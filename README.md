@@ -16,7 +16,7 @@ You'll want to work around LLVM GCC. Here's [a suggestion](http://www.relaxdiego
 
 Installation
 ------------
-1. `git clone https://bitbucket.org/mmaglana/mcloud_features`
+1. `git clone https://bitbucket.org/wdamarillo/mcloud_features`
 2. `cd mcloud_features` (if RVM asks, trust the .rvmrc file)
 3. `run/setup`
 
@@ -27,7 +27,7 @@ Usage
 
 Found a bug?
 ------------
-Report it [here](https://bitbucket.org/mmaglana/mcloud_features/issues/new).
+Report it [here](https://bitbucket.org/wdamarillo/mcloud_features/issues/new).
 
 Getting updates
 ------------
@@ -36,7 +36,7 @@ Getting updates
 
 Contributing
 ------------
-1. Fork `https://bitbucket.org/mmaglana/mcloud_features`
+1. Fork `https://bitbucket.org/wdamarillo/mcloud_features`
 2. Create a branch for whatever it is you plan to do
 3. Change stuff
 4. Send a pull request. If I like it, I will merge to my master branch
