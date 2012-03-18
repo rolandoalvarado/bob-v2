@@ -8,7 +8,7 @@ Prerequisites
 1. [Git](http://git-scm.com)
 2. [RVM](http://beginrescueend.com/) 1.10.2+
 3. [Ruby](ruby-lang.org/) 1.9.3-p125 (Should be installed via RVM)
-5. Mac Users: Xcode 4.1+ or the [Command Line Tools](https://developer.apple.com/downloads/index.action)
+5. Xcode 4.1+ or the [Command Line Tools](https://developer.apple.com/downloads/index.action)
 
 Got Xcode 4.2 or above?
 -----------------------
@@ -37,13 +37,13 @@ Getting updates
 Contributing
 ------------
 1. Fork `https://bitbucket.org/wdamarillo/mcloud_features`
-2. Create a branch for whatever it is you plan to do
+2. Create a branch for whatever it is you plan to do. ALWAYS create a branch so that when there are changes in origin/master, you only need to rebase your branch and keep your commits in order. Also, this allows you to squash multiple commits into one before submitting a pull request.
 3. Change stuff
-4. Send a pull request. If I like it, I will merge to my master branch
+4. Send a pull request
 
 Helpful references for development
 ----------------------------------
-1. [Gherkin Syntax](https://github.com/cucumber/cucumber/wiki/Gherkin) - If all you want is to write .feature files, this is the only reference you need.
+1. [Gherkin Syntax](https://github.com/cucumber/cucumber/wiki/Gherkin) - If all you want is to write feature files, this is the only reference you need.
 2. [Capybara DSL](http://rubydoc.info/github/jnicklas/capybara/master) - Learn about the DSL used in the tests.
 3. [Cucumber](http://cukes.info) - Learn about the Cucumber framework. The Cucumber Book is highly recommended.
 4. [Rspec-Rails](http://rubydoc.info/gems/rspec-rails/frames) - Background information about the testing framework used.
