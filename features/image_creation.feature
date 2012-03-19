@@ -9,7 +9,6 @@ Feature: Image Creation
       * I am logged in as a sysadmin of that project
       * There is an existing image in the list of approved images
       * The following developers exist in the project:
-        | Developer |
         | abustardo |
         | caedo     |
         | sbeast    |
@@ -18,7 +17,6 @@ Feature: Image Creation
     Given I have instantiated the image and configured it as needed
      When I create an image from the instance
       And I make the image available to the following developers:
-        | Developer |
         | abustardo |
         | caedo     |
      Then the new image should be added to the list
