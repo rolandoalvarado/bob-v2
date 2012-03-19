@@ -10,7 +10,7 @@ When /^I create an image from the instance$/ do
   pending # express the regexp above with the code you wish you had
 end
 
-When /^I make the image available to the following developers:$/ do |table|
+When /^I make the image available to the following users:$/ do |table|
   # table is a Cucumber::Ast::Table
   pending # express the regexp above with the code you wish you had
 end

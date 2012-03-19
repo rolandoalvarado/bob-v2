@@ -5,10 +5,10 @@ Feature: Image Creation
   (i.e. same OS, same software versions).
 
   Background:
-      * An 'HR Department' project exists
-      * I am logged in as a sysadmin of that project
+      * A 'Human Resources' department exists in the system
+      * I am logged in as a sysadmin of that department
       * There is an existing image in the list of approved images
-      * The following developers exist in the project:
+      * The following users exist in the department:
         | abustardo |
         | caedo     |
         | sbeast    |
@@ -16,12 +16,12 @@ Feature: Image Creation
   Scenario: Successfully create the image
     Given I have instantiated the image and configured it as needed
      When I create an image from the instance
-      And I make the image available to the following developers:
+      And I make the image available to the following users:
         | abustardo |
         | caedo     |
      Then the new image should be added to the list
       And the image should have the following ACL:
-        | Developer | Has Access? |
+        | User      | Has Access? |
         | abustardo | yes         |
         | caedo     | yes         |
         | sbeast    | no          |

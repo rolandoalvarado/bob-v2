@@ -1,8 +1,8 @@
-Given /^An? '(.+)' project exists$/ do |project_name|
+Given /^An? '(.+)' department exists in the system$/ do |department_name|
   pending # express the regexp above with the code you wish you had
 end
 
-Given /^The following developers exist in the project:$/ do |table|
+Given /^The following users exist in the department:$/ do |table|
   # table is a Cucumber::Ast::Table
   pending # express the regexp above with the code you wish you had
 end
