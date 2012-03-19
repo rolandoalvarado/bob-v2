@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+if [ $# -ne 2 ]; then
+  REMOTE='origin'
+  BRANCH='master'
+else
+  REMOTE=$1
+  BRANCH=$2
+fi
+echo -e "Pulling latest changes from $REMOTE/$BRANCH..."
+git pull $1 $2
+echo -e "Running run/setup..."
+run/setup
+echo "Your local repo has been updated. Have a nice day!"

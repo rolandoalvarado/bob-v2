@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# See cucumber.yml for a definition of each profile
+cucumber --profile steps_duration --dry-run

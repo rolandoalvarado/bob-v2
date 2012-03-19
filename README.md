@@ -43,14 +43,23 @@ To profile all steps in the test suite:
 
     run/profiler
 
+To get a listing of step definitions and the feature files that use them:
+
+    run/inventory
+
+Note: The above command is also useful for finding out which step definitions are not currently in use.
+
 Found a bug?
 ------------
 Report it [here](https://bitbucket.org/wdamarillo/mcloud_features/issues/new).
 
 Getting updates
 ------------
-1. `git pull origin master`
-2. `run/setup`
+    run/updater
+
+The above command will pull the latest changes from origin/master and run `setup`. If you want the updater to pull changes from another remote or branch, use:
+
+    run/updater <other_remote_repo> <my_branch>
 
 Contributing
 ------------
