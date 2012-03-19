@@ -51,12 +51,12 @@ module Cucumber
 
         @builder << '<html lang="en">'
           @builder.head do
-          @builder.meta(:content => 'text/html;charset=utf-8')
-          @builder.title ''
-          inline_css
-    		  google_js
-          inline_js
-        end
+            @builder.meta(:content => 'text/html;charset=utf-8')
+            @builder.title 'mCloud Features Progress Report'
+            inline_css
+      		  google_js
+            inline_js
+          end
         @builder << '<body>'
         @builder.div :id => 'status-labels' do |div|
           [:failed, :passed, :undefined, :pending, :skipped].each do |status|
