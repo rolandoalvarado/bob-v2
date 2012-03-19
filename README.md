@@ -23,7 +23,7 @@ Installation
 Usage
 -----
 
-To run the tests once and generate the progress report:
+To run the tests and generate the progress report:
 
     run/verifier
 
@@ -33,7 +33,7 @@ To run `verifier` everytime something changes in the feature or step files:
 
     run/autoverifier
 
-To run the tests once in a CI environment:
+To run the tests in a CI environment:
 
     run/verifier ci
 
