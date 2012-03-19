@@ -59,7 +59,7 @@ module Cucumber
         end
         @builder << '<body>'
         @builder.div :id => 'status-labels' do |div|
-          [:failed, :passed, :undefined].each do |status|
+          [:failed, :passed, :undefined, :pending, :skipped].each do |status|
             div.span(:class => "#{status_css_class(status)} #{status}") do |span|
               span.text! status_text(status)
             end
@@ -86,7 +86,7 @@ module Cucumber
           header.div do |legend|
             legend.h2 "Legend"
             legend.table :id => 'legend', :class => 'table-condensed' do |table|
-              [:passed, :failed, :undefined].each do |status|
+              [:passed, :failed, :undefined, :pending, :skipped].each do |status|
                 table.tr do |tr|
                   tr.td do |td|
                     td.span(:class => "#{status_css_class(status)} #{status}") do |span|
@@ -96,11 +96,15 @@ module Cucumber
                   tr.td do |td|
                     td << case status
                           when :passed
-                            "The feature is fully implemented"
+                            "The feature is fully implemented and validated."
                           when :failed
                             "The feature has one or more steps that failed."
                           when :undefined
                             "The feature has one or more steps that don't have an underlying validator."
+                          when :pending
+                            "The feature's underlying validator is still being built."
+                          when :skipped
+                            "One or more steps of the feature was skipped."
                           end
                   end
                 end
@@ -212,6 +216,7 @@ module Cucumber
       def before_feature_element(feature_element)
         @scenario_number+=1
         @scenario_red = false
+        @scenario_outline = (feature_element.class == Ast::ScenarioOutline)
         css_class = {
           Ast::Scenario        => 'scenario',
           Ast::ScenarioOutline => 'scenario outline'
@@ -222,6 +227,7 @@ module Cucumber
       def after_feature_element(feature_element)
         @builder << '</div>'
         @open_step_list = true
+        @scenario_outline = nil
       end
 
       def scenario_name(keyword, name, file_colon_line, source_indent)
@@ -249,6 +255,7 @@ module Cucumber
 
       def before_outline_table(outline_table)
         @outline_row = 0
+        @scenario_outline = nil
         @builder << '<table class="table table-bordered">'
       end
 
@@ -482,7 +489,7 @@ module Cucumber
         end
 
         def build_step(keyword, step_match, status)
-          step_name = step_match.format_args(lambda{|param| %{<span class="param">#{param}</span>}})
+          step_name = step_match.format_args(lambda{|param| %{#{param}}})
           @builder.div do |div|
             div.span(keyword, :class => 'keyword') unless keyword.strip == '*'
             div.text!(' ')
@@ -504,6 +511,8 @@ module Cucumber
             css << 'success'
           when :failed
             css << 'important'
+          when :pending
+            css << 'warning'
           else
             css << ''
           end
@@ -518,6 +527,10 @@ module Cucumber
             'OK'
           when :failed
             'Failed'
+          when :skipped
+            @scenario_outline ? '' : 'Skipped'
+          when :pending
+            'Under construction'
           else
             ''
           end

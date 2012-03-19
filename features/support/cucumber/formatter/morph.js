@@ -12,7 +12,9 @@ MM.labelFeatures = function(){
     feature.find('.step').each(function(index, step){
       step = $(step);
 
-      if(step.hasClass('undefined')){
+      if(step.hasClass('pending')){
+        label = 'pending';
+      } else if(step.hasClass('undefined')){
         label = 'undefined';
       } else if(step.hasClass('failed')) {
         label = 'failed';
