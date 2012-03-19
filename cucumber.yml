@@ -7,11 +7,11 @@
 
 # Runs all scenarios that are not tagged with @wip
 # (which are considered works in progress)
-default: --strict --tags ~@wip --require features --format progress --format Cucumber::Formatter::Morph --out output/progress.html --format rerun --out rerun.txt
+default: --strict --tags ~@wip --require features --format progress --format Cucumber::Formatter::Morph --out output/progress_report.html --format rerun --out rerun.txt
 
 # Use this profile when running these tests in a
 # CI environment
-ci: --strict --tags ~@wip --require features --format junit --out output/junit --format Cucumber::Formatter::Morph --out output/progress_report
+ci: --strict --tags ~@wip --require features --format junit --out output/junit --format Cucumber::Formatter::Morph --out output/progress_report.html
 
 # This profile runs scenarios that are taged as works
 # in progress. To ensure that you are not working on
