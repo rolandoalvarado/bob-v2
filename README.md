@@ -6,18 +6,17 @@ can run it and it will be automatically verified against an existing mCloud inst
 Prerequisites
 -------------
 1. [Git](http://git-scm.com)
-2. [RVM](http://beginrescueend.com/) 1.10.2+
-3. [Ruby](ruby-lang.org/) 1.9.3-p125 (Should be installed via RVM)
-5. Xcode 4.1+ or the [Command Line Tools](https://developer.apple.com/downloads/index.action)
+2. [Ruby](ruby-lang.org/) 1.8.7 or higher
 
-Got Xcode 4.2 or above?
------------------------
-You'll want to work around LLVM GCC. Here's [a suggestion](http://www.relaxdiego.com/2012/02/using-gcc-when-xcode-43-is-installed.html).
+Additional Prerequisites for Mac OS X
+-------------------------------------
+1. Xcode 4.1+ or the [Command Line Tools](https://developer.apple.com/downloads/index.action)
+2. Got Xcode 4.2 or above? You'll want to work around LLVM GCC. Here's [a suggestion](http://www.relaxdiego.com/2012/02/using-gcc-when-xcode-43-is-installed.html).
 
 Installation
 ------------
 1. `git clone https://bitbucket.org/wdamarillo/mcloud_features`
-2. `cd mcloud_features` (if RVM asks, trust the .rvmrc file)
+2. `cd mcloud_features`
 3. `run/setup`
 
 Usage
@@ -57,7 +56,7 @@ Getting updates
 ------------
     run/updater
 
-The above command will pull the latest changes from origin/master and run `setup`. If you want the updater to pull changes from another remote or branch, use:
+The above command will pull the latest changes from origin/master and run `setup`. If you want to pull changes from another remote or branch, use:
 
     run/updater <other_remote_repo> <my_branch>
 
