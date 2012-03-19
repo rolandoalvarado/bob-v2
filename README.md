@@ -15,7 +15,7 @@ Additional Prerequisites for Mac OS X
 
 Installation
 ------------
-1. `git clone https://bitbucket.org/wdamarillo/mcloud_features`
+1. `git clone git@bitbucket.org:wdamarillo/mcloud_features.git`
 2. `cd mcloud_features`
 3. `run/setup`
 
