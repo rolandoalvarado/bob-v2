@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # See cucumber.yml for a definition of each profile
+rm -rf output/*
 if [ $# -eq 1 ]; then
   cucumber --profile $1
 else
