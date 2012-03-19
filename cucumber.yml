@@ -1,0 +1,38 @@
+# These profiles customize cucumber's behavior.
+# To use, run `cucumber --profile <profile_name>`
+# from the command line.
+
+# NOTE: these are also used by various scripts
+# under the `run` directory.
+
+# Runs all scenarios that are not tagged with @wip
+# (which are considered works in progress)
+default: --strict --tags ~@wip --require features --format progress --format Cucumber::Formatter::Morph --out output/progress.html --format rerun --out rerun.txt
+
+# Use this profile when running these tests in a
+# CI environment
+ci: --strict --tags ~@wip --require features --format junit --out output/junit --format Cucumber::Formatter::Morph --out output/progress_report
+
+# This profile runs scenarios that are taged as works
+# in progress. To ensure that you are not working on
+# too many scenarios at once, It will generate an error
+# when you have more than three @wip scenarios. Also,
+# to ensure that you don't forget to remove the @wip
+# tag on finished scenarios, it will generate an error
+# when one of the @wip scenarios passes.
+wip: --tags @wip:3 --wip --require features --format progress --format rerun --out rerun.txt
+
+# Use this profile to show the step definitions that
+# are not being used by any of the feature files.
+unused_steps: --require features --format usage --dry-run
+
+# Use this profile to show the duration of each step.
+# The slowest steps are listed first.
+steps_duration: --require features --format usage
+
+# Rerun failed steps, if any
+<%
+rerun = File.file?('rerun.txt') ? IO.read('rerun.txt') : ""
+rerun_opts = rerun.to_s.strip.empty? ? "--format #{ENV['CUCUMBER_FORMAT'] || 'progress'} features" : "--format #{ENV['CUCUMBER_FORMAT'] || 'pretty'} #{rerun}"
+%>
+rerun: <%= rerun_opts %> --format rerun --out rerun.txt --strict

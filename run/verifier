@@ -1,2 +1,7 @@
 #!/usr/bin/env bash
-bundle exec guard
+# See cucumber.yml for a definition of each profile
+if [ $# -eq 1 ]; then
+  cucumber --profile $1
+else
+  cucumber --profile default
+fi

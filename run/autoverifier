@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# Use this when you are editing features and step definitions
+echo "Press Ctrl-C anytime to stop running the tests."
+bundle exec guard

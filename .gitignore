@@ -9,3 +9,5 @@
 /tmp
 /coverage
 /rerun.txt
+/output/junit
+/output/progress.html
