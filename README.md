@@ -25,23 +25,23 @@ Usage
 
 To run the tests once and generate the progress report:
 
-    `run/verifier`
+    run/verifier
 
 The above command will generate the report in the `output` directory.
 
 To run `verifier` everytime something changes in the feature or step files:
 
-    `run/autoverifier`
+    run/autoverifier
 
 To run the tests once in a CI environment:
 
-    `run/verifier ci`
+    run/verifier ci
 
 The above will generate two types of output: a junit report (for the CI), and an html report. Both will be located under the `output` directory.
 
 To profile all steps in the test suite:
 
-    `run/profiler`
+    run/profiler
 
 Found a bug?
 ------------
