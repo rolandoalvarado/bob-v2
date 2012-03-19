@@ -11,3 +11,4 @@
 /rerun.txt
 /output/junit
 /output/*.html
+*.ignore
