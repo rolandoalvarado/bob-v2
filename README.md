@@ -6,6 +6,7 @@ Prerequisites
 -------------
 1. [Git](http://git-scm.com)
 2. [Ruby](ruby-lang.org/) 1.8.7 or higher
+3. [Bundler Gem](http://gembundler.com/)
 
 Additional Prerequisites for Mac OS X
 -------------------------------------
@@ -21,25 +22,29 @@ Installation
 Usage
 -----
 
-To run the tests and generate the progress report:
+To run the verifier and generate the progress report:
 
     run/verifier
 
-The above command will generate the report in the `output` directory.
+The above command will run the verifier once and generate the report in the `output` directory.
 
-To run `verifier` everytime something changes in the feature or step files:
+To automatically run the verifier everytime something changes in the feature or step files:
 
     run/autoverifier
 
-To run the tests in a CI environment:
+Other useful commands
+---------------------
+To run the verifier in a CI environment:
 
     run/verifier ci
 
 The above will generate two types of output: a junit report (for the CI), and an html report. Both will be located under the `output` directory.
 
-To profile all steps in the test suite:
+To profile the steps:
 
     run/profiler
+
+The above will list all steps arranged according to execution time with the steps taking the most time listed at the top.
 
 To get a listing of step definitions and the feature files that use them:
 
@@ -49,7 +54,7 @@ Note: The above command is also useful for finding out which step definitions ar
 
 Found a bug?
 ------------
-Report it [here](https://bitbucket.org/wdamarillo/mcloud_features/issues/new).
+If you find a problem with the the verifier, report it [here](https://bitbucket.org/wdamarillo/mcloud_features/issues/new). If you find bugs on mCloud, please report it to Jira.
 
 Getting updates
 ------------
@@ -61,6 +66,8 @@ The above command will pull the latest changes from origin/master and run `setup
 
 Contributing
 ------------
+__NOTE:__ If you just plan on contributing to the .feature files every now and then, you may skip this section and write .feature files directly. Afterwards, submit it by emailing the .feature file to (email TBD) and someone will commit your file for you. If you plan on contributing on an ongoing basis, we highly recommend you follow this process.
+
 1. Fork `https://bitbucket.org/wdamarillo/mcloud_features`
 2. Create a branch for whatever it is you plan to do. ALWAYS create a branch so that when there are changes in origin/master, you only need to rebase your branch and keep your commits in order. Also, this allows you to squash multiple commits into one before submitting a pull request.
 3. Change stuff
@@ -68,20 +75,18 @@ Contributing
 
 How to write Features
 ---------------------
-
-    
 * Features are written as ordinary text files with a .feature extension under the `features` directory
-* The simplest .feature file can be written as:    
+* The simplest .feature file can be written as:
 
   Listing 1. Sample .feature file
-      
+
       Feature: Launch a VM
-      
+
         Scenario: Succesfully launch a VM
           Given a machine image exists
            When I try to launch it
            Then it should be online in 20 minutes
-      
+
         Scenario: Gracefully fail
           Given a bad machine image exists
            When I try launch it
