@@ -73,8 +73,8 @@ How to write Features
 * Features are written as ordinary text files with a .feature extension under the `features` directory
 * The simplest .feature file can be written as:
 
-<pre><code>    Feature: Launch a VM
-
+    Feature: Launch a VM
+    
       Scenario: Succesfully launch a VM
         Given a machine image exists
          When I try to launch it
@@ -84,7 +84,6 @@ How to write Features
         Given a bad machine image exists
          When I try launch it
          Then the system should alert me by email
-</code></pre>
 
 * For a more extensive guide on how to write feature files, see [https://gist.github.com/2128650](https://gist.github.com/2128650)
 
