@@ -33,10 +33,6 @@ GEM
     rspec-expectations (2.8.0)
       diff-lcs (~> 1.1.2)
     rspec-mocks (2.8.0)
-    simplecov (0.6.1)
-      multi_json (~> 1.0)
-      simplecov-html (~> 0.5.3)
-    simplecov-html (0.5.3)
     syntax (1.0.0)
     term-ansicolor (1.0.7)
     thor (0.14.6)
@@ -50,5 +46,4 @@ DEPENDENCIES
   guard-cucumber
   rb-fsevent
   rspec
-  simplecov
   syntax
