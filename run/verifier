@@ -2,7 +2,7 @@
 # See cucumber.yml for a definition of each profile
 rm -rf output/*
 if [ $# -eq 1 ]; then
-  cucumber --profile $1
+  bundle exec cucumber --profile $1
 else
-  cucumber --profile default
+  bundle exec cucumber --profile default
 fi
