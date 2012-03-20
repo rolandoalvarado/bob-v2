@@ -1,7 +1,6 @@
 mCloud Features
 ===============
-This is an executable documentation of the features in all mCloud products. By executable, that means you
-can run it and it will be automatically verified against an existing mCloud installation.
+This is an executable documentation of the features in the mCloud product suite. By executable, that means you can run it and it will be automatically verified against an existing mCloud installation.
 
 Prerequisites
 -------------
@@ -11,7 +10,7 @@ Prerequisites
 Additional Prerequisites for Mac OS X
 -------------------------------------
 1. Xcode 4.1+ or the [Command Line Tools](https://developer.apple.com/downloads/index.action)
-2. Got Xcode 4.2 or above? You'll want to work around LLVM GCC. Here's [a suggestion](http://www.relaxdiego.com/2012/02/using-gcc-when-xcode-43-is-installed.html).
+2. If you have Xcode 4.2 or above, you'll need to work around LLVM GCC. Here's [a suggestion](http://www.relaxdiego.com/2012/02/using-gcc-when-xcode-43-is-installed.html).
 
 Installation
 ------------
@@ -66,6 +65,11 @@ Contributing
 2. Create a branch for whatever it is you plan to do. ALWAYS create a branch so that when there are changes in origin/master, you only need to rebase your branch and keep your commits in order. Also, this allows you to squash multiple commits into one before submitting a pull request.
 3. Change stuff
 4. Send a pull request
+
+How to write Features
+---------------------
+* Features are written as .feature files under the `features` directory
+* For guidance on how to write feature files, see [https://gist.github.com/2128650](https://gist.github.com/2128650)
 
 Helpful references for development
 ----------------------------------
