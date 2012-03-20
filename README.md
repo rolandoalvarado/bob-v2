@@ -1,6 +1,6 @@
 mCloud Features
 ===============
-This is an executable documentation of the features in the mCloud product suite. By executable, that means you can run it and it will be automatically verified against an existing mCloud installation.
+This is an executable documentation of the features in the mCloud product suite. By executable, that means you can run it and it will be automatically verified against an existing mCloud installation. After verification, it will generate a [business-friendly progress report](http://dl.dropbox.com/u/1355795/misc/progress_report.png).
 
 Prerequisites
 -------------
