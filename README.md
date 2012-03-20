@@ -72,6 +72,8 @@ How to write Features
     
 * Features are written as ordinary text files with a .feature extension under the `features` directory
 * The simplest .feature file can be written as:    
+
+  Listing 1. Sample .feature file
       
       Feature: Launch a VM
       
