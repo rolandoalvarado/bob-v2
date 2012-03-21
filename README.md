@@ -21,23 +21,23 @@ Installation
 Usage
 -----
 
-To run the verifier and generate the progress report:
+To verify the documentation:
 
     run/verifier
 
-The above command will run the verifier once and generate the report in the `output` directory.
+The above command will generate the report in the `output` directory.
 
-To automatically run the verifier everytime something changes in the feature or step files:
+To automatically verify the document everytime something changes in the feature or step files:
 
     run/autoverifier
 
 Other useful commands
 ---------------------
-To run the verifier in a CI environment:
+To verify the documentation in a CI environment:
 
     run/verifier ci
 
-The above will generate two types of output: a junit report (for the CI), and an html report. Both will be located under the `output` directory.
+The above will generate two reports: a junit report (for the CI), and an html report. Both will be located under the `output` directory.
 
 To profile the steps:
 
