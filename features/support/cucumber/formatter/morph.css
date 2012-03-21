@@ -42,6 +42,10 @@ li.step > div:hover,
   background-color: whiteSmoke;
 }
 
+.scenario {
+  margin-top: 36pt;
+}
+
 .background ol,
 .scenario ol,
 .examples {

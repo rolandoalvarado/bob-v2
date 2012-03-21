@@ -100,11 +100,11 @@ module Cucumber
                           when :failed
                             "The feature has one or more steps that failed."
                           when :undefined
-                            "The feature has one or more steps that don't have an underlying validator."
+                            "Undefined. The feature has one or more steps that don't have an underlying validator."
                           when :pending
-                            "The feature's underlying validator is still being built."
+                            "Pending. The feature's underlying validator is still being built."
                           when :skipped
-                            "One or more steps of the feature was skipped."
+                            "Skipped. One or more steps of the feature was skipped."
                           end
                   end
                 end
@@ -494,7 +494,7 @@ module Cucumber
             div.span(keyword, :class => 'keyword') unless keyword.strip == '*'
             div.text!(' ')
             div.span(:class => 'step val') do |name|
-              name << h(step_name).gsub(/&lt;(.+)&gt;/, '<code>\1</code>')
+              name << h(step_name).gsub(/&lt;(\w+)&gt;/, '<code>\1</code>')
             end
             div.span(:class => status_css_class(status)) do |span|
               span.text! status_text(status)
@@ -522,15 +522,15 @@ module Cucumber
         def status_text(status)
           case status
           when :undefined
-            'Missing validator'
+            'U'
           when :passed
             'OK'
           when :failed
-            'Failed'
+            'F'
           when :skipped
-            @scenario_outline ? '' : 'Skipped'
+            @scenario_outline ? '' : 'S'
           when :pending
-            'Under construction'
+            'P'
           else
             ''
           end
