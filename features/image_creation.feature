@@ -6,7 +6,7 @@ Feature: Image Creation
 
   Background:
       * A 'Human Resources' department exists in the system
-      * I am logged in as a sysadmin of that department
+      * I am logged in as an admin of that department
       * There is an existing image in the list of approved images
       * The following users exist in the department:
         | abustardo |
