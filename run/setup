@@ -1,2 +1,10 @@
 #!/usr/bin/env bash
+
+if bundle --version | grep "Bundler version"; then
+  echo "Bundler gem found!"
+else
+  echo "Installing Bundler gem..."
+  gem install bundler
+fi
 bundle install
+echo "Setup is complete. Now type 'run/verifier' or 'run/autoverifier' (without the quotes)"

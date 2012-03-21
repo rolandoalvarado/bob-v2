@@ -6,7 +6,6 @@ Prerequisites
 -------------
 1. [Git](http://git-scm.com)
 2. [Ruby](ruby-lang.org/) 1.8.7 or higher
-3. [Bundler gem](http://gembundler.com/)
 
 Additional Prerequisites for Mac OS X
 -------------------------------------
