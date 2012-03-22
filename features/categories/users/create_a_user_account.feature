@@ -1,11 +1,11 @@
-Feature: User Management
-  The head of an organization needs to manage user accounts
-  for each member of her team so that they can create
-  and destroy VMs on their own.
+Feature: Create a User Account
+  A project owners needs to manage user accounts
+  so that these users can create and destroy VMs
+  on their own.
 
   Background:
-    * A project named 'HRIS Team' exists in the DCU
-    * Amanda is a manager of that project
+    * A project named 'HRIS Team' exists in the cloud
+    * Amanda is the owner of that project
 
   Scenario: Create user account
     When she creates a user named Albert Martinez in the project
