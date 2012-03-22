@@ -122,7 +122,6 @@ module Cucumber
         end
 
         def after_features(features)
-          puts "\n"
           build_html
         end
 
@@ -229,6 +228,7 @@ module Cucumber
           template = File.open(File.expand_path('../html.erb', __FILE__), 'r')
           erb = ERB.new(template.read)
           @io.write erb.result(binding)
+          puts "HTML report saved as #{@io.path}"
         end
 
         def embed_assets
@@ -266,7 +266,7 @@ module Cucumber
         end
 
         def show_progress(current, total, what)
-          print "\rProcessed #{current} of #{total} #{what}"
+          # print "\rProcessed #{current} of #{total} #{what}"
         end
 
         def skip_current_step?
