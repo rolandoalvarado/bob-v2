@@ -3,8 +3,8 @@ Feature: Logging In
 
   Background:
     * The following user exists:
-      | Email                | Password      |
-      | relaxdiego@gmail.com | as4943dladdsf |
+      | Email | Password |
+      | admin | klnm12   |
 
 
   Scenario Outline: User tries to log in
@@ -13,12 +13,12 @@ Feature: Logging In
      And the system will display '<Message>'
 
     Examples:
-      | Email                | Password       | Page  | Message                   |
-      | relaxdiego@gmail.com | as4943dladdsf  | home  | Signed in successfully    |
-      | relaxdiego@gmail.com | wrong-password | login | Invalid email or password |
-      | aaaaaaaaaa@gmail.com | as4943dladdsf  | login | Invalid email or password |
-      |                      |                | login | Invalid email or password |
-      | relaxdiego@gmail.com |                | login | Invalid email or password |
+      | Email | Password | Page       | Message                   |
+      | admin | klnm12   | dashboard  | Signed in successfully    |
+      | admin | w00t!    | dashboard  | Invalid email or password |
+      | d00p  | klnm12   | dashboard  | Invalid email or password |
+      | admin |          | dashboard  | Invalid email or password |
+      |       | klnm12   | dashboard  | Invalid email or password |
 
 
   Scenario Outline: User attempts to access a secure page without logging in
@@ -34,7 +34,7 @@ Feature: Logging In
   Scenario: User tries to visit the login page when he's already logged in
     Given he is logged in
      When he visits the log in page
-     Then he will be redirected to his home page
+     Then he will be redirected to the dashboard
 
 
   Scenario Outline: User logs in after being redirected
