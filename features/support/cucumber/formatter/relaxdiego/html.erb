@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>mCloud Features</title>
+  <%= embed_assets %>
+</head>
+<div class="container">
+  <h1>mCloud Features</h1>
+  <p>Last updated: <%= Time.now.utc %></p>
+
+  <div class="row">
+    <div id="summary" class="span12">
+      <h2>Summary</h2>
+      <ul>
+        <li><%= total_completed_features %> out of <%= total_features %> features have been completed.</li>
+        <% if total_undefined_features > 0 %>
+          <li><%= total_undefined_features %> features are not yet fully spec'd out</li>
+        <% else %>
+          <li>All features are fully spec'd out</li>
+        <% end %>
+      </ul>
+    </div>
+  </div>
+
+  <div class="row">
+    <div id="legend" class="span12">
+      <h2>Legend</h2>
+      <table class="table table-condensed">
+        <% [:passed, :failed, :undefined, :pending, :skipped].each do |status| %>
+        <tr>
+          <td><span class="label <%= label_type(status) %>"><%= status_text(status) %></span></td>
+          <td>
+            <%= case status
+                when :passed
+                  "The feature is fully implemented and validated."
+                when :failed
+                  "The feature has one or more steps that failed."
+                when :undefined
+                  "Undefined. The feature has one or more steps that don't have an underlying validator."
+                when :pending
+                  "Pending. The feature's underlying validator is still being built."
+                when :skipped
+                  "Skipped. One or more steps of the feature was skipped."
+                end
+            %>
+          </td>
+        </tr>
+        <% end %>
+      </table>
+    </div>
+  </div>
+
+  <div class="row">
+    <div id="toc" class="span12">
+      <h2>Table of Features</h2>
+      <ol>
+      <% @results.keys.sort{ |a, b| a <=> b}.each do |category| %>
+        <li>
+          <%= category.humanize %>
+          <ul>
+            <% @results[category].each do |feature| %>
+              <a href="#<%= build_bookmark(category, feature) %>">
+                <li class="feature">
+                  <%= feature[:name] %>
+                  <span class="label <%= feature_label_type(feature) %>"><%= feature_status_text(feature) %></span>
+                </li>
+              </a>
+            <% end %>
+          </ul>
+        </li>
+      <% end %>
+      </ol>
+    </div><!-- id="toc" -->
+  </div><!-- class="row" -->
+
+  <div class="row">
+    <div id="features" class="span12">
+      <h2>Features</h2>
+      <% @results.keys.sort{ |a, b| a<=>b}.each do |category| %>
+        <h3><%= category.humanize %></h3>
+        <% @results[category].each do |feature| %>
+          <div class="feature">
+            <div class="name">
+              <a name="<%= build_bookmark(category, feature) %>"><%= feature[:name] %></a>
+              <span class="label <%= feature_label_type(feature) %>"><%= feature_status_text(feature) %></span>
+            </div>
+            <div class="description"><%= feature[:description] %></div>
+            <div class="elements">
+              <% feature[:elements].each do |element| %>
+                <div class="element">
+                  <div class="header">
+                    <span class="type"><%= element[:type] %>:</span>
+                    <span class="name"><%= element[:name] %></span><br>
+                    <span class="description"><%= element[:description] %></span>
+                  </div>
+
+                  <div class="steps">
+                    <ul>
+                      <% element[:steps].each do |step| %>
+                        <li class="step <%= "outline" if is_scenario_outline?(element) %>">
+                          <% unless step[:keyword].empty? %>
+                          <span class="keyword"><%= step[:keyword] %></span>
+                          <% end %>
+                          <span class="name"><%= step[:name] %></span>
+                          <% unless is_scenario_outline?(element)%>
+                            <span class="label <%= label_type(step[:status]) %>"><%= status_text(step[:status]) %></span>
+                          <% end %>
+                          <% if step[:table] %>
+                            <table class="table table-bordered">
+                              <% step[:table].each do |row| %>
+                                <tr>
+                                  <% row.each do |cell| %>
+                                    <td><%= cell[:value] %></td>
+                                  <% end %>
+                                </tr>
+                              <% end %>
+                            </table>
+                          <% end # if step[:table] %>
+                        </li>
+                      <% end %>
+                    </ul>
+                  </div><!-- class="steps" -->
+
+                  <% if element[:examples] %>
+                  <div class="examples">
+                    <div class="header">
+                      <span class="type"><%= element[:examples][:type] %>:</span>
+                      <span class="name"><%= element[:examples][:name] %></span><br>
+                      <span class="description"><%= element[:examples][:description] %></span>
+                    </div>
+
+                    <div class="rows">
+                      <table class="table table-bordered">
+                        <tr>
+                        <% element[:examples][:rows][0].each do |header| %>
+                          <td><%= header[:value] %></td>
+                        <% end %>
+                        </tr>
+                        <% (1...element[:examples][:rows].length).each do |index| %>
+                          <tr>
+                            <% element[:examples][:rows][index].each do |cell| %>
+                              <td>
+                                <%= cell[:value] %>
+                                <span class="label <%= label_type(cell[:status]) %>"><%= status_text(cell[:status]) %></span>
+                              </td>
+                            <% end %>
+                          </tr>
+                        <% end %>
+                      </table>
+                    </div>
+                  </div>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end # @results[category].each do |feature| %>
+      <% end # @results.keys.sort{ |a, b| a<=>b}.each do |category| %>
+    </div><!-- id="features" -->
+  </div><!-- class="row" -->
+
+</div>
+</html>

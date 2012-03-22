@@ -1,0 +1,86 @@
+h2 {
+  margin-top: 15px;
+  border-bottom: 1px solid #CCCCCC;
+}
+
+#legend > h2 {
+  border-bottom: 0px;
+}
+
+.label, .label:hover {
+  float: right;
+  padding: 0px 4px 0px 4px;
+  text-decoration: none !important;
+}
+
+li {
+  margin: 2px;
+}
+
+li.feature {
+  border-radius: 4px;
+  padding: 3px;
+}
+
+li.feature:hover {
+  background-color: whiteSmoke;
+}
+
+div.feature {
+  margin-left: 20px;
+  margin-bottom: 20px;
+}
+
+.feature > .name {
+  border-radius: 4px;
+  font-weight: bold;
+  margin-right: 5px;
+  padding: 3px;
+}
+
+.feature > .description {
+  padding: 3px;
+}
+
+.feature > .name:hover {
+  background-color: whiteSmoke;
+}
+
+.feature .elements {
+  padding: 3px;
+}
+
+.feature .element {
+  margin-bottom: 10px;
+}
+
+.feature .element .header .type {
+  font-weight: bold;
+}
+
+li.step {
+  border-radius: 4px;
+  padding: 3px;
+}
+
+li.step:hover {
+  background-color: whiteSmoke;
+}
+
+li.step.outline:hover {
+  background-color: transparent;
+}
+
+li.step table {
+  margin-top: 3px;
+  margin-bottom: 0px;
+}
+
+.element .examples {
+  margin-left: 13px;
+}
+
+.feature .element .examples .header .type {
+  font-weight: normal;
+  text-decoration: underline;
+}
