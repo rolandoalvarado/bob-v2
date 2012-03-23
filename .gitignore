@@ -12,3 +12,4 @@
 /output/junit
 /output/*.html
 *.ignore
+/config.yml
