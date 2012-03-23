@@ -231,10 +231,13 @@ module Cucumber
             filepath = File.join(screenshots_dir, filename)
             FileUtils.cp(src, filepath)
 
-            # REVISIT: For some reason, using @current_cell here doesn't give us the cell we want.
-            # This is why I'm using @previous_cell instead.
-            if is_scenario_outline?(@current_feature_element) && @previous_cell[:status] != :skipped
-              @previous_cell[:screenshot] = "screenshots/#{filename}"
+            if is_scenario_outline?(@current_feature_element)
+              @current_row.each do |cell|
+                if cell[:status] == :failed
+                  cell[:screenshot] = "screenshots/#{filename}"
+                  break
+                end
+              end
             elsif !is_scenario_outline?(@current_feature_element)
               @current_step[:screenshot] = "screenshots/#{filename}"
             end
