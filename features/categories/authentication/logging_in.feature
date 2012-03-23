@@ -9,16 +9,16 @@ Feature: Logging In
 
   Scenario Outline: User tries to log in
     When he logs in with the following credentials: <Email>, <Password>
-    Then he will be redirected to <Page>
+    Then he will be redirected to the <Page Name> page
      And the system will display '<Message>'
 
     Examples:
-      | Email | Password | Page       | Message                   |
-      | admin | klnm12   | dashboard  | Signed in successfully    |
-      | admin | w00t!    | dashboard  | Invalid email or password |
-      | d00p  | klnm12   | dashboard  | Invalid email or password |
-      | admin |          | dashboard  | Invalid email or password |
-      |       | klnm12   | dashboard  | Invalid email or password |
+      | Email | Password | Page Name | Message                   |
+      | admin | klnm12   | projects  | Signed in successfully    |
+      | admin | w00t!    | login     | Invalid email or password |
+      | d00p  | klnm12   | login     | Invalid email or password |
+      | admin |          | login     | Invalid email or password |
+      |       | klnm12   | login     | Invalid email or password |
 
 
   Scenario Outline: User attempts to access a secure page without logging in
@@ -26,15 +26,16 @@ Feature: Logging In
     Then he will be redirected to the log in page
 
     Examples:
-      | Page       |
-      | dashboard  |
-      | account    |
+      | Page      |
+      | projects  |
+      | users     |
+      | usage     |
 
 
   Scenario: User tries to visit the login page when he's already logged in
     Given he is logged in
      When he visits the log in page
-     Then he will be redirected to the dashboard
+     Then he will be redirected to the projects page
 
 
   Scenario Outline: User logs in after being redirected
