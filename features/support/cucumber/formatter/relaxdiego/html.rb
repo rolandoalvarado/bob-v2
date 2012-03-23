@@ -232,27 +232,30 @@ module Cucumber
           puts "HTML report saved as #{@report_dir}/index.html"
         end
 
-        def embed_assets
-          asset_tags = ""
+        def asset_tags
+          tags = ""
           destination_dir = File.join(@report_dir, "assets")
 
           dir = Dir.open(File.dirname(__FILE__))
 
           Dir.mkdir(destination_dir) unless Dir.exists?(destination_dir)
 
-          dir.entries.select { |e| e.match /.+\.(css|js)/ }.each do |f|
-            FileUtils.cp(File.join(File.dirname(__FILE__), f), File.join(@report_dir, "assets", f))
+          dir.entries.select { |e| e.match /.+\.(css|js|png)/ }.each do |f|
+            type = f.split('.')[-1]
+            type = "img" if type == 'png'
 
-            type = f.split('.')[f.split('.').length-1]
+            Dir.mkdir(File.join(destination_dir, type)) unless Dir.exists?(File.join(destination_dir, type))
+
+            FileUtils.cp(File.join(File.dirname(__FILE__), f), File.join(@report_dir, "assets", type, f))
 
             if type == 'css'
-              asset_tags << "<link type='text/css' rel='stylesheet' href='#{ File.join("assets", f) }'>\n"
+              tags << "<link type='text/css' rel='stylesheet' href='#{ File.join("assets", type, f) }'>\n"
             elsif type == 'js'
-              asset_tags << "<script src='#{ File.join("assets", f) }' type='text/javascript'></script>\n"
+              tags << "<script src='#{ File.join("assets", type, f) }' type='text/javascript'></script>\n"
             end
           end
 
-          asset_tags
+          tags
         end
 
         def get_current_category(args)
