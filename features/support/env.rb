@@ -21,6 +21,10 @@ config['host'] = "http://#{config['host']}" if config['host'].match(/^http/).nil
 Capybara.app_host = config['host']
 Capybara.default_driver = :selenium
 
+#
+# Ensure that features are sorted by their filenames alphabetically
+#
+
 # Overrides the method +method_name+ in +obj+ with the passed block
 def override_method(obj, method_name, &block)
   # Get the singleton class/eigenclass for 'obj'
