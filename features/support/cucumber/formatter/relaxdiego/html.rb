@@ -305,10 +305,23 @@ module Cucumber
           status = nil
 
           feature[:elements].each do |element|
-            element[:steps].each do |step|
-              status = step[:status] unless step[:status] == :passed
-              break if status
+            if is_scenario_outline?(element)
+              # Go through the examples instead of the steps
+              (1...element[:examples][:rows].length).each do |index|
+                element[:examples][:rows][index].each do |cell|
+                  status = cell[:status] unless cell[:status] == :passed
+                  break if status
+                end
+                break if status
+              end
+            else
+              # Go through the steps
+              element[:steps].each do |step|
+                status = step[:status] unless step[:status] == :passed
+                break if status
+              end
             end
+
             break if status
           end
 
@@ -319,7 +332,7 @@ module Cucumber
         end
 
         def is_scenario_outline?(element)
-          element[:examples]
+          !element[:examples].nil?
         end
 
         def label_type(status)
