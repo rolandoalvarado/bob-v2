@@ -91,9 +91,6 @@
                   <div class="header">
                     <span class="type"><%= element[:type] %>:</span>
                     <span class="name"><%= element[:name] %></span>
-                    <% if element[:screenshot] %>
-                      <a href="<%= element[:screenshot] %>"><i class="icon-camera"></i></a>
-                    <% end %>
                     <br>
                     <span class="description"><%= element[:description] %></span>
                   </div>
@@ -106,6 +103,9 @@
                           <span class="keyword"><%= step[:keyword] %></span>
                           <% end %>
                           <span class="name"><%= step[:name] %></span>
+                          <% if step[:screenshot] %>
+                            <a href="<%= step[:screenshot] %>"><i class="icon-camera"></i></a>
+                          <% end %>
                           <% unless is_scenario_outline?(element)%>
                             <span class="label <%= label_type(step[:status]) %>"><%= status_text(step[:status]) %></span>
                           <% end %>

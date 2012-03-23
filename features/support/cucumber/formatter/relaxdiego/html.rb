@@ -226,7 +226,7 @@ module Cucumber
               # Which is why I'm using @previous_cell instead.
               @previous_cell[:screenshot] = "screenshots/#{filename}"
             else
-              @current_feature_element[:screenshot] = "screenshots/#{filename}"
+              @current_step[:screenshot] = "screenshots/#{filename}"
             end
           end
         end
