@@ -62,7 +62,9 @@
               <a href="#<%= build_bookmark(category, feature) %>">
                 <li class="feature">
                   <%= feature[:name] %>
-                  <span class="label <%= feature_label_type(feature) %>"><%= feature_status_text(feature) %></span>
+                  <span class="flags">
+                    <span class="label <%= feature_label_type(feature) %>"><%= feature_status_text(feature) %></span>
+                  </span>
                 </li>
               </a>
             <% end %>
@@ -82,7 +84,9 @@
           <div class="feature">
             <div class="name">
               <a name="<%= build_bookmark(category, feature) %>"><%= feature[:name] %></a>
-              <span class="label <%= feature_label_type(feature) %>"><%= feature_status_text(feature) %></span>
+              <span class="flags">
+                <span class="label <%= feature_label_type(feature) %>"><%= feature_status_text(feature) %></span>
+              </span>
             </div>
             <div class="description"><%= feature[:description] %></div>
             <div class="elements">
@@ -103,12 +107,27 @@
                           <span class="keyword"><%= step[:keyword] %></span>
                           <% end %>
                           <span class="name"><%= step[:name] %></span>
-                          <% if step[:screenshot] %>
-                            <a href="<%= step[:screenshot] %>"><i class="icon-camera"></i></a>
-                          <% end %>
-                          <% unless is_scenario_outline?(element)%>
-                            <span class="label <%= label_type(step[:status]) %>"><%= status_text(step[:status]) %></span>
-                          <% end %>
+                          <span class="flags">
+                            <% if step[:screenshot] %>
+                              <a rel="#<%= build_id feature[:name], element[:name], step[:name] %>-screenshot"><i class="icon-camera"></i></a>
+                              <div class="simple_overlay" id="<%= build_id feature[:name], element[:name], step[:name] %>-screenshot">
+                                <img src="<%= step[:screenshot] %>">
+                              </div>
+                            <% end %>
+                            <% if step[:exception] %>
+                              <a rel="#<%= build_id feature[:name], element[:name], step[:name] %>-exception"><i class="icon-info-sign"></i></a>
+                              <div class="simple_overlay" id="<%= build_id feature[:name], element[:name], step[:name] %>-exception">
+<pre>
+<%= step[:exception][:message] %>
+<%= step[:exception][:backtrace].join("\n") %>
+<%= step[:exception][:extra_failure_content] %>
+</pre>
+                              </div>
+                            <% end %>
+                            <% unless is_scenario_outline?(element)%>
+                              <span class="label <%= label_type(step[:status]) %>"><%= status_text(step[:status]) %></span>
+                            <% end %>
+                          </span>
                           <% if step[:table] %>
                             <table class="table table-bordered">
                               <% step[:table].each do |row| %>
@@ -145,10 +164,25 @@
                             <% element[:examples][:rows][index].each do |cell| %>
                               <td>
                                 <%= cell[:value] %>
-                                <% if cell[:screenshot] %>
-                                  <a href="<%= cell[:screenshot] %>"><i class="icon-camera"></i></a>
-                                <% end %>
-                                <span class="label <%= label_type(cell[:status]) %>"><%= status_text(cell[:status]) %></span>
+                                <span class="flags">
+                                  <% if cell[:screenshot] %>
+                                    <a rel="#<%= build_id feature[:name], element[:name], cell[:value] %><%= index %>-screenshot"><i class="icon-camera"></i></a>
+                                    <div class="simple_overlay" id="<%= build_id feature[:name], element[:name], cell[:value] %><%= index %>-screenshot">
+                                      <img src="<%= cell[:screenshot] %>">
+                                    </div>
+                                  <% end %>
+                                  <% if cell[:exception] %>
+                                    <a rel="#<%= build_id feature[:name], element[:name], cell[:name] %><%= index %>-exception"><i class="icon-info-sign"></i></a>
+                                    <div class="simple_overlay" id="<%= build_id feature[:name], element[:name], cell[:name] %><%= index %>-exception">
+<pre>
+<%= cell[:exception][:message] %>
+<%= cell[:exception][:backtrace].join("\n") %>
+<%= cell[:exception][:extra_failure_content] %>
+</pre>
+                                    </div>
+                                  <% end %>
+                                  <span class="label <%= label_type(cell[:status]) %>"><%= status_text(cell[:status]) %></span>
+                                </span>
                               </td>
                             <% end %>
                           </tr>

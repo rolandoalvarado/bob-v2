@@ -4,6 +4,7 @@ require 'erb'
 require 'cucumber/formatter/ordered_xml_markup'
 require 'cucumber/formatter/duration'
 require 'cucumber/formatter/io'
+require 'cucumber/formatter/html'
 require 'cucumber/formatter/summary'
 require 'active_support/all'
 
@@ -32,6 +33,7 @@ module Cucumber
 
         def before_features(features)
           features.each { |f| @total_features += 1 }
+          show_progress(0, @total_features, "features")
         end
 
         # Assumes that the .feature file is at least two levels down from
@@ -126,6 +128,7 @@ module Cucumber
         end
 
         def after_features(features)
+          print "\n"
           write_html
         end
 
@@ -149,7 +152,7 @@ module Cucumber
         end
 
         def before_examples(examples)
-          # Do nothing
+          @examples = true
         end
 
         def examples_name(keyword, name_and_desc)
@@ -164,6 +167,7 @@ module Cucumber
         end
 
         def after_examples(examples)
+          @examples = false
         end
 
         # Denotes the beginning of a Scenario Outline table
@@ -174,7 +178,6 @@ module Cucumber
         end
 
         def after_outline_table(outline_table)
-          # Do nothing
         end
 
         #==================================================
@@ -199,7 +202,14 @@ module Cucumber
         end
 
         def after_table_row(table_row)
-          # Do nothing
+          if table_row.exception
+            @current_row.each do |cell|
+              if cell[:status] == :failed
+                cell[:exception] = build_exception_detail(table_row.exception)
+                break
+              end
+            end
+          end
         end
 
         def after_step_result(keyword, step_match, multiline_arg, status, exception, source_indent, background)
@@ -229,6 +239,35 @@ module Cucumber
               @current_step[:screenshot] = "screenshots/#{filename}"
             end
           end
+        end
+
+        #==================================================
+        # Methods for embedding exceptions in the report
+        #==================================================
+
+        def exception(exception, status)
+          @current_step[:exception] = build_exception_detail(exception)
+        end
+
+        def build_exception_detail(exception)
+          exception_hash = {}
+          backtrace = Array.new
+
+          message = exception.message
+          unless exception.instance_of?(RuntimeError)
+            message = "#{message} (#{exception.class})"
+          end
+          exception_hash[:message] = message
+
+          backtrace = exception.backtrace
+          backtrace.delete_if { |x| x =~ /\/gems\/(cucumber|rspec)/ }
+          exception_hash[:backtrace] = backtrace
+
+          snippet_extractor ||= Cucumber::Formatter::Html::SnippetExtractor.new
+          extra = snippet_extractor.snippet(backtrace)
+          exception_hash[:extra_failure_content] = extra
+
+          exception_hash
         end
 
         #==================================================
@@ -306,7 +345,7 @@ module Cucumber
         end
 
         def show_progress(current, total, what)
-          # print "\rProcessed #{current} of #{total} #{what}"
+          print "Processed #{current} of #{total} #{what}\r"
         end
 
         def skip_current_step?
@@ -329,6 +368,10 @@ module Cucumber
 
         def build_bookmark(category, feature)
           "#{category}-#{feature[:name].parameterize}"
+        end
+
+        def build_id(feature, element, step)
+          "#{ feature }#{ element }#{ step }".parameterize
         end
 
         def feature_label_type(feature)
