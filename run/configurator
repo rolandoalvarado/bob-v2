@@ -1,0 +1,28 @@
+#!/usr/bin/env ruby
+
+require 'rubygems'
+require 'yaml'
+
+config_path = File.expand_path('../../config.yml', __FILE__)
+
+if File.exists? config_path
+  config_file = File.open(config_path, 'r+')
+  config = YAML.load_file(config_file)
+else
+  config_file = File.open(config_path, File::WRONLY|File::CREAT|File::EXCL)
+  puts "\033[0;31m#{config_path} not found. Creating a new config file...\033[0;m"
+  config = {}
+end
+
+if config['host'].nil?
+  print "Which mCloud environment would you like to verify? A blank answer means you will be asked this question everytime the verifier runs: "
+  host = STDIN.gets.chomp
+  config['host'] = host
+  unless host.empty?
+    config['host'] = "http://#{config['host']}" if config['host'].match(/^http/).nil?
+    config['host'] = config['host'].gsub(/\/?$/, '')
+  end
+end
+
+puts "Writing #{config_path}"
+YAML.dump(config, config_file)

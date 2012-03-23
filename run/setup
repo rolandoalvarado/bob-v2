@@ -18,4 +18,5 @@ else
   gem install bundler
 fi
 bundle install
+run/configurator
 echo "Setup is complete. Now type 'run/verifier' or 'run/autoverifier' (without the quotes)"
