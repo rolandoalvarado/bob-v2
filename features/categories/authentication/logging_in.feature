@@ -3,8 +3,8 @@ Feature: Logging In
 
   Background:
     * The following user exists:
-      | Email | Password |
-      | admin | klnm12   |
+      | Username | Password |
+      | admin    | klnm12   |
 
 
   Scenario Outline: User tries to log in
