@@ -13,3 +13,4 @@
 /output/*.html
 *.ignore
 /config.yml
+/capybara*.*
