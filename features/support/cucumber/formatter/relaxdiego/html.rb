@@ -1,4 +1,5 @@
 require 'rubygems'
+require 'fileutils'
 require 'erb'
 require 'cucumber/formatter/ordered_xml_markup'
 require 'cucumber/formatter/duration'
@@ -232,20 +233,26 @@ module Cucumber
         end
 
         def embed_assets
-          inline_assets = ""
+          asset_tags = ""
+          destination_dir = File.join(@report_dir, "assets")
 
           dir = Dir.open(File.dirname(__FILE__))
 
+          Dir.mkdir(destination_dir) unless Dir.exists?(destination_dir)
+
           dir.entries.select { |e| e.match /.+\.(css|js)/ }.each do |f|
-            file = File.read(File.dirname(__FILE__) + "/#{f}")
+            FileUtils.cp(File.join(File.dirname(__FILE__), f), File.join(@report_dir, "assets", f))
+
             type = f.split('.')[f.split('.').length-1]
 
-            inline_assets << (type == 'css' ? "<style type='text/css'>" : "<script>")
-            inline_assets << "\n#{file}\n"
-            inline_assets << (type == 'css' ? "</style>" : "</script>")
+            if type == 'css'
+              asset_tags << "<link type='text/css' rel='stylesheet' href='#{ File.join("assets", f) }'>\n"
+            elsif type == 'js'
+              asset_tags << "<script src='#{ File.join("assets", f) }' type='text/javascript'></script>\n"
+            end
           end
 
-          inline_assets
+          asset_tags
         end
 
         def get_current_category(args)
