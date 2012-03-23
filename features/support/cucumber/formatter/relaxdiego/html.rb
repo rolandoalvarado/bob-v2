@@ -193,7 +193,9 @@ module Cucumber
 
         def table_cell_value(value, status)
           return if skip_current_step?
-          @current_row << { :value => value, :status => status }
+          @previous_cell = @current_cell
+          @current_cell = { :value => value, :status => status }
+          @current_row << @current_cell
         end
 
         def after_table_row(table_row)
@@ -219,7 +221,13 @@ module Cucumber
             filepath = File.join(screenshots_dir, filename)
             FileUtils.cp(src, filepath)
 
-            @current_feature_element[:screenshot] = "screenshots/#{filename}"
+            if is_scenario_outline?(@current_feature_element)
+              # REVISIT: For some reason, using @current_cell here doesn't give us the cell we want.
+              # Which is why I'm using @previous_cell instead.
+              @previous_cell[:screenshot] = "screenshots/#{filename}"
+            else
+              @current_feature_element[:screenshot] = "screenshots/#{filename}"
+            end
           end
         end
 

@@ -145,6 +145,9 @@
                             <% element[:examples][:rows][index].each do |cell| %>
                               <td>
                                 <%= cell[:value] %>
+                                <% if cell[:screenshot] %>
+                                  <a href="<%= cell[:screenshot] %>"><i class="icon-camera"></i></a>
+                                <% end %>
                                 <span class="label <%= label_type(cell[:status]) %>"><%= status_text(cell[:status]) %></span>
                               </td>
                             <% end %>
