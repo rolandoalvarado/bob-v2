@@ -103,7 +103,7 @@ module Cucumber
           step_name = step_match.format_args(lambda{|param| %{#{param}}})
           step = { :keyword => keyword.gsub('*','').strip,
                    :status  => status,
-                   :name    => h(step_name).gsub(/&lt;(\w+)&gt;/, '<code>\1</code>') }
+                   :name    => h(step_name).gsub(/&lt;([\w ]+)&gt;/, '<code>\1</code>') }
           @current_step = step
           return if skip_current_step?
 
