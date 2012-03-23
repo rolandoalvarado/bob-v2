@@ -1,5 +1,16 @@
 #!/usr/bin/env bash
 
+ruby_string="ruby 1.9"
+
+if ruby --version | grep -q "${ruby_string}" ; then
+  echo "${ruby_string} found!"
+else
+  echo "${ruby_string} or higher must be installed."
+  echo "Please install it before proceeding"
+  exit 1
+fi
+
+
 if bundle --version | grep "Bundler version"; then
   echo "Bundler gem found!"
 else

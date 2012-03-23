@@ -5,7 +5,7 @@ This is an executable documentation of the features in the mCloud product suite.
 Prerequisites
 -------------
 1. [Git](http://git-scm.com)
-2. [Ruby](ruby-lang.org/) 1.8.7 or higher
+2. [Ruby](ruby-lang.org/) 1.9.2-p290 or higher
 
 Additional Prerequisites for Mac OS X
 -------------------------------------
