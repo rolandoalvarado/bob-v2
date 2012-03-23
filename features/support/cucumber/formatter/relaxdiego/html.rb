@@ -123,7 +123,7 @@ module Cucumber
         end
 
         def after_features(features)
-          build_html
+          write_html
         end
 
         #=================================================
@@ -225,7 +225,7 @@ module Cucumber
 
         protected
 
-        def build_html
+        def write_html
           template = File.open(File.expand_path('../html.erb', __FILE__), 'r')
           erb = ERB.new(template.read)
           File.open(File.join(@report_dir, "index.html"), 'w') { |file| file.write(erb.result(binding)) }
