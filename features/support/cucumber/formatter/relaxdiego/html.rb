@@ -204,7 +204,7 @@ module Cucumber
         def after_table_row(table_row)
           if table_row.exception
             @current_row.each do |cell|
-              if cell[:status] == :failed
+              if [:failed, :undefined].include?(cell[:status])
                 cell[:exception] = build_exception_detail(table_row.exception)
                 break
               end
