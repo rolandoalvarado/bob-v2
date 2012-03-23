@@ -1,5 +1,6 @@
 require 'rubygems'
 require 'bundler/setup'
+require 'capybara/cucumber'
 
 config_path = File.expand_path('../../../config.yml', __FILE__)
 
@@ -16,6 +17,9 @@ if config['host'].nil? || config['host'].empty?
 end
 
 config['host'] = "http://#{config['host']}" if config['host'].match(/^http/).nil?
+
+Capybara.app_host = config['host']
+Capybara.default_driver = :selenium
 
 # Overrides the method +method_name+ in +obj+ with the passed block
 def override_method(obj, method_name, &block)
