@@ -18,7 +18,7 @@ module Cucumber
         include ActiveSupport::Inflector
 
         def initialize(step_mother, path_or_io, options)
-          @io = ensure_io(path_or_io, "html")
+          @report_dir = ensure_dir(path_or_io, "html")
           @total_features = 0
           @processed_features = 0
           @results = {}
@@ -227,8 +227,8 @@ module Cucumber
         def build_html
           template = File.open(File.expand_path('../html.erb', __FILE__), 'r')
           erb = ERB.new(template.read)
-          @io.write erb.result(binding)
-          puts "HTML report saved as #{@io.path}"
+          File.open(File.join(@report_dir, "index.html"), 'w') { |file| file.write(erb.result(binding)) }
+          puts "HTML report saved as #{@report_dir}/index.html"
         end
 
         def embed_assets

@@ -10,7 +10,7 @@
 /coverage
 /rerun.txt
 /output/junit
-/output/*.html
+/output/**/*
 *.ignore
 /config.yml
 /capybara*.*
