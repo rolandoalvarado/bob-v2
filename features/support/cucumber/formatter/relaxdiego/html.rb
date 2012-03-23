@@ -25,6 +25,9 @@ module Cucumber
           @results = {}
           @current_category
           @current_feature
+
+          FileUtils.rm_rf(screenshots_dir) if Dir.exists?(screenshots_dir)
+          Dir.mkdir(screenshots_dir)
         end
 
         def before_features(features)
@@ -199,6 +202,25 @@ module Cucumber
 
         def after_step_result(keyword, step_match, multiline_arg, status, exception, source_indent, background)
           # Do nothing
+        end
+
+        #==================================================
+        # Methods for inserting images to the report
+        #==================================================
+
+        def screenshots_dir
+          File.join(@report_dir, "screenshots")
+        end
+
+        def embed(src, mime_type, label)
+          case(mime_type)
+          when /^image\/(png|gif|jpg|jpeg)/
+            filename = src.split('/')[-1]
+            filepath = File.join(screenshots_dir, filename)
+            FileUtils.cp(src, filepath)
+
+            @current_feature_element[:screenshot] = "screenshots/#{filename}"
+          end
         end
 
         #==================================================

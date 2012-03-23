@@ -90,7 +90,11 @@
                 <div class="element">
                   <div class="header">
                     <span class="type"><%= element[:type] %>:</span>
-                    <span class="name"><%= element[:name] %></span><br>
+                    <span class="name"><%= element[:name] %></span>
+                    <% if element[:screenshot] %>
+                      <a href="<%= element[:screenshot] %>"><i class="icon-camera"></i></a>
+                    <% end %>
+                    <br>
                     <span class="description"><%= element[:description] %></span>
                   </div>
 
