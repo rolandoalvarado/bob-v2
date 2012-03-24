@@ -183,7 +183,9 @@
 </pre>
                                     </div>
                                   <% end %>
-                                  <span class="label <%= label_type(cell[:status]) %>"><%= status_text(cell[:status]) %></span>
+                                  <% unless cell[:status] == :passed %>
+                                    <span class="label <%= label_type(cell[:status]) %>"><%= status_text(cell[:status]) %></span>
+                                  <% end %>
                                 </span>
                               </td>
                             <% end %>
