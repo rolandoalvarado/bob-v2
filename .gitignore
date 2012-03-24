@@ -14,3 +14,4 @@
 *.ignore
 /config.yml
 /capybara*.*
+/*_tmp_screenshot_dir
