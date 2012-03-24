@@ -126,7 +126,7 @@
 </pre>
                               </div>
                             <% end %>
-                            <% unless is_scenario_outline?(element)%>
+                            <% unless is_scenario_outline?(element) || step[:status] == :passed %>
                               <span class="label <%= label_type(step[:status]) %>"><%= status_text(step[:status]) %></span>
                             <% end %>
                           </span>
