@@ -28,7 +28,6 @@ li.feature:hover {
 }
 
 div.feature {
-  margin-left: 20px;
   margin-bottom: 20px;
 }
 
@@ -48,7 +47,7 @@ div.feature {
 }
 
 .feature .elements {
-  padding: 3px;
+  padding: 3px 3px 3px 25px;
 }
 
 .feature .element {
@@ -57,6 +56,10 @@ div.feature {
 
 .feature .element .header .type {
   font-weight: bold;
+}
+
+.steps {
+  margin-left: 20px;
 }
 
 li.step {
@@ -78,7 +81,7 @@ li.step table {
 }
 
 .element .examples {
-  margin-left: 13px;
+  margin-left: 30px;
 }
 
 .feature .element .examples .header .type {
