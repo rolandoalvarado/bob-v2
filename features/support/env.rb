@@ -16,7 +16,10 @@ if config['host'].nil? || config['host'].empty?
   config['host'] = STDIN.gets.chomp
 end
 
+# Cleanup host input
+# TODO: Put these a config helper and use here and in run/configurator
 config['host'] = "http://#{config['host']}" if config['host'].match(/^http/).nil?
+config['host'] = config['host'].gsub(/\/?$/, '')
 
 Capybara.app_host = config['host']
 Capybara.default_driver = :selenium
