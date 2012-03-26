@@ -398,6 +398,8 @@ module Cucumber
         def get_status(feature)
           @statuses ||= {}
           return @statuses[feature[:name]] unless @statuses[feature[:name]].nil?
+          return :undefined if feature[:elements].nil?
+
           status = nil
 
           feature[:elements].each do |element|
