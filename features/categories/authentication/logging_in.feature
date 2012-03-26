@@ -26,6 +26,7 @@ Feature: Logging In
   Scenario Outline: User attempts to access a secure page without logging in
     When he attempts to access <Page> without logging in first
     Then he will be redirected to the log in page
+     And the system will display 'Please log in before proceeding'
 
     Examples:
       | Page      |
