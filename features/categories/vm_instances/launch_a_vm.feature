@@ -11,10 +11,9 @@ Feature: Launch a VM
     * Marjorie is a developer of that project
     * Marjorie is logged in
 
-  Scenario: Launch a VM from an available image
+  Scenario: Launch a VM
     When she tries to launch a VM in the project
-    Then the system will as which machine image she wants to use
-
+    Then the system will ask which machine image she wants to use
     When she chooses the first image
      And fills in a friendly name for the new VM
     Then the system will launch the VM
