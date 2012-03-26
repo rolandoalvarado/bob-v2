@@ -46,7 +46,7 @@ div.feature {
   background-color: whiteSmoke;
 }
 
-.feature .elements {
+.feature .elements, .feature .jira-issues {
   padding: 3px 3px 3px 25px;
 }
 
@@ -54,11 +54,13 @@ div.feature {
   margin-bottom: 10px;
 }
 
-.feature .element .header .type {
+.feature .element .header .type,
+.jira-issues .header {
   font-weight: bold;
 }
 
-.steps {
+.steps,
+.jira-issues .list {
   margin-left: 20px;
 }
 
