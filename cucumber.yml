@@ -3,7 +3,9 @@
 # from the command line.
 
 # NOTE: these are also used by various scripts
-# under the `run` directory.
+# under the `run` directory. For example, you can
+# call `run/verifier ci` to use the ci profile, or
+# `run/verifier unused_steps` to use that profile.
 
 # Runs all scenarios that are not tagged with @wip
 # (which are considered works in progress)
