@@ -5,7 +5,12 @@ Feature: Limit a Project's VM Consumption
   consume so that he can control the project's
   expenses.
 
-  The limit check needs to happen before actual VM launch
+  Non-functional requirement: The limit check needs
+  to happen before the system even attempts to launch
+  the VMs. Meaning, it should check what the total will
+  be should it launch the new VMs. When the future total
+  will be within the limit, then the launch proceeds.
+  Otherwise, the system will return an error message.
 
   Background:
     * A project named 'Marketing' exists in the cloud
