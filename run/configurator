@@ -31,5 +31,13 @@ if config[key].nil? || config[key].empty?
 end
 
 config.delete('cloud_admin_username')
+
+key = 'cloud_admin_email'
+if config[key].nil? || config[key].empty?
+  print "Cloud Admin email for #{config['host']}: "
+  host = STDIN.gets.chomp
+  config[key] = host
+end
+
 puts "Writing #{config_path}"
 YAML.dump(config, config_file)
