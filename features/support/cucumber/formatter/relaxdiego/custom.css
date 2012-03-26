@@ -95,13 +95,21 @@ li.step table {
   margin-top: 3px;
 }
 
-.feature .tags .label {
+.jira-issues .list {
+  margin-left: 35px;
+}
+
+.jira-issues .list .label {
   font-size: 9px;
+}
+
+.jira-issues .list a .label {
   background-color: #CCCCCC;
 }
 
-.feature .tags .label a {
-  color: inherit;
+code {
+  padding: 2px 3px;
+  font-size: 11px;
 }
 
 /* the overlayed element */
