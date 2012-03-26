@@ -439,6 +439,15 @@ module Cucumber
           feature[:tags].select { |tag| tag =~ /^@DPBLOG-\d+/ }
         end
 
+        def all_tags(feature)
+          feature[:tags] || []
+        end
+
+        def non_jira_tags(feature)
+          tags = feature[:tags] || []
+          tags.select { |tag| tag.match(/^@DPBLOG-\d+/).nil? }
+        end
+
         def jira_issue_link_or_text(tag)
           tag.gsub! /^@/, ''
           if tag =~ /^DPBLOG-\d+/

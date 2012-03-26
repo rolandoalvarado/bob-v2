@@ -62,7 +62,7 @@
           <ul>
             <% @results[category].each do |feature| %>
               <a href="#<%= build_bookmark(category, feature) %>">
-                <li class="feature">
+                <li class="feature <%= all_tags(feature).map{|t| t.gsub /^@/, 'tag-'}.join(' ') %>">
                   <%= feature[:name] %>
                   <span class="flags">
                     <span class="label <%= feature_label_type(feature) %>"><%= feature_status_text(feature) %></span>
@@ -83,9 +83,12 @@
       <% @results.keys.sort{ |a, b| a<=>b}.each do |category| %>
         <h3><%= category.humanize %></h3>
         <% @results[category].each do |feature| %>
-          <div class="feature">
+          <div class="feature <%= all_tags(feature).map{|t| t.gsub /^@/, 'tag-'}.join(' ') %>">
             <div class="name">
               <a name="<%= build_bookmark(category, feature) %>"><%= feature[:name] %></a>
+              <% non_jira_tags(feature).each do |tag| %>
+                <span class="label label-info"><%= tag %></span>
+              <% end %>
               <span class="flags">
                 <span class="label <%= feature_label_type(feature) %>"><%= feature_status_text(feature) %></span>
               </span>
@@ -96,7 +99,7 @@
               <div class="list">
                 <% if jira_tags(feature) %>
                   <% jira_tags(feature).each do |tag| %>
-                    <a href='https://issues.morphlabs.com/browse/<%= tag.gsub(/^@/, '') %>' target='__jira__'><span class="label"><%= tag %></span></a>
+                    <a href='https://issues.morphlabs.com/browse/<%= tag.gsub(/^@/, '') %>' target='__jira__'><span class="label"><%= tag.gsub(/^@/, '') %></span></a>
                   <% end %>
                 <% else %>
                   <span class="label label-important">WARNING: No associated Jira issue</span>
