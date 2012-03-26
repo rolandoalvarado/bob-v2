@@ -144,7 +144,7 @@ module Cucumber
         def before_multiline_arg(multiline_arg)
           return if skip_current_step?
           @current_table = []
-          @current_step[:table] = @current_table
+          @current_step[:table] = @current_table unless multiline_arg.class == Cucumber::Ast::DocString
         end
 
         def after_multiline_arg(multiline_arg)
@@ -276,6 +276,10 @@ module Cucumber
         #==================================================
         # Unused methods
         #==================================================
+
+        def doc_string(doc_string)
+          @current_step[:doc_string] = doc_string.to_s
+        end
 
         def before_comment(comment)
         end

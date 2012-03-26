@@ -141,6 +141,9 @@
                               <% end %>
                             </table>
                           <% end # if step[:table] %>
+                          <% if step[:doc_string] %>
+                            <pre class="doc-string"><%= h step[:doc_string] %></pre>
+                          <% end  # if step[:docstring] %>
                         </li>
                       <% end %>
                     </ul>
