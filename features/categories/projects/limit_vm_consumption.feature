@@ -14,18 +14,17 @@ Feature: Limit a Project's VM Consumption
 
   Background:
     * A project named 'Marketing' exists in the cloud
-    * Robert Baratheon is a manager of that project
-    * Arya Stark is an developer in that project
+    * Arya Stark is a member of that project
 
   Scenario Outline:
-    Given Robert has set the project's Maximum VM Usage to <Limit>
-      And there are <Starting> VMs in the project
-     When Arya attempts to launch <New> VMs
-     Then there will be <Total> launched VMs in the system
-      And the UI will display '<Message>'
+    Given the project's Maximum VM Usage is <Max>
+      And there are <Existing> VMs in the project
+     When Arya attempts to launch <Additional> VMs
+     Then the UI will display '<Message>'
+      And there will be <Total> launched VMs in the system
 
     Examples:
-      | Limit | Starting | New  | Total | Message                      |
-      |  10   |    0     |  10  |  10   | Launching 10 VMs             |
-      |   5   |    0     |   4  |   4   | Launching 4 VMs              |
-      |  15   |    5     |  15  |   5   | Project is limited to 15 VMs |
+      | Max | Existing | Additional | Message                      | Total |
+      |  10 |    0     |     10     | Launching 10 VMs             |  10   |
+      |   5 |    1     |      4     | Launching 4 VMs              |   5   |
+      |  15 |    5     |     15     | Project is limited to 15 VMs |   5   |

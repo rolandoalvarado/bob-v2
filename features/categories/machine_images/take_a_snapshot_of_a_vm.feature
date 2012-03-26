@@ -16,20 +16,18 @@ Feature: Take a Snapshot of a VM
       for future releases.
 
   Background:
-      * A 'GIS' project exists in the system
+      * A project has one running VM
       * Catelyn is the owner of that project
       * The following developers are members of that project:
         | Brandon   |
         | Robb      |
         | Jeoffrey  |
-      * Catelyn has a running VM
 
   Scenario: Create a new image
      When she takes a snapshot of that VM
       And she makes the produced image available to the following developers:
         | Brandon |
         | Robb    |
-
      Then the new image should have the following ACL:
         | Developer | Has Access? |
         | Brandon   | yes         |

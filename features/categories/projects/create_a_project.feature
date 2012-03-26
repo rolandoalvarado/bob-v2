@@ -10,7 +10,7 @@ Feature: Create a Project
     * Arya Stark has a role of Developer in the DCU
 
   Scenario: Robert tries to create a project
-    When Robert tries to create a project
+    When Robert tries to create a project named 'Project Winterfell'
     Then the project will be created in the DCU
      And the system will display 'Project Winterfell was successfully created'
 
