@@ -1,8 +1,16 @@
-Feature: Create a Machine Image
+Feature: Create a VM Snapshot
   A project owner needs to create approved
   machine images so that the project's developers only
   deploy their applications in the same environment (e.g. same
   OS, binaries, and system configuration)
+
+  These snapshots have to be stored outside the CN because
+  our CNs don't have storage capabilities.
+
+  The snapshots have to have meta-data in the snapshot. Custom
+  fields: name, description, etc.
+
+  Does snapshotting have versioning support? Something for future releases.
 
   Background:
       * A 'GIS' project exists in the system

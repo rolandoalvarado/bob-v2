@@ -3,6 +3,8 @@ Feature: Launch a VM
   This feature allows an authorized project member
   to launch a VM in a project.
 
+  hypervisor to support: KVM
+
   Background:
     * A project named 'Department Store Management System' exists
     * The project has 2 machine images available

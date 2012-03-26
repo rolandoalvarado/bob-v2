@@ -16,8 +16,8 @@ Feature: Add a member to a project
 
     * Albert is a developer of another project
 
-
-  Scenario: Amanda adds Albert to one of her projects
+  @stretchgoal
+  Scenario: Amanda adds Albert to one of her projects with a message
     When she adds Albert to the HRIS project with an accompanying message:
     """
     Hi Albert. I need your help setting up one of the VMs in this project.

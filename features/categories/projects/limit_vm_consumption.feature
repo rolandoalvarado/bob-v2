@@ -5,6 +5,8 @@ Feature: Limit a Project's VM Consumption
   consume so that he can control the project's
   expenses.
 
+  The limit check needs to happen before actual VM launch
+
   Background:
     * A project named 'Marketing' exists in the cloud
     * Robert Baratheon is a manager of that project
@@ -13,9 +15,7 @@ Feature: Limit a Project's VM Consumption
   Scenario Outline:
     Given Robert has set the project's Maximum VM Usage to <Limit>
       And there are <Starting> VMs in the project
-
      When Arya attempts to launch <New> VMs
-
      Then there will be <Total> launched VMs in the system
       And the UI will display '<Message>'
 
