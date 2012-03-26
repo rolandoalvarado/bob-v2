@@ -39,5 +39,12 @@ if config[key].nil? || config[key].empty?
   config[key] = host
 end
 
+key = 'cloud_admin_password'
+if config[key].nil? || config[key].empty?
+  print "Password for #{config['cloud_admin_email']}: "
+  host = STDIN.gets.chomp
+  config[key] = host
+end
+
 puts "Writing #{config_path}"
 YAML.dump(config, config_file)
