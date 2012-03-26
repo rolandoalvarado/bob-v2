@@ -91,7 +91,18 @@ li.step table {
   text-decoration: underline;
 }
 
+.doc-string {
+  margin-top: 3px;
+}
 
+.feature .tags .label {
+  font-size: 9px;
+  background-color: #CCCCCC;
+}
+
+.feature .tags .label a {
+  color: inherit;
+}
 
 /* the overlayed element */
 .simple_overlay {
