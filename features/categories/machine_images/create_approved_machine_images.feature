@@ -1,4 +1,4 @@
-Feature: Create Approved Machine Images
+Feature: Create a Machine Image
   A project owner needs to create approved
   machine images so that the project's developers only
   deploy their applications in the same environment (e.g. same
@@ -11,12 +11,10 @@ Feature: Create Approved Machine Images
         | Brandon   |
         | Robb      |
         | Jeoffrey  |
+      * Catelyn has a running VM
 
-  Scenario: Successfully create the image
-    Given Catelyn has a running instance
-      And she has configured it according to her needs
-
-     When she creates a new image from that instance
+  Scenario: Create a new image
+     When she creates a new image from that VM
       And she makes the image available to the following developers:
         | Brandon |
         | Robb    |
