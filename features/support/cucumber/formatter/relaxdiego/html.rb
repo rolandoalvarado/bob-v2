@@ -41,11 +41,13 @@ module Cucumber
         # In the above example, "features" and "somedir" are ignored
         def before_feature(feature)
           @current_category = get_current_category(:path => feature.file, :root_category => @results)
+          @current_feature = {}
         end
 
         def feature_name(keyword, name_and_desc)
           name, desc = split_name_and_desc(name_and_desc)
-          @current_feature = {:name => name, :description => desc}
+          @current_feature[:name] = name
+          @current_feature[:description] = desc
           @current_category << @current_feature
         end
 
@@ -293,7 +295,11 @@ module Cucumber
         def before_tags(tags)
         end
 
+        # WARNING: this assumes that the tag is for a feature
+        # TODO: This should check if the tag is for a feature, a feature element
         def tag_name(tag_name)
+          @current_feature[:tags] ||= []
+          @current_feature[:tags] << tag_name
         end
 
         def after_tags(tags)
@@ -423,6 +429,21 @@ module Cucumber
 
         def is_scenario_outline?(element)
           !element[:examples].nil?
+        end
+
+        def jira_tags(feature)
+          return nil unless feature[:tags]
+
+          feature[:tags].select { |tag| tag =~ /^@DPBLOG-\d+/ }
+        end
+
+        def jira_issue_link_or_text(tag)
+          tag.gsub! /^@/, ''
+          if tag =~ /^DPBLOG-\d+/
+            "<a href='https://issues.morphlabs.com/browse/#{tag}' target='__jira__'>#{tag}</a>"
+          else
+            tag
+          end
         end
 
         def label_type(status)

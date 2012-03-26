@@ -91,6 +91,19 @@
               </span>
             </div>
             <div class="description"><%= feature[:description] %></div>
+            <div class="jira-issues">
+              <div class="header">Related Jira Issues:</div>
+              <div class="list">
+                <% if jira_tags(feature) %>
+                  <% jira_tags(feature).each do |tag| %>
+                    <a href='https://issues.morphlabs.com/browse/<%= tag.gsub(/^@/, '') %>' target='__jira__'><span class="label"><%= tag %></span></a>
+                  <% end %>
+                <% else %>
+                  <span class="label label-important">WARNING: No associated Jira issue</span>
+                <% end %>
+              </div>
+            </div>
+            <% if feature[:elements] %>
             <div class="elements">
               <% feature[:elements].each do |element| %>
                 <div class="element">
@@ -200,7 +213,8 @@
                   <% end %>
                 </div>
               <% end %>
-            </div>
+            </div><!-- class="elements" -->
+            <% end # if feature[:elements] %>
           </div>
         <% end # @results[category].each do |feature| %>
       <% end # @results.keys.sort{ |a, b| a<=>b}.each do |category| %>
