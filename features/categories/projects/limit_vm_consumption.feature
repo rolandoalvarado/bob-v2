@@ -21,10 +21,10 @@ Feature: Limit a Project's VM Consumption
       And there are <Existing> VMs in the project
      When Arya attempts to launch <Additional> VMs
      Then the UI will display '<Message>'
-      And there will be <Total> launched VMs in the system
+      And there will be <New> launching VMs in the system
 
     Examples:
-      | Max | Existing | Additional | Message                      | Total |
-      |  10 |    0     |     10     | Launching 10 VMs             |  10   |
-      |   5 |    1     |      4     | Launching 4 VMs              |   5   |
-      |  15 |    5     |     15     | Project is limited to 15 VMs |   5   |
+      | Max | Existing | Additional | Message                      | New |
+      |  10 |    0     |     10     | Launching 10 VMs             |  10 |
+      |   5 |    1     |      4     | Launching 4 VMs              |   4 |
+      |  15 |    5     |     15     | Project is limited to 15 VMs |   0 |
