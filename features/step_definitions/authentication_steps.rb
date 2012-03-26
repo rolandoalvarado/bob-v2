@@ -1,28 +1,18 @@
-# This step definition is not very well designed.
-# To improve it, the test should have a secret access
-# to the backend that allows it to create the user
-# on the fly.
 Given /^The following user exists:$/ do |table|
-  credentials = table.hashes[0]
-  @user = {}
-  @user[:username] = credentials['Username']
-  @user[:password] = credentials['Password']
-
-  # Need something here to ensure that the user actually
-  # exists in the system. Ideally, a direct connection
-  # to the backend server where we can create the user.
+  @user = table.rows_hash
+  ensure_user_exists @user
 end
 
 Given /^s?he is logged in$/ do
   visit('/')
-  fill_in 'username', :with => @user[:username]
-  fill_in 'password', :with => @user[:password]
+  fill_in 'email', :with => @user['Email']
+  fill_in 'password', :with => @user['Password']
   click_button 'submit'
 end
 
-When /^s?he logs in with the following credentials: (.*), (.*)$/ do |username, password|
+When /^s?he logs in with the following credentials: (.*), (.*)$/ do |email, password|
   visit('/')
-  fill_in 'username', :with => username
+  fill_in 'email', :with => email
   fill_in 'password', :with => password
   click_button 'submit'
 end
