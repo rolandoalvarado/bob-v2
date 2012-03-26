@@ -16,16 +16,17 @@ else
   config = {}
 end
 
-if config['host'].nil?
 FileUtils.rm_rf(config_path)
 config_file = File.open(config_path, File::WRONLY|File::CREAT|File::EXCL)
 
+key = 'host'
+if config[key].nil? || config[key].empty?
   print "Which mCloud environment would you like to verify? A blank answer means you will be asked this question everytime the verifier runs: "
   host = STDIN.gets.chomp
-  config['host'] = host
+  config[key] = host
   unless host.empty?
-    config['host'] = "http://#{config['host']}" if config['host'].match(/^http/).nil?
-    config['host'] = config['host'].gsub(/\/?$/, '')
+    config[key] = "http://#{config[key]}" if config[key].match(/^http/).nil?
+    config[key] = config[key].gsub(/\/?$/, '')
   end
 end
 
