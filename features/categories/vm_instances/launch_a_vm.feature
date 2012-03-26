@@ -3,18 +3,20 @@ Feature: Launch a VM
   This feature allows an authorized project member
   to launch a VM in a project.
 
-  hypervisor to support: KVM
-
   Background:
-    * A project named 'Department Store Management System' exists
-    * The project has 2 machine images available
+    * A project named 'CMS' exists
+    * The project has the following machine images available:
+      | MACHINE IMAGE |
+      | Web Server    |
+      | Database      |
     * Marjorie is a developer of that project
-    * Marjorie is logged in
 
   Scenario: Launch a VM
-    When she tries to launch a VM in the project
-    Then the system will ask which machine image she wants to use
-    When she chooses the first image
-     And fills in a friendly name for the new VM
-    Then the system will launch the VM
-     And the VM will be available in the project within 5 minutes
+    When Marjorie tries to launch a VM with the following attributes:
+      | MACHINE IMAGE | FRIENDLY NAME | TAGS             |
+      | Database      | Production DB | marj, production |
+    Then the system will launch the VM within 5 to 10 minutes
+     And the VM will have the following attributes:
+      | FRIENDLY NAME | TAGS             |
+      | Production DB | marj, production |
+     And Marjorie should be able to SSH to it
