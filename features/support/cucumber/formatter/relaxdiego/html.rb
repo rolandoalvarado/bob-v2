@@ -72,6 +72,7 @@ module Cucumber
         # May be called for other elements should
         # Cucumber add a new type in future versions.
         def before_feature_element(feature_element)
+          @in_feature_element = true
           @current_feature[:elements] = [] if @current_feature[:elements].nil?
           @current_feature_element = {}
           @current_feature[:elements] << @current_feature_element
@@ -121,7 +122,7 @@ module Cucumber
         end
 
         def after_feature_element(feature_element)
-          # Do nothing
+          @in_feature_element = false
         end
 
         def after_feature(feature)
@@ -295,11 +296,14 @@ module Cucumber
         def before_tags(tags)
         end
 
-        # WARNING: this assumes that the tag is for a feature
-        # TODO: This should check if the tag is for a feature, a feature element
         def tag_name(tag_name)
-          @current_feature[:tags] ||= []
-          @current_feature[:tags] << tag_name
+          if @in_feature_element
+            @current_feature_element[:tags] ||= []
+            @current_feature_element[:tags] << tag_name
+          else
+            @current_feature[:tags] ||= []
+            @current_feature[:tags] << tag_name
+          end
         end
 
         def after_tags(tags)
@@ -433,18 +437,18 @@ module Cucumber
           !element[:examples].nil?
         end
 
-        def jira_tags(feature)
-          return nil unless feature[:tags]
+        def jira_tags(feature_or_element)
+          return nil unless feature_or_element[:tags]
 
-          feature[:tags].select { |tag| tag =~ /^@DPBLOG-\d+/ }
+          feature_or_element[:tags].select { |tag| tag =~ /^@DPBLOG-\d+/ }
         end
 
-        def all_tags(feature)
-          feature[:tags] || []
+        def all_tags(feature_or_element)
+          feature_or_element[:tags] || []
         end
 
-        def non_jira_tags(feature)
-          tags = feature[:tags] || []
+        def non_jira_tags(feature_or_element)
+          tags = feature_or_element[:tags] || []
           tags.select { |tag| tag.match(/^@DPBLOG-\d+/).nil? }
         end
 
@@ -505,7 +509,7 @@ module Cucumber
             features.each do |feature|
               @stats[:total_completed_features] += 1 if get_status(feature) == :passed
               @stats[:total_features] += 1
-              @stats[:total_undefined_features] += 1 if get_status(feature) == :undefined
+              @stats[:total_undefined_features] += 1 if get_status(feature) != :passed
             end
           end
         end

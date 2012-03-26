@@ -112,7 +112,11 @@
                 <div class="element">
                   <div class="header">
                     <span class="type"><%= element[:type] %>:</span>
-                    <span class="name"><%= element[:name] %></span>
+                    <span class="name"><%= element[:name] %>
+                    <% non_jira_tags(element).each do |tag| %>
+                      <span class="label label-info"><%= tag %></span>
+                    <% end %>
+                    </span>
                     <br>
                     <span class="description"><%= element[:description] %></span>
                   </div>
