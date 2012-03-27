@@ -1,0 +1,28 @@
+#!/usr/bin/env ruby
+rundir = Dir.open(File.dirname(__FILE__))
+
+description = "Display help (FYI: You're looking at it)"
+
+if ARGV.length == 2 and ARGV[0] == 'describe'
+  basename = File.basename(__FILE__).to_s.ljust(ARGV[1].to_i)
+  print "  #{basename} - #{description}"
+  exit 0
+elsif ARGV.length == 1 and rundir.entries.include?(ARGV[0])
+  puts `#{rundir.path}/#{ARGV[0]} --help`
+  exit 0
+end
+
+padding = 0
+rundir.entries.each do |file|
+  padding = file.to_s.length if file.to_s.length > padding
+end
+
+puts  "The following commands are available from the run directory. call them with \`run/<COMMAND>\`"
+print "\n  COMMAND".ljust(padding + 2) + "   DESCRIPTION\n"
+
+rundir.entries.each do |file|
+  next if file =~ /^\.\.?$/
+  puts `#{rundir.path}/#{file} describe #{padding}`
+end
+
+puts "\nFor more detailed help on each command execute `run/<command> --help`"

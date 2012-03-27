@@ -1,3 +1,13 @@
 #!/usr/bin/env bash
-# See cucumber.yml for a definition of each profile
-bundle exec cucumber --profile steps_duration --dry-run
+description="Lists all step definitions and where they are used"
+
+if [ $# -eq 2 ] && [ $1 == 'describe' ]; then
+  printf "  %-0$2s - $description\n" `basename $0`
+  exit 0
+elif [ $# -eq 1 ] && [ $1 == '--help' ]; then
+  printf "Just execute \`run/`basename $0`\` without arguments\n"
+  exit 0
+fi
+
+
+bundle exec cucumber --profile unused_steps

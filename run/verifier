@@ -1,5 +1,14 @@
 #!/usr/bin/env bash
-# See cucumber.yml for a definition of each profile
+description="Verifies all features"
+
+if [ $# -eq 2 ] && [ $1 == 'describe' ]; then
+  printf "  %-0$2s - $description\n" `basename $0`
+  exit 0
+elif [ $# -eq 1 ] && [ $1 == '--help' ]; then
+  printf "Just execute \`run/`basename $0`\` without arguments\n"
+  exit 0
+fi
+
 rm -rf output/*
 if [ $# -eq 1 ]; then
   bundle exec cucumber --profile $1

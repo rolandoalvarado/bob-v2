@@ -1,6 +1,15 @@
 #!/usr/bin/env bash
-# Use this when you are editing features and step definitions
-echo "Press Ctrl-C anytime to stop running the tests."
-echo "Press Enter to re-run all tests."
+description="Verifies features everytime a change is detected in this repo"
+
+if [ $# -eq 2 ] && [ $1 == 'describe' ]; then
+  printf "  %-0$2s - $description\n" `basename $0`
+  exit 0
+elif [ $# -eq 1 ] && [ $1 == '--help' ]; then
+  printf "Just execute \`run/`basename $0`\` without arguments\n"
+  exit 0
+fi
+
+echo "Press Ctrl-C anytime to stop validating features"
+echo "Press Enter anytime to re-validate all tests"
 rm -rf output/*
 bundle exec guard

@@ -1,4 +1,14 @@
 #!/usr/bin/env ruby
+description = "Configure this copy of mcloud_features"
+
+if ARGV.length == 2 and ARGV[0] == 'describe'
+  basename = File.basename(__FILE__).to_s.ljust(ARGV[1].to_i)
+  print "  #{basename} - #{description}"
+  exit 0
+elsif ARGV.length == 1 and ARGV[0] == '--help'
+  print "Just execute \`run/#{File.basename(__FILE__)}\` without arguments\n"
+  exit 0
+end
 
 require 'rubygems'
 require 'yaml'
