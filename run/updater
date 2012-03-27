@@ -5,11 +5,12 @@ if [ $# -eq 2 ] && [ $1 == 'describe' ]; then
   printf "  %-0$2s - $description\n" `basename $0`
   exit 0
 elif [ $# -eq 1 ] && [ $1 == '--help' ]; then
-  printf "run/`basename $0` [remote] [branch]\n"
+  printf "run/`basename $0` [remote] [branch]\n\n"
   printf "Examples:\n"
   printf "  run/`basename $0`\n"
   printf "  run/`basename $0` wdamarillo master\n\n"
-  printf "IMPORTANT: 'remote' and 'branch' must already be configured in .git/config"
+  printf "IMPORTANT: 'remote' and 'branch' must already be configured in .git/config\n"
+  printf "\nIf 'remote' and 'branch' are not specified, they default to 'origin' and 'master' respectively\n"
   exit 0
 fi
 

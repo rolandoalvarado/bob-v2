@@ -5,7 +5,12 @@ if [ $# -eq 2 ] && [ $1 == 'describe' ]; then
   printf "  %-0$2s - $description\n" `basename $0`
   exit 0
 elif [ $# -eq 1 ] && [ $1 == '--help' ]; then
-  printf "Just execute \`run/`basename $0`\` without arguments\n"
+  printf "run/`basename $0` <profile>\n"
+  printf "\nExamples:\n"
+  printf "  run/`basename $0`\n"
+  printf "  run/`basename $0` ci\n"
+  printf "  run/`basename $0` wip\n"
+  printf "\nSee cucumber.yml for available profiles\n"
   exit 0
 fi
 
