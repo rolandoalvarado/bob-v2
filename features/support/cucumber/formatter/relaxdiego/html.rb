@@ -443,7 +443,7 @@ module Cucumber
         end
 
         def jira_tags(feature_or_element)
-          return nil unless feature_or_element[:tags]
+          return [] unless feature_or_element[:tags]
 
           feature_or_element[:tags].select { |tag| tag =~ /^@DPBLOG-\d+/ }
         end
