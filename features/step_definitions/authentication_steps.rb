@@ -1,5 +1,5 @@
 Given /^The following user exists:$/ do |table|
-  @user = table.rows_hash
+  @user = table.hashes
   ensure_user_exists @user
 end
 
