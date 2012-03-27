@@ -33,35 +33,27 @@ To automatically verify the document everytime something changes in the feature 
 
 Other useful commands
 ---------------------
-To verify the documentation in a CI environment:
 
-    run/verifier ci
+Getting updates:
 
-The above will generate two reports: a junit report (for the CI), and an html report. Both will be located under the `output` directory.
-
-To profile the steps:
-
-    run/profiler
-
-The above will list all steps arranged according to execution time with the steps taking the most time listed at the top.
-
-To get a listing of step definitions and the feature files that use them:
-
-    run/inventory
-
-Note: The above command is also useful for finding out which step definitions are not currently in use.
-
-Found a bug?
-------------
-If you find a problem with the the verifier, report it [here](https://bitbucket.org/wdamarillo/mcloud_features/issues/new). If you find bugs on mCloud, please report it to Jira.
-
-Getting updates
-------------
     run/updater
 
 The above command will pull the latest changes from origin/master and run `setup`. If you want to pull changes from another remote or branch, use:
 
     run/updater <other_remote_repo> <my_branch>
+
+To see a list of available commands:
+
+    run/help
+
+To verify the documentation in a CI environment:
+
+    run/verifier ci
+
+
+Found a bug?
+------------
+If you find a problem with the the verifier, report it [here](https://bitbucket.org/wdamarillo/mcloud_features/issues/new). If you find bugs on mCloud, please report it to Jira.
 
 Contributing
 ------------
