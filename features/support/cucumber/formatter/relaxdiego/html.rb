@@ -437,6 +437,11 @@ module Cucumber
           !element[:examples].nil?
         end
 
+        def has_jira_tags?(feature_or_element)
+          return !jira_tags(feature_or_element).nil? &&
+                 !jira_tags(feature_or_element).empty?
+        end
+
         def jira_tags(feature_or_element)
           return nil unless feature_or_element[:tags]
 
