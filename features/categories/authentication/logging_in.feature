@@ -28,8 +28,6 @@ Feature: Logging In
      When he attempts to access the <Page Name> page
      Then he will be redirected to the log in page
       And the system will display 'Please log in before proceeding'
-     When he submits his credentials
-     Then he will be redirected back to the <Page Name> page
 
     Examples:
       | Page Name |
