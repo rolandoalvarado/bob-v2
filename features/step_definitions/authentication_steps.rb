@@ -1,3 +1,7 @@
+#=================
+# GIVENs
+#=================
+
 Given /^The following user exists:$/ do |table|
   @user = table.hashes
   ensure_user_exists @user
@@ -9,6 +13,10 @@ Given /^s?he is logged in$/ do
   fill_in 'password', :with => @user['Password']
   click_button 'submit'
 end
+
+#=================
+# WHENs
+#=================
 
 When /^s?he logs in with the following credentials: (.*), (.*)$/ do |email, password|
   visit('/')
@@ -24,6 +32,10 @@ end
 When /^s?he attempts to access (.+) without logging in first/ do |page|
   visit("/#{page}")
 end
+
+#=================
+# THENs
+#=================
 
 Then /^s?he will be redirected to the (.+) page$/ do |page|
   page = "" if page == "login" || page == "log in"
