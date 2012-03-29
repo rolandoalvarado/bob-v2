@@ -5,32 +5,32 @@ Feature: Logging In
   user so that the system can limit her actions based on the permissions
   given to her.
 
-  Background:
-    * The following user exists:
-      | Name       | Email          | Password   |
-      | Robb Stark | robb@stark.com | w1nt3rf3ll |
-    * He is not logged in
-
-
-  Scenario Outline: User tries to log in
-    When he logs in with the following credentials: <Email>, <Password>
-    Then he will be redirected to the <Page Name> page
-     And the system will display '<Message>'
-
-    Examples:
-      | Email          | Password   | Page Name | Message                   |
-      | robb@stark.com | w1nt3rf3ll | projects  | Welcome back, Robb Stark! |
-      | robb@stark.com | w00t!      | login     | Invalid email or password |
-      | d00p           | w1nt3rf3ll | login     | Invalid email or password |
-
-
-  Scenario Outline: User attempts to access a secure page without logging in
-     When he attempts to access the <Page Name> page
-     Then he will be redirected to the log in page
-      And the system will display 'Please log in before proceeding'
-
-    Examples:
-      | Page Name |
-      | projects  |
-      | users     |
-      | usage     |
+  # Background:
+  #   * The following user exists:
+  #     | Name       | Email          | Password   |
+  #     | Robb Stark | robb@stark.com | w1nt3rf3ll |
+  #   * He is not logged in
+  #
+  #
+  # Scenario Outline: User tries to log in
+  #   When he logs in with the following credentials: <Email>, <Password>
+  #   Then he will be redirected to the <Page Name> page
+  #    And the system will display '<Message>'
+  #
+  #   Examples:
+  #     | Email          | Password   | Page Name | Message                   |
+  #     | robb@stark.com | w1nt3rf3ll | projects  | Welcome back, Robb Stark! |
+  #     | robb@stark.com | w00t!      | login     | Invalid email or password |
+  #     | d00p           | w1nt3rf3ll | login     | Invalid email or password |
+  #
+  #
+  # Scenario Outline: User attempts to access a secure page without logging in
+  #    When he attempts to access the <Page Name> page
+  #    Then he will be redirected to the log in page
+  #     And the system will display 'Please log in before proceeding'
+  #
+  #   Examples:
+  #     | Page Name |
+  #     | projects  |
+  #     | users     |
+  #     | usage     |

@@ -15,21 +15,21 @@ Feature: Take a Snapshot of a VM
     - Does creating an image have versioning support? Something
       for future releases.
 
-  Background:
-      * A project has one running VM
-      * Catelyn is the owner of that project
-      * The following developers are members of that project:
-        | Brandon   |
-        | Robb      |
-        | Jeoffrey  |
-
-  Scenario: Create a new image
-     When she takes a snapshot of that VM
-      And she makes the produced image available to the following developers:
-        | Brandon |
-        | Robb    |
-     Then the new image should have the following ACL:
-        | Developer | Has Access? |
-        | Brandon   | yes         |
-        | Robb      | yes         |
-        | Jeoffrey  | no          |
+  # Background:
+  #     * A project has one running VM
+  #     * Catelyn is the owner of that project
+  #     * The following developers are members of that project:
+  #       | Brandon   |
+  #       | Robb      |
+  #       | Jeoffrey  |
+  #
+  # Scenario: Create a new image
+  #    When she takes a snapshot of that VM
+  #     And she makes the produced image available to the following developers:
+  #       | Brandon |
+  #       | Robb    |
+  #    Then the new image should have the following ACL:
+  #       | Developer | Has Access? |
+  #       | Brandon   | yes         |
+  #       | Robb      | yes         |
+  #       | Jeoffrey  | no          |

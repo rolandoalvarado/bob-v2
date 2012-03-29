@@ -10,4 +10,4 @@ elif [ $# -eq 1 ] && [ $1 == '--help' ]; then
 fi
 
 
-bundle exec cucumber --profile unused_steps
+bundle exec cucumber --format usage --dry-run --no-profile
