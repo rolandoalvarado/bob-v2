@@ -8,7 +8,7 @@
 
 When /^(?:he|she) tries to create a user in (?:his|her) project$/ do
   steps %{
-    * visit Users page
+    * visit the Users page
     * fill in name with Jheff
     * fill in email with jvicedo@mail.com
     * fill in password with ASDF
@@ -20,7 +20,7 @@ end
 
 When /^(?:he|she) tries to create a user with (.+), (.+), (.+) and (.+)$/ do |name, email, password, password_confirmation|
   steps %{
-    * visit User page
+    * visit the Users page
     * fill in name with #{name}
     * fill in email with #{email}
     * fill in password with #{password}
@@ -36,14 +36,14 @@ end
 
 Then /^the new user will be created$/ do
   steps %{
-    * visit Users page
+    * visit the Users page
     * page should have content 'Jheff'
   }
 end
 
 Then /^the new user will not be created$/ do
   steps %{
-    * visit Users page
+    * visit the Users page
     * page should not have content 'Jheff'
   }
 end

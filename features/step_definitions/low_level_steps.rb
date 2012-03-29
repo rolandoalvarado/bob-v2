@@ -31,7 +31,7 @@ def select_nth_option(n, id)
   select(second_option, :from => id)
 end
 
-Given /^visit (\S+) page$/ do |page_name|
+Given /^visit the (\S+) page$/ do |page_name|
   path = get_page_path(page_name)
   raise "Unknown page name '#{page_name}'. Make sure you spelled it correctly. Available pages are #{get_pages.keys.join(', ')}" if path.nil?
   visit path
