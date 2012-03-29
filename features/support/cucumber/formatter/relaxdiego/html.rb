@@ -362,7 +362,7 @@ module Cucumber
         end
 
         def show_progress(current, total, what)
-          print "Processed #{current} of #{total} #{what}\r"
+          # print "Processed #{current} of #{total} #{what}\r"
         end
 
         def skip_current_step?

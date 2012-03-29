@@ -9,7 +9,7 @@ Feature: Logging In
     * The following user exists:
       | Name       | Email          | Password   |
       | Robb Stark | robb@stark.com | w1nt3rf3ll |
-    * He is not logged in
+    * Robb is not logged in
 
 
   Scenario Outline: User tries to log in

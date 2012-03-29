@@ -9,7 +9,7 @@
 
 # Runs all scenarios that are not tagged with @wip
 # (which are considered works in progress)
-default: --strict --tags ~@wip --require features --format Cucumber::Formatter::Relaxdiego::Html --out output/html --format rerun --out rerun.txt
+default: --strict --tags ~@wip --require features --format progress --format Cucumber::Formatter::Relaxdiego::Html --out output/html --format rerun --out rerun.txt
 
 # Used by run/feature
 single_feature: --strict --tags ~@wip --require features --format progress --format Cucumber::Formatter::Relaxdiego::Html --out output/html --format rerun --out rerun.txt
