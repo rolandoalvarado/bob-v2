@@ -49,6 +49,11 @@ def get_config_file
   @config
 end
 
+def get_users
+  @users ||= {}
+  @users
+end
+
 def login_as_admin
   config = get_config_file
   error_message = ""

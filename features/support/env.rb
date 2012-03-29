@@ -1,6 +1,9 @@
 require 'rubygems'
 require 'bundler/setup'
 require 'capybara/cucumber'
+require 'anticipate'
+
+include Anticipate
 
 config_path = File.expand_path('../../../config.yml', __FILE__)
 
