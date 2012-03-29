@@ -98,7 +98,7 @@ def login_as_admin
   end
 
   unless logged_in?
-    raise_init_error "I couldn't log in as admin with email '#{config['cloud_admin_email']}' and password '#{config['cloud_admin_password']}'. I need to do this to set up some objects prior to doing the actual tests. Please make sure that this admin user exists in the system before proceeding. NOTE: Make sure this user has cloud admin rights to the DCU.\n\n#{error_message}"
+    raise_init_error "I couldn't log in as admin with email '#{config['cloud_admin_email']}' and password '#{config['cloud_admin_password']}'. I need to do this to set up some objects prior to doing the actual tests.\n\n#{error_message}"
   end
 end
 
