@@ -99,7 +99,7 @@
               <div class="list">
                 <% if has_jira_tags?(feature) %>
                   <% jira_tags(feature).each do |tag| %>
-                    <a href='https://issues.morphlabs.com/browse/<%= tag.gsub(/^@/, '') %>' target='__jira__'><span class="label"><%= tag.gsub(/^@/, '') %></span></a>
+                    <a href='https://issues.morphlabs.com/browse/<%= tag.gsub(/^@jira-/, '') %>' target='__jira__'><span class="label"><%= tag.gsub(/^@jira-/, '') %></span></a>
                   <% end %>
                 <% else %>
                   <span class="label label-important">WARNING: No associated Jira issue</span>

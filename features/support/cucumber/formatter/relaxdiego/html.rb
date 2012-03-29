@@ -445,7 +445,7 @@ module Cucumber
         def jira_tags(feature_or_element)
           return [] unless feature_or_element[:tags]
 
-          feature_or_element[:tags].select { |tag| tag =~ /^@DPBLOG-\d+/ }
+          feature_or_element[:tags].select { |tag| tag =~ /^@jira-/ }
         end
 
         def all_tags(feature_or_element)
@@ -454,12 +454,12 @@ module Cucumber
 
         def non_jira_tags(feature_or_element)
           tags = feature_or_element[:tags] || []
-          tags.select { |tag| tag.match(/^@DPBLOG-\d+/).nil? }
+          tags.select { |tag| tag.match(/^@jira-/).nil? }
         end
 
         def jira_issue_link_or_text(tag)
-          tag.gsub! /^@/, ''
-          if tag =~ /^DPBLOG-\d+/
+          tag.gsub! /^@jira-/, ''
+          if tag =~ /^\S-\d+/
             "<a href='https://issues.morphlabs.com/browse/#{tag}' target='__jira__'>#{tag}</a>"
           else
             tag

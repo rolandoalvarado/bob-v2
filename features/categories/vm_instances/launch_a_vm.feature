@@ -1,4 +1,4 @@
-@DPBLOG-14 @DPBLOG-18
+@jira-DPBLOG-14 @jira-DPBLOG-18
 Feature: Launch a VM
   This feature allows an authorized project member
   to launch a VM in a project.

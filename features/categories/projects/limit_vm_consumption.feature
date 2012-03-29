@@ -1,4 +1,4 @@
-@DPBLOG-10
+@jira-DPBLOG-10
 Feature: Limit a Project's VM Consumption
   A project owner needs to be able to limit the
   maximum number of VMs that his project may

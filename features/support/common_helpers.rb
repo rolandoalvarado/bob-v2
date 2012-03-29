@@ -53,17 +53,8 @@ def get_users
   @users
 end
 
-
 def get_pages
-  return @pages if @pages
-
-  @pages = {}
-  @pages = {
-    'Login' => '/',
-    'Projects' => '/projects',
-    'Users' => '/users',
-    'Usage' => '/usage'
-  }
+  return @pages
 end
 
 def get_page_path(page_name)
