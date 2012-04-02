@@ -1,4 +1,4 @@
-Feature: Take a Snapshot of a VM
+Feature: Snapshot a VM
   Taking a snapshot of a VM produces a machine image that
   can be used to launch other VMs. The machine image produced
   is always attached to a single project.

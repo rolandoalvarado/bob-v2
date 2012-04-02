@@ -9,7 +9,7 @@
 /tmp
 /coverage
 /rerun.txt
-/output/junit
+/output/*
 /output/**/*
 *.ignore
 /config.yml

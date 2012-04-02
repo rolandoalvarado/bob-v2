@@ -15,6 +15,19 @@ end
 # WHENs
 #=================
 
+WORD = Transform /^(\S+)$/ do |word|
+  word
+end
+
+STRING = Transform /^(.+)$/ do |string|
+  string
+end
+
+
+When /^he logs in with the following credentials: (#{WORD}), (#{STRING})$/ do |username, password|
+  pending # express the regexp above with the code you wish you had
+end
+
 
 #=================
 # THENs
