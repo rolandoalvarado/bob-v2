@@ -1,6 +1,10 @@
+require 'rubygems'
 require 'bundler/setup'
+require 'fog'
+require 'faker'
 
 # Ensure that features are sorted by their filenames alphabetically
+#==================================================================
 def override_method(obj, method_name, &block)
   klass = class <<obj; self; end
   klass.send(:undef_method, method_name)
@@ -18,3 +22,4 @@ AfterConfiguration do |configuration|
     sort_features(featurefiles);
   }
 end
+#==================================================================

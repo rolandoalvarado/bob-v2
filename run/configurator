@@ -16,55 +16,55 @@ end
 require 'rubygems'
 require 'yaml'
 require 'fileutils'
+require File.expand_path('../../features/support/configuration.rb', __FILE__)
 
-config_path = File.expand_path('../../config.yml', __FILE__)
+include Configuration
 
-if File.exists?(config_path) && !ARGV.include?('--force')
-  puts "config.yml already exists"
+# Remove old configuration file location
+FileUtils.rm_rf( File.expand_path('../../configuration.rb', __FILE__) )
+
+@force = ARGV.include?('--force')
+
+config_path = Configuration::PATH
+
+if File.exists?(config_path)
   config_file = File.open(config_path, 'r+')
-  config = YAML.load_file(config_file)
-  config = {} unless config
-else
-  puts "\033[0;31m#{config_path} not found. Creating a new config file...\033[0;m"
-  config = {}
+  @config = YAML.load_file(config_file)
+  @config = {} unless @config
 end
 
-FileUtils.rm_rf(config_path)
-config_file = File.open(config_path, File::WRONLY|File::CREAT|File::EXCL)
-
-key = 'host'
-if config[key].nil? || config[key].empty?
-  print "Which mCloud environment would you like to verify? A blank answer means you will be asked this question everytime the verifier runs: "
-  host = STDIN.gets.chomp
-  config[key] = host
-  unless host.empty?
-    config[key] = "http://#{config[key]}" if config[key].match(/^http/).nil?
-    config[key] = config[key].gsub(/\/?$/, '')
+def configure(hash, key, prompt)
+  value = hash[key]
+  if value.nil? || value.empty? || @force
+    print prompt
+    print "[#{value}] " if @force && !value.nil?
+    hash[key] = STDIN.gets.chomp
+    hash[key] = value if hash[key].empty?
   end
 end
 
-config.delete('cloud_admin_username')
-
-key = 'cloud_admin_email'
-if config[key].nil? || config[key].empty?
-  print "Cloud Admin email for #{config['host']}: "
-  host = STDIN.gets.chomp
-  config[key] = host
+def cleanup_url(hash, key)
+  url = hash[key]
+  url = "http://#{url}" if url.match(/^http/).nil?
+  hash[key] = url.gsub(/\/?$/, '')
 end
 
-key = 'cloud_admin_username'
-if config[key].nil? || config[key].empty?
-  print "Cloud Admin username for #{config['host']}: "
-  input = STDIN.gets.chomp
-  config[key] = input
-end
+configure @config, WEB_CLIENT_HOST, "URL of the mCloud instance you want to verify? "
+cleanup_url(@config, WEB_CLIENT_HOST)
 
-key = 'cloud_admin_password'
-if config[key].nil? || config[key].empty?
-  print "Password for #{config['cloud_admin_email']}: "
-  host = STDIN.gets.chomp
-  config[key] = host
-end
+openstack_options = @config[OPENSTACK_OPTIONS] ||= {}
+
+openstack_options[OPENSTACK_AUTH_URL] ||= "#{@config[WEB_CLIENT_HOST]}:35357/v2.0/tokens"
+configure openstack_options, OPENSTACK_AUTH_URL, "openstack_auth_url for #{@config[WEB_CLIENT_HOST]}? "
+cleanup_url(openstack_options, OPENSTACK_AUTH_URL)
+
+configure openstack_options, OPENSTACK_USERNAME, "cloud admin username for #{openstack_options[OPENSTACK_AUTH_URL]}? "
+configure openstack_options, OPENSTACK_API_KEY , "password for #{openstack_options[OPENSTACK_USERNAME]}? "
+
+openstack_options[OPENSTACK_TENANT] ||= 'admin'
+configure openstack_options, OPENSTACK_TENANT  , "tenant name for #{openstack_options[OPENSTACK_USERNAME]}? "
 
 puts "Writing #{config_path}"
-YAML.dump(config, config_file)
+FileUtils.rm_rf(config_path)
+config_file = File.open(config_path, File::WRONLY|File::CREAT|File::EXCL)
+YAML.dump(@config, config_file)

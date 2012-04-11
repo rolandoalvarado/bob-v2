@@ -2,6 +2,7 @@ source :rubygems
 
 gem 'activesupport'
 gem 'cucumber'
+gem 'faker'
 gem 'fog', :git => 'git://github.com/MorphGlobal/fog.git', :branch => 'development'
 gem 'rspec'
 gem 'syntax'
