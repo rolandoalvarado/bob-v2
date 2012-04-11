@@ -14,6 +14,8 @@ Feature: Snapshot a VM
     - Does creating an image have versioning support? Something
       for future releases.
 
+  Default image should be OVF
+
   # Background:
   #     * A project has one running VM
   #     * Catelyn is the owner of that project

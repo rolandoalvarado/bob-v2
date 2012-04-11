@@ -1,7 +1,23 @@
+GIT
+  remote: git://github.com/MorphGlobal/fog.git
+  revision: 93eb7cb1f6f4bc631a131377b89948124c3473d3
+  branch: development
+  specs:
+    fog (1.1.2)
+      builder
+      excon (~> 0.9.0)
+      formatador (~> 0.2.0)
+      mime-types
+      multi_json (~> 1.0.3)
+      net-scp (~> 1.0.4)
+      net-ssh (>= 2.1.3)
+      nokogiri (~> 1.5.0)
+      ruby-hmac
+
 GEM
   remote: http://rubygems.org/
   specs:
-    activesupport (3.2.2)
+    activesupport (3.2.3)
       i18n (~> 0.6)
       multi_json (~> 1.0)
     anticipate (0.0.2)
@@ -22,8 +38,10 @@ GEM
       json (>= 1.4.6)
       term-ansicolor (>= 1.0.6)
     diff-lcs (1.1.3)
+    excon (0.9.6)
     ffi (1.0.11)
-    gherkin (2.9.0)
+    formatador (0.2.1)
+    gherkin (2.9.3)
       json (>= 1.4.6)
     guard (1.0.1)
       ffi (>= 0.5.0)
@@ -32,23 +50,27 @@ GEM
       cucumber (>= 0.10)
       guard (>= 0.8.3)
     i18n (0.6.0)
-    json (1.6.5)
+    json (1.6.6)
     mime-types (1.18)
-    multi_json (1.1.0)
+    multi_json (1.0.4)
+    net-scp (1.0.4)
+      net-ssh (>= 1.99.1)
+    net-ssh (2.3.0)
     nokogiri (1.5.2)
     rack (1.4.1)
     rack-test (0.6.1)
       rack (>= 1.0)
-    rb-fsevent (0.9.0)
-    rspec (2.8.0)
-      rspec-core (~> 2.8.0)
-      rspec-expectations (~> 2.8.0)
-      rspec-mocks (~> 2.8.0)
-    rspec-core (2.8.0)
-    rspec-expectations (2.8.0)
-      diff-lcs (~> 1.1.2)
-    rspec-mocks (2.8.0)
-    rubyzip (0.9.6.1)
+    rb-fsevent (0.9.1)
+    rspec (2.9.0)
+      rspec-core (~> 2.9.0)
+      rspec-expectations (~> 2.9.0)
+      rspec-mocks (~> 2.9.0)
+    rspec-core (2.9.0)
+    rspec-expectations (2.9.1)
+      diff-lcs (~> 1.1.3)
+    rspec-mocks (2.9.0)
+    ruby-hmac (0.4.0)
+    rubyzip (0.9.7)
     selenium-webdriver (2.20.0)
       childprocess (>= 0.2.5)
       ffi (~> 1.0)
@@ -68,6 +90,7 @@ DEPENDENCIES
   anticipate
   capybara
   cucumber
+  fog!
   guard-cucumber
   rb-fsevent
   rspec

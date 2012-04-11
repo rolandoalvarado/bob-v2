@@ -1,22 +1,18 @@
 @jira-DPBLOG-14 @jira-DPBLOG-18
 Feature: Launch a VM
-  This feature allows an authorized project member
-  to launch a VM in a project.
+  As a project member, I should be able to launch VMs in my project so that
+  I can deploy one or more applications.
 
-  # Background:
-  #   * A project named 'CMS' exists
-  #   * The project has the following machine images available:
-  #     | Machine Image |
-  #     | Web Server    |
-  #     | Database      |
-  #   * Marjorie is a developer of that project
-  #
-  # Scenario: Launch a VM
-  #   When Marjorie tries to launch a VM with the following attributes:
-  #     | Image Type | Friendly Name | Tags             |
-  #     | Database   | Production DB | marj, production |
-  #   Then the system will launch the VM within 5 to 10 minutes
-  #    And the VM will have the following attributes:
-  #     | Friendly Name | Tags             |
-  #     | Production DB | marj, production |
-  #    And Marjorie should be able to SSH to it
+  Background:
+    * A project exists in the system
+    * The project has one machine image available
+
+  Scenario Outline: Check permissions
+    When <Membership Type> tries to launch a VM based on any available image
+    Then the system will <Launch or Not> the VM
+
+    Examples:
+      | Membership Type     | Launch or Not |
+      | Project Owner       | Launch        |
+      | Project Member      | Launch        |
+      | Non-Member          | Not Launch    |
