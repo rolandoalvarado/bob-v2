@@ -6,10 +6,11 @@ require File.expand_path('../tenant_methods.rb', __FILE__)
 
 class IdentityService
   include Singleton
+  include Configuration
   include UserMethods
   include TenantMethods
 
   def initialize
-    @service = Fog::Identity.new(Cloud.instance.credentials)
+    @service = Fog::Identity.new(Configuration.cloud_credentials)
   end
 end
