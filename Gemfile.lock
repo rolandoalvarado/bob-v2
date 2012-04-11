@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/MorphGlobal/fog.git
-  revision: 93eb7cb1f6f4bc631a131377b89948124c3473d3
+  revision: 861ba6e643ab246e30f47e33d04b95e0a56b844c
   branch: development
   specs:
     fog (1.1.2)
@@ -20,7 +20,6 @@ GEM
     activesupport (3.2.3)
       i18n (~> 0.6)
       multi_json (~> 1.0)
-    anticipate (0.0.2)
     builder (3.0.0)
     capybara (1.1.2)
       mime-types (>= 1.16)
@@ -87,7 +86,6 @@ PLATFORMS
 
 DEPENDENCIES
   activesupport
-  anticipate
   capybara
   cucumber
   fog!

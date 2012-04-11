@@ -1,6 +1,4 @@
-require 'rubygems'
 require 'bundler/setup'
-require 'capybara/cucumber'
 
 # Ensure that features are sorted by their filenames alphabetically
 def override_method(obj, method_name, &block)
