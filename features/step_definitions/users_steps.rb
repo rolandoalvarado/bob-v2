@@ -2,18 +2,17 @@
 # GIVENs
 #=================
 
-Given /^The following user exists:$/ do |user_details_table|
+Given /^The following user exists:$/ do |table|
   identity_service = IdentityService.instance
-  user_hash        = user_details_table.hashes[0]
-  user             = identity_service.find_user(user_hash)
+  user_attrs       = CloudObjectsBuilder.attributes_for(:user, table.hashes[0])
+  user             = identity_service.users.find_by_name(user_attrs[:name])
 
   if user
-    # Make sure that the user attributes match
-    # what's stated in the feature file
-    identity_service.update_user(user, user_hash)
+    user.update(user_attrs)
   else
-    tenant = identity_service.create_tenant
-    identity_service.create_user( {'tenant_id' => tenant.id}.merge(user_hash) )
+    user_attrs[:tenant_id] = identity_service.test_tenant.id
+    user = identity_service.users.new(user_attrs)
+    user.save
   end
 end
 
