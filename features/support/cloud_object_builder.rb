@@ -1,4 +1,4 @@
-module CloudObjectsBuilder
+module CloudObjectBuilder
 
   def self.attributes_for(object_type, hash = {})
     if self.respond_to? "attributes_for_#{ object_type.to_s }"
