@@ -8,7 +8,7 @@ require 'singleton'
 # OpenStack to something else in the near future, when the event happens, we
 # will be able to easily shift by just changing this one file.
 
-module Configuration
+module CloudConfiguration
   PATH               = File.expand_path('../../support/config.yml', __FILE__)
   WEB_CLIENT_HOST    = :web_client_host
   OPENSTACK_OPTIONS  = :openstack_options
@@ -17,12 +17,16 @@ module Configuration
   OPENSTACK_API_KEY  = :openstack_api_key
   OPENSTACK_TENANT   = :openstack_tenant
 
-  class Configuration
+  class ConfigFile
     include Singleton
 
     def self.cloud_credentials
       inst = self.instance
       { :provider => 'OpenStack' }.merge inst[OPENSTACK_OPTIONS]
+    end
+
+    def self.web_client_url
+      self.instance[WEB_CLIENT_HOST]
     end
 
     def initialize

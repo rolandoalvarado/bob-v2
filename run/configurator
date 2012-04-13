@@ -18,14 +18,14 @@ require 'yaml'
 require 'fileutils'
 require File.expand_path('../../features/support/configuration.rb', __FILE__)
 
-include Configuration
+include CloudConfiguration
 
 # Remove old configuration file location
 FileUtils.rm_rf( File.expand_path('../../configuration.rb', __FILE__) )
 
 @force = ARGV.include?('--force')
 
-config_path = Configuration::PATH
+config_path = CloudConfiguration::PATH
 
 if File.exists?(config_path)
   config_file = File.open(config_path, 'r+')

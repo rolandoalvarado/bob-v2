@@ -30,6 +30,8 @@ module Fog
             tenant = Fog::Identity::OpenStack::User.new(tenant_hash) if tenant_hash
           end
           tenant
+        rescue Excon::Errors::SocketError
+          nil
         end
       end
     end

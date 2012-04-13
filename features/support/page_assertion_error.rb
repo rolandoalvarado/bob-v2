@@ -1,0 +1,2 @@
+class PageAssertionError < StandardError
+end

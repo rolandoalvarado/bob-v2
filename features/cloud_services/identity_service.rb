@@ -7,17 +7,17 @@ require 'singleton'
 
 class IdentityService
   include Singleton
-  include Configuration
+  include CloudConfiguration
 
   attr_reader :test_tenant, :users, :tenants, :roles
 
   def initialize
-    service  = Fog::Identity.new(Configuration.cloud_credentials)
+    service  = Fog::Identity.new(ConfigFile.cloud_credentials)
     @users   = service.users
     @tenants = service.tenants
     @roles   = service.roles
 
-    test_tenant_name = "admin"
+    test_tenant_name = "mCloud Features"
     @test_tenant = find_test_tenant(test_tenant_name) || create_test_tenant(test_tenant_name)
   end
 
@@ -32,7 +32,7 @@ class IdentityService
   end
 
   def create_test_tenant(name)
-    attributes = CloudObjectsBuilder.attributes_for(:tenant, :name => name)
+    attributes = CloudObjectBuilder.attributes_for(:tenant, :name => name)
     tenant = tenants.new(attributes)
     tenant.save
     tenant
