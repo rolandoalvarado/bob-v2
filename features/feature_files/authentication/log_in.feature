@@ -6,23 +6,23 @@ Feature: Log In
     * The following user exists:
       | Username | Password   |
       | rstark   | w1nt3rf3ll |
+    * No user is logged in
 
 
   Scenario Outline: Someone tries to log in
     When a user logs in with the following credentials: <Username>, <Password>
     Then he will be redirected to the <Redirect To> page
-     And the system will display '<Message>'
 
     Examples: Valid credentials
-      | Username  | Password   | Redirect To | Message                       |
-      | rstark    | w1nt3rf3ll | Projects    | Welcome back, Robb!           |
-      | RSTARK    | w1nt3rf3ll | Projects    | Welcome back, Robb!           |
+      | Username  | Password   | Redirect To |
+      | rstark    | w1nt3rf3ll | Projects    |
+      | RSTARK    | w1nt3rf3ll | Projects    |
 
     Examples: Invalid credentials
-      | Username  | Password   | Redirect To | Message                       |
-      | rstark    | w00t!      | Login       | Invalid username or password  |
-      | rstark    | W1NT3RF3LL | Login       | Invalid username or password  |
-      |           | w1nt3rf3ll | Login       | Invalid username or password  |
+      | Username  | Password   | Redirect To |
+      | rstark    | w00t!      | Login       |
+      | rstark    | W1NT3RF3LL | Login       |
+      |           | w1nt3rf3ll | Login       |
 
 
   Scenario Outline: Someone tries to access a secure page without logging in

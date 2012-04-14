@@ -1,26 +1,34 @@
 require 'capybara'
 require 'capybara/dsl'
 
+include CloudConfiguration
+
+Capybara.run_server = false
+Capybara.current_driver = :selenium
+Capybara.app_host = ConfigFile.web_client_url
+
+# Base class inherited by other pages
 class WebClientPage
-  include CloudConfiguration
-
-  Capybara.run_server = false
-  Capybara.current_driver = :selenium
-  Capybara.app_host = ConfigFile.web_client_url
-
   def self.visit
     page = new
     page.visit
     page
   end
 
-  def self.set_path(path)
+  def self.path(path)
     send :define_method, :path do
       path
     end
   end
 
+  def self.default_submit_button(button_id)
+    send :define_method, :submit_button_id do
+      button_id
+    end
+  end
+
   attr_reader :path
+  default_submit_button 'submit'
 
   def initialize
     @session = Capybara.current_session
@@ -35,17 +43,21 @@ class WebClientPage
   end
 
   def fill_in(field_id, value)
-    unless page.has_selector? "##{ field_id }"
-      raise "#{ self.class }: Can't find any field with id=#{ field_id }"
+    unless session.has_selector? "##{ field_id.to_s }"
+      raise PageAssertionError, "#{ self.class }: Can't find any field with id='#{ field_id }'"
     end
-    page.fill_in field_id.to_s, :with => value
+    session.fill_in field_id.to_s, :with => value
   end
 
   def submit
-    unless page.has_selector? "#submit"
-      raise "#{ self.class }: Can't find a submit button with id=submit"
+    unless session.has_selector? "##{ submit_button_id }"
+      raise PageAssertionError, "#{ self.class }: Can't find a submit button with id='#{ submit_button_id }'"
     end
-    page.click_on "submit"
+    session.click_on "#{ submit_button_id }"
+  end
+
+  def log_out
+    session.click_link "Logout"
   end
 
   #=====================
@@ -53,7 +65,7 @@ class WebClientPage
   #=====================
 
   def is_current?
-    session.current_path == path
+    session.current_path == self.path
   end
 
   #=====================
@@ -62,13 +74,19 @@ class WebClientPage
 
   def should_be_current
     unless is_current?
-      raise_page_assertion_error "Expected #{ url } but #{ session.current_url } was returned."
+      raise PageAssertionError, "Expected #{ url } but #{ session.current_url } was returned."
+    end
+  end
+
+  def should_not_be_current
+    if is_current?
+      raise PageAssertionError, "Expected to NOT be redirected to #{ url }."
     end
   end
 
   def should_have_content(content)
     unless session.has_content?(content)
-      raise_page_assertion_error "#{ self.class } does not contain the content '#{ content }'"
+      raise PageAssertionError, "#{ self.class } does not contain the content '#{ content }'"
     end
   end
 
@@ -82,15 +100,9 @@ class WebClientPage
 
   private
 
-  def page
-    @session
-  end
-
   def session
     @session
   end
-
-  def raise_page_assertion_error(message)
-    raise PageAssertionError, message
-  end
 end
+
+class PageAssertionError < StandardError; end

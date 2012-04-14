@@ -10,9 +10,7 @@ Given /^The following user exists:$/ do |table|
   if user
     user.update(user_attrs)
   else
-    user_attrs[:tenant_id] = identity_service.test_tenant.id
-    user = identity_service.users.new(user_attrs)
-    user.save
+    identity_service.create_user(user_attrs)
   end
 end
 

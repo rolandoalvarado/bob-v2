@@ -2,6 +2,10 @@
 # GIVENs
 #=================
 
+When /^No user is logged in$/ do
+  WebClientPage.new.log_out
+end
+
 #=================
 # WHENs
 #=================

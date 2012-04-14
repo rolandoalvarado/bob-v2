@@ -17,8 +17,18 @@ class IdentityService
     @tenants = service.tenants
     @roles   = service.roles
 
-    test_tenant_name = "mCloud Features"
+    test_tenant_name = 'admin'
     @test_tenant = find_test_tenant(test_tenant_name) || create_test_tenant(test_tenant_name)
+
+    @roles = {}
+    @roles[:cloud_admin] = service.roles.find_by_name('admin')
+  end
+
+  def create_user(user_attrs)
+    user_attrs[:tenant_id] = test_tenant.id
+    user = users.new(user_attrs)
+    user.save
+    test_tenant.add_user(user.id, @roles[:cloud_admin].id)
   end
 
   private
