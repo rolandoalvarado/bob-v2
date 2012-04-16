@@ -21,13 +21,13 @@ Installation
 Usage
 -----
 
-To verify the documentation:
+To run mCloud Features:
 
     run/verifier
 
-The above command will generate the report in the `output` directory.
+The above command will generate a report in the `output` directory.
 
-To automatically verify the document everytime something changes in the feature or step files:
+To automatically run mCloud Features every time something changes in the feature or step files:
 
     run/autoverifier
 
@@ -45,10 +45,6 @@ The above command will pull the latest changes from origin/master and run `setup
 To see a list of available commands:
 
     run/help
-
-To verify the documentation in a CI environment:
-
-    run/verifier ci
 
 
 Found a bug?

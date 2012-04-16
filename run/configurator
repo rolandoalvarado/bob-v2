@@ -28,8 +28,11 @@ FileUtils.rm_rf( File.expand_path('../../configuration.rb', __FILE__) )
 config_path = CloudConfiguration::PATH
 
 if File.exists?(config_path)
+  puts "Found configuration file at #{ config_path }"
   config_file = File.open(config_path, 'r+')
   @config = YAML.load_file(config_file)
+else
+  puts "Creating new configuration file at #{ config_path }"
 end
 
 @config = {} unless @config
@@ -56,7 +59,7 @@ cleanup_url(@config, WEB_CLIENT_HOST)
 openstack_options = @config[OPENSTACK_OPTIONS] ||= {}
 
 openstack_options[OPENSTACK_AUTH_URL] ||= "#{@config[WEB_CLIENT_HOST]}:35357/v2.0/tokens"
-configure openstack_options, OPENSTACK_AUTH_URL, "openstack_auth_url for #{@config[WEB_CLIENT_HOST]}? ", true
+configure openstack_options, OPENSTACK_AUTH_URL, "openstack_auth_url for #{@config[WEB_CLIENT_HOST]}? "
 cleanup_url(openstack_options, OPENSTACK_AUTH_URL)
 
 configure openstack_options, OPENSTACK_USERNAME, "cloud admin username for #{openstack_options[OPENSTACK_AUTH_URL]}? "
