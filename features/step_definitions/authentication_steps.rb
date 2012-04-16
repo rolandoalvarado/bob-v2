@@ -15,7 +15,7 @@ When /^a user logs in with the following credentials: (.*), (.*)$/ do |username,
   @page = LoginPage.new
   @page.visit
   @page.should_be_valid
-  @page.fill_in :username, username
+  @page.fill_in :username, Unique.username(username)
   @page.fill_in :password, password
   @page.submit
 end
