@@ -1,10 +1,15 @@
+# This is similar to FactoryGirl, but exclusively designed for mCloud Features
 module CloudObjectBuilder
 
   def self.attributes_for(object_type, hash = {})
-    if self.respond_to? "attributes_for_#{ object_type.to_s }"
-      send("attributes_for_#{ object_type.to_s }", hash)
+    method_name = "attributes_for_#{ object_type.to_s }"
+    if self.respond_to? method_name
+      send(method_name, hash)
     else
-      raise "I don't know how to build the attributes for cloud object type '#{ object_type.to_s }'"
+      raise "I don't know how to build the attributes for cloud object type " +
+            "'#{ object_type.to_s }'. You may have mispelled it, or you may " +
+            "need to define a class method named '#{ method_name }' inside " +
+            "#{ File.expand_path('.', __FILE__)}"
     end
   end
 
