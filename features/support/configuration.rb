@@ -43,3 +43,5 @@ module CloudConfiguration
   end # class Configuration
 
 end # module Configuration
+
+include CloudConfiguration

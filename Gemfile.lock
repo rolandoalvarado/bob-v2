@@ -16,7 +16,7 @@ GIT
 
 GIT
   remote: git://github.com/activepage/activepage.git
-  revision: f89db42c102809e64ce1f2ebed9807b71633a1fd
+  revision: 21eee0d5ce954c43df00a7c0e55f130e21df22c4
   branch: master
   specs:
     activepage (0.0.0)
