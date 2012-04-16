@@ -5,27 +5,22 @@
 Given /^The following user exists:$/ do |table|
   user_attrs        = CloudObjectBuilder.attributes_for(:user, table.hashes[0])
   user_attrs[:name] = Unique.username(user_attrs[:name])
-  identity_service  = IdentityService.instance
-  user              = identity_service.users.find_by_name(user_attrs[:name])
 
-  if user
-    user.update(user_attrs)
-  else
-    identity_service.create_user(user_attrs)
-  end
+  IdentityService.instance.ensure_user_exists(user_attrs)
 end
 
 Given /^a user is logged in$/ do
-  steps %{
-    * The following user exists:
-      | Username | Password |
-      | rstark   | 123qwe   |
-  }
+  user_attrs = CloudObjectBuilder.attributes_for(:user, {
+                 :name     => Unique.username('rstark'),
+                 :password => '123qwe'
+               })
+  IdentityService.instance.ensure_user_exists(user_attrs)
+
   @page = LoginPage.new
   @page.visit
   @page.should_be_valid
-  @page.fill_in :username, Unique.username('rstark')
-  @page.fill_in :password, '123qwe'
+  @page.fill_in :username, user_attrs[:name]
+  @page.fill_in :password, user_attrs[:password]
   @page.submit
 end
 

@@ -2,7 +2,7 @@
 # GIVENs
 #=================
 
-When /^No user is logged in$/ do
+Given /^No user is logged in$/ do
   @page = WebClientPage.new
   @page.click_log_out if @page.is_secure_page?
 end

@@ -31,6 +31,15 @@ class IdentityService
     test_tenant.add_user(user.id, @roles[:cloud_admin].id)
   end
 
+  def ensure_user_exists(user_attrs)
+    user = users.find_by_name(user_attrs[:name])
+    if user
+      user.update(user_attrs)
+    else
+      create_user(user_attrs)
+    end
+  end
+
   private
 
   def service
