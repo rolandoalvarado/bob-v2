@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/MorphGlobal/fog.git
-  revision: 861ba6e643ab246e30f47e33d04b95e0a56b844c
+  revision: 6954de80e770646d1872a7f72796be06c13ce4a0
   branch: development
   specs:
     fog (1.1.2)
@@ -13,6 +13,14 @@ GIT
       net-ssh (>= 2.1.3)
       nokogiri (~> 1.5.0)
       ruby-hmac
+
+GIT
+  remote: git://github.com/activepage/activepage.git
+  revision: f89db42c102809e64ce1f2ebed9807b71633a1fd
+  branch: master
+  specs:
+    activepage (0.0.0)
+      capybara
 
 GEM
   remote: http://rubygems.org/
@@ -87,6 +95,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  activepage!
   activesupport
   capybara
   cucumber
@@ -95,4 +104,5 @@ DEPENDENCIES
   guard-cucumber
   rb-fsevent
   rspec
+  selenium-webdriver (= 2.20)
   syntax

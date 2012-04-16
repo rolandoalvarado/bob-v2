@@ -9,11 +9,6 @@ AfterConfiguration do |config|
   Dir.mkdir(tmp_screenshots_dir)
 end
 
-Before do |scenario|
-  IdentityService.instance.users.reload
-  WebClientpage.new.log_out
-end
-
 After do |scenario|
   if scenario.failed? && page.driver.respond_to?('browser')
     page.driver.browser.save_screenshot(File.join(tmp_screenshots_dir, "scenario.#{__id__}.png"))

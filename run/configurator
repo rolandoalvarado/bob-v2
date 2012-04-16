@@ -30,14 +30,15 @@ config_path = CloudConfiguration::PATH
 if File.exists?(config_path)
   config_file = File.open(config_path, 'r+')
   @config = YAML.load_file(config_file)
-  @config = {} unless @config
 end
 
-def configure(hash, key, prompt)
+@config = {} unless @config
+
+def configure(hash, key, prompt, force = @force)
   value = hash[key]
-  if value.nil? || value.empty? || @force
+  if value.nil? || value.empty? || force
     print prompt
-    print "[#{value}] " if @force && !value.nil?
+    print "[#{value}] " if force && !value.nil?
     hash[key] = STDIN.gets.chomp
     hash[key] = value if hash[key].empty?
   end
@@ -55,7 +56,7 @@ cleanup_url(@config, WEB_CLIENT_HOST)
 openstack_options = @config[OPENSTACK_OPTIONS] ||= {}
 
 openstack_options[OPENSTACK_AUTH_URL] ||= "#{@config[WEB_CLIENT_HOST]}:35357/v2.0/tokens"
-configure openstack_options, OPENSTACK_AUTH_URL, "openstack_auth_url for #{@config[WEB_CLIENT_HOST]}? "
+configure openstack_options, OPENSTACK_AUTH_URL, "openstack_auth_url for #{@config[WEB_CLIENT_HOST]}? ", true
 cleanup_url(openstack_options, OPENSTACK_AUTH_URL)
 
 configure openstack_options, OPENSTACK_USERNAME, "cloud admin username for #{openstack_options[OPENSTACK_AUTH_URL]}? "
