@@ -20,6 +20,10 @@ When /^a user logs in with the following credentials: (.*), (.*)$/ do |username,
   @page.submit
 end
 
+When /^he logs out$/ do
+  @page.click_log_out
+end
+
 When /^an unauthenticated user tries to access the (.+) page$/ do |page_name|
   @page = eval("#{ page_name }Page").new
   @page.visit

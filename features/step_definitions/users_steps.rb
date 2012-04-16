@@ -15,6 +15,20 @@ Given /^The following user exists:$/ do |table|
   end
 end
 
+Given /^a user is logged in$/ do
+  steps %{
+    * The following user exists:
+      | Username | Password |
+      | rstark   | 123qwe   |
+  }
+  @page = LoginPage.new
+  @page.visit
+  @page.should_be_valid
+  @page.fill_in :username, 'rstark'
+  @page.fill_in :password, '123qwe'
+  @page.submit
+end
+
 #=================
 # WHENs
 #=================
