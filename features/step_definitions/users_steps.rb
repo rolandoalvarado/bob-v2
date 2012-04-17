@@ -24,6 +24,19 @@ Given /^I am logged in$/ do
   @page.submit
 end
 
+Given /^[Aa] user with a role of (.+) exists in the project$/ do |friendly_name|
+  identity_service = IdentityService.instance
+  @user_attrs      = CloudObjectBuilder.attributes_for(:user, :name => Unique.username('rstark'))
+  user             = identity_service.ensure_user_exists(@user_attrs)
+
+  role_name = RoleNameDictionary.db_name(friendly_name)
+  role      = identity_service.roles.find_by_name(role_name)
+  @project.add_user(user.id, role.id)
+
+  pending # express the regexp above with the code you wish you had
+end
+
+
 #=================
 # WHENs
 #=================
