@@ -26,6 +26,10 @@ module Unique
     "#{ value }_#{ ConfigFile.unique_alpha }"[0, 15]
   end
 
+  def self.name(value)
+    "#{ value } #{ ConfigFile.unique_alpha }"[0, 15]
+  end
+
   def self.alpha
     ConfigFile.unique_alpha
   end
