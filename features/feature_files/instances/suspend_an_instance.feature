@@ -1,1 +1,1 @@
-Feature: Suspend a VM
+Feature: Suspend an Instance

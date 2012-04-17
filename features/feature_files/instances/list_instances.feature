@@ -1,1 +1,1 @@
-Feature: List VMs
+Feature: List Instances

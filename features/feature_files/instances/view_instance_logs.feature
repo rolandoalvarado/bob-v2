@@ -1,1 +1,1 @@
-Feature: View VM Logs
+Feature: View Instance Logs

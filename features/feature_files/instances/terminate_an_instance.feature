@@ -1,3 +1,3 @@
 @jira-DPBLOG-13
-Feature: Terminate a VM
+Feature: Terminate an Instance
   This allows an authorized user to kill a VM

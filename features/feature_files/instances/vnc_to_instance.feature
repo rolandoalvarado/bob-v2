@@ -1,1 +1,1 @@
-Feature: VNC to VM
+Feature: VNC to Instance

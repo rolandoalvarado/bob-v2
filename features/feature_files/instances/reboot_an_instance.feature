@@ -1,1 +1,1 @@
-Feature: Reboot a VM
+Feature: Reboot an Instance

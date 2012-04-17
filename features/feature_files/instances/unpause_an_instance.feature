@@ -1,1 +1,1 @@
-Feature: Unpause a VM
+Feature: Unpause an Instance
