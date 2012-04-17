@@ -16,4 +16,5 @@
 /*_tmp_screenshot_dir
 /features/support/config.yml
 /features/support/activepage
-/features/support/cucumber/formatter/relaxdiego
+/features/support/diego_formatter
+/features/support/fog
