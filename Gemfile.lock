@@ -1,7 +1,22 @@
 GIT
-  remote: git://github.com/MorphGlobal/fog.git
-  revision: 6954de80e770646d1872a7f72796be06c13ce4a0
-  branch: development
+  remote: git://github.com/activepage/activepage.git
+  revision: 21eee0d5ce954c43df00a7c0e55f130e21df22c4
+  branch: master
+  specs:
+    activepage (0.0.0)
+      capybara
+
+GIT
+  remote: git://github.com/relaxdiego/diego_formatter.git
+  revision: 0adabda04c970b0292abc4c789a10b879dfeb5cb
+  branch: master
+  specs:
+    diego_formatter (0.0.0)
+
+GIT
+  remote: git://github.com/relaxdiego/fog.git
+  revision: 4113ee0d33e101db243c681f4e04b41f1eaf6240
+  branch: mmaglana
   specs:
     fog (1.1.2)
       builder
@@ -13,21 +28,6 @@ GIT
       net-ssh (>= 2.1.3)
       nokogiri (~> 1.5.0)
       ruby-hmac
-
-GIT
-  remote: git://github.com/activepage/activepage.git
-  revision: 21eee0d5ce954c43df00a7c0e55f130e21df22c4
-  branch: master
-  specs:
-    activepage (0.0.0)
-      capybara
-
-GIT
-  remote: git://github.com/relaxdiego/diego_formatter.git
-  revision: fd5d849b1b8ab75b1c9f5584c08b2cf75930e878
-  branch: master
-  specs:
-    diego_formatter (0.0.0)
 
 GEM
   remote: http://rubygems.org/
@@ -90,11 +90,11 @@ GEM
     rspec-mocks (2.9.0)
     ruby-hmac (0.4.0)
     rubyzip (0.9.7)
-    selenium-webdriver (2.21.0)
+    selenium-webdriver (2.21.1)
       childprocess (>= 0.2.5)
       ffi (~> 1.0)
       libwebsocket (~> 0.1.3)
-      multi_json (~> 1.0)
+      multi_json (< 1.3)
       rubyzip
     syntax (1.0.0)
     term-ansicolor (1.0.7)
