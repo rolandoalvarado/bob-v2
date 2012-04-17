@@ -7,6 +7,7 @@ end
 AfterConfiguration do |config|
   FileUtils.rm_rf(tmp_screenshots_dir) if Dir.exists?(tmp_screenshots_dir)
   Dir.mkdir(tmp_screenshots_dir)
+  puts "Unique ID: #{ Unique.alpha }"
 end
 
 After do |scenario|
