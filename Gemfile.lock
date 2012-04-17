@@ -22,6 +22,13 @@ GIT
     activepage (0.0.0)
       capybara
 
+GIT
+  remote: git://github.com/relaxdiego/diego_formatter.git
+  revision: fd5d849b1b8ab75b1c9f5584c08b2cf75930e878
+  branch: master
+  specs:
+    diego_formatter (0.0.0)
+
 GEM
   remote: http://rubygems.org/
   specs:
@@ -103,6 +110,7 @@ DEPENDENCIES
   activesupport
   capybara
   cucumber
+  diego_formatter!
   faker
   fog!
   guard-cucumber
