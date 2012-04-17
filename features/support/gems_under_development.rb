@@ -10,6 +10,7 @@
 gems = [
   { :name => 'activepage',      :symlink => 'activepage'                    },
   { :name => 'diego_formatter', :symlink => 'cucumber/formatter/relaxdiego' }
+  { :name => 'fog',             :symlink => 'fog'             }
 ]
 
 gems.each do |gem_info|

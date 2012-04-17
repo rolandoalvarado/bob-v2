@@ -1,6 +1,5 @@
 require 'rubygems'
 require 'bundler/setup'
-require 'fog'
 require 'faker'
 
 # Ensure that features are sorted by their filenames alphabetically
