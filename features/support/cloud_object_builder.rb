@@ -18,7 +18,7 @@ module CloudObjectBuilder
     attributes[:enabled]    ||= attributes.delete('enabled') || true
     attributes[:name]       ||= attributes.delete('name') || attributes.delete('Username') || Faker::Name.name
     attributes[:tenant_id]  ||= attributes.delete('tenant_id')
-    attributes[:password]   ||= attributes.delete('password') || attributes.delete('Password')
+    attributes[:password]   ||= attributes.delete('password') || attributes.delete('Password') || "123qwe"
     attributes
   end
 
