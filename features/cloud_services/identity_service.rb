@@ -1,18 +1,11 @@
-# This class implements the singleton pattern. More info at
-# http://www.ruby-doc.org/stdlib-1.9.3/libdoc/singleton/rdoc/Singleton.html)
-require 'singleton'
+require_relative 'base_cloud_service'
 
-# This is a wrapper for Fog::Identity. We're wrapping it to ensure that
-# we only have one instance of it in memory at any point in time.
-
-class IdentityService
-  include Singleton
-  include CloudConfiguration
+class IdentityService < BaseCloudService
 
   attr_reader :test_tenant, :users, :tenants, :roles
 
   def initialize
-    service  = Fog::Identity.new(ConfigFile.cloud_credentials)
+    service  = Identity.new(ConfigFile.cloud_credentials)
     @users   = service.users
     @tenants = service.tenants
     @roles   = service.roles
@@ -24,31 +17,59 @@ class IdentityService
     @roles[:cloud_admin] = service.roles.find_by_name('admin')
   end
 
-  def create_user(user_attrs)
-    user_attrs[:tenant_id] = test_tenant.id
-    user = users.new(user_attrs)
+  def create_tenant(attributes)
+    tenant = tenants.new(attributes)
+    tenant.save
+    tenant
+  end
+
+  def create_user(attributes)
+    attributes[:tenant_id] = test_tenant.id
+    user = users.new(attributes)
     user.save
     test_tenant.add_user(user.id, @roles[:cloud_admin].id)
+    user
   end
 
-  def ensure_user_exists(user_attrs)
-    user = users.find_by_name(user_attrs[:name])
-    if user
-      user.update(user_attrs)
+  def ensure_tenant_exists(attributes)
+    tenant = tenants.find_by_name(attributes[:name])
+    if tenant
+      tenant.update(attributes)
     else
-      create_user(user_attrs)
+      tenant = create_tenant(attributes)
     end
+    tenant
   end
+
+  def ensure_user_exists(attributes)
+    user = users.find_by_name(attributes[:name])
+    if user
+      user.update(attributes)
+    else
+      user = create_user(attributes)
+    end
+    user
+  end
+
+  #================================================
+  # COMPUTE SERVICE-RELATED METHODS
+  # Convenience methods to make the DSL consistent
+  # with the Compute Service's language
+  #================================================
+
+  def ensure_project_exists(attributes)
+    ensure_tenant_exists(attributes)
+  end
+
+  def projects
+    tenants
+  end
+
+  #================================================
+  # PRIVATE METHODS
+  #================================================
 
   private
-
-  def service
-    @service
-  end
-
-  def service=(value)
-    @service = value
-  end
 
   def create_test_tenant(name)
     attributes = CloudObjectBuilder.attributes_for(:tenant, :name => name)
