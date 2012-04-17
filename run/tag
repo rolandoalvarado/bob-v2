@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+description="Validates features that have a given tag"
+
+if [ $# -eq 2 ] && [ $1 == 'describe' ]; then
+  printf "  %-0$2s - $description\n" `basename $0`
+  exit 0
+elif [ $# -eq 1 ] && [ $1 == '--help' ]; then
+  printf "run/`basename $0` <tag>\n"
+  printf "Examples:\n"
+  printf "  run/`basename $0` wip\n"
+  printf "  run/`basename $0` jira-DPBLOG-14\n"
+  exit 0
+fi
+
+printf "Running features tagged with @$1\n"
+bundle exec cucumber --no-profile --tags @$1 --require features --format progress --format rerun --out rerun.txt
