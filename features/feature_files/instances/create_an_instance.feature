@@ -9,6 +9,7 @@ Feature: Create an Instance
   Background:
     * A project exists in the system
     * An image is available for use
+    * The project does not have any running instances
 
   Scenario Outline: Check User Permissions
     Given a user has a role of <Role> in the project
@@ -17,6 +18,7 @@ Feature: Create an Instance
       Examples: Authorized Roles
         | Role            | Can or Cannot Create |
         | Project Manager | Can Create           |
+        | Develoepr       | Can Create           |
         | Cloud Admin     | Can Create           |
 
       Examples: Unauthorized Roles
