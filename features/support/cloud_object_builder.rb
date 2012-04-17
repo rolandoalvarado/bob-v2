@@ -29,4 +29,8 @@ module CloudObjectBuilder
     attributes
   end
 
+  def self.attributes_for_project(attributes)
+    attributes_for_tenant(attributes)
+  end
+
 end
