@@ -43,3 +43,9 @@ Feature: Create an Instance
         | (Any)  | (None)      | (Any)  | (Any)   | (Any)          | Not Created    |
         | (Any)  | My Server   | (Any)  | (None)  | (Any)          | Not Created    |
         | (Any)  | My Server   | (Any)  | (Any)   | (None)         | Not Created    |
+
+      Examples: Specific Images
+        | Image                 | Server Name | Flavor | Keypair | Security Group | Created or Not |
+        | Windows2008-R2-server | My Server   | (Any)  | (Any)   | (Any)          | Created        |
+        | CentOS 5.8            | My Server   | (Any)  | (Any)   | (Any)          | Created        |
+        | Ubuntu 10.04 (lucid)  | My Server   | (Any)  | (Any)   | (Any)          | Created        |
