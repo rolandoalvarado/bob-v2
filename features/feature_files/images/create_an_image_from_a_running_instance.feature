@@ -61,4 +61,4 @@ Feature: Create an Image from a Running Instance
 
     Given I am authorized to create images from instances in the project
      When I create an image from the instance and add meta-data to it
-     Then the image should contain that meta-data
+     Then the created image should contain that meta-data
