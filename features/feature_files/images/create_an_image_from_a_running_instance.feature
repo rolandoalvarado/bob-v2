@@ -29,7 +29,7 @@ Feature: Create an Image from a Running Instance
         | Non-Member      | Cannot Create        |
 
 
-  Scenario: Define Image Visibility on Create
+  Scenario Outline: Define Image Visibility on Create
     To prevent the inadvertent exposure of secure data, creating an image from a
     running instance is private by default, unless explicitly set by the user
     as public.
