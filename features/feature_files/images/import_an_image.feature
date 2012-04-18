@@ -45,7 +45,6 @@ Feature: Import an Image
         | OVF          |
 
 
-
   Scenario: Add Meta-data on Import
     I should be able to add arbitrary meta-data when I create an image. This
     meta-data should be in key-value pairs. For example: description='This is
