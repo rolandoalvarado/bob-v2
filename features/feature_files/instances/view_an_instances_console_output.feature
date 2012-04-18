@@ -1,8 +1,12 @@
 Feature: View an Instance's Console Output
   As a user, I want to view the console output of an instance in my project
-  so that I will know if there are any errors during boot-up time.
+  so that I will know if there are any errors in the instance.
 
-  See "Server Console Output" section at http://api.openstack.org/
+  Instances do not have a physical monitor through which users can view their
+  console output. This feature allows users to see that output. In effect, it is
+  the instance's virtual monitor that shows the last few lines.
+
+  See "Server Console Output" section at http://api.openstack.org/ for more info
 
   Background:
     * A project exists in the system
