@@ -10,7 +10,7 @@
 # THENs
 #=================
 
-Then /^(?:[Hh]e|[Ss]he) will be redirected to the (.+) page$/ do |page_name|
+Then /^I will be redirected to the (.+) page$/ do |page_name|
   @page = eval("#{ page_name }Page").new
   @page.should_be_current
 end

@@ -24,7 +24,7 @@ Feature: Log In
 
 
   Scenario Outline: Access a secure page without logging in first
-     When I try to access the <Secure Page> page without logging in first
+     When I try to access the <Secure Page> page
      Then I will be redirected to the Login page
 
     Examples: Secure Pages
