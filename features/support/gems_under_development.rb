@@ -8,7 +8,7 @@
 # --Mark (mmaglana@morphlabs.com)
 
 gems = [
-  { :name => 'activepage',      :symlink => 'activepage'      },
+  { :name => 'po',              :symlink => 'po'      },
   { :name => 'diego_formatter', :symlink => 'diego_formatter' },
   { :name => 'fog',             :symlink => 'fog'             }
 ]

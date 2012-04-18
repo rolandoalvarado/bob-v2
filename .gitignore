@@ -15,6 +15,6 @@
 /capybara*.*
 /*_tmp_screenshot_dir
 /features/support/config.yml
-/features/support/activepage
+/features/support/po
 /features/support/diego_formatter
 /features/support/fog

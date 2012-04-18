@@ -3,7 +3,7 @@ Capybara.current_driver = :selenium
 Capybara.app_host = ConfigFile.web_client_url
 
 # Base class inherited by other pages
-class WebClientPage < ActivePage::Page
+class WebClientPage < PO::Page
 
   def click_log_out
     find_by_xpath("//a[@href='/logout']").click
