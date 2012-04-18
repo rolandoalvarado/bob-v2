@@ -9,8 +9,8 @@ Feature: Connect to an Instance
 
   Scenario Outline:
     Given I am authorized to create instances in the project
-     When I create an instance based on the image <Image Name>
-     Then I can connect to the instance via <Remote Client>
+     When I create an instance on that project based on the image <Image Name>
+     Then I can connect to that instance via <Remote Client>
 
     Examples:
       | Image Name            | Remote Client |

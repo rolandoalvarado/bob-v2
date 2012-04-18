@@ -16,8 +16,8 @@ Feature: Assign a Floating IP to an Instance
     * The project does not have any floating IPs
 
   Scenario Outline: Check User Permissions
-    Given a user has a role of <Role> in the project
-     Then she <Can or Cannot Assign> a floating IP to an instance in the project
+    Given I have a role of <Role> in the project
+     Then I <Can or Cannot Assign> a floating IP to an instance in the project
 
       Examples: Authorized Roles
         | Role            | Can or Cannot Assign |
@@ -33,6 +33,6 @@ Feature: Assign a Floating IP to an Instance
 
 
   Scenario: Assign Floating IP
-    Given a user is authorized to assign floating IPs to instances in the project
-     When she assigns a floating IP to the instance
+    Given I am authorized to assign floating IPs to instances in the project
+     When I assign a floating IP to the instance
      Then the instance should be accessible from that floating IP

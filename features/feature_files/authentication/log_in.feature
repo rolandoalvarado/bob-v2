@@ -1,16 +1,16 @@
 @jira-DPBLOG-7
 Feature: Log In
-  As a registered user, I should be able to log in so that I can use mCloud
+  As a registered user, I want to log in so that I can use mCloud
 
   Background:
-    * The following user exists:
+    * I have the following credentials:
       | Username | Password   |
       | rstark   | w1nt3rf3ll |
-    * No user is logged in
+    * I am not logged in
 
-  Scenario Outline: Someone tries to log in
-    When a user logs in with the following credentials: <Username>, <Password>
-    Then he will be redirected to the <Redirect To> page
+  Scenario Outline: Log in
+    When I log in with the following credentials: <Username>, <Password>
+    Then I will be redirected to the <Redirect To> page
 
     Examples: Valid credentials
       | Username  | Password   | Redirect To |
@@ -23,9 +23,9 @@ Feature: Log In
       | rstark    | w0nt3rf3ll | Login       |
 
 
-  Scenario Outline: Someone tries to access a secure page without logging in
-     When an unauthenticated user tries to access the <Secure Page> page
-     Then he will be redirected to the Login page
+  Scenario Outline: Access a secure page without logging in first
+     When I try to access the <Secure Page> page without logging in first
+     Then I will be redirected to the Login page
 
     Examples: Secure Pages
       | Secure Page |
