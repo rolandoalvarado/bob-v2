@@ -27,7 +27,7 @@ To run mCloud Features:
 
 The above command will generate a report in the `output` directory.
 
-To automatically run mCloud Features every time something changes in any of the files declared in `Guardfile`:
+To automatically run mCloud Features every time something changes in any of the files declared in [the Guardfile](https://bitbucket.org/wdamarillo/mcloud_features/src/master/Guardfile):
 
     run/autoverifier
 
@@ -81,7 +81,7 @@ How to write Features
            When I try launch it
            Then the system should alert me by email
 
-* For more sample feature files, see [the actual mCloud Features feature files in](https://bitbucket.org/wdamarillo/mcloud_features/src/375ec13be815/features/feature_files/).
+* For more sample feature files, see [the actual mCloud Features feature files](https://bitbucket.org/wdamarillo/mcloud_features/src/375ec13be815/features/feature_files/).
 
 Helpful references for development
 ----------------------------------
