@@ -10,6 +10,6 @@ elif [ $# -eq 1 ] && [ $1 == '--help' ]; then
 fi
 
 echo "Press Ctrl-C anytime to stop validating features"
-echo "Press Enter anytime to re-validate all tests"
+echo "Press Enter anytime to re-validate all features"
 rm -rf output/*
 bundle exec guard
