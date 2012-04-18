@@ -15,22 +15,3 @@ Feature: Create an Instance Snapshot
       for future releases.
 
   Default image should be OVF
-
-  # Background:
-  #     * A project has one running VM
-  #     * Catelyn is the owner of that project
-  #     * The following developers are members of that project:
-  #       | Brandon   |
-  #       | Robb      |
-  #       | Jeoffrey  |
-  #
-  # Scenario: Create a new image
-  #    When she takes a snapshot of that VM
-  #     And she makes the produced image available to the following developers:
-  #       | Brandon |
-  #       | Robb    |
-  #    Then the new image should have the following ACL:
-  #       | Developer | Has Access? |
-  #       | Brandon   | yes         |
-  #       | Robb      | yes         |
-  #       | Jeoffrey  | no          |
