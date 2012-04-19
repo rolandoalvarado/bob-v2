@@ -49,13 +49,15 @@ To see a full list of available commands:
     run/help
 
 
-Found a bug?
-------------
-If you find a problem with the the verifier, report it [here](https://bitbucket.org/wdamarillo/mcloud_features/issues/new). If you find bugs on mCloud, please report it to [the Morphlabs bug tracker](https://issues.morphlabs.com).
+Need More Help?
+---------------
+If you're stuck, email me at mmaglana@morphlabs.com or ping me through my Skype
+ID mark.maglana. Optionally, you can suggest ways to further improve mCloud
+Features by creating tickets [here](https://bitbucket.org/wdamarillo/mcloud_features/issues/new).
 
 Contributing
 ------------
-__NOTE:__ If you just plan on contributing to the .feature files every now and then, you may skip this section and write .feature files directly. Afterwards, submit it by emailing the .feature file to (email TBD) and someone will commit your file for you. If you plan on contributing on an ongoing basis, we highly recommend you follow this process.
+__NOTE:__ If you just plan on contributing to the .feature files every now and then, you may skip this section and write .feature files directly. Afterwards, submit it by emailing the .feature file to mmaglana@morphlabs.com and I will commit your file for you. If you plan on contributing on an ongoing basis, we highly recommend you follow this process.
 
 1. Fork `https://bitbucket.org/wdamarillo/mcloud_features`
 2. Create a branch for whatever it is you plan to do. ALWAYS create a branch so that when there are changes in origin/master, you only need to rebase your local branch and keep your commits in order. Also, this allows you to squash multiple commits into one before submitting a pull request.
