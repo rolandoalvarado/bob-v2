@@ -26,8 +26,3 @@ Feature: Delete an Instance
         | IT Security     | Cannot Delete        |
         | Network Admin   | Cannot Delete        |
         | Non-Member      | Cannot Delete        |
-
-
-  Scenario: Delete an Instance
-    Given I am authorized to delete instances in the project
-     Then I can delete the instance in the project
