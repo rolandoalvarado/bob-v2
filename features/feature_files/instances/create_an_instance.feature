@@ -18,7 +18,7 @@ Feature: Create an Instance
       Examples: Authorized Roles
         | Role            | Can or Cannot Create |
         | Project Manager | Can Create           |
-        | Develoepr       | Can Create           |
+        | Developer       | Can Create           |
         | Cloud Admin     | Can Create           |
 
       Examples: Unauthorized Roles
