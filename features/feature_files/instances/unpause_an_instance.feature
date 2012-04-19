@@ -27,7 +27,7 @@ Feature: Unpause a Paused Instance
         | Developer       | Cannot Unpause        |
         | IT Security     | Cannot Unpause        |
         | Network Admin   | Cannot Unpause        |
-        | Non-Member      | Cannot Unpause        |
+        | (None)          | Cannot Unpause        |
 
 
   Scenario: Unpause an Instance

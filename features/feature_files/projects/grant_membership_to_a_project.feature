@@ -30,7 +30,7 @@ Feature: Grant Membership to a Project
         | Developer       | Cannot Grant        |
         | IT Security     | Cannot Grant        |
         | Network Admin   | Cannot Grant        |
-        | Non-Member      | Cannot Grant        |
+        | (None)          | Cannot Grant        |
 
 
   Scenario Outline: Add a Member to A Project

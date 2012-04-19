@@ -25,7 +25,7 @@ Feature: Pause an Instance
         | Developer       | Cannot Pause        |
         | IT Security     | Cannot Pause        |
         | Network Admin   | Cannot Pause        |
-        | Non-Member      | Cannot Pause        |
+        | (None)          | Cannot Pause        |
 
 
   Scenario: Pause an Instance

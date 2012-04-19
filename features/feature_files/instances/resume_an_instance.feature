@@ -27,7 +27,7 @@ Feature: Resume an Instance
         | Developer       | Cannot Resume        |
         | IT Security     | Cannot Resume        |
         | Network Admin   | Cannot Resume        |
-        | Non-Member      | Cannot Resume        |
+        | (None)          | Cannot Resume        |
 
 
   Scenario: Resume an Instance

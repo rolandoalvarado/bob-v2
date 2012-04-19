@@ -19,7 +19,7 @@ Feature: Edit a Project
         | Developer       | Cannot Edit        |
         | IT Security     | Cannot Edit        |
         | Network Admin   | Cannot Edit        |
-        | Non-Member      | Cannot Edit        |
+        | (None)          | Cannot Edit        |
 
 
   Scenario Outline: Edit a Project

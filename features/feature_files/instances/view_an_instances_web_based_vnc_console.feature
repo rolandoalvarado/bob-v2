@@ -39,4 +39,4 @@ Feature: View an Instance's Web-based VNC Console
         | Role            | Can or Cannot View |
         | IT Security     | Cannot View        |
         | Network Admin   | Cannot View        |
-        | Non-Member      | Cannot View        |
+        | (None)          | Cannot View        |

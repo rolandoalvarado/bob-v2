@@ -25,7 +25,7 @@ Feature: Create an Instance
         | Role            | Can or Cannot Create |
         | IT Security     | Cannot Create        |
         | Network Admin   | Cannot Create        |
-        | Non-Member      | Cannot Create        |
+        | (None)          | Cannot Create        |
 
 
   Scenario Outline: Create an Instance

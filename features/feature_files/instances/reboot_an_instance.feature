@@ -27,7 +27,7 @@ Feature: Reboot an Instance
         | Developer       | Cannot Reboot        |
         | IT Security     | Cannot Reboot        |
         | Network Admin   | Cannot Reboot        |
-        | Non-Member      | Cannot Reboot        |
+        | (None)          | Cannot Reboot        |
 
 
   Scenario: Soft Reboot

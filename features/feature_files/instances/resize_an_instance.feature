@@ -30,7 +30,7 @@ Feature: Resize an Instance
         | Developer       | Cannot Resize        |
         | IT Security     | Cannot Resize        |
         | Network Admin   | Cannot Resize        |
-        | Non-Member      | Cannot Resize        |
+        | (None)          | Cannot Resize        |
 
 
   Scenario: Resize an Instance

@@ -29,7 +29,7 @@ Feature: Assign a Floating IP to an Instance
         | Developer       | Cannot Assign        |
         | IT Security     | Cannot Assign        |
         | Network Admin   | Cannot Assign        |
-        | Non-Member      | Cannot Assign        |
+        | (None)          | Cannot Assign        |
 
 
   Scenario: Assign Floating IP

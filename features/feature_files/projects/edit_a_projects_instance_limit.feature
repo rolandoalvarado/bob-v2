@@ -26,7 +26,7 @@ Feature: Edit a Project's Instance Limit
         | Developer       | Cannot Edit        |
         | IT Security     | Cannot Edit        |
         | Network Admin   | Cannot Edit        |
-        | Non-Member      | Cannot Edit        |
+        | (None)          | Cannot Edit        |
 
 
   Scenario Outline: Edit the Project's Instance Limit

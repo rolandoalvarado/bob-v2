@@ -34,7 +34,7 @@ Feature: View Instance Statistics
         | Role            | Can or Cannot View |
         | IT Security     | Cannot View        |
         | Network Admin   | Cannot View        |
-        | Non-Member      | Cannot View        |
+        | (None)          | Cannot View        |
 
   Scenario Outline: View Instance Statistics
     Given I am authorized to view instance statistics in the project

@@ -26,7 +26,7 @@ Feature: Create an Image from a Running Instance
         | Developer       | Cannot Create        |
         | IT Security     | Cannot Create        |
         | Network Admin   | Cannot Create        |
-        | Non-Member      | Cannot Create        |
+        | (None)          | Cannot Create        |
 
 
   Scenario Outline: Define Image Visibility on Create

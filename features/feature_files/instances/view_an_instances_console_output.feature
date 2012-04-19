@@ -27,4 +27,4 @@ Feature: View an Instance's Console Output
         | Developer       | Cannot View        |
         | IT Security     | Cannot View        |
         | Network Admin   | Cannot View        |
-        | Non-Member      | Cannot View        |
+        | (None)          | Cannot View        |

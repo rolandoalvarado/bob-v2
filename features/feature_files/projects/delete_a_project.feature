@@ -21,7 +21,7 @@ Feature: Delete a project
         | Developer       | Cannot Delete        |
         | IT Security     | Cannot Delete        |
         | Network Admin   | Cannot Delete        |
-        | Non-Member      | Cannot Delete        |
+        | (None)          | Cannot Delete        |
 
 
   Scenario: Delete a Project

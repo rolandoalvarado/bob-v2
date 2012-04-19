@@ -26,7 +26,7 @@ Feature: Suspend an Instance
         | Developer       | Cannot Suspend        |
         | IT Security     | Cannot Suspend        |
         | Network Admin   | Cannot Suspend        |
-        | Non-Member      | Cannot Suspend        |
+        | (None)          | Cannot Suspend        |
 
 
   Scenario: Suspend an Instance

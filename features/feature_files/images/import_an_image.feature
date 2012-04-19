@@ -25,7 +25,7 @@ Feature: Import an Image
         | Developer       | Cannot Import        |
         | IT Security     | Cannot Import        |
         | Network Admin   | Cannot Import        |
-        | Non-Member      | Cannot Import        |
+        | (None)          | Cannot Import        |
 
 
   Scenario Outline: Import an Image

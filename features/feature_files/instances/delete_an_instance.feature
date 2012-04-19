@@ -25,4 +25,4 @@ Feature: Delete an Instance
         | Developer       | Cannot Delete        |
         | IT Security     | Cannot Delete        |
         | Network Admin   | Cannot Delete        |
-        | Non-Member      | Cannot Delete        |
+        | (None)          | Cannot Delete        |

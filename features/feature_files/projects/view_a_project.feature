@@ -18,4 +18,4 @@ Feature: View a Project
       Examples: Unauthorized Roles
         | Role            | Can or Cannot View |
         | IT Security     | Cannot View        |
-        | Non-Member      | Cannot View        |
+        | (None)          | Cannot View        |
