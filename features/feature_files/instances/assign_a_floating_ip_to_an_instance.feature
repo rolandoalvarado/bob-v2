@@ -35,4 +35,4 @@ Feature: Assign a Floating IP to an Instance
   Scenario: Assign Floating IP
     Given I am authorized to assign floating IPs to instances in the project
      When I assign a floating IP to the instance
-     Then the instance should be accessible from that floating IP
+     Then the instance is accessible via that floating IP
