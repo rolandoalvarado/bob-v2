@@ -22,11 +22,11 @@ Feature: Assign a Floating IP to an Instance
       Examples: Authorized Roles
         | Role            | Can or Cannot Assign |
         | Project Manager | Can Assign           |
-        | Developer       | Can Assign           |
         | Cloud Admin     | Can Assign           |
 
       Examples: Unauthorized Roles
         | Role            | Can or Cannot Assign |
+        | Developer       | Cannot Assign        |
         | IT Security     | Cannot Assign        |
         | Network Admin   | Cannot Assign        |
         | Non-Member      | Cannot Assign        |
