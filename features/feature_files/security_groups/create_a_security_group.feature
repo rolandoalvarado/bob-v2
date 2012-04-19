@@ -24,13 +24,13 @@ Feature: Create a Security Group
       Examples: Authorized Roles
         | Role            | Can or Cannot Create |
         | Project Manager | Can Create           |
+        | Network Admin   | Can Create           |
         | Cloud Admin     | Can Create           |
 
       Examples: Unauthorized Roles
         | Role            | Can or Cannot Create |
         | Developer       | Cannot Create        |
         | IT Security     | Cannot Create        |
-        | Network Admin   | Cannot Create        |
         | (None)          | Cannot Create        |
 
 

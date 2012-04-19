@@ -24,13 +24,13 @@ Feature: Edit a Security Group
       Examples: Authorized Roles
         | Role            | Can or Cannot Edit |
         | Project Manager | Can Edit           |
+        | Network Admin   | Can Edit           |
         | Cloud Admin     | Can Edit           |
 
       Examples: Unauthorized Roles
         | Role            | Can or Cannot Edit |
         | Developer       | Cannot Edit        |
         | IT Security     | Cannot Edit        |
-        | Network Admin   | Cannot Edit        |
         | (None)          | Cannot Edit        |
 
 
