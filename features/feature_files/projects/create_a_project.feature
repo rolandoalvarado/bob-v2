@@ -4,9 +4,9 @@ Feature: Create a Project
   resources together and control who has access to them.
 
   From the OpenStack docs (http://goo.gl/DND5I):
-  Projects are isolated resource containers forming the principal organizational
-  structure within the Compute Service. They consist of a separate VLAN,
-  volumes, instances, images, keys, and users.
+  Projects are isolated resource containers forming the principal
+  organizational structure within OpenStack Compute. They consist of a
+  distinct set of VLAN, volumes, instances, images, keys, and members.
 
   Additional info for devs working against the OpenStack API:
   A user can specify which project he or she wishes to use by appending
