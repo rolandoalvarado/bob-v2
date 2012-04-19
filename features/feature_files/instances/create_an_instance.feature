@@ -18,11 +18,11 @@ Feature: Create an Instance
       Examples: Authorized Roles
         | Role            | Can or Cannot Create |
         | Project Manager | Can Create           |
-        | Developer       | Can Create           |
         | Cloud Admin     | Can Create           |
 
       Examples: Unauthorized Roles
         | Role            | Can or Cannot Create |
+        | Developer       | Cannnot Create       |
         | IT Security     | Cannot Create        |
         | Network Admin   | Cannot Create        |
         | (None)          | Cannot Create        |
