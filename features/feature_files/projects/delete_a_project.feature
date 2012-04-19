@@ -4,7 +4,6 @@ Feature: Delete a project
 
   Background:
     * A project exists in the system
-    * The project has one running instance
 
 
   Scenario Outline: Check User Permissions
@@ -26,5 +25,6 @@ Feature: Delete a project
 
   Scenario: Delete a Project
     Given I am authorized to delete the project
+      And the project has a running instance
      When I delete the project
      Then the project and all its resources will be deleted
