@@ -1,6 +1,66 @@
 @jira-DPBLOG-16 @jira-DPBLOG-17
 Feature: Create a User
- #  This feature allows a cloud administrator or a project
- #  owner to create a user in the system. Cloud administrators
- #  will be able to add the user to any project while a project
- #  owner can only add the user to projects that she owns.
+  As a cloud administrator, I want to create users.
+
+
+  Scenario Outline: Check User Permissions
+    Given I have a role of <Role> in the project
+     Then I <Can or Cannot Create> a user
+
+      Examples: Authorized Roles
+        | Role            | Can or Cannot Create |
+        | Cloud Admin     | Can Create           |
+
+      Examples: Unauthorized Roles
+        | Role            | Can or Cannot Create |
+        | Project Manager | Cannot Create        |
+        | Developer       | Cannot Create        |
+        | IT Security     | Cannot Create        |
+        | Network Admin   | Cannot Create        |
+        | (None)          | Cannot Create        |
+
+
+  Scenario Outline: Create a user with certain attributes
+    Given I am authorized to create users in the system
+      And a user with username <Username> does not exist in the system
+     When I create a user with attributes <Username>, <Email>, <Password>, and <Password Confirmation>
+     Then the user will be <Created or Not>
+
+      Examples: Valid User Attributes
+        | Username | Email                | Password | Password Confirmation | Created or Not |
+        | astark   | astark@morphlabs.com | fkd2350a | fkd2350a              | Created        |
+        | astark   | astark@morphlabs.com | ++afd]3b | ++afd]3b              | Created        |
+
+      Examples: Invalid User Attributes
+        | Username | Email                | Password | Password Confirmation | Created or Not | Reason                                            |
+        | (None)   | astark@morphlabs.com | fkd2350a | fkd2350a              | Not Created    | Username can't be empty                           |
+        | astark+  | astark@morphlabs.com | fkd2350a | fkd2350a              | Not Created    | Username can only contain alphanumeric characters |
+        | astark   | (None)               | fkd2350a | fkd2350a              | Not Created    | Email can't be empty                              |
+        | astark   | astark.com           | fkd2350a | fkd2350a              | Not Created    | Email format is invalid                           |
+        | astark   | astark@morphlabs.com | Abqwe23a | fkd2350a              | Not Created    | Passwords don't match                             |
+        | astark   | astark@morphlabs.com | (None)   | fkd2350a              | Not Created    | Passwords don't match                             |
+        | astark   | astark@morphlabs.com | (None)   | (None)                | Not Created    | Passwords don't match                             |
+
+
+  Scenario Outline: Add a Membership During Creation
+    Given I am authorized to create users in the system
+      And there is at least one project in the system
+     When I create a user with the following membership: <Project>, <Role>, and <Is Primary>
+     Then the user will be <Created or Not>
+
+      Examples: Valid Membership Attributes
+        | Project | Role   | Is Primary | Created or Not |
+        | (Any)   | (Any)  | Yes        | Created        |
+
+      Examples: Invalid Membership Attributes
+        | Project | Role   | Is Primary | Created or Not | Reason                                      |
+        | (None)  | (Any)  | Yes        | Not Created    | Project must be indicated                   |
+        | (Any)   | (None) | Yes        | Not Created    | Role must be indicated                      |
+        | (Any)   | (Any)  | No         | Not Created    | At least one membership must be the primary |
+
+
+  Scenario: Add a User Without a Membership
+    Given I am authorized to create users in the system
+     When I create a user without a membership
+     Then the user will not be able to login
+      And the system will display "You are not a member of any project"
