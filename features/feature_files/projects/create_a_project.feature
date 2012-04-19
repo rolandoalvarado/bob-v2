@@ -16,7 +16,18 @@ Feature: Create a Project
   Background:
     * A user named Arya Stark exists in the system
 
+  Scenario Outline: Check User Permissions
+    Given I have am <Logged In or Not>
+     Then I <Can or Cannot Create> a project
+
+      Examples:
+        | Logged In or Not | Can or Cannot Create |
+        | Logged In        | Can Create           |
+        | Not Logged In    | Cannot Create        |
+
+
   Scenario: Create a project
+   Given I am logged in
     When I create a project
     Then I can view that project
      But Arya Stark cannot view that project
