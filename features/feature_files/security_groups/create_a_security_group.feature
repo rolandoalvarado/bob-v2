@@ -50,7 +50,7 @@ Feature: Create a Security Group
         |                  | Only port 443 is allowed | Not Created    |
 
 
-  Scenario: Add a Rule During Creation
+  Scenario Outline: Add a Rule During Creation
     Given I am authorized to create a security group in the project
       And the project has only one security group named Web Servers
      When I create a security group with the following rule: <Protocol>, <From Port>, <To Port>, <Source Type>, <Source>

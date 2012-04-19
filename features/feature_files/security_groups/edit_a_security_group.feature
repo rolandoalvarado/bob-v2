@@ -50,7 +50,7 @@ Feature: Edit a Security Group
         |                  | Only port 443 is allowed | Not Updated    |
 
 
-  Scenario: Add a Rule During Edit
+  Scenario Outline: Add a Rule During Edit
     Given I am authorized to edit a security group in the project
       And the project has 2 security groups named Web Servers, and Database Servers
      When I edit the Database Servers security group with the following rule: <Protocol>, <From Port>, <To Port>, <Source Type>, <Source>
