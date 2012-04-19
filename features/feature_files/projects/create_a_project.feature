@@ -17,7 +17,7 @@ Feature: Create a Project
     * A user named Arya Stark exists in the system
 
   Scenario Outline: Check User Permissions
-    Given I have am <Logged In or Not>
+    Given I am <Logged In or Not>
      Then I <Can or Cannot Create> a project
 
       Examples:
