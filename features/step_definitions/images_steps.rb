@@ -9,6 +9,10 @@ Given /^[Aa]n image is available for use$/ do
   @image = public_images[0]
 end
 
+Given /^The project does not have any running instances$/ do
+  pending # express the regexp above with the code you wish you had
+end
+
 #=================
 # WHENs
 #=================
