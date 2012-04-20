@@ -1,2 +1,0 @@
-class PageAssertionError < StandardError
-end

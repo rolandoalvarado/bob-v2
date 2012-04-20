@@ -5,7 +5,7 @@ require 'rubygems'
 require 'yaml'
 require 'fileutils'
 
-# The reason why we put wrap the credentials in this class is so that,
+# The reason why we wrap the credentials in this class is so that
 # we only need to look at one place to determine what type of cloud we
 # are dealing with. While it's highly unlikely that we will change from
 # OpenStack to something else in the near future, when the event happens, we

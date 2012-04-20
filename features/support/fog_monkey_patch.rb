@@ -1,5 +1,3 @@
-require_relative 'gems_under_development'
-
 # Fixes/patches that I have not submitted to the fog repo since I'm still
 # observing them. -- Mark (mmaglana@morphlabs.com)
 module Fog
