@@ -26,8 +26,23 @@ Feature: Create a Project
         | Not Logged In    | Cannot Create        |
 
 
+  Scenario Outline: Create a Project
+    Given I am authorized to create projects
+     When I create a project with attributes <Name>, <Description>
+     Then the project will be <Created or Not>
+
+      Examples: Valid Values
+        | Name               | Description     | Created or Not |
+        | My Awesome Project | Another project | Created        |
+        | My Awesome Project | (None)          | Created        |
+
+      Examples: Invalid Values
+        | Name               | Description     | Created or Not | Reason           |
+        | (None)             | Another project | Not Created    | Name is required |
+
+
   Scenario: Create a project
-   Given I am logged in
+   Given I am authorized to create projects
     When I create a project
     Then I can view that project
      But Arya Stark cannot view that project
