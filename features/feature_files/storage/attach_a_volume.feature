@@ -15,6 +15,34 @@ Feature: Attach a Volume
     * The project has an available volume
 
 
-  Scenario: Attach a Volume
-    Given I can SSH to the instance
-     Then I can attach the volume to the instance
+  Scenario Outline: Check User Permissions
+    Given I have a role of <Role> in the project
+     Then I <Can or Cannot Attach> the volume to the instance
+
+      Examples: Authorized Roles
+        | Role            | Can or Cannot Create |
+        | Project Manager | Can Create           |
+        | Cloud Admin     | Can Create           |
+
+      Examples: Unauthorized Roles
+        | Role            | Can or Cannot Create |
+        | Developer       | Cannnot Create       |
+        | IT Security     | Cannot Create        |
+        | Network Admin   | Cannot Create        |
+        | (None)          | Cannot Create        |
+
+
+  Scenario Outline: Attach a Volume Given A Mount Point
+    NOTE: The Mount Point can have a value of /dev/vda, /dev/vdb, ... /dev/vdz
+
+    Given I am authorized to attach volumes to the instance
+     When I attach the volume to the instance with mount point <Mount Point>
+     Then the volume will be <Attached or Not> to the instance
+
+      Examples: Valid Attributes
+        | Mount Point | Attached or Not |
+        | (Any)       | Attached        |
+
+      Examples: Invalid Attributes
+        | Mount Point | Attached or Not | Reason                        |
+        | (None)      | Not Attached    | Mount point must be indicated |
