@@ -43,11 +43,11 @@ Feature: Create a Security Group
       Scenarios: Valid Values
         | Name             | Description              | Created or Not |
         | Database Servers | Only port 443 is allowed | Created        |
-        | Database Servers |                          | Created        |
+        | Database Servers | (None)                   | Created        |
 
       Scenarios: Invalid Values
         | Name             | Description              | Created or Not | Reason              |
-        |                  | Only port 443 is allowed | Not Created    | Name can't be empty |
+        | (None)           | Only port 443 is allowed | Not Created    | Name can't be empty |
 
 
   Scenario Outline: Add a Rule During Creation
