@@ -82,9 +82,9 @@ How to write Features
 
   Listing 1. Sample .feature file
 
-      Feature: Launch a VM
+      Feature: Withdraw Money
 
-        Scenario Outline: Withdraw cash
+        Scenario Outline: Withdraw an amount given a starting balance
           Given my account has a balance of <Balance>
            When I withdraw <Requested Amount>
            Then the amount will be <Dispensed or Not>
