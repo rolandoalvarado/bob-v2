@@ -29,3 +29,18 @@ Feature: Create a Volume on the Storage Node
         | IT Security     | Cannot Create        |
         | Network Admin   | Cannot Create        |
         | (None)          | Cannot Create        |
+
+
+  Scenario Outline: Create a Volume Given Some Attributes
+    Given I am authorized to create volumes in the project
+     When I create a volume with attributes <Name>, <Size>
+     Then the volume will be <Created or Not>
+
+      Examples: Valid Values
+        | Name             | Size   | Created or Not |
+        | Database storage | 5GB    | Created        |
+
+      Examples: Invalid Values
+        | Name             | Size   | Created or Not | Reason              |
+        | (None)           | 5GB    | Not Created    | Name can't be empty |
+        | Database storage | (None) | Not Created    | Size can't be empty |
