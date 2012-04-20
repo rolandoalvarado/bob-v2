@@ -63,4 +63,4 @@ Feature: Create a User
     Given I am authorized to create users in the system
      When I create a user without a membership
      Then the user will not be able to login
-      And the system will display "You are not a member of any project"
+      And the system will display 'You are not a member of any project'
