@@ -56,20 +56,22 @@ Feature: Edit a Security Group
      When I edit the Database Servers security group with the following rule: <Protocol>, <From Port>, <To Port>, <Source Type>, <Source>
      Then the security group will be <Updated or Not>
 
-      Examples: Valid Rules
-        | Protocol | From Port | To Port  | Source Type    | Source      | Updated or Not |
-        | TCP      | (Random)  | (Random) | Subnet         | 0.0.0.0/25  | Updated        |
-        | TCP      | (Random)  | (Random) | Security Group | Web Servers | Updated        |
-        | UDP      | (Random)  | (Random) | Subnet         | 0.0.0.0/25  | Updated        |
-        | UDP      | (Random)  | (Random) | Security Group | Web Servers | Updated        |
-        | ICMP     | (Random)  | (Random) | Subnet         | 0.0.0.0/25  | Updated        |
-        | ICMP     | (Random)  | (Random) | Security Group | Web Servers | Updated        |
+     Examples: Valid Rules
+       | Protocol | From Port | To Port  | Source Type    | Source      | Updated or Not |
+       | TCP      | (Random)  | (Random) | Subnet         | 0.0.0.0/25  | Updated        |
+       | TCP      | (Random)  | (Random) | Security Group | Web Servers | Updated        |
+       | UDP      | (Random)  | (Random) | Subnet         | 0.0.0.0/25  | Updated        |
+       | UDP      | (Random)  | (Random) | Security Group | Web Servers | Updated        |
+       | ICMP     | (Random)  | (Random) | Subnet         | 0.0.0.0/25  | Updated        |
+       | ICMP     | (Random)  | (Random) | Security Group | Web Servers | Updated        |
 
-      Examples: Invalid Rules
-        | Protocol | From Port | To Port  | Source Type    | Source      | Updated or Not |
-        | (Any)    | (None)    | (Random) | Subnet         | 0.0.0.0/25  | Not Updated    |
-        | (Any)    | (Random)  | (None)   | Subnet         | 0.0.0.0/25  | Not Updated    |
-        | (Any)    | (Random)  | (Random) | Subnet         | (None)      | Not Updated    |
-        | (Any)    | (None)    | (Random) | Security Group | Web Servers | Not Updated    |
-        | (Any)    | (Random)  | (None)   | Security Group | Web Servers | Not Updated    |
-        | (Any)    | (Random)  | (Random) | Security Group | (None)      | Not Updated    |
+     Examples: Invalid Rules
+       | Protocol | From Port | To Port  | Source Type    | Source      | Updated or Not | Reason                                     |
+       | (Any)    | (None)    | (Random) | Subnet         | 0.0.0.0/25  | Not Updated    | 'From Port' must be specified              |
+       | (Any)    | (Random)  | (None)   | Subnet         | 0.0.0.0/25  | Not Updated    | 'To Port' must be specified                |
+       | (Any)    | (Random)  | (None)   | Subnet         | 1.2.9.12    | Not Updated    | Source must be in CIDR notation            |
+       | (Any)    | (Random)  | (Random) | Subnet         | (None)      | Not Updated    | 'Source' can't be empty                    |
+       | (Any)    | (None)    | (Random) | Security Group | Web Servers | Not Updated    | 'From Port' must be specified              |
+       | (Any)    | (Random)  | (None)   | Security Group | Web Servers | Not Updated    | 'To Port' must be specified                |
+       | (Any)    | (Random)  | (Random) | Security Group | (None)      | Not Updated    | 'Source' can't be empty                    |
+       | (Any)    | (Random)  | (Random) | Security Group | App Servers | Not Updated    | Security group 'App Servers' doesn't exist |

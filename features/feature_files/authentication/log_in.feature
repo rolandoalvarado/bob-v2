@@ -17,10 +17,10 @@ Feature: Log In
       | rstark    | w1nt3rf3ll | Projects    |
 
     Examples: Invalid credentials
-      | Username  | Password   | Redirect To |
-      | RSTARK    | w1nt3rf3ll | Login       |
-      |           | w1nt3rf3ll | Login       |
-      | rstark    | w0nt3rf3ll | Login       |
+      | Username  | Password   | Redirect To | Reason                                                       |
+      | RSTARK    | w1nt3rf3ll | Login       | Username is case sensitive (This is an OpenStack constraint) |
+      |           | w1nt3rf3ll | Login       | Username can't be empty                                      |
+      | rstark    | w0nt3rf3ll | Login       | Invalid password                                             |
 
 
   Scenario Outline: Access a secure page without logging in first

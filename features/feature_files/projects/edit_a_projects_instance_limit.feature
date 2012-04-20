@@ -41,12 +41,9 @@ Feature: Edit a Project's Instance Limit
         | 1                 | 2         | 1         | Updated        |
         | 1                 | 2         | 3         | Updated        |
 
-      Examples: Invalid New Limit (Lower than currently running instances)
-        | Running Instances | Old Limit | New Limit | Updated or Not |
-        | 2                 | 2         | 1         | Not Updated    |
-
-      Examples: Invalid New Limit (Edge cases)
-        | Running Instances | Old Limit | New Limit | Updated or Not |
-        | 1                 | 1         | 0         | Not Updated    |
-        | 1                 | 1         | ABCD      | Not Updated    |
-        | 1                 | 1         | +1        | Not Updated    |
+      Examples: Invalid New Limit
+        | Running Instances | Old Limit | New Limit | Updated or Not | Reason                                                        |
+        | 2                 | 2         | 1         | Not Updated    | Limit can't be lower than current number of running instances |
+        | 1                 | 1         | 0         | Not Updated    | Limit can't be zero                                           |
+        | 1                 | 1         | ABCD      | Not Updated    | Limit must be numeric                                         |
+        | 1                 | 1         | +1        | Not Updated    | Limit must be numeric                                         |

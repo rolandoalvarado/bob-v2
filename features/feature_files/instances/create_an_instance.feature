@@ -30,22 +30,22 @@ Feature: Create an Instance
 
   Scenario Outline: Create an Instance
     Given I am authorized to create instances in the project
-     When I create an instance with attributes <Image>, <Server Name>, <Flavor>, <Keypair> and <Security Group>
+     When I create an instance with attributes <Image>, <Name>, <Flavor>, <Keypair> and <Security Group>
      Then the instance will be <Created or Not>
 
       Examples: Valid Values
-        | Image  | Server Name | Flavor | Keypair | Security Group | Created or Not |
+        | Image  | Name        | Flavor | Keypair | Security Group | Created or Not |
         | (Any)  | My Server   | (Any)  | (Any)   | (Any)          | Created        |
 
       Examples: Invalid Values
-        | Image  | Server Name | Flavor | Keypair | Security Group | Created or Not |
-        | (None) | My Server   | (Any)  | (Any)   | (Any)          | Not Created    |
-        | (Any)  | (None)      | (Any)  | (Any)   | (Any)          | Not Created    |
-        | (Any)  | My Server   | (Any)  | (None)  | (Any)          | Not Created    |
-        | (Any)  | My Server   | (Any)  | (Any)   | (None)         | Not Created    |
+        | Image  | Name        | Flavor | Keypair | Security Group | Created or Not | Reason                                           |
+        | (None) | My Server   | (Any)  | (Any)   | (Any)          | Not Created    | Must specify an image                            |
+        | (Any)  | (None)      | (Any)  | (Any)   | (Any)          | Not Created    | Must specify a name                              |
+        | (Any)  | My Server   | (Any)  | (None)  | (Any)          | Not Created    | Must supply a keypair                            |
+        | (Any)  | My Server   | (Any)  | (Any)   | (None)         | Not Created    | Instance should have at least one security group |
 
       Examples: Specific Images
-        | Image                 | Server Name | Flavor | Keypair | Security Group | Created or Not |
+        | Image                 | Name        | Flavor | Keypair | Security Group | Created or Not |
         | Windows2008-R2-server | My Server   | (Any)  | (Any)   | (Any)          | Created        |
         | CentOS 5.8            | My Server   | (Any)  | (Any)   | (Any)          | Created        |
         | Ubuntu 10.04 (lucid)  | My Server   | (Any)  | (Any)   | (Any)          | Created        |

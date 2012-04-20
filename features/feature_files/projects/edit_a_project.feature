@@ -24,13 +24,14 @@ Feature: Edit a Project
 
   Scenario Outline: Edit a Project
     Given I am authorized to edit the project
-     When I edit the project's attributes to <Name>
+     When I edit the project's attributes to <Name>, <Description>
      Then the project will be <Updated or Not>
 
       Examples: Valid Values
-        | Name               | Updated or Not |
-        | My Awesome Project | Updated        |
+        | Name               | Description     | Updated or Not |
+        | My Awesome Project | Another project | Updated        |
+        | My Awesome Project | (None)          | Updated        |
 
       Examples: Invalid Values
-        | Name               | Updated or Not |
-        | (None)             | Not Updated    |
+        | Name               | Description     | Updated or Not | Reason           |
+        | (None)             | Another project | Not Updated    | Name is required |
