@@ -15,6 +15,18 @@ Feature: Detach a Volume
     * The instance has an attached volume
 
 
-  Scenario: Detach a Volume
-    Given I can SSH to the instance
-     Then I can detach the volume from the instance
+  Scenario Outline: Check User Permissions
+    Given I have a role of <Role> in the project
+     Then I <Can or Cannot Detach> the volume from the instance
+
+      Examples: Authorized Roles
+        | Role            | Can or Cannot Create |
+        | Project Manager | Can Create           |
+        | Cloud Admin     | Can Create           |
+
+      Examples: Unauthorized Roles
+        | Role            | Can or Cannot Create |
+        | Developer       | Cannnot Create       |
+        | IT Security     | Cannot Create        |
+        | Network Admin   | Cannot Create        |
+        | (None)          | Cannot Create        |
