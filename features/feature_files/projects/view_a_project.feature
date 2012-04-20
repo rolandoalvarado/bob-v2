@@ -8,14 +8,14 @@ Feature: View a Project
     Given I have a role of <Role> in the project
      Then I <Can or Cannot View> the project
 
-      Examples: Authorized Roles
+      Scenarios: Authorized Roles
         | Role            | Can or Cannot View |
         | Project Manager | Can View           |
         | Developer       | Can View           |
         | Network Admin   | Can View           |
         | Cloud Admin     | Can View           |
 
-      Examples: Unauthorized Roles
+      Scenarios: Unauthorized Roles
         | Role            | Can or Cannot View |
         | IT Security     | Cannot View        |
         | (None)          | Cannot View        |

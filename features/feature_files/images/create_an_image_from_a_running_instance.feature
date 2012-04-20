@@ -16,12 +16,12 @@ Feature: Create an Image from a Running Instance
     Given I have a role of <Role> in the project
      Then I <Can or Cannot Create> an image from an instance in the project
 
-      Examples: Authorized Roles
+      Scenarios: Authorized Roles
         | Role            | Can or Cannot Create |
         | Project Manager | Can Create           |
         | Cloud Admin     | Can Create           |
 
-      Examples: Unauthorized Roles
+      Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Create |
         | Developer       | Cannot Create        |
         | IT Security     | Cannot Create        |
@@ -38,7 +38,7 @@ Feature: Create an Image from a Running Instance
      When I create an image from the instance and give it a visibility of <Visibility>
      Then the image should be visible to <Visible To>
 
-      Examples:
+      Scenarios:
         | Visibility | Visible To |
         | (Default)  | Project    |
         | Private    | Project    |

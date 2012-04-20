@@ -9,11 +9,11 @@ Feature: Delete a user
     Given I have a role of <Role> in the project
      Then I <Can or Cannot Delete> the user astark
 
-      Examples: Authorized Roles
+      Scenarios: Authorized Roles
         | Role            | Can or Cannot Delete |
         | Cloud Admin     | Can Delete           |
 
-      Examples: Unauthorized Roles
+      Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Delete |
         | Project Manager | Cannot Delete        |
         | Developer       | Cannot Delete        |

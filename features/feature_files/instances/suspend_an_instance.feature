@@ -16,12 +16,12 @@ Feature: Suspend an Instance
     Given I have a role of <Role> in the project
      Then I <Can or Cannot Suspend> the instance
 
-      Examples: Authorized Roles
+      Scenarios: Authorized Roles
         | Role            | Can or Cannot Suspend |
         | Project Manager | Can Suspend           |
         | Cloud Admin     | Can Suspend           |
 
-      Examples: Unauthorized Roles
+      Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Suspend |
         | Developer       | Cannot Suspend        |
         | IT Security     | Cannot Suspend        |

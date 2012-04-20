@@ -12,11 +12,11 @@ Feature: Log In
     When I log in with the following credentials: <Username>, <Password>
     Then I will be redirected to the <Redirect To> page
 
-    Examples: Valid credentials
+    Scenarios: Valid credentials
       | Username  | Password   | Redirect To |
       | rstark    | w1nt3rf3ll | Projects    |
 
-    Examples: Invalid credentials
+    Scenarios: Invalid credentials
       | Username  | Password   | Redirect To | Reason                                                       |
       | RSTARK    | w1nt3rf3ll | Login       | Username is case sensitive (This is an OpenStack constraint) |
       |           | w1nt3rf3ll | Login       | Username can't be empty                                      |
@@ -27,7 +27,7 @@ Feature: Log In
      When I try to access the <Secure Page> page
      Then I will be redirected to the Login page
 
-    Examples: Secure Pages
+    Scenarios: Secure Pages
       | Secure Page |
       | Projects    |
       | Users       |

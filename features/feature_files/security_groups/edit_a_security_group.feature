@@ -21,13 +21,13 @@ Feature: Edit a Security Group
     Given I have a role of <Role> in the project
      Then I <Can or Cannot Edit> a security group in the project
 
-      Examples: Authorized Roles
+      Scenarios: Authorized Roles
         | Role            | Can or Cannot Edit |
         | Project Manager | Can Edit           |
         | Network Admin   | Can Edit           |
         | Cloud Admin     | Can Edit           |
 
-      Examples: Unauthorized Roles
+      Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Edit |
         | Developer       | Cannot Edit        |
         | IT Security     | Cannot Edit        |
@@ -40,12 +40,12 @@ Feature: Edit a Security Group
      When I edit a security group with attributes <Name>, <Description>
      Then the security will be <Updated or Not>
 
-      Examples: Valid Values
+      Scenarios: Valid Values
         | Name             | Description              | Updated or Not |
         | Database Servers | Only port 443 is allowed | Updated        |
         | Database Servers |                          | Updated        |
 
-      Examples: Invalid Values
+      Scenarios: Invalid Values
         | Name             | Description              | Updated or Not |
         |                  | Only port 443 is allowed | Not Updated    |
 
@@ -56,7 +56,7 @@ Feature: Edit a Security Group
      When I edit the Database Servers security group with the following rule: <Protocol>, <From Port>, <To Port>, <Source Type>, <Source>
      Then the security group will be <Updated or Not>
 
-     Examples: Valid Rules
+     Scenarios: Valid Rules
        | Protocol | From Port | To Port  | Source Type    | Source      | Updated or Not |
        | TCP      | (Random)  | (Random) | Subnet         | 0.0.0.0/25  | Updated        |
        | TCP      | (Random)  | (Random) | Security Group | Web Servers | Updated        |
@@ -65,7 +65,7 @@ Feature: Edit a Security Group
        | ICMP     | (Random)  | (Random) | Subnet         | 0.0.0.0/25  | Updated        |
        | ICMP     | (Random)  | (Random) | Security Group | Web Servers | Updated        |
 
-     Examples: Invalid Rules
+     Scenarios: Invalid Rules
        | Protocol | From Port | To Port  | Source Type    | Source      | Updated or Not | Reason                                     |
        | (Any)    | (None)    | (Random) | Subnet         | 0.0.0.0/25  | Not Updated    | 'From Port' must be specified              |
        | (Any)    | (Random)  | (None)   | Subnet         | 0.0.0.0/25  | Not Updated    | 'To Port' must be specified                |

@@ -14,7 +14,7 @@ Feature: List Projects
     Given I have a role of <Role> in the project
      Then I <Can or Cannot See> it in the list of projects
 
-      Examples: Authorized Roles
+      Scenarios: Authorized Roles
         | Role            | Can or Cannot See |
         | Project Manager | Can See           |
         | Developer       | Can See           |
@@ -22,6 +22,6 @@ Feature: List Projects
         | Cloud Admin     | Can See           |
         | IT Security     | Can See           |
 
-      Examples: Unauthorized Roles
+      Scenarios: Unauthorized Roles
         | Role            | Can or Cannot See |
         | (None)          | Cannot See        |

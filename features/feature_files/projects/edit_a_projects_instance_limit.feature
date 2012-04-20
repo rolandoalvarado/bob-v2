@@ -16,12 +16,12 @@ Feature: Edit a Project's Instance Limit
     Given I have a role of <Role> in the project
      Then I <Can or Cannot Edit> the instance limit of the project
 
-      Examples: Authorized Roles
+      Scenarios: Authorized Roles
         | Role            | Can or Cannot Edit |
         | Project Manager | Can Edit           |
         | Cloud Admin     | Can Edit           |
 
-      Examples: Unauthorized Roles
+      Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Edit |
         | Developer       | Cannot Edit        |
         | IT Security     | Cannot Edit        |
@@ -36,12 +36,12 @@ Feature: Edit a Project's Instance Limit
      When I set the instance limit to <New Limit>
      Then the project's instance limit will be <Updated or Not>
 
-      Examples: Valid New Limit
+      Scenarios: Valid New Limit
         | Running Instances | Old Limit | New Limit | Updated or Not |
         | 1                 | 2         | 1         | Updated        |
         | 1                 | 2         | 3         | Updated        |
 
-      Examples: Invalid New Limit
+      Scenarios: Invalid New Limit
         | Running Instances | Old Limit | New Limit | Updated or Not | Reason                                                        |
         | 2                 | 2         | 1         | Not Updated    | Limit can't be lower than current number of running instances |
         | 1                 | 1         | 0         | Not Updated    | Limit can't be zero                                           |

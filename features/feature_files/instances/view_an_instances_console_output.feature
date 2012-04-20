@@ -17,12 +17,12 @@ Feature: View an Instance's Console Output
     Given I have a role of <Role> in the project
      Then I <Can or Cannot View> console output of the instance
 
-      Examples: Authorized Roles
+      Scenarios: Authorized Roles
         | Role            | Can or Cannot View |
         | Project Manager | Can View           |
         | Cloud Admin     | Can View           |
 
-      Examples: Unauthorized Roles
+      Scenarios: Unauthorized Roles
         | Role            | Can or Cannot View |
         | Developer       | Cannot View        |
         | IT Security     | Cannot View        |

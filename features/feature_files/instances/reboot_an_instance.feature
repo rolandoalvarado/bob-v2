@@ -17,12 +17,12 @@ Feature: Reboot an Instance
     Given I have a role of <Role> in the project
      Then I <Can or Cannot Reboot> the instance
 
-      Examples: Authorized Roles
+      Scenarios: Authorized Roles
         | Role            | Can or Cannot Reboot |
         | Project Manager | Can Reboot           |
         | Cloud Admin     | Can Reboot           |
 
-      Examples: Unauthorized Roles
+      Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Reboot |
         | Developer       | Cannot Reboot        |
         | IT Security     | Cannot Reboot        |

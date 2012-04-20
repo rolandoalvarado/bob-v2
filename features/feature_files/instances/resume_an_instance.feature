@@ -17,12 +17,12 @@ Feature: Resume an Instance
     Given I have a role of <Role> in the project
      Then I <Can or Cannot Resume> the instance
 
-      Examples: Authorized Roles
+      Scenarios: Authorized Roles
         | Role            | Can or Cannot Resume |
         | Project Manager | Can Resume           |
         | Cloud Admin     | Can Resume           |
 
-      Examples: Unauthorized Roles
+      Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Resume |
         | Developer       | Cannot Resume        |
         | IT Security     | Cannot Resume        |

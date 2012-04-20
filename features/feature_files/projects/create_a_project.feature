@@ -17,7 +17,7 @@ Feature: Create a Project
     Given I am <Logged In or Not>
      Then I <Can or Cannot Create> a project
 
-      Examples:
+      Scenarios:
         | Logged In or Not | Can or Cannot Create |
         | Logged In        | Can Create           |
         | Not Logged In    | Cannot Create        |
@@ -28,12 +28,12 @@ Feature: Create a Project
      When I create a project with attributes <Name>, <Description>
      Then the project will be <Created or Not>
 
-      Examples: Valid Values
+      Scenarios: Valid Values
         | Name               | Description     | Created or Not |
         | My Awesome Project | Another project | Created        |
         | My Awesome Project | (None)          | Created        |
 
-      Examples: Invalid Values
+      Scenarios: Invalid Values
         | Name               | Description     | Created or Not | Reason           |
         | (None)             | Another project | Not Created    | Name is required |
 

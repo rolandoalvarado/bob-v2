@@ -15,12 +15,12 @@ Feature: Import an Image
     Given I have a role of <Role> in the project
      Then I <Can or Cannot Import> an image to the project
 
-      Examples: Authorized Roles
+      Scenarios: Authorized Roles
         | Role            | Can or Cannot Import |
         | Project Manager | Can Import           |
         | Cloud Admin     | Can Import           |
 
-      Examples: Unauthorized Roles
+      Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Import |
         | Developer       | Cannot Import        |
         | IT Security     | Cannot Import        |
@@ -33,7 +33,7 @@ Feature: Import an Image
      When I import an image that has a format of <Image Format>
      Then the image will be imported to the project
 
-      Examples:
+      Scenarios:
         See the list of available image formats at http://goo.gl/0yGJg
         | Image Format |
         | Raw          |

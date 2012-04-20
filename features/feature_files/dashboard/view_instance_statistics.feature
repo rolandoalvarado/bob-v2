@@ -24,13 +24,13 @@ Feature: View Instance Statistics
     Given I have a role of <Role> in the project
      Then I <Can or Cannot View> instance statistics in that project
 
-      Examples: Authorized Roles
+      Scenarios: Authorized Roles
         | Role            | Can or Cannot View |
         | Project Manager | Can View           |
         | Developer       | Can View           |
         | Cloud Admin     | Can View           |
 
-      Examples: Unauthorized Roles
+      Scenarios: Unauthorized Roles
         | Role            | Can or Cannot View |
         | IT Security     | Cannot View        |
         | Network Admin   | Cannot View        |
@@ -40,7 +40,7 @@ Feature: View Instance Statistics
     Given I am authorized to view instance statistics in the project
      Then I should see the <Type> statistics for the instance
 
-      Examples:
+      Scenarios:
         | Type |
         | RAM  |
         | CPU  |

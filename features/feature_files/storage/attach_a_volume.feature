@@ -19,12 +19,12 @@ Feature: Attach a Volume
     Given I have a role of <Role> in the project
      Then I <Can or Cannot Attach> the volume to the instance
 
-      Examples: Authorized Roles
+      Scenarios: Authorized Roles
         | Role            | Can or Cannot Create |
         | Project Manager | Can Create           |
         | Cloud Admin     | Can Create           |
 
-      Examples: Unauthorized Roles
+      Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Create |
         | Developer       | Cannnot Create       |
         | IT Security     | Cannot Create        |
@@ -39,10 +39,10 @@ Feature: Attach a Volume
      When I attach the volume to the instance with mount point <Mount Point>
      Then the volume will be <Attached or Not> to the instance
 
-      Examples: Valid Attributes
+      Scenarios: Valid Attributes
         | Mount Point | Attached or Not |
         | (Any)       | Attached        |
 
-      Examples: Invalid Attributes
+      Scenarios: Invalid Attributes
         | Mount Point | Attached or Not | Reason                        |
         | (None)      | Not Attached    | Mount point must be indicated |

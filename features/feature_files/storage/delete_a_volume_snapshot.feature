@@ -12,12 +12,12 @@ Feature: Delete a Volume Snapshot
     Given I have a role of <Role> in the project
      Then I <Can or Cannot Delete> a snapshot of the volume
 
-      Examples: Authorized Roles
+      Scenarios: Authorized Roles
         | Role            | Can or Cannot Delete |
         | Project Manager | Can Delete           |
         | Cloud Admin     | Can Delete           |
 
-      Examples: Unauthorized Roles
+      Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Delete |
         | Developer       | Cannnot Delete       |
         | IT Security     | Cannot Delete        |

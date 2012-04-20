@@ -17,12 +17,12 @@ Feature: Unpause a Paused Instance
     Given I have a role of <Role> in the project
      Then I <Can or Cannot Unpause> the instance
 
-      Examples: Authorized Roles
+      Scenarios: Authorized Roles
         | Role            | Can or Cannot Unpause |
         | Project Manager | Can Unpause           |
         | Cloud Admin     | Can Unpause           |
 
-      Examples: Unauthorized Roles
+      Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Unpause |
         | Developer       | Cannot Unpause        |
         | IT Security     | Cannot Unpause        |

@@ -20,12 +20,12 @@ Feature: Grant Membership to a Project
     Given I have a role of <Role> in the project
      Then I <Can or Cannot Grant> project membership to Arya Stark
 
-      Examples: Authorized Roles
+      Scenarios: Authorized Roles
         | Role            | Can or Cannot Grant |
         | Project Manager | Can Grant           |
         | Cloud Admin     | Can Grant           |
 
-      Examples: Unauthorized Roles
+      Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Grant |
         | Developer       | Cannot Grant        |
         | IT Security     | Cannot Grant        |

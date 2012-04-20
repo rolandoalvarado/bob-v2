@@ -10,12 +10,12 @@ Feature: View a Project's Compute Usage Report
     Given I have a role of <Role> in the project
      Then I <Can or Cannot View> the project's usage report
 
-      Examples: Authorized Roles
+      Scenarios: Authorized Roles
         | Role            | Can or Cannot View |
         | Project Manager | Can View           |
         | Cloud Admin     | Can View           |
 
-      Examples: Unauthorized Roles
+      Scenarios: Unauthorized Roles
         | Role            | Can or Cannot View |
         | Developer       | Cannot View        |
         | Network Admin   | Cannot View        |
@@ -33,7 +33,7 @@ Feature: View a Project's Compute Usage Report
     Given I am authorized to view the project's usage report
      Then I can download the usage report in <Format> format
 
-      Examples:
+      Scenarios:
         | Format |
         | HTML   |
         | CSV    |

@@ -21,13 +21,13 @@ Feature: Create a Security Group
     Given I have a role of <Role> in the project
      Then I <Can or Cannot Create> a security group in the project
 
-      Examples: Authorized Roles
+      Scenarios: Authorized Roles
         | Role            | Can or Cannot Create |
         | Project Manager | Can Create           |
         | Network Admin   | Can Create           |
         | Cloud Admin     | Can Create           |
 
-      Examples: Unauthorized Roles
+      Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Create |
         | Developer       | Cannot Create        |
         | IT Security     | Cannot Create        |
@@ -40,12 +40,12 @@ Feature: Create a Security Group
      When I create a security group with attributes <Name>, <Description>
      Then the security group will be <Created or Not>
 
-      Examples: Valid Values
+      Scenarios: Valid Values
         | Name             | Description              | Created or Not |
         | Database Servers | Only port 443 is allowed | Created        |
         | Database Servers |                          | Created        |
 
-      Examples: Invalid Values
+      Scenarios: Invalid Values
         | Name             | Description              | Created or Not | Reason              |
         |                  | Only port 443 is allowed | Not Created    | Name can't be empty |
 
@@ -56,7 +56,7 @@ Feature: Create a Security Group
      When I create a security group with the following rule: <Protocol>, <From Port>, <To Port>, <Source Type>, <Source>
      Then the security group will be <Created or Not>
 
-      Examples: Valid Rules
+      Scenarios: Valid Rules
         | Protocol | From Port | To Port  | Source Type    | Source      | Created or Not |
         | TCP      | (Random)  | (Random) | Subnet         | 0.0.0.0/25  | Created        |
         | TCP      | (Random)  | (Random) | Security Group | Web Servers | Created        |
@@ -65,7 +65,7 @@ Feature: Create a Security Group
         | ICMP     | (Random)  | (Random) | Subnet         | 0.0.0.0/25  | Created        |
         | ICMP     | (Random)  | (Random) | Security Group | Web Servers | Created        |
 
-      Examples: Invalid Rules
+      Scenarios: Invalid Rules
         | Protocol | From Port | To Port  | Source Type    | Source      | Created or Not | Reason                                     |
         | (Any)    | (None)    | (Random) | Subnet         | 0.0.0.0/25  | Not Created    | 'From Port' must be specified              |
         | (Any)    | (Random)  | (None)   | Subnet         | 0.0.0.0/25  | Not Created    | 'To Port' must be specified                |

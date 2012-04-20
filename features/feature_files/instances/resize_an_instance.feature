@@ -20,12 +20,12 @@ Feature: Resize an Instance
     Given I have a role of <Role> in the project
      Then I <Can or Cannot Resize> the instance
 
-      Examples: Authorized Roles
+      Scenarios: Authorized Roles
         | Role            | Can or Cannot Resize |
         | Project Manager | Can Resize           |
         | Cloud Admin     | Can Resize           |
 
-      Examples: Unauthorized Roles
+      Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Resize |
         | Developer       | Cannot Resize        |
         | IT Security     | Cannot Resize        |

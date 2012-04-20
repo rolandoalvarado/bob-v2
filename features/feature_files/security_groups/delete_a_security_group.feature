@@ -18,13 +18,13 @@ Feature: Delete a Security Group
     Given I have a role of <Role> in the project
      Then I <Can or Cannot Delete> the Web Servers security group in the project
 
-      Examples: Authorized Roles
+      Scenarios: Authorized Roles
         | Role            | Can or Cannot Delete |
         | Project Manager | Can Delete           |
         | Network Admin   | Can Delete           |
         | Cloud Admin     | Can Delete           |
 
-      Examples: Unauthorized Roles
+      Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Delete |
         | Developer       | Cannot Delete        |
         | IT Security     | Cannot Delete        |

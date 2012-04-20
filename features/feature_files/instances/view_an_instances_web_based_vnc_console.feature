@@ -29,13 +29,13 @@ Feature: View an Instance's Web-based VNC Console
     Given I have a role of <Role> in the project
      Then I <Can or Cannot View> the instance's web-based VNC console
 
-      Examples: Authorized Roles
+      Scenarios: Authorized Roles
         | Role            | Can or Cannot View |
         | Project Manager | Can View           |
         | Developer       | Can View           |
         | Cloud Admin     | Can View           |
 
-      Examples: Unauthorized Roles
+      Scenarios: Unauthorized Roles
         | Role            | Can or Cannot View |
         | IT Security     | Cannot View        |
         | Network Admin   | Cannot View        |

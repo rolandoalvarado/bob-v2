@@ -12,7 +12,7 @@ Feature: Connect to an Instance
      When I create an instance on that project based on the image <Image Name>
      Then I can connect to that instance via <Remote Client>
 
-    Examples:
+    Scenarios:
       | Image Name            | Remote Client |
       | Windows2008-R2-server | RDP           |
       | CentOS 5.8            | SSH           |

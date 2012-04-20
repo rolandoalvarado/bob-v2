@@ -7,11 +7,11 @@ Feature: Create a User
     Given I have a role of <Role> in the project
      Then I <Can or Cannot Create> a user
 
-      Examples: Authorized Roles
+      Scenarios: Authorized Roles
         | Role            | Can or Cannot Create |
         | Cloud Admin     | Can Create           |
 
-      Examples: Unauthorized Roles
+      Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Create |
         | Project Manager | Cannot Create        |
         | Developer       | Cannot Create        |
@@ -26,12 +26,12 @@ Feature: Create a User
      When I create a user with attributes <Username>, <Email>, <Password>, and <Password Confirmation>
      Then the user will be <Created or Not>
 
-      Examples: Valid User Attributes
+      Scenarios: Valid User Attributes
         | Username | Email                | Password | Password Confirmation | Created or Not |
         | astark   | astark@morphlabs.com | fkd2350a | fkd2350a              | Created        |
         | astark   | astark@morphlabs.com | ++afd]3b | ++afd]3b              | Created        |
 
-      Examples: Invalid User Attributes
+      Scenarios: Invalid User Attributes
         | Username | Email                | Password | Password Confirmation | Created or Not | Reason                                            |
         | (None)   | astark@morphlabs.com | fkd2350a | fkd2350a              | Not Created    | Username can't be empty                           |
         | astark+  | astark@morphlabs.com | fkd2350a | fkd2350a              | Not Created    | Username can only contain alphanumeric characters |
@@ -48,11 +48,11 @@ Feature: Create a User
      When I create a user with the following membership: <Project>, <Role>, and <Is Primary>
      Then the user will be <Created or Not>
 
-      Examples: Valid Membership Attributes
+      Scenarios: Valid Membership Attributes
         | Project | Role   | Is Primary | Created or Not |
         | (Any)   | (Any)  | Yes        | Created        |
 
-      Examples: Invalid Membership Attributes
+      Scenarios: Invalid Membership Attributes
         | Project | Role   | Is Primary | Created or Not | Reason                                      |
         | (None)  | (Any)  | Yes        | Not Created    | Project must be indicated                   |
         | (Any)   | (None) | Yes        | Not Created    | Role must be indicated                      |

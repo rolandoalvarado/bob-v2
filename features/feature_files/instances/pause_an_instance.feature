@@ -15,12 +15,12 @@ Feature: Pause an Instance
     Given I have a role of <Role> in the project
      Then I <Can or Cannot Pause> the instance
 
-      Examples: Authorized Roles
+      Scenarios: Authorized Roles
         | Role            | Can or Cannot Pause |
         | Project Manager | Can Pause           |
         | Cloud Admin     | Can Pause           |
 
-      Examples: Unauthorized Roles
+      Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Pause |
         | Developer       | Cannot Pause        |
         | IT Security     | Cannot Pause        |

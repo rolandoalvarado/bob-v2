@@ -18,12 +18,12 @@ Feature: Create a Volume on the Storage Node
     Given I have a role of <Role> in the project
      Then I <Can or Cannot Create> a volume in the project
 
-      Examples: Authorized Roles
+      Scenarios: Authorized Roles
         | Role            | Can or Cannot Create |
         | Project Manager | Can Create           |
         | Cloud Admin     | Can Create           |
 
-      Examples: Unauthorized Roles
+      Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Create |
         | Developer       | Cannnot Create       |
         | IT Security     | Cannot Create        |
@@ -36,11 +36,11 @@ Feature: Create a Volume on the Storage Node
      When I create a volume with attributes <Name>, <Size>
      Then the volume will be <Created or Not>
 
-      Examples: Valid Values
+      Scenarios: Valid Values
         | Name             | Size   | Created or Not |
         | Database storage | 5GB    | Created        |
 
-      Examples: Invalid Values
+      Scenarios: Invalid Values
         | Name             | Size   | Created or Not | Reason              |
         | (None)           | 5GB    | Not Created    | Name can't be empty |
         | Database storage | (None) | Not Created    | Size can't be empty |

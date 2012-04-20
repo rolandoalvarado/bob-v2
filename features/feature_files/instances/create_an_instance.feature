@@ -15,12 +15,12 @@ Feature: Create an Instance
     Given I have a role of <Role> in the project
      Then I <Can or Cannot Create> an instance in the project
 
-      Examples: Authorized Roles
+      Scenarios: Authorized Roles
         | Role            | Can or Cannot Create |
         | Project Manager | Can Create           |
         | Cloud Admin     | Can Create           |
 
-      Examples: Unauthorized Roles
+      Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Create |
         | Developer       | Cannnot Create       |
         | IT Security     | Cannot Create        |
@@ -33,18 +33,18 @@ Feature: Create an Instance
      When I create an instance with attributes <Image>, <Name>, <Flavor>, <Keypair> and <Security Group>
      Then the instance will be <Created or Not>
 
-      Examples: Valid Values
+      Scenarios: Valid Values
         | Image  | Name        | Flavor | Keypair | Security Group | Created or Not |
         | (Any)  | My Server   | (Any)  | (Any)   | (Any)          | Created        |
 
-      Examples: Invalid Values
+      Scenarios: Invalid Values
         | Image  | Name        | Flavor | Keypair | Security Group | Created or Not | Reason                                           |
         | (None) | My Server   | (Any)  | (Any)   | (Any)          | Not Created    | Must specify an image                            |
         | (Any)  | (None)      | (Any)  | (Any)   | (Any)          | Not Created    | Must specify a name                              |
         | (Any)  | My Server   | (Any)  | (None)  | (Any)          | Not Created    | Must supply a keypair                            |
         | (Any)  | My Server   | (Any)  | (Any)   | (None)         | Not Created    | Instance should have at least one security group |
 
-      Examples: Specific Images
+      Scenarios: Specific Images
         | Image                 | Name        | Flavor | Keypair | Security Group | Created or Not |
         | Windows2008-R2-server | My Server   | (Any)  | (Any)   | (Any)          | Created        |
         | CentOS 5.8            | My Server   | (Any)  | (Any)   | (Any)          | Created        |

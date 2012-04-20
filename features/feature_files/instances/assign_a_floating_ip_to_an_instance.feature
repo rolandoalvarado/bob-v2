@@ -19,12 +19,12 @@ Feature: Assign a Floating IP to an Instance
     Given I have a role of <Role> in the project
      Then I <Can or Cannot Assign> a floating IP to an instance in the project
 
-      Examples: Authorized Roles
+      Scenarios: Authorized Roles
         | Role            | Can or Cannot Assign |
         | Project Manager | Can Assign           |
         | Cloud Admin     | Can Assign           |
 
-      Examples: Unauthorized Roles
+      Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Assign |
         | Developer       | Cannot Assign        |
         | IT Security     | Cannot Assign        |
