@@ -13,9 +13,6 @@ Feature: Create a Project
   :project_id to his or her access key. If no project is specified in the
   API request, Compute attempts to use a project with the same id as the user.
 
-  Background:
-    * A user named Arya Stark exists in the system
-
   Scenario Outline: Check User Permissions
     Given I am <Logged In or Not>
      Then I <Can or Cannot Create> a project
@@ -41,8 +38,9 @@ Feature: Create a Project
         | (None)             | Another project | Not Created    | Name is required |
 
 
-  Scenario: Create a project
+  Scenario: Create a Project That is Not Accessible to Another User
    Given I am authorized to create projects
+     And a user named Arya Stark exists in the system
     When I create a project
     Then I can view that project
      But Arya Stark cannot view that project
