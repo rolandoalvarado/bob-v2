@@ -30,9 +30,9 @@ Feature: Create an Image from a Running Instance
 
 
   Scenario Outline: Define Image Visibility on Create
-    To prevent the inadvertent exposure of secure data, creating an image from a
-    running instance is private by default, unless explicitly set by the user
-    as public.
+    Note: To prevent the inadvertent exposure of secure data, creating an image
+    from a running instance is private by default, unless explicitly set by the
+    user as public.
 
     Given I am authorized to create images from instances in the project
      When I create an image from the instance and give it a visibility of <Visibility>
@@ -46,19 +46,19 @@ Feature: Create an Image from a Running Instance
 
 
   Scenario: Save Image in OVF Format
-    Images created using this feature should use the OVF format
-
     Given I am authorized to create images from instances in the project
-     When I create an image from the instance
-     Then the image should be created using the OVF format
+     Then the images I create will be written in the OVF format
 
 
   Scenario: Add Meta-data on Create
-    I should be able to add arbitrary meta-data when I create an image. This
-    meta-data should be in key-value pairs. For example: description='This is
-    a copy of our web server'; version='2.0'. I should be able to specify any
-    key and value. Thus, the meta-data is like a set of custom fields.
+    NOTE: Users should be able to add arbitrary meta-data when they create an
+    image. This meta-data should be in key-value pairs. For example:
+
+      - description='This is a copy of our web server'
+      - version='2.0'
+
+    Users should be able to specify any key and value. Thus, the meta-data is
+    like a set of custom fields.
 
     Given I am authorized to create images from instances in the project
-     When I create an image from the instance and add meta-data to it
-     Then the created image should contain that meta-data
+     Then I can add meta-data when I create an image
