@@ -94,7 +94,7 @@ How to write Features
             |    $100 |              $50 | Dispensed        |
             |    $100 |             $150 | Not Dispensed    |
 
-* For more sample feature files, see [the actual mCloud Features feature files](https://bitbucket.org/wdamarillo/mcloud_features/src/375ec13be815/features/feature_files/).
+* For more sample feature files, see [the actual mCloud Features feature files](https://bitbucket.org/wdamarillo/mcloud_features/src/master/features/feature_files/).
 
 Helpful references for development
 ----------------------------------
