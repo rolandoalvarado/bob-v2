@@ -30,11 +30,11 @@ Feature: Import an Image
 
   Scenario Outline: Import an Image
     Given I am authorized to import images to the project
-     When I import an image that has a format of <Image Format>
-     Then the image will be imported to the project
+     Then I can import an image with a format of <Image Format>
 
       Scenarios:
-        See the list of available image formats at http://goo.gl/0yGJg
+        NOTE: See the list of available image formats at http://goo.gl/0yGJg
+
         | Image Format |
         | Raw          |
         | AMI          |
@@ -46,11 +46,14 @@ Feature: Import an Image
 
 
   Scenario: Add Meta-data on Import
-    I should be able to add arbitrary meta-data when I create an image. This
-    meta-data should be in key-value pairs. For example: description='This is
-    a copy of our web server'; version='2.0'. I should be able to specify any
-    key and value. Thus, the meta-data is like a set of custom fields.
+    NOTE: Users should be able to add arbitrary meta-data when they create an
+    image. This meta-data should be in key-value pairs. For example:
+
+      - description='This is a copy of our web server'
+      - version='2.0'
+
+    Users should be able to specify any key and value. Thus, the meta-data is
+    like a set of custom fields.
 
     Given I am authorized to import images to the project
-     When I import an image and add meta-data to it
-     Then the imported image should contain that meta-data
+     Then I can add meta-data when I import an image
