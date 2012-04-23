@@ -1,5 +1,8 @@
+require_relative 'gems'
+
 # Fixes/patches that I have not submitted to the fog repo since I'm still
 # observing them. -- Mark (mmaglana@morphlabs.com)
+
 module Fog
 
   class Collection < Array
