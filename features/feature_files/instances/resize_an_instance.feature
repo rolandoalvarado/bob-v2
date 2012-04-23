@@ -16,6 +16,7 @@ Feature: Resize an Instance
     * The project has more than one instance flavor
 
 
+  @permissions
   Scenario Outline: Check User Permissions
     Given I have a role of <Role> in the project
      Then I <Can or Cannot Resize> the instance

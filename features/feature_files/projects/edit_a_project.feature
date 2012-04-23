@@ -5,6 +5,7 @@ Feature: Edit a Project
     * A project exists in the system
 
 
+  @permissions
   Scenario Outline: Check User Permissions
     Given I have a role of <Role> in the project
      Then I <Can or Cannot Edit> the project

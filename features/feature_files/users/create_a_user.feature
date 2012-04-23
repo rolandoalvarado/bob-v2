@@ -3,6 +3,7 @@ Feature: Create a User
   As a cloud administrator, I want to create users.
 
 
+  @permissions
   Scenario Outline: Check User Permissions
     Given I have a role of <Role> in the project
      Then I <Can or Cannot Create> a user

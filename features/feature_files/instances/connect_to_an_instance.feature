@@ -7,6 +7,7 @@ Feature: Connect to an Instance
     * A project exists in the system
     * The project does not have any running instances
 
+
   Scenario Outline:
     Given I am authorized to create instances in the project
      When I create an instance on that project based on the image <Image Name>

@@ -14,6 +14,7 @@ Feature: Delete a volume
     * The project has a volume
 
 
+  @permissions
   Scenario Outline: Check User Permissions
     Given I have a role of <Role> in the project
      Then I <Can or Cannot Delete> a volume in the project

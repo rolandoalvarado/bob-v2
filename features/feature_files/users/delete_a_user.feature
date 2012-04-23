@@ -5,6 +5,7 @@ Feature: Delete a user
     * A user named astark exists in the system
 
 
+  @permissions
   Scenario Outline: Check User Permissions
     Given I have a role of <Role> in the project
      Then I <Can or Cannot Delete> the user astark

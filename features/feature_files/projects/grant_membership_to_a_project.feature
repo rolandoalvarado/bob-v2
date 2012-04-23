@@ -16,6 +16,8 @@ Feature: Grant Membership to a Project
     * A project exists in the system
     * A user named Arya Stark exists in the system
 
+
+  @permissions
   Scenario Outline: Check User Permissions
     Given I have a role of <Role> in the project
      Then I <Can or Cannot Grant> project membership to Arya Stark

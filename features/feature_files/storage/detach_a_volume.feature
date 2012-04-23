@@ -15,6 +15,7 @@ Feature: Detach a Volume
     * The instance has an attached volume
 
 
+  @permissions
   Scenario Outline: Check User Permissions
     Given I have a role of <Role> in the project
      Then I <Can or Cannot Detach> the volume from the instance

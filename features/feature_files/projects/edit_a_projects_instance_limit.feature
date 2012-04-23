@@ -12,6 +12,7 @@ Feature: Edit a Project's Instance Limit
   Background:
     * A project exists in the system
 
+  @permissions
   Scenario Outline: Check User Permissions
     Given I have a role of <Role> in the project
      Then I <Can or Cannot Edit> the instance limit of the project

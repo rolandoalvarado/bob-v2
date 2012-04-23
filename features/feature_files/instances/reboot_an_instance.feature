@@ -13,6 +13,7 @@ Feature: Reboot an Instance
     * The project has a running instance
 
 
+  @permissions
   Scenario Outline: Check User Permissions
     Given I have a role of <Role> in the project
      Then I <Can or Cannot Reboot> the instance

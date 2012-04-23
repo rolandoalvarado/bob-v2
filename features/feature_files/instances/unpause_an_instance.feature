@@ -13,6 +13,7 @@ Feature: Unpause a Paused Instance
     * The instance is paused
 
 
+  @permissions
   Scenario Outline: Check User Permissions
     Given I have a role of <Role> in the project
      Then I <Can or Cannot Unpause> the instance

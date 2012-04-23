@@ -13,6 +13,7 @@ Feature: Delete an Image
     * The project has an image
 
 
+  @permissions
   Scenario Outline: Check User Permissions
     Given I have a role of <Role> in the project
      Then I <Can or Cannot Delete> the image in the project

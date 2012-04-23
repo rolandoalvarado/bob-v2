@@ -8,6 +8,7 @@ Feature: Delete a Volume Snapshot
     * The volume has a saved snapshot
 
 
+  @permissions
   Scenario Outline: Check User Permissions
     Given I have a role of <Role> in the project
      Then I <Can or Cannot Delete> a snapshot of the volume

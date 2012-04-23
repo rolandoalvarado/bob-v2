@@ -12,6 +12,8 @@ Feature: Create an Image from a Running Instance
     * A project exists in the system
     * The project has a running instance
 
+
+  @permissions
   Scenario Outline: Check User Permissions
     Given I have a role of <Role> in the project
      Then I <Can or Cannot Create> an image from an instance in the project

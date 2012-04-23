@@ -6,6 +6,7 @@ Feature: View a Project's Compute Usage Report
     * A project exists in the system
 
 
+  @permissions
   Scenario Outline: Check User Permissions
     Given I have a role of <Role> in the project
      Then I <Can or Cannot View> the project's usage report

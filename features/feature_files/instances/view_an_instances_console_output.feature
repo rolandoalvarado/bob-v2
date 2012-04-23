@@ -13,6 +13,7 @@ Feature: View an Instance's Console Output
     * The project has one running instance
 
 
+  @permissions
   Scenario Outline: Check User Permissions
     Given I have a role of <Role> in the project
      Then I <Can or Cannot View> console output of the instance

@@ -11,6 +11,7 @@ Feature: Pause an Instance
     * The project has an instance that is running on KVM
 
 
+  @permissions
   Scenario Outline: Check User Permissions
     Given I have a role of <Role> in the project
      Then I <Can or Cannot Pause> the instance

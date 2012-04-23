@@ -8,6 +8,7 @@ Feature: Create a Volume Snapshot
     * The project has an available volume
 
 
+  @permissions
   Scenario Outline: Check User Permissions
     Given I have a role of <Role> in the project
      Then I <Can or Cannot Create> a snapshot of the volume

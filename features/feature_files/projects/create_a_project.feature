@@ -13,14 +13,23 @@ Feature: Create a Project
   :project_id to his or her access key. If no project is specified in the
   API request, Compute attempts to use a project with the same id as the user.
 
+
+  @permissions
   Scenario Outline: Check User Permissions
-    Given I am <Logged In or Not>
+    Given I have a role of <Role> in the project
      Then I <Can or Cannot Create> a project
 
-      Scenarios:
-        | Logged In or Not | Can or Cannot Create |
-        | Logged In        | Can Create           |
-        | Not Logged In    | Cannot Create        |
+      Scenarios: Authorized Roles
+        | Role            | Can or Cannot Create |
+        | Project Manager | Can Create           |
+        | Cloud Admin     | Can Create           |
+
+      Scenarios: Unauthorized Roles
+        | Role            | Can or Cannot Create |
+        | Developer       | Cannot Create        |
+        | IT Security     | Cannot Create        |
+        | Network Admin   | Cannot Create        |
+        | (None)          | Cannot Create        |
 
 
   Scenario Outline: Create a Project

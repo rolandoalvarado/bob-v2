@@ -25,6 +25,7 @@ Feature: View an Instance's Web-based VNC Console
     * The project has one running instance
 
 
+  @permissions
   Scenario Outline: Check User Permissions
     Given I have a role of <Role> in the project
      Then I <Can or Cannot View> the instance's web-based VNC console

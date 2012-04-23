@@ -11,6 +11,8 @@ Feature: Create an Instance
     * An image is available for use
     * The project does not have any running instances
 
+
+  @permissions
   Scenario Outline: Check User Permissions
     Given I have a role of <Role> in the project
      Then I <Can or Cannot Create> an instance in the project
