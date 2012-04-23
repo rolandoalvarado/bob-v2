@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+description="Generates a permissions matrix"
+
+if [ $# -eq 2 ] && [ $1 == 'describe' ]; then
+  printf "  %-0$2s - $description\n" `basename $0`
+  exit 0
+elif [ $# -eq 1 ] && [ $1 == '--help' ]; then
+  printf "Just execute \`run/`basename $0`\` without arguments\n"
+  exit 0
+fi
+
+
+bundle exec cucumber --tags @permissions --no-profile --require features --dry-run --format Cucumber::Formatter::Relaxdiego::PermissionsMatrix --out output/permissions --require features
