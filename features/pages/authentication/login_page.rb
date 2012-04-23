@@ -1,10 +1,8 @@
-require_relative '../web_client_page'
-
 class LoginPage < WebClientPage
-  validates_path '/'
+  path '/'
 
-  validates_selector '#username'
-  validates_selector '#password'
+  username_field '#username'
+  password_field '#password'
 
-  submit_button_or_link_selector '#submit'
+  submit_button  '#submit'
 end

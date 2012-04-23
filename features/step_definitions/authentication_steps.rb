@@ -2,34 +2,93 @@
 # GIVENs
 #=================
 
+Given /^I am logged in$/ do
+  username = 'rstark'
+  password = 'asdf123'
+
+  steps %{
+    * Click the logout button if currently logged in
+    * Ensure that a user with username #{ username } and password #{ password } exists
+    * Visit the Login page
+    * Fill in the username field with #{ username }
+    * Fill in the password field with #{ password }
+    * Click the submit button
+    * Current page should have the logout button
+  }
+end
+
 Given /^I am not logged in$/ do
-  @page = WebClientPage.new
-  @page.click_log_out if @page.is_secure_page?
+  steps %{
+    * Cick the logout button if currently logged in
+  }
 end
 
 #=================
 # WHENs
 #=================
 
-When /^I log in with the following credentials: (.*), (.*)$/ do |username, password|
-  @page = LoginPage.new
-  @page.visit
-  @page.should_be_valid
-  @page.fill_in :username, Unique.username(username)
-  @page.fill_in :password, password
-  @page.submit
+When /^I login with the following credentials: (.*), (.*)$/ do |username, password|
+  steps %{
+    * Visit the login page
+    * Current page should have the correct path
+    * Current page should have the username field
+    * Current page should have the password field
+    * Current page should have the submit button
+
+    * Fill in the username field with #{ username }
+    * Fill in the password field with #{ password }
+    * Click the submit button
+  }
 end
 
-When /^I log out$/ do
-  @page.click_log_out
+When /^I logout$/ do
+  steps %{
+    * Click the log out button
+  }
 end
 
-When /^I try to access the (.+) page$/ do |page_name|
-  @page = eval("#{ page_name }Page").new
-  @page.visit
+When /^I try to access the (.+) section$/ do |section_name|
+  steps %{
+    * Visit the #{ section_name } page
+  }
 end
 
 
 #=================
 # THENs
 #=================
+
+Then /^I can log out$/ do
+  steps %{
+    * Current page should have the logout button
+    * Click the logout button
+    * Current page should be the login page
+  }
+end
+
+Then /^I will be asked to log in first$/ do
+  steps %{
+    * Current page should be the login page
+  }
+end
+
+Then /^I will be [Ll]ogged [Ii]n$/ do
+  steps %{
+    * Current page should have the logout button
+  }
+end
+
+Then /^I will be [Nn]ot [Ll]ogged [Ii]n$/ do
+  steps %{
+    * Current page should be the login page
+    * Current page should have the username field
+    * Current page should have the password field
+    * Current page should have the submit button
+  }
+end
+
+Then /^I will see the (.+) section$/ do |section_name|
+  steps %{
+    * Current page should be the #{ section_name } page
+  }
+end

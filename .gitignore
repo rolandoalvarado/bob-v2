@@ -16,5 +16,8 @@
 /*_tmp_screenshot_dir
 /features/support/config.yml
 /features/support/po
+/features/support/__po
 /features/support/diego_formatter
+/features/support/__diego_formatter
 /features/support/fog
+/features/support/__fog

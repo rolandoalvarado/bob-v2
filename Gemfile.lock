@@ -23,8 +23,8 @@ GIT
 
 GIT
   remote: git://github.com/relaxdiego/po.git
-  revision: f6e68f05980dbbaf49123eea55ca28068bf3b3e0
-  branch: master
+  revision: 8c19f1a25e961bc8fb25360a29b7cc36ae349cce
+  branch: 0.1.x
   specs:
     po (0.0.0)
       capybara

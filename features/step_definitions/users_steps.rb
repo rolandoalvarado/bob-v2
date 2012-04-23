@@ -2,36 +2,28 @@
 # GIVENs
 #=================
 
-Given /^I have the following credentials:$/ do |table|
-  user_attrs        = CloudObjectBuilder.attributes_for(:user, table.hashes[0])
-  user_attrs[:name] = Unique.username(user_attrs[:name])
-
-  IdentityService.instance.ensure_user_exists(user_attrs)
+Given /^A user with username '(.+)' and a password '(.+)' exists$/ do |username, password|
+  steps %{
+    * Ensure that a user with username #{ username } and password #{ password } exists
+  }
 end
 
-Given /^I am logged in$/ do
-  user_attrs = CloudObjectBuilder.attributes_for(:user, {
-                 :name     => Unique.username('rstark'),
-                 :password => '123qwe'
-               })
-  IdentityService.instance.ensure_user_exists(user_attrs)
+Given /^[Aa] user with a role of (.+) exists in the project$/ do |role_name|
+  # identity_service = IdentityService.instance
+  # @user_attrs      = CloudObjectBuilder.attributes_for(:user, :name => Unique.username('rstark'))
+  # user             = identity_service.ensure_user_exists(@user_attrs)
+  #
+  # role_name = RoleNameDictionary.db_name(friendly_name)
+  # role      = identity_service.roles.find_by_name(role_name)
+  # @project.add_user(user.id, role.id)
 
-  @page = LoginPage.new
-  @page.visit
-  @page.should_be_valid
-  @page.fill_in :username, user_attrs[:name]
-  @page.fill_in :password, user_attrs[:password]
-  @page.submit
-end
+  username = 'rstark'
 
-Given /^[Aa] user with a role of (.+) exists in the project$/ do |friendly_name|
-  identity_service = IdentityService.instance
-  @user_attrs      = CloudObjectBuilder.attributes_for(:user, :name => Unique.username('rstark'))
-  user             = identity_service.ensure_user_exists(@user_attrs)
-
-  role_name = RoleNameDictionary.db_name(friendly_name)
-  role      = identity_service.roles.find_by_name(role_name)
-  @project.add_user(user.id, role.id)
+  steps %{
+    * Ensure that a user with username #{ username } exists
+    * Ensure that the user has a role of #{ role_name }
+    * Raise an error if the user does not have a role of #{ role_name }
+  }
 
   pending # express the regexp above with the code you wish you had
 end
