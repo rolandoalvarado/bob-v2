@@ -5,9 +5,17 @@ if [ $# -eq 2 ] && [ $1 == 'describe' ]; then
   printf "  %-0$2s - $description\n" `basename $0`
   exit 0
 elif [ $# -eq 1 ] && [ $1 == '--help' ]; then
-  printf "Just execute \`run/`basename $0`\` without arguments\n"
+  printf "run/`basename $0` [path_to_output_dir]\n\n"
+  printf "Examples:\n"
+  printf "  run/`basename $0`\n"
+  printf "  run/`basename $0` ~/Dropbox/permissions\n\n"
   exit 0
 fi
 
+if [ $# -eq 1 ]; then
+  OUTDIR=$1
+else
+  OUTDIR=output/permissions
+fi
 
-bundle exec cucumber --tags @permissions --no-profile --require features --dry-run --format Cucumber::Formatter::Relaxdiego::PermissionsMatrix --out output/permissions --require features
+bundle exec cucumber --tags @permissions --no-profile --require features --dry-run --format Cucumber::Formatter::Relaxdiego::PermissionsMatrix --out $OUTDIR --require features
