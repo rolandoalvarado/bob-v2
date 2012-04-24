@@ -20,14 +20,11 @@ Feature: Delete an Image
 
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Delete |
-        | Project Manager | Can Delete           |
+        | Member          | Can Delete           |
         | Cloud Admin     | Can Delete           |
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Delete |
-        | Developer       | Cannot Delete        |
-        | IT Security     | Cannot Delete        |
-        | Network Admin   | Cannot Delete        |
         | (None)          | Cannot Delete        |
 
 

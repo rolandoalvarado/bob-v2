@@ -17,11 +17,8 @@ Feature: List Projects
 
       Scenarios: Authorized Roles
         | Role            | Can or Cannot See |
-        | Project Manager | Can See           |
-        | Developer       | Can See           |
-        | Network Admin   | Can See           |
+        | Member          | Can See           |
         | Cloud Admin     | Can See           |
-        | IT Security     | Can See           |
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot See |

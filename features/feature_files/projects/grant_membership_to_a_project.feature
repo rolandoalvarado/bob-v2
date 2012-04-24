@@ -24,14 +24,11 @@ Feature: Grant Membership to a Project
 
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Grant |
-        | Project Manager | Can Grant           |
         | Cloud Admin     | Can Grant           |
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Grant |
-        | Developer       | Cannot Grant        |
-        | IT Security     | Cannot Grant        |
-        | Network Admin   | Cannot Grant        |
+        | Member          | Cannot Grant        |
         | (None)          | Cannot Grant        |
 
 

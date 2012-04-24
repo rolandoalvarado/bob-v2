@@ -14,10 +14,7 @@ Feature: Create a User
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Create |
-        | Project Manager | Cannot Create        |
-        | Developer       | Cannot Create        |
-        | IT Security     | Cannot Create        |
-        | Network Admin   | Cannot Create        |
+        | Member          | Cannot Create        |
         | (None)          | Cannot Create        |
 
 

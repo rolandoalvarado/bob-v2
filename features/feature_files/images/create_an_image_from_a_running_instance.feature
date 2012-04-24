@@ -20,14 +20,11 @@ Feature: Create an Image from a Running Instance
 
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Create |
-        | Project Manager | Can Create           |
         | Cloud Admin     | Can Create           |
+        | Member          | Can Create           |
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Create |
-        | Developer       | Cannot Create        |
-        | IT Security     | Cannot Create        |
-        | Network Admin   | Cannot Create        |
         | (None)          | Cannot Create        |
 
 

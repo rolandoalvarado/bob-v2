@@ -16,10 +16,7 @@ Feature: Edit a User
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Edit |
-        | Project Manager | Cannot Edit        |
-        | Developer       | Cannot Edit        |
-        | IT Security     | Cannot Edit        |
-        | Network Admin   | Cannot Edit        |
+        | Member          | Cannot Edit        |
         | (None)          | Cannot Edit        |
 
 

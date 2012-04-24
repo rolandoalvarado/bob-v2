@@ -22,12 +22,9 @@ Feature: Detach a Volume
 
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Create |
-        | Project Manager | Can Create           |
+        | Member          | Can Create           |
         | Cloud Admin     | Can Create           |
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Create |
-        | Developer       | Cannnot Create       |
-        | IT Security     | Cannot Create        |
-        | Network Admin   | Cannot Create        |
         | (None)          | Cannot Create        |

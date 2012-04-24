@@ -12,14 +12,11 @@ Feature: Edit a Project
 
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Edit |
-        | Project Manager | Can Edit           |
         | Cloud Admin     | Can Edit           |
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Edit |
-        | Developer       | Cannot Edit        |
-        | IT Security     | Cannot Edit        |
-        | Network Admin   | Cannot Edit        |
+        | Member          | Cannot Edit        |
         | (None)          | Cannot Edit        |
 
 

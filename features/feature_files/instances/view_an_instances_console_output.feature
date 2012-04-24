@@ -20,12 +20,9 @@ Feature: View an Instance's Console Output
 
       Scenarios: Authorized Roles
         | Role            | Can or Cannot View |
-        | Project Manager | Can View           |
+        | Member          | Can View           |
         | Cloud Admin     | Can View           |
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot View |
-        | Developer       | Cannot View        |
-        | IT Security     | Cannot View        |
-        | Network Admin   | Cannot View        |
         | (None)          | Cannot View        |

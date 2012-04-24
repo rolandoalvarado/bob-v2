@@ -25,14 +25,11 @@ Feature: Edit a Security Group
 
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Edit |
-        | Project Manager | Can Edit           |
-        | Network Admin   | Can Edit           |
+        | Member          | Can Edit           |
         | Cloud Admin     | Can Edit           |
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Edit |
-        | Developer       | Cannot Edit        |
-        | IT Security     | Cannot Edit        |
         | (None)          | Cannot Edit        |
 
 

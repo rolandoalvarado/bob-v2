@@ -20,14 +20,11 @@ Feature: Unpause a Paused Instance
 
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Unpause |
-        | Project Manager | Can Unpause           |
+        | Member          | Can Unpause           |
         | Cloud Admin     | Can Unpause           |
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Unpause |
-        | Developer       | Cannot Unpause        |
-        | IT Security     | Cannot Unpause        |
-        | Network Admin   | Cannot Unpause        |
         | (None)          | Cannot Unpause        |
 
 

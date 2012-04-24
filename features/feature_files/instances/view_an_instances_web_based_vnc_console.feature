@@ -32,12 +32,9 @@ Feature: View an Instance's Web-based VNC Console
 
       Scenarios: Authorized Roles
         | Role            | Can or Cannot View |
-        | Project Manager | Can View           |
-        | Developer       | Can View           |
+        | Member          | Can View           |
         | Cloud Admin     | Can View           |
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot View |
-        | IT Security     | Cannot View        |
-        | Network Admin   | Cannot View        |
         | (None)          | Cannot View        |
