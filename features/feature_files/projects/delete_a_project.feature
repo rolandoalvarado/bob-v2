@@ -13,14 +13,11 @@ Feature: Delete a project
 
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Delete |
-        | Project Manager | Can Delete           |
         | Cloud Admin     | Can Delete           |
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Delete |
-        | Developer       | Cannot Delete        |
-        | IT Security     | Cannot Delete        |
-        | Network Admin   | Cannot Delete        |
+        | Member          | Cannot Delete        |
         | (None)          | Cannot Delete        |
 
 

@@ -13,14 +13,11 @@ Feature: View a Project's Compute Usage Report
 
       Scenarios: Authorized Roles
         | Role            | Can or Cannot View |
-        | Project Manager | Can View           |
+        | Member          | Can View           |
         | Cloud Admin     | Can View           |
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot View |
-        | Developer       | Cannot View        |
-        | Network Admin   | Cannot View        |
-        | IT Security     | Cannot View        |
         | (None)          | Cannot View        |
 
 

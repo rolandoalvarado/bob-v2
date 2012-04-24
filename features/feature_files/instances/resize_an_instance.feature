@@ -23,14 +23,11 @@ Feature: Resize an Instance
 
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Resize |
-        | Project Manager | Can Resize           |
+        | Member          | Can Resize           |
         | Cloud Admin     | Can Resize           |
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Resize |
-        | Developer       | Cannot Resize        |
-        | IT Security     | Cannot Resize        |
-        | Network Admin   | Cannot Resize        |
         | (None)          | Cannot Resize        |
 
 

@@ -16,10 +16,7 @@ Feature: Delete a user
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Delete |
-        | Project Manager | Cannot Delete        |
-        | Developer       | Cannot Delete        |
-        | IT Security     | Cannot Delete        |
-        | Network Admin   | Cannot Delete        |
+        | Member          | Cannot Delete        |
         | (None)          | Cannot Delete        |
 
 

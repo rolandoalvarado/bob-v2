@@ -19,14 +19,11 @@ Feature: Suspend an Instance
 
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Suspend |
-        | Project Manager | Can Suspend           |
+        | Member          | Can Suspend           |
         | Cloud Admin     | Can Suspend           |
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Suspend |
-        | Developer       | Cannot Suspend        |
-        | IT Security     | Cannot Suspend        |
-        | Network Admin   | Cannot Suspend        |
         | (None)          | Cannot Suspend        |
 
 

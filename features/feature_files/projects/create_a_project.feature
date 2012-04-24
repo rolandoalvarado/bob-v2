@@ -21,14 +21,11 @@ Feature: Create a Project
 
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Create |
-        | Project Manager | Can Create           |
         | Cloud Admin     | Can Create           |
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Create |
-        | Developer       | Cannot Create        |
-        | IT Security     | Cannot Create        |
-        | Network Admin   | Cannot Create        |
+        | Member          | Cannot Create        |
         | (None)          | Cannot Create        |
 
 

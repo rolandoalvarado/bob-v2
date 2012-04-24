@@ -18,14 +18,11 @@ Feature: Pause an Instance
 
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Pause |
-        | Project Manager | Can Pause           |
+        | Member          | Can Pause           |
         | Cloud Admin     | Can Pause           |
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Pause |
-        | Developer       | Cannot Pause        |
-        | IT Security     | Cannot Pause        |
-        | Network Admin   | Cannot Pause        |
         | (None)          | Cannot Pause        |
 
 

@@ -25,14 +25,11 @@ Feature: Create a Security Group
 
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Create |
-        | Project Manager | Can Create           |
-        | Network Admin   | Can Create           |
+        | Member          | Can Create           |
         | Cloud Admin     | Can Create           |
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Create |
-        | Developer       | Cannot Create        |
-        | IT Security     | Cannot Create        |
         | (None)          | Cannot Create        |
 
 

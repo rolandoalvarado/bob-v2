@@ -20,14 +20,11 @@ Feature: Reboot an Instance
 
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Reboot |
-        | Project Manager | Can Reboot           |
+        | Member          | Can Reboot           |
         | Cloud Admin     | Can Reboot           |
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Reboot |
-        | Developer       | Cannot Reboot        |
-        | IT Security     | Cannot Reboot        |
-        | Network Admin   | Cannot Reboot        |
         | (None)          | Cannot Reboot        |
 
 

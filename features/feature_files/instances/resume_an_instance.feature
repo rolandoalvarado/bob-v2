@@ -20,14 +20,11 @@ Feature: Resume an Instance
 
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Resume |
-        | Project Manager | Can Resume           |
+        | Member          | Can Resume           |
         | Cloud Admin     | Can Resume           |
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Resume |
-        | Developer       | Cannot Resume        |
-        | IT Security     | Cannot Resume        |
-        | Network Admin   | Cannot Resume        |
         | (None)          | Cannot Resume        |
 
 

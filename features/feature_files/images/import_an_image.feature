@@ -18,14 +18,11 @@ Feature: Import an Image
 
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Import |
-        | Project Manager | Can Import           |
+        | Member          | Can Import           |
         | Cloud Admin     | Can Import           |
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Import |
-        | Developer       | Cannot Import        |
-        | IT Security     | Cannot Import        |
-        | Network Admin   | Cannot Import        |
         | (None)          | Cannot Import        |
 
 

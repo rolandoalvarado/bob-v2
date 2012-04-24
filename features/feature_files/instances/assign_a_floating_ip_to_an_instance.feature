@@ -23,14 +23,11 @@ Feature: Assign a Floating IP to an Instance
 
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Assign |
-        | Project Manager | Can Assign           |
+        | Member          | Can Assign           |
         | Cloud Admin     | Can Assign           |
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Assign |
-        | Developer       | Cannot Assign        |
-        | IT Security     | Cannot Assign        |
-        | Network Admin   | Cannot Assign        |
         | (None)          | Cannot Assign        |
 
 
