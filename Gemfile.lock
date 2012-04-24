@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/relaxdiego/diego_formatter.git
-  revision: c8de5262b1200322c9cfae0e210ef0ae3a1cdc59
+  revision: 600e8cdc81239ab715f00209a9a5108592fc9e87
   branch: master
   specs:
     diego_formatter (0.0.0)
