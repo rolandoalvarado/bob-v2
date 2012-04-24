@@ -5,25 +5,44 @@ if ARGV.length == 2 and ARGV[0] == 'describe'
   basename = File.basename(__FILE__).to_s.ljust(ARGV[1].to_i)
   print "  #{basename} - #{description}"
   exit 0
-elsif ARGV.length == 1 and ARGV[0] == '--help'
-  puts "Examples:"
-  puts "\trun/#{File.basename(__FILE__)}"
-  puts "\trun/#{File.basename(__FILE__)}\ --force"
-  puts "\nThe --force option allows you to overwrite existing settings in config.yml"
-  exit 0
 end
 
 require 'rubygems'
 require 'yaml'
 require 'fileutils'
+require 'optparse'
 require File.expand_path('../../features/support/configuration.rb', __FILE__)
 
 include CloudConfiguration
 
+@options = {}
+OptionParser.new do |opts|
+  opts.banner = "Usage: run/#{File.basename(__FILE__)} [options]"
+
+  opts.on("-f", "--force", "Allows you to overwrite existing settings in config.yml") do |v|
+    @options[:force] = v
+  end
+
+  opts.on("-h", "--host HOST", "URL of the mCloud instance you want to verify") do |v|
+    @options[:host] = v
+  end
+
+  opts.on("-u", "--username USERNAME", "Cloud admin username") do |v|
+    @options[:username] = v
+  end
+
+  opts.on("-p", "--password PASSWORD", "Cloud admin password") do |v|
+    @options[:password] = v
+  end
+
+  opts.on("-t", "--tenant TENANT", "Cloud tenant") do |v|
+    @options[:tenant] = v
+  end
+
+end.parse!
+
 # Remove old configuration file location
 FileUtils.rm_rf( File.expand_path('../../configuration.rb', __FILE__) )
-
-@force = ARGV.include?('--force')
 
 config_path = CloudConfiguration::PATH
 
@@ -37,13 +56,17 @@ end
 
 @config = {} unless @config
 
-def configure(hash, key, prompt, force = @force)
+def configure(hash, key, prompt, force = @options[:force])
   value = hash[key]
   if value.nil? || value.empty? || force
-    print prompt
-    print "[#{value}] " if force && !value.nil?
-    hash[key] = STDIN.gets.chomp
-    hash[key] = value if hash[key].empty?
+    if hash[key].empty? 
+      print prompt
+      print "[#{value}] " if force && !value.nil?
+      hash[key] = STDIN.gets.chomp 
+      hash[key] = value if hash[key].empty?
+    else
+      puts "#{key}: #{value}"
+    end
   end
 end
 
@@ -53,19 +76,24 @@ def cleanup_url(hash, key)
   hash[key] = url.gsub(/\/?$/, '')
 end
 
-configure @config, WEB_CLIENT_HOST, "URL of the mCloud instance you want to verify? "
-cleanup_url(@config, WEB_CLIENT_HOST)
 
 openstack_options = @config[OPENSTACK_OPTIONS] ||= {}
 
-openstack_options[OPENSTACK_AUTH_URL] ||= "#{@config[WEB_CLIENT_HOST]}:35357/v2.0/tokens"
-configure openstack_options, OPENSTACK_AUTH_URL, "openstack_auth_url for #{@config[WEB_CLIENT_HOST]}? "
+openstack_options[WEB_CLIENT_HOST] = @options[:host] ? @options[:host] : openstack_options[WEB_CLIENT_HOST]
+configure openstack_options, WEB_CLIENT_HOST, "URL of the mCloud instance you want to verify? "
+cleanup_url(openstack_options, WEB_CLIENT_HOST)
+
+openstack_options[OPENSTACK_AUTH_URL] = "#{openstack_options[WEB_CLIENT_HOST]}:35357/v2.0/tokens"
+configure openstack_options, OPENSTACK_AUTH_URL, "openstack_auth_url for #{openstack_options[WEB_CLIENT_HOST]}? "
 cleanup_url(openstack_options, OPENSTACK_AUTH_URL)
 
+openstack_options[OPENSTACK_USERNAME] = @options[:username] ? @options[:username] : openstack_options[OPENSTACK_USERNAME]
 configure openstack_options, OPENSTACK_USERNAME, "cloud admin username for #{openstack_options[OPENSTACK_AUTH_URL]}? "
+
+openstack_options[OPENSTACK_API_KEY] = @options[:password] ? @options[:password] : openstack_options[OPENSTACK_API_KEY]
 configure openstack_options, OPENSTACK_API_KEY , "password for #{openstack_options[OPENSTACK_USERNAME]}? "
 
-openstack_options[OPENSTACK_TENANT] ||= 'admin'
+openstack_options[OPENSTACK_TENANT] = @options[:tenant] ? @options[:tenant] : openstack_options[OPENSTACK_TENANT]
 configure openstack_options, OPENSTACK_TENANT  , "tenant name for #{openstack_options[OPENSTACK_USERNAME]}? "
 
 puts "Writing #{config_path}"

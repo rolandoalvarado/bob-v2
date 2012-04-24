@@ -6,6 +6,7 @@ if [ $# -eq 2 ] && [ $1 == 'describe' ]; then
   exit 0
 elif [ $# -eq 1 ] && [ $1 == '--help' ]; then
   printf "Just execute \`run/`basename $0`\` without arguments\n"
+  printf "Alternatively \`run/`basename $0`\` with ENV variables WEB_CLIENT_HOST, WEB_CLIENT_USER, WEB_CLIENT_API_KEY, WEB_CLIENT_TENANT to configute mcloud_features\n"
   exit 0
 fi
 
@@ -27,5 +28,11 @@ else
   gem install bundler
 fi
 bundle update
-run/configurator
+
+if [ "${WEB_CLIENT_HOST}" ]; then
+  echo "Using ENV options for configuration... "
+  run/configurator --force --host $WEB_CLIENT_HOST --username $WEB_CLIENT_USER --password $WEB_CLIENT_API_KEY --tenant $WEB_CLIENT_TENANT
+else
+  run/configurator
+fi
 echo "Setup is complete. Now type 'run/verifier' or 'run/autoverifier' (without the quotes)"
