@@ -1,0 +1,9 @@
+---
+:web_client_host: http://mc1.la-1-2.morphcloud.net
+:openstack_options:
+  :openstack_auth_url: http://mc1.la-1-2.morphcloud.net:35357/v2.0/tokens
+  :openstack_username: admin
+  :openstack_api_key: klnm12
+  :openstack_tenant: admin
+:unique_helper_options:
+  :alpha: HAQUFCBSCOTHLMOJPIRNVXARYCYXIVECQOXHKCJIBWNFQNMCIH

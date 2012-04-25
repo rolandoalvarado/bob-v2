@@ -31,7 +31,7 @@ bundle update
 
 if [ "${WEB_CLIENT_HOST}" ]; then
   echo "Using ENV options for configuration... "
-  run/configurator --force --host $WEB_CLIENT_HOST --username $WEB_CLIENT_USER --password $WEB_CLIENT_API_KEY --tenant $WEB_CLIENT_TENANT
+  run/configurator --host $WEB_CLIENT_HOST --username $WEB_CLIENT_USER --password $WEB_CLIENT_API_KEY --tenant $WEB_CLIENT_TENANT
 else
   run/configurator
 fi
