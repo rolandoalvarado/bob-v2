@@ -2,7 +2,7 @@
 # GIVENs
 #=================
 
-Given /^A user with username '(.+)' and a password '(.+)' exists$/ do |username, password|
+Given /^My username is (.+) and my password is (.+)$/ do |username, password|
   steps %{
     * Ensure that a user with username #{ username } and password #{ password } exists
   }

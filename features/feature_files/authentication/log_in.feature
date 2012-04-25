@@ -3,7 +3,7 @@ Feature: Log In
   As a registered user, I want to log in so that I can use mCloud
 
   Background:
-    * A user with username 'rstark' and a password 'w1nt3rf3ll' exists
+    * My username is rstark and my password is w1nt3rf3ll
     * I am not logged in
 
   Scenario Outline: Log in
