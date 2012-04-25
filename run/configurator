@@ -27,6 +27,10 @@ OptionParser.new do |opts|
     @options[WEB_CLIENT_HOST] = v
   end
 
+  opts.on("-o", "--openstack_api_url URL", "(optional) URL of the OpenStack service used by the mCloud instance you want to verify") do |v|
+    @options[OPENSTACK_AUTH_URL] = v
+  end
+
   opts.on("-u", "--username USERNAME", "Cloud admin username") do |v|
     @options[OPENSTACK_USERNAME] = v
   end
@@ -59,14 +63,10 @@ end
 def configure(hash, key, prompt, force = @options[:force])
   value = hash[key]
   if value.nil? || value.empty? || force
-    if @options[key].nil? and key != OPENSTACK_AUTH_URL
-      print prompt
-      print "[#{value}] " if force && !value.nil?
-      hash[key] = STDIN.gets.chomp 
-      hash[key] = value if hash[key].empty?
-    else
-      puts "#{key}: #{value}"
-    end
+    print prompt
+    print "[#{value}] " if force && !value.nil?
+    hash[key] = STDIN.gets.chomp
+    hash[key] = value if hash[key].empty?
   end
 end
 
@@ -79,24 +79,26 @@ end
 
 openstack_options = @config[OPENSTACK_OPTIONS] ||= {}
 
-openstack_options[WEB_CLIENT_HOST] = @options[WEB_CLIENT_HOST] ? @options[WEB_CLIENT_HOST] : openstack_options[WEB_CLIENT_HOST] if @options[:force]
-configure openstack_options, WEB_CLIENT_HOST, "URL of the mCloud instance you want to verify? "
-cleanup_url(openstack_options, WEB_CLIENT_HOST)
+@config[WEB_CLIENT_HOST] = @options[WEB_CLIENT_HOST] || @config[WEB_CLIENT_HOST]
+configure @config, WEB_CLIENT_HOST, "URL of the mCloud instance you want to verify? "
+cleanup_url(@config, WEB_CLIENT_HOST)
 
-openstack_options[OPENSTACK_AUTH_URL] = "#{openstack_options[WEB_CLIENT_HOST]}:35357/v2.0/tokens"
-configure openstack_options, OPENSTACK_AUTH_URL, "openstack_auth_url for #{openstack_options[WEB_CLIENT_HOST]}? "
+openstack_options[OPENSTACK_AUTH_URL] = @options[OPENSTACK_AUTH_URL] || openstack_options[OPENSTACK_AUTH_URL] || "#{ @config[WEB_CLIENT_HOST] }:35357/v2.0/tokens"
+configure openstack_options, OPENSTACK_AUTH_URL, "openstack_auth_url for #{@config[WEB_CLIENT_HOST]}? "
 cleanup_url(openstack_options, OPENSTACK_AUTH_URL)
 
-openstack_options[OPENSTACK_USERNAME] = @options[OPENSTACK_USERNAME] ? @options[OPENSTACK_USERNAME] : openstack_options[OPENSTACK_USERNAME] if @options[:force]
+openstack_options[OPENSTACK_USERNAME] = @options[OPENSTACK_USERNAME] || openstack_options[OPENSTACK_USERNAME]
 configure openstack_options, OPENSTACK_USERNAME, "cloud admin username for #{openstack_options[OPENSTACK_AUTH_URL]}? "
 
-openstack_options[OPENSTACK_API_KEY] = @options[OPENSTACK_API_KEY] ? @options[OPENSTACK_API_KEY] : openstack_options[OPENSTACK_API_KEY] if @options[:force]
+openstack_options[OPENSTACK_API_KEY] = @options[OPENSTACK_API_KEY] || openstack_options[OPENSTACK_API_KEY]
 configure openstack_options, OPENSTACK_API_KEY , "password for #{openstack_options[OPENSTACK_USERNAME]}? "
 
-openstack_options[OPENSTACK_TENANT] = @options[OPENSTACK_TENANT] ? @options[OPENSTACK_TENANT] : openstack_options[OPENSTACK_TENANT] if @options[:force]
+openstack_options[OPENSTACK_TENANT] = @options[OPENSTACK_TENANT] || openstack_options[OPENSTACK_TENANT]
 configure openstack_options, OPENSTACK_TENANT  , "tenant name for #{openstack_options[OPENSTACK_USERNAME]}? "
 
-puts "Writing #{config_path}"
+
+puts "Writing #{config_path} with contents:"
+puts @config.to_yaml
 FileUtils.rm_rf(config_path)
 config_file = File.open(config_path, File::WRONLY|File::CREAT|File::EXCL)
 YAML.dump(@config, config_file)
