@@ -24,19 +24,19 @@ OptionParser.new do |opts|
   end
 
   opts.on("-h", "--host HOST", "URL of the mCloud instance you want to verify") do |v|
-    @options[:host] = v
+    @options[WEB_CLIENT_HOST] = v
   end
 
   opts.on("-u", "--username USERNAME", "Cloud admin username") do |v|
-    @options[:username] = v
+    @options[OPENSTACK_USERNAME] = v
   end
 
   opts.on("-p", "--password PASSWORD", "Cloud admin password") do |v|
-    @options[:password] = v
+    @options[OPENSTACK_API_KEY] = v
   end
 
   opts.on("-t", "--tenant TENANT", "Cloud tenant") do |v|
-    @options[:tenant] = v
+    @options[OPENSTACK_TENANT] = v
   end
 
 end.parse!
@@ -59,7 +59,7 @@ end
 def configure(hash, key, prompt, force = @options[:force])
   value = hash[key]
   if value.nil? || value.empty? || force
-    if hash[key].empty? 
+    if @options[key].nil? and key != OPENSTACK_AUTH_URL
       print prompt
       print "[#{value}] " if force && !value.nil?
       hash[key] = STDIN.gets.chomp 
@@ -79,7 +79,7 @@ end
 
 openstack_options = @config[OPENSTACK_OPTIONS] ||= {}
 
-openstack_options[WEB_CLIENT_HOST] = @options[:host] ? @options[:host] : openstack_options[WEB_CLIENT_HOST]
+openstack_options[WEB_CLIENT_HOST] = @options[WEB_CLIENT_HOST] ? @options[WEB_CLIENT_HOST] : openstack_options[WEB_CLIENT_HOST] if @options[:force]
 configure openstack_options, WEB_CLIENT_HOST, "URL of the mCloud instance you want to verify? "
 cleanup_url(openstack_options, WEB_CLIENT_HOST)
 
@@ -87,13 +87,13 @@ openstack_options[OPENSTACK_AUTH_URL] = "#{openstack_options[WEB_CLIENT_HOST]}:3
 configure openstack_options, OPENSTACK_AUTH_URL, "openstack_auth_url for #{openstack_options[WEB_CLIENT_HOST]}? "
 cleanup_url(openstack_options, OPENSTACK_AUTH_URL)
 
-openstack_options[OPENSTACK_USERNAME] = @options[:username] ? @options[:username] : openstack_options[OPENSTACK_USERNAME]
+openstack_options[OPENSTACK_USERNAME] = @options[OPENSTACK_USERNAME] ? @options[OPENSTACK_USERNAME] : openstack_options[OPENSTACK_USERNAME] if @options[:force]
 configure openstack_options, OPENSTACK_USERNAME, "cloud admin username for #{openstack_options[OPENSTACK_AUTH_URL]}? "
 
-openstack_options[OPENSTACK_API_KEY] = @options[:password] ? @options[:password] : openstack_options[OPENSTACK_API_KEY]
+openstack_options[OPENSTACK_API_KEY] = @options[OPENSTACK_API_KEY] ? @options[OPENSTACK_API_KEY] : openstack_options[OPENSTACK_API_KEY] if @options[:force]
 configure openstack_options, OPENSTACK_API_KEY , "password for #{openstack_options[OPENSTACK_USERNAME]}? "
 
-openstack_options[OPENSTACK_TENANT] = @options[:tenant] ? @options[:tenant] : openstack_options[OPENSTACK_TENANT]
+openstack_options[OPENSTACK_TENANT] = @options[OPENSTACK_TENANT] ? @options[OPENSTACK_TENANT] : openstack_options[OPENSTACK_TENANT] if @options[:force]
 configure openstack_options, OPENSTACK_TENANT  , "tenant name for #{openstack_options[OPENSTACK_USERNAME]}? "
 
 puts "Writing #{config_path}"
