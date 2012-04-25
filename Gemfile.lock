@@ -23,7 +23,7 @@ GIT
 
 GIT
   remote: git://github.com/relaxdiego/po.git
-  revision: 8c19f1a25e961bc8fb25360a29b7cc36ae349cce
+  revision: 9b70b2bf7d507f771125d37a6574ed9a9dff4303
   branch: 0.1.x
   specs:
     po (0.0.0)
