@@ -19,7 +19,7 @@ end
 
 Given /^I am not logged in$/ do
   steps %{
-    * Cick the logout button if currently logged in
+    * Click the logout button if currently logged in
   }
 end
 

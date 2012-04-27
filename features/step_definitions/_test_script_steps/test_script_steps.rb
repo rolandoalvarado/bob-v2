@@ -4,7 +4,7 @@
 # to http://www.relaxdiego.com/2012/04/using-cucumber.html for a better
 # understanding on how to organize steps.
 
-Then /^Cick the logout button if currently logged in$/ do
+Then /^Click the logout button if currently logged in$/ do
   @current_page ||= WebClientPage.new
   @current_page.logout_button.click if @current_page.has_logout_button?
 end
@@ -39,9 +39,8 @@ Then /^Current page should have the correct path$/ do
 end
 
 Then /^Ensure that a project named (.+) exists$/ do |project_name|
-  @project_attrs   = CloudObjectBuilder.attributes_for(:project, :name => Unique.name(project_name) )
-  compute_service  = ComputeService.instance
-  @project         = compute_service.ensure_project_exists( project_details )
+  attributes = CloudObjectBuilder.attributes_for(:tenant, :name => project_name)
+  @project = IdentityService.instance.ensure_project_exists( attributes )
 
   if @project.nil? or @project.id.empty?
     raise "Project couldn't be initialized!"
