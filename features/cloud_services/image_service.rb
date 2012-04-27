@@ -7,7 +7,7 @@ class ImageService < BaseCloudService
   attr_reader :images
 
   def initialize
-    service = Image.new(ConfigFile.cloud_credentials)
+    @service = Image.new(ConfigFile.cloud_credentials)
     @images = service.images
   end
 
