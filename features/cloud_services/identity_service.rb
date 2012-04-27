@@ -5,7 +5,7 @@ class IdentityService < BaseCloudService
   attr_reader :test_tenant, :users, :tenants, :roles
 
   def initialize
-    @service  = Identity.new(ConfigFile.cloud_credentials)
+    initialize_service Identity
     @users   = service.users
     @tenants = service.tenants
     @roles   = service.roles
