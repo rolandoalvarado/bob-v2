@@ -9,21 +9,23 @@ class BaseCloudService
   include CloudConfiguration
   include Fog                 # Make Fog classes directly available to child classes
 
+  #============================
+  # CLASS METHODS
+  #============================
+
+  # Alias for Singleton::instance since 'instance' has a special
+  # meaning in the context of mCloud/OpenStack
+  def self.session
+    instance
+  end
+
+  #============================
+  # INSTANCE METHODS
+  #============================
+
+  attr_reader :service
+
   def initialize
     raise "#{ self.class } should define an initialize method"
-  end
-
-  #==================================
-  # PRIVATE METHODS
-  #==================================
-
-  private
-
-  def service
-    @service
-  end
-
-  def service=(value)
-    @service = value
   end
 end
