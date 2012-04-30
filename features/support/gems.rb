@@ -9,9 +9,9 @@
 # --Mark (mmaglana@morphlabs.com)
 
 gems = [
-  { :name => 'po',              :symlink => 'po'      },
-  { :name => 'diego_formatter', :symlink => 'diego_formatter' },
-  { :name => 'fog',             :symlink => 'fog'             }
+  { :name => 'po',              :symlink => '../../localgems/po'              },
+  { :name => 'diego_formatter', :symlink => '../../localgems/diego_formatter' },
+  { :name => 'fog',             :symlink => '../../localgems/fog'             }
 ]
 
 gems.each do |gem_info|
