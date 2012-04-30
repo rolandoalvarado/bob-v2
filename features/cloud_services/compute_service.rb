@@ -5,6 +5,5 @@ class ComputeService < BaseCloudService
   def initialize
     initialize_service Compute
   end
-  end
 
 end
