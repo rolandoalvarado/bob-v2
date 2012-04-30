@@ -8,21 +8,20 @@
 #
 # --Mark (mmaglana@morphlabs.com)
 
-gems = [
-  { :name => 'po',              :symlink => '../../localgems/po'              },
-  { :name => 'diego_formatter', :symlink => '../../localgems/diego_formatter' },
-  { :name => 'fog',             :symlink => '../../localgems/fog'             }
-]
+gems = %w{ po diego_formatter fog }
 
-gems.each do |gem_info|
-  symlink = File.expand_path("../#{ gem_info[:symlink] }", __FILE__)
+symlink_basedir = '../../localgems'
 
-  if Dir.exists? symlink
-    Dir["#{ symlink }/*.rb"].each do |file|
-      require_relative file
-    end
+gems.each do |gem_name|
+  break if Object.const_defined?('RelaxdiegoGemClassesLoaded')
+  symlink = File.expand_path("../#{ symlink_basedir }/#{ gem_name }", __FILE__)
+
+  if Dir.exists?(symlink)
+    Dir["#{ symlink }/*.rb"].each { |file| require_relative file }
   else
-    require gem_info[:name]
+    require gem_name
   end
 end
 #==================================================================
+
+class RelaxdiegoGemClassesLoaded; end

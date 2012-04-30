@@ -12,7 +12,7 @@ Given /^I am logged in$/ do
     * Visit the Login page
     * Fill in the username field with #{ username }
     * Fill in the password field with #{ password }
-    * Click the submit button
+    * Click the login button
     * Current page should have the logout button
   }
 end
@@ -37,13 +37,13 @@ When /^I login with the following credentials: (.*), (.*)$/ do |username, passwo
 
     * Fill in the username field with #{ username }
     * Fill in the password field with #{ password }
-    * Click the submit button
+    * Click the login button
   }
 end
 
 When /^I logout$/ do
   steps %{
-    * Click the log out button
+    * Click the logout button
   }
 end
 

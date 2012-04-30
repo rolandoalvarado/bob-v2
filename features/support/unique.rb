@@ -22,12 +22,12 @@
 # can just re-use the objects each time it is executed.
 
 module Unique
-  def self.username(value)
-    "#{ value }_#{ ConfigFile.unique_alpha }"[0, 15]
+  def self.username(value, length = 16)
+    "#{ value }_#{ ConfigFile.unique_alpha }"[0, length - 1]
   end
 
-  def self.name(value)
-    "#{ value } #{ ConfigFile.unique_alpha }"[0, 15]
+  def self.name(value, length = 16)
+    "#{ value } #{ ConfigFile.unique_alpha }"[0, length - 1]
   end
 
   def self.alpha

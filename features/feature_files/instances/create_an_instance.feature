@@ -8,11 +8,11 @@ Feature: Create an Instance
 
   Background:
     * A project exists in the system
-    * An image is available for use
-    * The project does not have any running instances
+    * The project has at least 1 image
+    * The project has 0 instances
 
 
-  @permissions
+  @permissions @wip
   Scenario Outline: Check User Permissions
     Given I have a role of <Role> in the project
      Then I <Can or Cannot Create> an instance in the project
@@ -20,11 +20,11 @@ Feature: Create an Instance
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Create |
         | Member          | Can Create           |
-        | Cloud Admin     | Can Create           |
-
-      Scenarios: Unauthorized Roles
-        | Role            | Can or Cannot Create |
-        | (None)          | Cannot Create        |
+      #   | Cloud Admin     | Can Create           |
+      #
+      # Scenarios: Unauthorized Roles
+      #   | Role            | Can or Cannot Create |
+      #   | (None)          | Cannot Create        |
 
 
   Scenario Outline: Create an Instance

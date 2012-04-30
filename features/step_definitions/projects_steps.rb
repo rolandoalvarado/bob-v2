@@ -3,31 +3,63 @@
 #=================
 
 Given /^[Aa] project exists in the system$/ do
-  steps %{
-    * Ensure that a project named Project 1 exists
-  }
+  identity_service = IdentityService.session
+  project          = identity_service.ensure_project_exists(:name => 'Test Project')
+
+  if project.nil? or project.id.empty?
+    raise "Project couldn't be initialized!"
+  end
+
+  # Make variable(s) available for use in succeeding steps
+  @project = project
 end
 
-Given /^I have a role of Cloud Admin in the project$/ do
-  @username = "admin"
-  @password = "klnm12"
-  steps %{
-    * Click the logout button if currently logged in
-    * Visit the Login page
-    * Fill in the username field with #{ @username }
-    * Fill in the password field with #{ @password }
-    * Click the submit button
-    * Current page should have the logout button
-    * Visit the Projects page 
-   }
+Given /^The project has at least (\d+) images?$/ do |number_of_images|
+  number_of_images = number_of_images.to_i
+  image_service    = ImageService.session
+  images           = image_service.get_public_images
+
+  if images.count < number_of_images
+    raise "Expected at least #{ number_of_images } images but found #{ images.count }"
+  end
 end
 
-Given /^I have a role of Member in the project$/ do
-  pending # express the regexp above with the code you wish you had
+Given /^The project has (\d+) instances$/ do |number_of_instances|
+  number_of_instances = number_of_instances.to_i
+  compute_service     = ComputeService.session
+  total_instances     = compute_service.ensure_project_instance_count(@project, number_of_instances)
+
+  if total_instances != number_of_instances
+    raise "Couldn't ensure that #{ project.name } has #{ number_of_instances } instances. " +
+          "Current number of instances is #{ total_instances }."
+  end
 end
 
-Given /^I have a role of \(None\) in the project$/ do
-  pending # express the regexp above with the code you wish you had
+Given /^I have a role of (.+) in the project$/ do |role_name|
+  user_attrs       = CloudObjectBuilder.attributes_for(
+                       :user,
+                       :name => Unique.username('rstark')
+                     )
+  identity_service = IdentityService.session
+
+  user = identity_service.ensure_user_exists(user_attrs)
+  role = identity_service.roles.find_by_name(RoleNameDictionary.db_name(role_name))
+
+  if role.nil?
+    raise "Role #{ role_name } couldn't be found. Make sure it's defined in " +
+          "features/support/role_name_dictionary.rb and that it exists in " +
+          "#{ ConfigFile.web_client_url }."
+  end
+
+  begin
+    @project.add_user(user.id, role.id)
+  rescue Fog::Identity::OpenStack::NotFound => e
+    raise "Couldn't add #{ user.name } to #{ @project.name } as #{ role.name }"
+  end
+
+  # Make variable(s) available for use in succeeding steps
+  user.password = user_attrs[:password]
+  @current_user = user
 end
 
 Given /^I am authorized to create projects$/ do
@@ -94,4 +126,3 @@ end
 Then /^the project will be Not Created$/ do
   pending # express the regexp above with the code you wish you had
 end
-

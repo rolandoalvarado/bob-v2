@@ -31,6 +31,10 @@ module CloudConfiguration
       { :provider => 'OpenStack' }.merge inst[OPENSTACK_OPTIONS]
     end
 
+    def self.admin_username
+      cloud_credentials[OPENSTACK_USERNAME]
+    end
+
     def self.web_client_url
       self.instance[WEB_CLIENT_HOST]
     end

@@ -12,9 +12,6 @@ class IdentityService < BaseCloudService
 
     test_tenant_name = 'admin'
     @test_tenant = find_test_tenant(test_tenant_name) || create_test_tenant(test_tenant_name)
-
-    @roles = {}
-    @roles[:cloud_admin] = service.roles.find_by_name('admin')
   end
 
   def create_tenant(attributes)
@@ -27,17 +24,29 @@ class IdentityService < BaseCloudService
     attributes[:tenant_id] = test_tenant.id
     user = users.new(attributes)
     user.save
-    test_tenant.add_user(user.id, @roles[:cloud_admin].id)
+    admin_role = roles.find_by_name(RoleNameDictionary.db_name('Cloud Admin'))
+    test_tenant.add_user(user.id, admin_role.id)
     user
   end
 
   def ensure_tenant_exists(attributes)
+    attributes        = CloudObjectBuilder.attributes_for(:tenant, attributes)
+    attributes[:name] = Unique.name(attributes[:name], 25)
+
     tenant = tenants.find_by_name(attributes[:name])
     if tenant
       tenant.update(attributes)
     else
       tenant = create_tenant(attributes)
     end
+
+    # Make ConfigFile.admin_username an admin of the tenant. This is so that we
+    # can manipulate it as needed. Turns out the 'admin' role in Keystone is
+    # not really a global role
+    admin_user  = users.find_by_name(ConfigFile.admin_username)
+    admin_role  = roles.find_by_name(RoleNameDictionary.db_name('Cloud Admin'))
+    tenant.add_user(admin_user.id, admin_role.id)
+
     tenant
   end
 
@@ -59,6 +68,10 @@ class IdentityService < BaseCloudService
 
   def ensure_project_exists(attributes)
     ensure_tenant_exists(attributes)
+  end
+
+  def add_user_to_project(user_id, project_id, role_id)
+    raise "Implement this method"
   end
 
   def projects

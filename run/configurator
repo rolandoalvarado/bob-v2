@@ -11,7 +11,7 @@ require 'rubygems'
 require 'yaml'
 require 'fileutils'
 require 'optparse'
-require File.expand_path('../../features/support/configuration.rb', __FILE__)
+require File.expand_path('../../features/support/cloud_configuration.rb', __FILE__)
 
 include CloudConfiguration
 

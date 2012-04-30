@@ -12,22 +12,29 @@
 # THENs
 #=================
 
-Then /^(?:[Hh]e|[Ss]he) ([Cc]an|[Cc]annot) [Cc]reate an instance in the project$/ do |can_or_cannot|
-  # can_create = can_or_cannot =~ /^[Cc]an$/
-  #
-  # page = WebClientPage.use('login_page')
-  # page.visit
-  # page.fill_in_username_field_with @user_details( 'name' )
-  # page.fill_in_password_field_with @user_details( 'password' )
-  # page.click_submit_button
-  #
-  # page = WebClientPage.use('view_project_page')
-  # page.visit( @project.id )
-  # page.click_create_instance_button
+Then /^I [Cc]an [Cc]reate an instance in the project$/ do
+  steps %{
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
 
-  # choose a machine image
-  # click submit
-  # assert result
+    * Visit the projects page
+    * Click the #{ @project.id } project
 
-  pending # express the regexp above with the code you wish you had
+    * Click the create instance button
+    * Current page should have the create instance form
+    * Choose the 1st item in the images list
+    * Fill in the server name field with Test Instance
+    * Drag the flavor slider 1 position to the right
+    * Choose the 1st item in the keypair list
+    * Check the 1st security group
+    * Click the create instance button
+
+    * Instances list should contain Test Instance
+  }
+end
+
+Then /^I [Cc]annot [Cc]reate an instance in the project$/ do
+  pending
 end

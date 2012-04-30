@@ -7,7 +7,7 @@ require 'singleton'
 class BaseCloudService
   include Singleton
   include CloudConfiguration
-  include Fog                 # Make Fog classes directly available to child classes
+  include Fog                 # Make Fog classes directly available to subclasses
 
   #============================
   # CLASS METHODS

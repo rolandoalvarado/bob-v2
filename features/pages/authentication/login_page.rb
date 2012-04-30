@@ -4,5 +4,5 @@ class LoginPage < WebClientPage
   username_field '#username'
   password_field '#password'
 
-  submit_button  '#submit'
+  login_button  '#submit'
 end
