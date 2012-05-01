@@ -1,0 +1,155 @@
+require 'capybara'
+require 'capybara/dsl'
+
+Capybara.run_server = false
+Capybara.current_driver = :selenium
+Capybara.app_host = ConfigFile.web_client_url
+
+class Page
+
+  ELEMENT_TYPES = 'button|field|link|checkbox|dropdown|form'
+
+  #=====================
+  # CLASS METHODS
+  #=====================
+
+  def self.path(path)
+    send :define_method, :path do
+      path
+    end
+  end
+
+  def self.method_missing(name, *args, &block)
+    element =  /^(?<name>.+)_(?<type>#{ ELEMENT_TYPES })$/.match(name)
+    if element
+      register_element element['name'], element['type'], args[0]
+    else
+      super name, args, block
+    end
+  end
+
+  def self.register_element(name, type, locator)
+    if locator.class == Hash && locator.has_key?(:xpath)
+      send :define_method, "#{ name }_#{ type }" do
+        find_by_xpath locator[:xpath]
+      end
+
+      send :define_method, "has_#{ name }_#{ type }?" do
+        has_xpath? locator[:xpath]
+      end
+    elsif locator.class == String
+      send :define_method, "#{ name }_#{ type }" do
+        find locator
+      end
+
+      send :define_method, "has_#{ name }_#{ type }?" do
+        has_css_selector? locator
+      end
+    else
+      raise "Invalid element locator #{ locator.inspect }"
+    end
+  end
+
+  attr_reader :path
+
+  def initialize
+    @session = Capybara.current_session
+  end
+
+  #=====================
+  # ACTIONS
+  #=====================
+
+  def visit
+    session.visit path
+  end
+
+  def find(selector)
+    session.find(selector)
+  end
+
+  def find_by_xpath(the_xpath)
+    session.find(:xpath, the_xpath)
+  end
+
+  #=====================
+  # QUERIES
+  #=====================
+
+  def has_expected_path?
+    expected_path == actual_path
+  end
+
+  def has_expected_url?
+    expected_url == actual_url
+  end
+
+  def has_css_selector?(selector)
+    session.has_selector? selector.to_s
+  end
+
+  def has_content?(content)
+    session.has_content? content
+  end
+
+  def has_xpath?(the_xpath)
+    session.has_xpath? the_xpath
+  end
+
+  #=====================
+  # OTHERS
+  #=====================
+
+  def expected_path
+    path
+  end
+
+  def actual_path
+    session.current_path
+  end
+
+  def expected_url
+    "#{ session.current_host }#{ expected_path }"
+  end
+
+  def actual_url
+    "#{ session.current_host }#{ actual_path }"
+  end
+
+  #=====================
+  # METHOD MISSING
+  #=====================
+
+  def method_missing(name, *args, &block)
+    element_query  = /^has_(?<name>.+)_(?<type>#{ ELEMENT_TYPES })\??$/.match(name)
+    element_find   = /^(?<name>.+)_(?<type>#{ ELEMENT_TYPES })$/.match(name)
+    element_action = /^(?<action>click|fill_in|select|check)_(?<name>.+)_(?<type>#{ ELEMENT_TYPES })/.match(name)
+
+    if element_action
+      raise "Undefined method '#{ element_action[0] }'. Maybe you mean " +
+            "#{ self.class }##{ element_action['name'] }_#{ element_action['type'] }.#{ element_action['action'] }?"
+    elsif element_query
+      raise_missing_element_declaration_error(element_query['name'], element_query['type'])
+    elsif element_find
+      raise_missing_element_declaration_error(element_find['name'], element_find['type'])
+    else
+      super name, args, block
+    end
+  end
+
+  def raise_missing_element_declaration_error(element_name, element_type)
+    raise "I don't know how to find the #{ element_name } #{ element_type }. " +
+          "Make sure you define it by adding '#{ element_name }_#{ element_type } " +
+          "<css_selector>' in #{ self.class }"
+  end
+
+  #=====================
+  # PRIVATE METHODS
+  #=====================
+
+  private
+
+  def session
+    @session
+  end
+end

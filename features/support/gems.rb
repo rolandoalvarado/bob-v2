@@ -8,7 +8,7 @@
 #
 # --Mark (mmaglana@morphlabs.com)
 
-gems = %w{ po diego_formatter fog }
+gems = %w{ diego_formatter fog }
 
 symlink_basedir = '../../localgems'
 
