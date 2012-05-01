@@ -1,3 +1,5 @@
+require_relative '../web_client_page'
+
 class ProjectPage < WebClientPage
   path '/projects'
 
