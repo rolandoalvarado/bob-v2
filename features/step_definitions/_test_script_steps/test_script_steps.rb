@@ -15,7 +15,7 @@ Then /^Click the logout button if currently logged in$/ do
 end
 
 Then /^Click the (.+) button$/ do |button_name|
-  button_name = button_name.squeeze.downcase.gsub(' ', '_')
+  button_name = button_name.split.join(' ').downcase.gsub(' ', '_')
   @current_page.send("#{ button_name }_button").click
 end
 
@@ -32,7 +32,7 @@ Then /^Current page should be the (.+) page$/ do |page_name|
 end
 
 Then /^Current page should have the (.+) (button|field|form)$/ do |name, type|
-  name = name.squeeze.downcase.gsub(' ', '_')
+  name = name.split.join(' ').downcase.gsub(' ', '_')
   unless @current_page.send("has_#{ name }_#{type}?")
     raise "Current page doesn't have a #{ name } #{ type }"
   end
