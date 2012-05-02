@@ -8,8 +8,9 @@ Capybara.default_wait_time = 10
 
 class Page
 
-  ELEMENT_TYPES = 'button|field|link|checkbox|form'
-  LIST_TYPES    = 'list'
+  ELEMENT_TYPES    = 'button|field|link|checkbox|form'
+  RADIO_LIST_TYPES = 'radiolist'
+  CHECK_LIST_TYPES = 'checklist'
 
   #=====================
   # CLASS METHODS
@@ -22,61 +23,82 @@ class Page
   end
 
   def self.method_missing(name, *args, &block)
-    element = /^(?<name>.+)_(?<type>#{ ELEMENT_TYPES })$/.match(name)
-    list    = /^(?<name>.+)_(?<type>#{ LIST_TYPES })$/.match(name)
+    element    = /^(?<type>#{ ELEMENT_TYPES    })$/.match(name)
+    radio_list = /^(?<type>#{ RADIO_LIST_TYPES })$/.match(name)
+    check_list = /^(?<type>#{ CHECK_LIST_TYPES })$/.match(name)
 
     if element
-      register_element element['name'], element['type'], args[0]
-    elsif list
-      register_list list['name'], list['type'], args[0]
+      register_element args[0].split.join('_').downcase, element['type'], args[1]
+    elsif radio_list
+      register_radio_list args[0].split.join('_').downcase, radio_list['type'], args[1]
+    elsif check_list
+      register_check_list args[0].split.join('_').downcase, check_list['type'], args[1]
     else
       super name, args, block
     end
   end
 
-  def self.register_element(name, type, locator)
-    if locator.class == Hash && locator.has_key?(:xpath)
+  def self.register_element(name, type, selector)
+    if selector.class == Hash && selector.has_key?(:xpath)
       send :define_method, "#{ name }_#{ type }" do |vars = {}|
-        locator = locator[:xpath]
-        vars.each { |k, v| locator.gsub!(":#{ k }", v) }
-        find_by_xpath locator
+        selector = selector[:xpath]
+        vars.each { |k, v| selector.gsub!("<#{ k }>", v) }
+        find_by_xpath selector
       end
 
       send :define_method, "has_#{ name }_#{ type }?" do |vars = {}|
-        locator = locator[:xpath]
-        vars.each { |k, v| locator.gsub!(":#{ k }", v) }
-        has_xpath? locator
+        selector = selector[:xpath]
+        vars.each { |k, v| selector.gsub!("<#{ k }>", v) }
+        has_xpath? selector
       end
-    elsif locator.class == String
+    elsif selector.class == String
       send :define_method, "#{ name }_#{ type }" do |vars = {}|
-        vars.each { |k, v| locator.gsub!(":#{ k }", v) }
-        find locator
+        vars.each { |k, v| selector.gsub!("<#{ k }>", v) }
+        find selector
       end
 
       send :define_method, "has_#{ name }_#{ type }?" do |vars = {}|
-        vars.each { |k, v| locator.gsub!(":#{ k }", v) }
-        has_css_selector? locator
+        vars.each { |k, v| selector.gsub!("<#{ k }>", v) }
+        has_css_selector? selector
       end
     else
-      raise "Invalid element locator #{ locator.inspect }"
+      raise "Invalid element selector #{ selector.inspect }"
     end
   end
 
-  def self.register_list(name, type, items_locator)
-    if items_locator.class == Hash && items_locator.has_key?(:xpath)
+  def self.register_radio_list(name, type, selector)
+    if selector.class == Hash && selector.has_key?(:xpath)
       send :define_method, "#{ name }_#{ type }" do
-        session.all :xpath, items_locator[:xpath]
+        find_by_xpath selector[:xpath]
       end
-    elsif items_locator.class == String
+    elsif selector.class == String
       send :define_method, "#{ name }_#{ type }" do
-        session.all :css, items_locator
+        find selector
       end
     else
-      raise "Invalid list item locator #{ items_locator.inspect }"
+      raise "Invalid radio list selector #{ selector.inspect }"
     end
 
-    send :define_method, "has_#{ name }_#{ type }?" do
-      send("#{ name }_#{ type }").count > 0
+    send :define_method, "#{ name }_#{ type }_items" do
+      send("#{ name }_#{ type }").all(:xpath, "//input[@type='radio']")
+    end
+  end
+
+  def self.register_check_list(name, type, selector)
+    if selector.class == Hash && selector.has_key?(:xpath)
+      send :define_method, "#{ name }_#{ type }" do
+        find_by_xpath selector[:xpath]
+      end
+    elsif selector.class == String
+      send :define_method, "#{ name }_#{ type }" do
+        find selector
+      end
+    else
+      raise "Invalid check list selector #{ selector.inspect }"
+    end
+
+    send :define_method, "#{ name }_#{ type }_items" do
+      send("#{ name }_#{ type }").all(:xpath, "//input[@type='checkbox']")
     end
   end
 
@@ -98,8 +120,8 @@ class Page
     session.find(selector)
   end
 
-  def find_by_xpath(the_xpath)
-    session.find(:xpath, the_xpath)
+  def find_by_xpath(selector)
+    session.find(:xpath, selector)
   end
 
   #=====================
@@ -122,8 +144,8 @@ class Page
     session.has_content? content
   end
 
-  def has_xpath?(the_xpath)
-    session.has_xpath? the_xpath
+  def has_xpath?(selector)
+    session.has_xpath? selector
   end
 
   #=====================
@@ -169,8 +191,8 @@ class Page
 
   def raise_missing_element_declaration_error(element_name, element_type)
     raise "I don't know how to find the #{ element_name } #{ element_type }. " +
-          "Make sure you define it by adding '#{ element_name }_#{ element_type } " +
-          "<css_selector>' in #{ self.class }"
+          "Make sure you define it by adding \"#{ element_type } '#{ element_name }'" +
+          "<css_selector>\" in #{ self.class }"
   end
 
   #=====================
