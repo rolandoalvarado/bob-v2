@@ -4,9 +4,8 @@
 # to http://www.relaxdiego.com/2012/04/using-cucumber.html for a better
 # understanding on how to organize steps.
 
-Then /^Choose the (\d+)(?:st|nd|rd|th) item in the images list$/ do |item_number|
-  index = item_number - 1
-  pending # express the regexp above with the code you wish you had
+Then /^Choose the (\d+)(?:st|nd|rd|th) item in the (.+) list$/ do |item_number, list_name|
+  @current_page.send("#{ list_name }_list")[item_number.to_i - 1].click
 end
 
 Then /^Click the logout button if currently logged in$/ do
@@ -19,8 +18,9 @@ Then /^Click the (.+) button$/ do |button_name|
   @current_page.send("#{ button_name }_button").click
 end
 
-Then /^Click the (.+) project$/ do |project_id|
-  @current_page.find("#project-item-#{ project_id } .view-project").click
+Then /^Click the (.+) project$/ do |project_name|
+  # @current_page.find("#project-item-#{ project_id } .view-project").click
+  @current_page.project_link( name: project_name ).click
   @current_page = ProjectPage.new
 end
 
@@ -53,7 +53,8 @@ Then /^Ensure that a user with username (.+) and password (.+) exists$/ do |user
 end
 
 Then /^Fill in the (.+) field with (.+)$/ do |field_name, value|
-  value = value.gsub(/^\([Nn]one\)$/, '')
+  value      = value.gsub(/^\([Nn]one\)$/, '')
+  field_name = field_name.split.join(' ').downcase.gsub(' ', '_')
 
   case field_name
   when 'username'

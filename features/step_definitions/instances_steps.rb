@@ -20,7 +20,7 @@ Then /^I [Cc]an [Cc]reate an instance in the project$/ do
     * Click the login button
 
     * Visit the projects page
-    * Click the #{ @project.id } project
+    * Click the #{ @project.name } project
 
     * Click the create instance button
     * Current page should have the create instance form

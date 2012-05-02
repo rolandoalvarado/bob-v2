@@ -4,10 +4,12 @@ require 'capybara/dsl'
 Capybara.run_server = false
 Capybara.current_driver = :selenium
 Capybara.app_host = ConfigFile.web_client_url
+Capybara.default_wait_time = 10
 
 class Page
 
-  ELEMENT_TYPES = 'button|field|link|checkbox|dropdown|form'
+  ELEMENT_TYPES = 'button|field|link|checkbox|form'
+  LIST_TYPES    = 'list'
 
   #=====================
   # CLASS METHODS
@@ -20,9 +22,13 @@ class Page
   end
 
   def self.method_missing(name, *args, &block)
-    element =  /^(?<name>.+)_(?<type>#{ ELEMENT_TYPES })$/.match(name)
+    element = /^(?<name>.+)_(?<type>#{ ELEMENT_TYPES })$/.match(name)
+    list    = /^(?<name>.+)_(?<type>#{ LIST_TYPES })$/.match(name)
+
     if element
       register_element element['name'], element['type'], args[0]
+    elsif list
+      register_list list['name'], list['type'], args[0]
     else
       super name, args, block
     end
@@ -30,23 +36,47 @@ class Page
 
   def self.register_element(name, type, locator)
     if locator.class == Hash && locator.has_key?(:xpath)
-      send :define_method, "#{ name }_#{ type }" do
-        find_by_xpath locator[:xpath]
+      send :define_method, "#{ name }_#{ type }" do |vars = {}|
+        locator = locator[:xpath]
+        vars.each { |k, v| locator.gsub!(":#{ k }", v) }
+        find_by_xpath locator
       end
 
-      send :define_method, "has_#{ name }_#{ type }?" do
-        has_xpath? locator[:xpath]
+      send :define_method, "has_#{ name }_#{ type }?" do |vars = {}|
+        locator = locator[:xpath]
+        vars.each { |k, v| locator.gsub!(":#{ k }", v) }
+        has_xpath? locator
       end
     elsif locator.class == String
-      send :define_method, "#{ name }_#{ type }" do
+      send :define_method, "#{ name }_#{ type }" do |vars = {}|
+        vars.each { |k, v| locator.gsub!(":#{ k }", v) }
         find locator
       end
 
-      send :define_method, "has_#{ name }_#{ type }?" do
+      send :define_method, "has_#{ name }_#{ type }?" do |vars = {}|
+        vars.each { |k, v| locator.gsub!(":#{ k }", v) }
         has_css_selector? locator
       end
     else
       raise "Invalid element locator #{ locator.inspect }"
+    end
+  end
+
+  def self.register_list(name, type, items_locator)
+    if items_locator.class == Hash && items_locator.has_key?(:xpath)
+      send :define_method, "#{ name }_#{ type }" do
+        session.all :xpath, items_locator[:xpath]
+      end
+    elsif items_locator.class == String
+      send :define_method, "#{ name }_#{ type }" do
+        session.all :css, items_locator
+      end
+    else
+      raise "Invalid list item locator #{ items_locator.inspect }"
+    end
+
+    send :define_method, "has_#{ name }_#{ type }?" do
+      send("#{ name }_#{ type }").count > 0
     end
   end
 
