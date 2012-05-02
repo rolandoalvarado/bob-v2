@@ -22,16 +22,14 @@ Then /^I [Cc]an [Cc]reate an instance in the project$/ do
     * Visit the projects page
     * Click the #{ @project.name } project
 
-    * Click the create instance button
-    * Current page should have the create instance form
-    * Choose the 1st item in the images list
+    * Click the new instance button
+    * Current page should have the new instance form
+    * Choose the 1st item in the images radiolist
     * Fill in the server name field with Test Instance
-    * Drag the flavor slider 1 position to the right
-    * Choose the 1st item in the keypair list
-    * Check the 1st security group
+    * Check the 1st item in the security groups checklist
     * Click the create instance button
 
-    * Instances list should contain Test Instance
+    * The #{ @project.name } project should have an instance named Test Instance
   }
 end
 

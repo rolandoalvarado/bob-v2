@@ -4,8 +4,15 @@
 # to http://www.relaxdiego.com/2012/04/using-cucumber.html for a better
 # understanding on how to organize steps.
 
-Then /^Choose the (\d+)(?:st|nd|rd|th) item in the (.+) list$/ do |item_number, list_name|
-  @current_page.send("#{ list_name }_list")[item_number.to_i - 1].click
+Then /^Check the (\d+)(?:st|nd|rd|th) item in the (.+) checklist$/ do |item_number, list_name|
+  list_name = list_name.split.join('_').downcase
+  checkbox  = @current_page.send("#{ list_name }_checklist_items")[item_number.to_i - 1]
+  checkbox.click unless checkbox.checked?
+end
+
+Then /^Choose the (\d+)(?:st|nd|rd|th) item in the (.+) radiolist$/ do |item_number, list_name|
+  list_name = list_name.split.join('_').downcase
+  @current_page.send("#{ list_name }_radiolist_items")[item_number.to_i - 1].click
 end
 
 Then /^Click the logout button if currently logged in$/ do
@@ -14,7 +21,7 @@ Then /^Click the logout button if currently logged in$/ do
 end
 
 Then /^Click the (.+) button$/ do |button_name|
-  button_name = button_name.split.join(' ').downcase.gsub(' ', '_')
+  button_name = button_name.split.join('_').downcase
   @current_page.send("#{ button_name }_button").click
 end
 
@@ -32,7 +39,7 @@ Then /^Current page should be the (.+) page$/ do |page_name|
 end
 
 Then /^Current page should have the (.+) (button|field|form)$/ do |name, type|
-  name = name.split.join(' ').downcase.gsub(' ', '_')
+  name = name.split.join('_').downcase
   unless @current_page.send("has_#{ name }_#{type}?")
     raise "Current page doesn't have a #{ name } #{ type }"
   end
