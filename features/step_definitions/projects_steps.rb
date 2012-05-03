@@ -28,11 +28,6 @@ Given /^The project has (\d+) instances$/ do |number_of_instances|
   number_of_instances = number_of_instances.to_i
   compute_service     = ComputeService.session
   total_instances     = compute_service.ensure_project_instance_count(@project, number_of_instances)
-
-  if total_instances != number_of_instances
-    raise "Couldn't ensure that #{ project.name } has #{ number_of_instances } instances. " +
-          "Current number of instances is #{ total_instances }."
-  end
 end
 
 Given /^I have a role of (.+) in the project$/ do |role_name|

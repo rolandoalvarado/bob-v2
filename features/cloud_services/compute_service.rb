@@ -36,11 +36,26 @@ class ComputeService < BaseCloudService
       end
       instances.reload
     elsif desired_count < instances.length
-      # Reduce number of instances
-      raise "Write code to reduce instances in project"
+      so_far = 0
+
+      # Always use the 'each' iterator in this case because it takes a while
+      # for an instance to be removed from the array.
+      instances.each do |instance|
+        instance.destroy
+        so_far += 1
+        break if so_far == (instances.length - desired_count)
+      end
     end
 
-    instances.reload
+    sleeping(0.1).seconds.between_tries.failing_after(20).tries do
+      instances.reload
+
+      if instances.length != desired_count
+        raise "Couldn't ensure that #{ project.name } has #{ desired_count } " +
+              "instances. Current number of instances is #{ instances.length }."
+      end
+    end
+
     instances.length
   end
 

@@ -3,8 +3,10 @@
 # This class implements the singleton pattern. More info at
 # http://www.ruby-doc.org/stdlib-1.9.3/libdoc/singleton/rdoc/Singleton.html)
 require 'singleton'
+require 'anticipate'
 
 class BaseCloudService
+  include Anticipate
   include Singleton
   include CloudConfiguration
   include Fog                 # Make Fog classes directly available to subclasses
