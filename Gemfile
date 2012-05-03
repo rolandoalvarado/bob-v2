@@ -1,6 +1,7 @@
 source :rubygems
 
 gem 'activesupport'
+gem 'anticipate'
 gem 'cucumber'
 gem 'faker'
 gem 'fog', :git => 'git://github.com/MorphGlobal/fog.git', :branch => 'development'
