@@ -30,30 +30,28 @@ class ComputeService < BaseCloudService
     actual_count = instances.count
 
     if desired_count > actual_count
+
       how_many = desired_count - actual_count
       how_many.times do |n|
         create_instance_in_project(project)
       end
       instances.reload
-    elsif desired_count < instances.length
-      so_far = 0
 
-      # Always use the 'each' iterator in this case because it takes a while
-      # for an instance to be removed from the array.
-      instances.each do |instance|
-        instance.destroy
-        so_far += 1
-        break if so_far == (instances.length - desired_count)
+    elsif desired_count < instances.length
+
+      while instances.length > desired_count
+        instances.reload
+        begin
+          instances[0].destroy
+        rescue
+        end
       end
+
     end
 
-    sleeping(0.1).seconds.between_tries.failing_after(20).tries do
-      instances.reload
-
-      if instances.length != desired_count
-        raise "Couldn't ensure that #{ project.name } has #{ desired_count } " +
-              "instances. Current number of instances is #{ instances.length }."
-      end
+    if instances.length != desired_count
+      raise "Couldn't ensure that #{ project.name } has #{ desired_count } " +
+            "instances. Current number of instances is #{ instances.length }."
     end
 
     instances.length
