@@ -27,6 +27,7 @@ class ComputeService < BaseCloudService
 
   def ensure_project_instance_count(project, desired_count)
     service.set_tenant project
+    instances.reload
     actual_count = instances.count
 
     if desired_count > actual_count
