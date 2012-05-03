@@ -8,7 +8,7 @@ Capybara.default_wait_time = 10
 
 class Page
 
-  ELEMENT_TYPES    = 'button|field|link|checkbox|form'
+  ELEMENT_TYPES    = 'button|field|link|checkbox|form|table'
   RADIO_LIST_TYPES = 'radiolist'
   CHECK_LIST_TYPES = 'checklist'
 
@@ -23,16 +23,16 @@ class Page
   end
 
   def self.method_missing(name, *args, &block)
-    element    = /^(?<type>#{ ELEMENT_TYPES    })$/.match(name)
-    radio_list = /^(?<type>#{ RADIO_LIST_TYPES })$/.match(name)
-    check_list = /^(?<type>#{ CHECK_LIST_TYPES })$/.match(name)
+    element   = /^(?<type>#{ ELEMENT_TYPES    })$/.match(name)
+    radiolist = /^(?<type>#{ RADIO_LIST_TYPES })$/.match(name)
+    checklist = /^(?<type>#{ CHECK_LIST_TYPES })$/.match(name)
 
     if element
       register_element args[0].split.join('_').downcase, element['type'], args[1]
-    elsif radio_list
-      register_radio_list args[0].split.join('_').downcase, radio_list['type'], args[1]
-    elsif check_list
-      register_check_list args[0].split.join('_').downcase, check_list['type'], args[1]
+    elsif radiolist
+      register_radiolist args[0].split.join('_').downcase, radiolist['type'], args[1]
+    elsif checklist
+      register_checklist args[0].split.join('_').downcase, checklist['type'], args[1]
     else
       super name, args, block
     end
@@ -66,7 +66,7 @@ class Page
     end
   end
 
-  def self.register_radio_list(name, type, selector)
+  def self.register_radiolist(name, type, selector)
     if selector.class == Hash && selector.has_key?(:xpath)
       send :define_method, "#{ name }_#{ type }" do
         find_by_xpath selector[:xpath]
@@ -76,7 +76,7 @@ class Page
         find selector
       end
     else
-      raise "Invalid radio list selector #{ selector.inspect }"
+      raise "Invalid radiolist selector #{ selector.inspect }"
     end
 
     send :define_method, "#{ name }_#{ type }_items" do
@@ -84,7 +84,7 @@ class Page
     end
   end
 
-  def self.register_check_list(name, type, selector)
+  def self.register_checklist(name, type, selector)
     if selector.class == Hash && selector.has_key?(:xpath)
       send :define_method, "#{ name }_#{ type }" do
         find_by_xpath selector[:xpath]
@@ -94,7 +94,7 @@ class Page
         find selector
       end
     else
-      raise "Invalid check list selector #{ selector.inspect }"
+      raise "Invalid checklist selector #{ selector.inspect }"
     end
 
     send :define_method, "#{ name }_#{ type }_items" do

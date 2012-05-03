@@ -22,5 +22,3 @@ AfterConfiguration do |configuration|
   }
 end
 #==================================================================
-
-puts "env.rb loaded"
