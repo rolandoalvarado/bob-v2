@@ -38,26 +38,28 @@ class Page
     end
   end
 
-  def self.register_element(name, type, selector)
-    if selector.class == Hash && selector.has_key?(:xpath)
+  def self.register_element(name, type, options)
+    if options.class == Hash && options.has_key?(:xpath)
       send :define_method, "#{ name }_#{ type }" do |vars = {}|
-        selector = selector[:xpath]
+        selector = options[:xpath]
         vars.each { |k, v| selector.gsub!("<#{ k }>", v) }
         find_by_xpath selector
       end
 
       send :define_method, "has_#{ name }_#{ type }?" do |vars = {}|
-        selector = selector[:xpath]
+        selector = options[:xpath]
         vars.each { |k, v| selector.gsub!("<#{ k }>", v) }
         has_xpath? selector
       end
-    elsif selector.class == String
+    elsif options.class == String || (options.class == Hash && options.has_key?(:css))
       send :define_method, "#{ name }_#{ type }" do |vars = {}|
+        selector = (options.class == String ? options : options[:css])
         vars.each { |k, v| selector.gsub!("<#{ k }>", v) }
         find selector
       end
 
       send :define_method, "has_#{ name }_#{ type }?" do |vars = {}|
+        selector = (options.class == String ? options : options[:css])
         vars.each { |k, v| selector.gsub!("<#{ k }>", v) }
         has_css_selector? selector
       end
@@ -66,13 +68,15 @@ class Page
     end
   end
 
-  def self.register_radiolist(name, type, selector)
-    if selector.class == Hash && selector.has_key?(:xpath)
+  def self.register_radiolist(name, type, options)
+    if options.class == Hash && options.has_key?(:xpath)
       send :define_method, "#{ name }_#{ type }" do
-        find_by_xpath selector[:xpath]
+        selector = options[:xpath]
+        find_by_xpath selector
       end
-    elsif selector.class == String
+    elsif options.class == String || (options.class == Hash && options.has_key?(:css))
       send :define_method, "#{ name }_#{ type }" do
+        selector = (options.class == String ? options : options[:css])
         find selector
       end
     else
@@ -84,13 +88,15 @@ class Page
     end
   end
 
-  def self.register_checklist(name, type, selector)
-    if selector.class == Hash && selector.has_key?(:xpath)
+  def self.register_checklist(name, type, options)
+    if options.class == Hash && options.has_key?(:xpath)
       send :define_method, "#{ name }_#{ type }" do
-        find_by_xpath selector[:xpath]
+        selector = options[:xpath]
+        find_by_xpath selector
       end
-    elsif selector.class == String
+    elsif selector = (options.class == String ? options : options[:css])
       send :define_method, "#{ name }_#{ type }" do
+        selector = (options.class == String ? options : options[:css])
         find selector
       end
     else
