@@ -22,9 +22,9 @@ Feature: Create an Instance
         | Member          | Can Create           |
         | Cloud Admin     | Can Create           |
 
-      # Scenarios: Unauthorized Roles
-      #   | Role            | Can or Cannot Create |
-      #   | (None)          | Cannot Create        |
+      Scenarios: Unauthorized Roles
+        | Role            | Can or Cannot Create |
+        | (None)          | Cannot Create        |
 
 
   Scenario Outline: Create an Instance
