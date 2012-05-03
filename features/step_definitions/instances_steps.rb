@@ -17,6 +17,8 @@ Then /^I [Cc]an [Cc]reate an instance in the project$/ do
   instance_name = Unique.name('Instance')
 
   steps %{
+    * Click the logout button if currently logged in
+
     * Visit the login page
     * Fill in the username field with #{ @current_user.name }
     * Fill in the password field with #{ @current_user.password }
