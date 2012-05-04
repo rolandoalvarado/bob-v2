@@ -9,7 +9,7 @@ mCloud installation. After verification, it will generate a
 Prerequisites
 -------------
 1. [Git](http://git-scm.com)
-2. [Ruby](ruby-lang.org/) 1.9.2-p290 or higher
+2. [Ruby](ruby-lang.org/) 1.9.3-p125 or higher
 
 Additional Prerequisites for Mac OS X
 -------------------------------------

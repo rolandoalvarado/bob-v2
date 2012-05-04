@@ -10,7 +10,7 @@ elif [ $# -eq 1 ] && [ $1 == '--help' ]; then
   exit 0
 fi
 
-ruby_string="ruby 1.9"
+ruby_string="ruby 1.9.3"
 
 if ruby --version | grep -q "${ruby_string}" ; then
   echo "${ruby_string} found!"
