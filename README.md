@@ -99,7 +99,5 @@ How to write Features
 Helpful references for development
 ----------------------------------
 1. [Gherkin Syntax](https://github.com/cucumber/cucumber/wiki/Gherkin) - If all you want is to write feature files, this is the only reference you need.
-1. [PO gem](https://github.com/relaxdiego/po) - Learn about the DSL used within the step definitions
 1. [Cucumber](http://cukes.info) - Learn about the Cucumber framework. The Cucumber Book is highly recommended.
 1. [Cucumber Mailing List](https://groups.google.com/forum/?fromgroups#!forum/cukes) - Get help from the community.
-1. [Guard](https://github.com/guard/guard) - Learn about what files are watched (for changes) and how tests gets executed automatically.
