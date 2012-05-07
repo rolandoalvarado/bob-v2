@@ -24,7 +24,7 @@ Feature: Resize an Instance
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Resize |
         | Member          | Can Resize           |
-        | Cloud Admin     | Can Resize           |
+        | Admin           | Can Resize           |
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Resize |

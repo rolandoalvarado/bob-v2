@@ -21,7 +21,7 @@ Feature: Unpause a Paused Instance
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Unpause |
         | Member          | Can Unpause           |
-        | Cloud Admin     | Can Unpause           |
+        | Admin           | Can Unpause           |
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Unpause |

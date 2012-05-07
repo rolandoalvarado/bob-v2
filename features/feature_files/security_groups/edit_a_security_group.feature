@@ -26,7 +26,7 @@ Feature: Edit a Security Group
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Edit |
         | Member          | Can Edit           |
-        | Cloud Admin     | Can Edit           |
+        | Admin           | Can Edit           |
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Edit |

@@ -19,7 +19,7 @@ Feature: Pause an Instance
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Pause |
         | Member          | Can Pause           |
-        | Cloud Admin     | Can Pause           |
+        | Admin           | Can Pause           |
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Pause |

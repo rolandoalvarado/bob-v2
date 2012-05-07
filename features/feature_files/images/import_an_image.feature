@@ -19,7 +19,7 @@ Feature: Import an Image
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Import |
         | Member          | Can Import           |
-        | Cloud Admin     | Can Import           |
+        | Admin           | Can Import           |
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Import |

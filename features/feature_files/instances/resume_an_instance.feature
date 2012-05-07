@@ -21,7 +21,7 @@ Feature: Resume an Instance
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Resume |
         | Member          | Can Resume           |
-        | Cloud Admin     | Can Resume           |
+        | Admin           | Can Resume           |
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Resume |

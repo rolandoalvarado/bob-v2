@@ -16,7 +16,7 @@ Feature: Create a Volume Snapshot
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Create |
         | Member          | Can Create           |
-        | Cloud Admin     | Can Create           |
+        | Admin           | Can Create           |
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Create |

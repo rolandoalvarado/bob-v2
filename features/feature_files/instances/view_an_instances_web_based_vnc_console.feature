@@ -33,7 +33,7 @@ Feature: View an Instance's Web-based VNC Console
       Scenarios: Authorized Roles
         | Role            | Can or Cannot View |
         | Member          | Can View           |
-        | Cloud Admin     | Can View           |
+        | Admin           | Can View           |
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot View |

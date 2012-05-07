@@ -14,7 +14,7 @@ Feature: View a Project's Compute Usage Report
       Scenarios: Authorized Roles
         | Role            | Can or Cannot View |
         | Member          | Can View           |
-        | Cloud Admin     | Can View           |
+        | Admin           | Can View           |
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot View |
