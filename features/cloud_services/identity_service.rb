@@ -61,6 +61,12 @@ class IdentityService < BaseCloudService
     user
   end
 
+  def revoke_all_user_roles(user, tenant)
+    user.roles(tenant.id).each do |role|
+      tenant.revoke_user_role(user.id, role['id'])
+    end
+  end
+
   #================================================
   # COMPUTE SERVICE-RELATED METHODS
   # Convenience methods to make the DSL consistent
