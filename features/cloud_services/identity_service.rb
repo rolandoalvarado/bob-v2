@@ -57,6 +57,7 @@ class IdentityService < BaseCloudService
     else
       user = create_user(attributes)
     end
+    user.password = attributes[:password]
     user
   end
 
