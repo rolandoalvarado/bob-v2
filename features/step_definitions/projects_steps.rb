@@ -14,7 +14,9 @@ Given /^[Aa] project exists in the system$/ do
   @project = project
 end
 
-Given /^The project has at least (\d+) images?$/ do |number_of_images|
+
+
+Given /^At least (\d+) images? should be available for use in the project$/ do |number_of_images|
   number_of_images = number_of_images.to_i
   image_service    = ImageService.session
   images           = image_service.get_public_images
