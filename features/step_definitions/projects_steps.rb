@@ -64,7 +64,6 @@ Given /^I have a role of (.+) in the project$/ do |role_name|
   end
 
   # Make variable(s) available for use in succeeding steps
-  user.password = user_attrs[:password]
   @current_user = user
 end
 
