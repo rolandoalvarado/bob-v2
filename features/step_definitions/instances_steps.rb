@@ -38,6 +38,18 @@ Then /^I [Cc]an [Cc]reate an instance in the project$/ do
   }
 end
 
+
+
 Then /^I [Cc]annot [Cc]reate an instance in the project$/ do
-  pending
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * The #{ @project.name } project should not be visible
+  }
 end
