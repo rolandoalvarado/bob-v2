@@ -23,11 +23,19 @@
 
 module Unique
   def self.username(value, length = 16)
-    "#{ value }_#{ ConfigFile.unique_alpha }"[0, length - 1]
+    self.string_without_whitespace(value, length)
   end
 
   def self.name(value, length = 16)
-    "#{ value } #{ ConfigFile.unique_alpha }"[0, length - 1]
+    self.string_with_whitespace(value, length)
+  end
+
+  def self.string_with_whitespace(value = '', length = 16)
+    "#{ value } #{ self.alpha }"[0, length - 1]
+  end
+
+  def self.string_without_whitespace(value = '', length = 16)
+    "#{ value }_#{ self.alpha }"[0, length - 1]
   end
 
   def self.alpha

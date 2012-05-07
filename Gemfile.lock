@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/MorphGlobal/fog.git
-  revision: 57dcfc9fcef4c05ea3babe9474410fea49cb1756
+  revision: 00d6f2c037b4915313a497e659d313e46174b813
   branch: development
   specs:
     fog (1.3.1)

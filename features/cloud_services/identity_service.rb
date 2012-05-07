@@ -25,7 +25,7 @@ class IdentityService < BaseCloudService
     user = users.new(attributes)
     user.save
     admin_role = roles.find_by_name(RoleNameDictionary.db_name('Cloud Admin'))
-    test_tenant.add_user(user.id, admin_role.id)
+    test_tenant.grant_user_role(user.id, admin_role.id)
     user
   end
 
@@ -45,7 +45,7 @@ class IdentityService < BaseCloudService
     # not really a global role
     admin_user  = users.find_by_name(ConfigFile.admin_username)
     admin_role  = roles.find_by_name(RoleNameDictionary.db_name('Cloud Admin'))
-    tenant.add_user(admin_user.id, admin_role.id)
+    tenant.grant_user_role(admin_user.id, admin_role.id)
 
     tenant
   end
@@ -57,7 +57,14 @@ class IdentityService < BaseCloudService
     else
       user = create_user(attributes)
     end
+    user.password = attributes[:password]
     user
+  end
+
+  def revoke_all_user_roles(user, tenant)
+    user.roles(tenant.id).each do |role|
+      tenant.revoke_user_role(user.id, role['id'])
+    end
   end
 
   #================================================
