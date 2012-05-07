@@ -65,26 +65,6 @@ Given /^I have a role of (.+) in the project$/ do |role_name|
   # Make variable(s) available for use in succeeding steps
   @current_user = user
 end
-  # Ensure user has the following role in the project
-  unless role_name.downcase == "(none)"
-    role = identity_service.roles.find_by_name(RoleNameDictionary.db_name(role_name))
-
-    if role.nil?
-      raise "Role #{ role_name } couldn't be found. Make sure it's defined in " +
-            "features/support/role_name_dictionary.rb and that it exists in " +
-            "#{ ConfigFile.web_client_url }."
-    end
-
-    begin
-      @project.add_user_role(user.id, role.id)
-    rescue Fog::Identity::OpenStack::NotFound => e
-      raise "Couldn't add #{ user.name } to #{ @project.name } as #{ role.name }"
-    end
-  end
-
-  # Make variable(s) available for use in succeeding steps
-  @current_user = user
-end
 
 Given /^I am authorized to create projects$/ do
   pending # express the regexp above with the code you wish you had
