@@ -63,6 +63,9 @@ Given /^I have a role of (.+) in the project$/ do |role_name|
     end
   end
 
+  # Make variable(s) available for use in succeeding steps
+  @current_user = user
+end
   # Ensure user has the following role in the project
   unless role_name.downcase == "(none)"
     role = identity_service.roles.find_by_name(RoleNameDictionary.db_name(role_name))
