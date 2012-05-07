@@ -8,7 +8,7 @@ Feature: Create an Instance
 
   Background:
     * A project exists in the system
-    * The project has at least 1 image
+    * At least 1 image should be available for use in the project
     * The project has 0 instances
 
 
