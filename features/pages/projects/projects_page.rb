@@ -4,6 +4,7 @@ class ProjectsPage < WebClientPage
   path '/projects'
 
   button 'create project',      '#create-project'
+  button 'disabled create project',      '#create-project.disabled'
   field  'project name',        '#new-project-name'
   field  'project description', '#new-project-description'
   button 'save project',        '#save-project'

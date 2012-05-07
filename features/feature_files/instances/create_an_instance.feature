@@ -12,7 +12,7 @@ Feature: Create an Instance
     * The project has 0 instances
 
 
-  @permissions @wip
+  @permissions
   Scenario Outline: Check User Permissions
     Given I have a role of <Role> in the project
      Then I <Can or Cannot Create> an instance in the project
@@ -21,7 +21,7 @@ Feature: Create an Instance
         | Role            | Can or Cannot Create |
         | Member          | Can Create           |
         | Cloud Admin     | Can Create           |
-
+      @wip
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Create |
         | (None)          | Cannot Create        |

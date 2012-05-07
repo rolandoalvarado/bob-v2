@@ -24,7 +24,7 @@ Given /^The project has at least (\d+) images?$/ do |number_of_images|
   end
 end
 
-Given /^The project has (\d+) instances$/ do |number_of_instances|
+Given /^The project has (\d+) instances?$/ do |number_of_instances|
   number_of_instances = number_of_instances.to_i
   compute_service     = ComputeService.session
   total_instances     = compute_service.ensure_project_instance_count(@project, number_of_instances)
@@ -74,6 +74,27 @@ Given /^a user named Arya Stark exists in the system$/ do
   pending # express the regexp above with the code you wish you had
 end
 
+Given /^I have a role of (.+) in the system$/ do |role_name|
+  identity_service = IdentityService.session
+  project          = identity_service.ensure_project_exists(:name => 'admin')
+
+  if project.nil? or project.id.empty?
+    raise "Project couldn't be initialized!"
+  end
+
+  # Make variable(s) available for use in succeeding steps
+  old_project = @project
+  @project = project
+
+  steps %{
+   * I have a role of #{role_name} in the project
+  }
+
+  @project = old_project
+
+end
+
+
 
 #=================
 # WHENs
@@ -101,18 +122,54 @@ end
 #=================
 
 Then /^I Cannot Create a project$/ do
-  pending # express the regexp above with the code you wish you had
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+
+    * the create project button is disabled.
+  }
 end
 
 Then /^I Can Create a project$/ do
   project_name = Unique.name("DPBLOG-9-1")
   steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+
     * Click the create_project button
     * Fill in the project_name field with #{project_name}
     * Fill in the project_description field with "This project is created by cucumber."
     * Click the save_project button
-    * Ensure that a project named #{project_name} exists
+    * A project named #{project_name} exists
   }
+end
+
+Then /^A project named (.+) exists$/ do |project_name|
+
+    project =  IdentityService.session.tenants.find_by_name(project_name)
+    if project.nil? or project.id.empty?
+      raise ("project #{project_name} should exist, but it's not")      
+    end
+
+end
+
+Then /^the create project button is disabled\.$/ do
+  button = @current_page.find('disabled create project')
+  if button.nil?
+    raise ("create project button should not exist. but it is.")      	  
+  end
 end
 
 Then /^I can view that project$/ do
@@ -128,5 +185,13 @@ Then /^the project will be Created$/ do
 end
 
 Then /^the project will be Not Created$/ do
+  pending # express the regexp above with the code you wish you had
+end
+
+Then /^I Can Delete the instance$/ do
+  pending # express the regexp above with the code you wish you had
+end
+
+Then /^I Cannot Delete the instance$/ do
   pending # express the regexp above with the code you wish you had
 end

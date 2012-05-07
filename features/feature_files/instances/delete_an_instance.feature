@@ -8,10 +8,10 @@ Feature: Delete an Instance
 
   Background:
     * A project exists in the system
-    * The project has one running instance
+    * The project has 1 instance
 
 
-  @permissions
+  @permissions @dave
   Scenario Outline: Check User Permissions
     Given I have a role of <Role> in the project
      Then I <Can or Cannot Delete> the instance
