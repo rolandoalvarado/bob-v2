@@ -11,6 +11,7 @@ elif [ $# -eq 1 ] && [ $1 == '--help' ]; then
 fi
 
 ruby_string="ruby 1.9.3"
+phantomjs_string="1.5.0"
 
 if ruby --version | grep -q "${ruby_string}" ; then
   echo "${ruby_string} found!"
@@ -18,6 +19,12 @@ else
   echo "${ruby_string} or higher must be installed."
   echo "Please install it before proceeding"
   exit 1
+fi
+
+if phantomjs --version | grep -q "${phantomjs_string}" ; then
+  echo "PhantomJS ${phantomjs_string} found!"
+else
+  echo "PhantomJS ${phantomjs_string} not found."
 fi
 
 
