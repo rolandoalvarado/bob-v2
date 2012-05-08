@@ -66,16 +66,6 @@ Given /^I have a role of (.+) in the project$/ do |role_name|
   @current_user = user
 end
 
-Given /^I am authorized to create projects$/ do
-  pending # express the regexp above with the code you wish you had
-end
-
-
-
-Given /^a user named Arya Stark exists in the system$/ do
-  pending # express the regexp above with the code you wish you had
-end
-
 
 Given /^I have a role of (.+) in the system$/ do |role_name|
   user_attrs       = CloudObjectBuilder.attributes_for(
@@ -83,11 +73,15 @@ Given /^I have a role of (.+) in the system$/ do |role_name|
                        :name => Unique.username('rstark')
                      )
   identity_service = IdentityService.session
-  user             = identity_service.ensure_user_exists(user_attrs)
-  project          = identity_service.ensure_project_exists(:name => 'admin')
-  identity_service.revoke_all_user_roles(user, project)
 
-  # Ensure user has the following role in the project
+  user = identity_service.ensure_user_exists(user_attrs)
+
+  project = identity_service.tenants.find { |t| t.name == 'admin' }
+  if project.nil? or project.id.empty?
+    raise "Project couldn't be found!"
+  end
+
+  # Ensure user has the following role in the system
   unless role_name.downcase == "(none)"
     role = identity_service.roles.find_by_name(RoleNameDictionary.db_name(role_name))
 
@@ -107,6 +101,9 @@ Given /^I have a role of (.+) in the system$/ do |role_name|
   # Make variable(s) available for use in succeeding steps
   @current_user = user
 
+
+Given /^I am authorized to create projects$/ do
+  pending # express the regexp above with the code you wish you had
 end
 
 
@@ -190,14 +187,14 @@ Then /^A project named (.+) exists$/ do |project_name|
 
     project =  IdentityService.session.tenants.find_by_name(project_name)
     if project.nil? or project.id.empty?
-      raise ("project #{project_name} should exist, but it's not")      
+      raise ("project #{project_name} should exist, but it's not")
     end
 
 end
 
 Then /^the (.+) button is disabled$/ do |button_name|
   if @current_page.has_content?(button_name)
-    raise ("#{button name} button should not exist. but it is.")      	  
+    raise ("#{button name} button should not exist. but it is.")
   end
 end
 

@@ -24,7 +24,7 @@ Feature: Grant Membership to a Project
 
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Grant |
-        | Cloud Admin     | Can Grant           |
+        | Admin           | Can Grant           |
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Grant |

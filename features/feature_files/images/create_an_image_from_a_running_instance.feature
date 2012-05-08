@@ -20,7 +20,7 @@ Feature: Create an Image from a Running Instance
 
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Create |
-        | Cloud Admin     | Can Create           |
+        | Admin           | Can Create           |
         | Member          | Can Create           |
 
       Scenarios: Unauthorized Roles

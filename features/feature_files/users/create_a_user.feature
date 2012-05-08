@@ -10,7 +10,7 @@ Feature: Create a User
 
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Create |
-        | Cloud Admin     | Can Create           |
+        | Admin           | Can Create           |
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Create |

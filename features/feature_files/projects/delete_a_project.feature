@@ -13,7 +13,7 @@ Feature: Delete a project
 
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Delete |
-        | Cloud Admin     | Can Delete           |
+        | Admin           | Can Delete           |
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Delete |

@@ -19,7 +19,7 @@ Feature: Delete an Instance
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Delete |
         | Member          | Can Delete           |
-        | Cloud Admin     | Can Delete           |
+        | Admin           | Can Delete           |
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Delete |

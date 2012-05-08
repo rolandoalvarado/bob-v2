@@ -20,7 +20,7 @@ Feature: Suspend an Instance
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Suspend |
         | Member          | Can Suspend           |
-        | Cloud Admin     | Can Suspend           |
+        | Admin           | Can Suspend           |
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Suspend |

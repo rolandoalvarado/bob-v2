@@ -17,11 +17,12 @@ Feature: Create an Instance
     Given I have a role of <Role> in the project
      Then I <Can or Cannot Create> an instance in the project
 
+      @wip
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Create |
         | Member          | Can Create           |
-        | Cloud Admin     | Can Create           |
-      @wip
+        | Admin           | Can Create           |
+
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Create |
         | (None)          | Cannot Create        |

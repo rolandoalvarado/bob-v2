@@ -38,10 +38,9 @@ Then /^I [Cc]an [Cc]reate an instance in the project$/ do
   }
 end
 
+
+
 Then /^I [Cc]annot [Cc]reate an instance in the project$/ do
-
-  instance_name = Unique.name('Instance')
-
   steps %{
     * Click the logout button if currently logged in
 
@@ -51,9 +50,6 @@ Then /^I [Cc]annot [Cc]reate an instance in the project$/ do
     * Click the login button
 
     * Visit the projects page
-    * the #{ @project.name } project should not be visiable
-
+    * The #{ @project.name } project should not be visible
   }
-
-
 end

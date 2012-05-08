@@ -24,7 +24,7 @@ Feature: Assign a Floating IP to an Instance
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Assign |
         | Member          | Can Assign           |
-        | Cloud Admin     | Can Assign           |
+        | Admin           | Can Assign           |
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Assign |

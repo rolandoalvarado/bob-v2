@@ -19,7 +19,7 @@ Feature: Edit a Project's Instance Quota
 
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Edit |
-        | Cloud Admin     | Can Edit           |
+        | Admin           | Can Edit           |
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Edit |

@@ -18,7 +18,7 @@ Feature: List Projects
       Scenarios: Authorized Roles
         | Role            | Can or Cannot See |
         | Member          | Can See           |
-        | Cloud Admin     | Can See           |
+        | Admin           | Can See           |
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot See |

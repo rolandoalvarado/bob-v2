@@ -21,7 +21,7 @@ Feature: Reboot an Instance
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Reboot |
         | Member          | Can Reboot           |
-        | Cloud Admin     | Can Reboot           |
+        | Admin           | Can Reboot           |
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Reboot |
