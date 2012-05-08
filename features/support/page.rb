@@ -4,7 +4,7 @@ require 'capybara/dsl'
 Capybara.run_server = false
 Capybara.current_driver = :selenium
 Capybara.app_host = ConfigFile.web_client_url
-Capybara.default_wait_time = 10
+Capybara.default_wait_time = 30
 
 class Page
 
