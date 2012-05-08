@@ -187,12 +187,9 @@ Then /^I Can Create a project$/ do
 end
 
 Then /^A project named (.+) exists$/ do |project_name|
-
-    project =  IdentityService.session.tenants.find_by_name(project_name)
-    if project.nil? or project.id.empty?
-      raise ("project #{project_name} should exist, but it's not")
-    end
-
+  unless @current_page.has_project_link?( name: project_name )
+    raise ("project #{project_name} should exist, but it doesn't!")
+  end
 end
 
 Then /^the (.+) button is disabled$/ do |button_name|
