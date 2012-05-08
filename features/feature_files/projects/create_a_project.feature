@@ -14,7 +14,7 @@ Feature: Create a Project
   API request, Compute attempts to use a project with the same id as the user.
 
 
-  @permissions @take
+  @permissions
   Scenario Outline: Check User Permissions
     Given I have a role of <Role> in the system
      Then I <Can or Cannot Create> a project
@@ -35,12 +35,13 @@ Feature: Create a Project
 
       Scenarios: Valid Values
         | Name               | Description     | Created or Not |
-        | My Awesome Project | Another project | Created        |
-        | My Awesome Project | (None)          | Created        |
+        | Awesome Project | Another project | Created        |
 
+      @take
       Scenarios: Invalid Values
         | Name               | Description     | Created or Not | Reason           |
         | (None)             | Another project | Not Created    | Name is required |
+        | Awesome Project | (None)          | Not Created    | Description is required |
 
 
   Scenario: Create a Project That is Not Accessible to Another User
