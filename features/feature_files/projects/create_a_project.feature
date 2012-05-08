@@ -27,6 +27,7 @@ Feature: Create a Project
         | Role            | Can or Cannot Create |
         | Member          | Cannot Create        |
 
+
   Scenario Outline: Create a Project
     Given I am authorized to create projects
      When I create a project with attributes <Name>, <Description>
@@ -41,6 +42,7 @@ Feature: Create a Project
         | Name            | Description     | Created or Not | Reason           |
         | (None)          | Wrong name      | Not Created    | Name is required |
         | Wrong Desc      | (None)          | Not Created    | Description is required |
+
 
   Scenario: Create a Project That is Not Accessible to Another User
    Given I am authorized to create projects

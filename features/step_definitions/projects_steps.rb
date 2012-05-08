@@ -43,9 +43,9 @@ Given /^I have a role of (.+) in the project$/ do |role_name|
   end
 
   user_attrs       = CloudObjectBuilder.attributes_for(
-                                                       :user,
-                                                       :name => Unique.username('rstark')
-                                                       )
+                       :user,
+                       :name => Unique.username('rstark')
+                     )
   identity_service = IdentityService.session
   user             = identity_service.ensure_user_exists(user_attrs)
 
@@ -74,12 +74,12 @@ end
 
 Given /^I have a role of (.+) in the system$/ do |role_name|
   user_attrs       = CloudObjectBuilder.attributes_for(
-                                                       :user,
-                                                       :name => Unique.username('rstark')
-                                                       )
+                       :user,
+                       :name => Unique.username('rstark')
+                     )
   identity_service = IdentityService.session
 
-  user = identity_service.ensure_user_exists(user_attrs)
+  user             = identity_service.ensure_user_exists(user_attrs)
 
   project = identity_service.tenants.find { |t| t.name == 'admin' }
   if project.nil? or project.id.empty?

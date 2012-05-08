@@ -58,6 +58,7 @@ Then /^Ensure that a user with username (.+) and password (.+) exists$/ do |user
   @user = IdentityService.instance.ensure_user_exists(@user_attrs)
 end
 
+
 Then /^Fill in the (.+) field with (.+)$/ do |field_name, value|
   value      = value.gsub(/^\([Nn]one\)$/, '')
   field_name = field_name.split.join('_').downcase
