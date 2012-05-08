@@ -19,6 +19,7 @@ module CloudConfiguration
   OPENSTACK_USERNAME   = :openstack_username
   OPENSTACK_API_KEY    = :openstack_api_key
   OPENSTACK_TENANT     = :openstack_tenant
+  CAPYBARA_DRIVER      = :capybara_driver
   UNIQUE_HELPER_VALUES = :unique_helper_options
   ALPHA                = :alpha
   NUMERIC              = :numeric
@@ -38,6 +39,10 @@ module CloudConfiguration
     def self.web_client_url
       self.instance[WEB_CLIENT_HOST]
     end
+
+    def self.capybara_driver
+      self.instance[CAPYBARA_DRIVER].to_sym
+    end    
 
     def self.unique_alpha
       self.instance.ensure_unique_helper_key

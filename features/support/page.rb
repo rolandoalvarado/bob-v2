@@ -1,8 +1,34 @@
 require 'capybara'
 require 'capybara/dsl'
 
+require 'capybara/poltergeist'
+require 'capybara-webkit'
+
+begin
+  require 'headless'
+  headless = Headless.new
+  headless.start
+  at_exit do
+    headless.destroy
+  end
+rescue LoadError
+end
+
+
+Capybara.register_driver :webkit do |app|
+  Capybara::Driver::Webkit.new(app, {:ignore_ssl_errors => true} )
+end
+
+Capybara.register_driver :poltergeist do |app|
+  Capybara::Poltergeist::Driver.new(app, {:phantomjs => (ENV['PHANTOMJS_PATH'] || "/usr/local/bin/phantomjs"), :debug => (ENV['POLTERGEIST_DEBUG'] || false)})
+end
+
+puts "Driver: #{ConfigFile.capybara_driver}"
+
+Capybara.default_driver = ConfigFile.capybara_driver
+Capybara.javascript_driver = ConfigFile.capybara_driver
+
 Capybara.run_server = false
-Capybara.current_driver = :selenium
 Capybara.app_host = ConfigFile.web_client_url
 Capybara.default_wait_time = 30
 
