@@ -8,9 +8,10 @@ Capybara.default_wait_time = 10
 
 class Page
 
-  ELEMENT_TYPES    = 'button|field|link|checkbox|form|table'
+  ELEMENT_TYPES    = 'button|field|link|checkbox|form|table|span'
   RADIO_LIST_TYPES = 'radiolist'
   CHECK_LIST_TYPES = 'checklist'
+  SELECTION_TYPES  = 'selection|dropdown'
 
   #=====================
   # CLASS METHODS
@@ -26,6 +27,7 @@ class Page
     element   = /^(?<type>#{ ELEMENT_TYPES    })$/.match(name)
     radiolist = /^(?<type>#{ RADIO_LIST_TYPES })$/.match(name)
     checklist = /^(?<type>#{ CHECK_LIST_TYPES })$/.match(name)
+    selection = /^(?<type>#{ SELECTION_TYPES  })$/.match(name)
 
     if element
       register_element args[0].split.join('_').downcase, element['type'], args[1]
@@ -33,6 +35,8 @@ class Page
       register_radiolist args[0].split.join('_').downcase, radiolist['type'], args[1]
     elsif checklist
       register_checklist args[0].split.join('_').downcase, checklist['type'], args[1]
+    elsif selection
+      register_selection args[0].split.join('_').downcase, selection['type'], args[1]
     else
       super name, args, block
     end
@@ -105,6 +109,26 @@ class Page
 
     send :define_method, "#{ name }_#{ type }_items" do
       send("#{ name }_#{ type }").all(:xpath, "//input[@type='checkbox']")
+    end
+  end
+
+  def self.register_selection(name, type, options)
+    if options.class == Hash && options.has_key?(:xpath)
+      send :define_method, "#{ name }_#{ type }" do
+        selector = options[:xpath]
+        find_by_xpath selector
+      end
+    elsif selector = (options.class == String ? options : options[:css])
+      send :define_method, "#{ name }_#{ type }" do
+        selector = (options.class == String ? options : options[:css])
+        find selector
+      end
+    else
+      raise "Invalid selection selector #{ selector.inspect }"
+    end
+
+    send :define_method, "#{ name }_#{ type }_items" do
+      send("#{ name }_#{ type }").all(:xpath, "//option")
     end
   end
 
