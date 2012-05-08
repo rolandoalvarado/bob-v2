@@ -22,11 +22,11 @@
 # can just re-use the objects each time it is executed.
 
 module Unique
-  def self.username(value, length = 16)
+  def self.username(value = '', length = 16)
     self.string_without_whitespace(value, length)
   end
 
-  def self.name(value, length = 16)
+  def self.name(value = '', length = 16)
     self.string_with_whitespace(value, length)
   end
 
