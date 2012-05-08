@@ -4,7 +4,7 @@
 
 Given /^[Aa] project exists in the system$/ do
   identity_service = IdentityService.session
-  project          = identity_service.ensure_project_exists(:name => 'Test Project')
+  project          = identity_service.ensure_project_exists(:name => Unique.name('Existing'))
 
   if project.nil? or project.id.empty?
     raise "Project couldn't be initialized!"
@@ -12,6 +12,7 @@ Given /^[Aa] project exists in the system$/ do
 
   # Make variable(s) available for use in succeeding steps
   @project = project
+  @project_name = project.name
 end
 
 
@@ -62,7 +63,7 @@ Given /^I have a role of (.+) in the project$/ do |role_name|
     end
 
     begin
-      @project.grant_user_role(user.id, role.id)
+      role.add_to_user(user,@project)
     rescue Fog::Identity::OpenStack::NotFound => e
       raise "Couldn't add #{ user.name } to #{ @project.name } as #{ role.name }"
     end
@@ -173,7 +174,6 @@ When /^I create a project$/ do
   }
 end
 
-
 #=================
 # THENs
 #=================
@@ -246,10 +246,32 @@ Then /^the (.+) button is disabled$/ do |button_name|
   end
 end
 
-Then /^I can view that project$/ do
+Then /^I [Cc]an [Vv]iew (?:that|the) project$/ do
   steps %{
+
+    * Click the logout button if currently logged in
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
     * Visit the projects page
     * A project named #{@project_name} exists
+  }
+end
+
+Then /^I [Cc]annot [Vv]iew (?:that|the) project$/ do
+  steps %{
+
+    * Click the logout button if currently logged in
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * A project named #{@project_name} does not exist
+
   }
 end
 
@@ -289,9 +311,14 @@ Then /^the project will be Not Created$/ do
 
   # current_page should still have a new project form
   # new project form should have the error message "This field is required".
-  if !@current_page.has_new_project_name_error_span? && !@current_page.has_new_project_description_error_span?
-    raise ("#{@project_name} should have new_project_name_error. but not.")    
+  if @current_page.has_new_project_name_error_span?
+    break
   end
+  if @current_page.has_new_project_description_error_span?
+    break
+  end
+
+  raise ("#{@project_name} should have new_project_name_error. but not.")    
 
 end
 

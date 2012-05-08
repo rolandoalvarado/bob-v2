@@ -5,10 +5,10 @@ Feature: View a Project
     * A project exists in the system
 
 
-  @permissions
+  @permissions @take
   Scenario Outline: Check User Permissions
     Given I have a role of <Role> in the project
-     Then I <Can or Cannot View> the project
+    Then I <Can or Cannot View> the project
 
       Scenarios: Authorized Roles
         | Role            | Can or Cannot View |
