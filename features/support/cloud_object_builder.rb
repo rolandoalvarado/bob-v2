@@ -19,18 +19,28 @@ module CloudObjectBuilder
     attributes[:name]       ||= attributes.delete('name') || attributes.delete('Username') || Faker::Name.name
     attributes[:tenant_id]  ||= attributes.delete('tenant_id')
     attributes[:password]   ||= attributes.delete('password') || attributes.delete('Password') || "123qwe"
-    attributes
+    BetterHash.new.merge(attributes)
   end
 
   def self.attributes_for_tenant(attributes)
     attributes[:description] ||= attributes.delete('description') || Faker::Lorem.paragraph
     attributes[:enabled]     ||= attributes.delete('enabled') || true
     attributes[:name]        ||= attributes.delete('name') || Faker::Company.name
-    attributes
+    BetterHash.new.merge(attributes)
   end
 
   def self.attributes_for_project(attributes)
     attributes_for_tenant(attributes)
   end
 
+end
+
+class BetterHash < Hash
+  def method_missing(name, *args, &block)
+    if has_key?(name)
+      self[name]
+    else
+        super
+    end
+  end
 end

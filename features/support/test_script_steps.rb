@@ -58,6 +58,7 @@ Then /^Ensure that a user with username (.+) and password (.+) exists$/ do |user
   @user = IdentityService.instance.ensure_user_exists(@user_attrs)
 end
 
+
 Then /^Fill in the (.+) field with (.+)$/ do |field_name, value|
   value      = value.gsub(/^\([Nn]one\)$/, '')
   field_name = field_name.split.join('_').downcase
@@ -88,8 +89,28 @@ Then /^The (.+) button should be disabled$/ do |button_name|
   end
 end
 
+Then /^The (.+) message should be visible$/ do |span_name|
+  span_name = span_name.split.join('_').downcase
+  unless @current_page.send("has_#{ message_name }_span?")
+    raise "The '#{ span_name.gsub('_',' ') }' message should be visible, but it's not."
+  end
+end
+
+Then /^The (.+) message should not be visible$/ do |span_name|
+  span_name = span_name.split.join('_').downcase
+  if @current_page.send("has_#{ message_name }_span?")
+    raise "The '#{ span_name.gsub('_',' ') }' message should not be visible, but it is."
+  end
+end
+
+
+Then /^The (.+) project should be visible$/ do |project_name|
+  unless @current_page.has_project_link?( name: project_name )
+    raise "The project '#{ project_name }' should be visible, but it's not."
+  end
+end
+
 Then /^The (.+) project should not be visible$/ do |project_name|
-  project_name = project_name.split.join('_').downcase
   if @current_page.has_project_link?( name: project_name )
     raise "The project '#{ project_name }' should not be visible, but it is."
   end

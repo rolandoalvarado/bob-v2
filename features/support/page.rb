@@ -30,7 +30,7 @@ Capybara.javascript_driver = ConfigFile.capybara_driver
 
 Capybara.run_server = false
 Capybara.app_host = ConfigFile.web_client_url
-Capybara.default_wait_time = 10
+Capybara.default_wait_time = 30
 
 class Page
 
