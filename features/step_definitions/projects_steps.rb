@@ -36,6 +36,12 @@ end
 
 
 Given /^I have a role of (.+) in the project$/ do |role_name|
+
+  if @project.nil?
+    raise "No project was defined. You might need to add '* A project exists in the system' " +
+          "in the feature file."
+  end
+
   user_attrs       = CloudObjectBuilder.attributes_for(
                                                        :user,
                                                        :name => Unique.username('rstark')
