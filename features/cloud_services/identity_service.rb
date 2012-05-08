@@ -26,10 +26,13 @@ class IdentityService < BaseCloudService
       return
     end
     users = tenant.users
-    users.each do |user| 
+    users.each do |user|
       revoke_all_user_roles(user, tenant)
     end
-    tenant.destroy
+
+    sleeping(1).seconds.between_tries.failing_after(20).tries do
+      tenant.destroy
+    end
   end
 
   def create_user(attributes)
