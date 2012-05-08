@@ -1,3 +1,4 @@
+@MCF-30
 Feature: View a Project
   As a user, I should be able to see the details of a project
 
@@ -5,7 +6,7 @@ Feature: View a Project
     * A project exists in the system
 
 
-  @permissions @take
+  @permissions
   Scenario Outline: Check User Permissions
     Given I have a role of <Role> in the project
     Then I <Can or Cannot View> the project
