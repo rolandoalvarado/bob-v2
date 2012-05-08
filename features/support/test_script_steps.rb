@@ -70,6 +70,11 @@ Then /^Fill in the (.+) field with (.+)$/ do |field_name, value|
   @current_page.send("#{ field_name }_field").set value
 end
 
+Then /^Choose the (\d+)(?:st|nd|rd|th) item of the (.+) dropdown$/ do |item_number, dropdown_name|
+  dropdown_name = dropdown_name.split.join('_').downcase
+  @current_page.send("#{ dropdown_name }_dropdown_items")[item_number.to_i - 1].click
+end
+
 Then /^The (.+) table should include the text (.+)$/ do |table_name, text|
   unless @current_page.send("#{ table_name }_table").has_content?(text)
     raise "Couldn't find the text '#{ text }' in the #{ table_name } table."
