@@ -27,22 +27,20 @@ Feature: Create a Project
         | Role            | Can or Cannot Create |
         | Member          | Cannot Create        |
 
-
   Scenario Outline: Create a Project
     Given I am authorized to create projects
      When I create a project with attributes <Name>, <Description>
      Then the project will be <Created or Not>
 
       Scenarios: Valid Values
-        | Name               | Description     | Created or Not |
-        | Awesome Project | Another project | Created        |
+        | Name            | Description     | Created or Not |
+        | Awesome         | Another project | Created        |
 
-      @take
+
       Scenarios: Invalid Values
-        | Name               | Description     | Created or Not | Reason           |
-        | (None)             | Another project | Not Created    | Name is required |
-        | Awesome Project | (None)          | Not Created    | Description is required |
-
+        | Name            | Description     | Created or Not | Reason           |
+        | (None)          | Wrong name      | Not Created    | Name is required |
+        | Wrong Desc      | (None)          | Not Created    | Description is required |
 
   Scenario: Create a Project That is Not Accessible to Another User
    Given I am authorized to create projects

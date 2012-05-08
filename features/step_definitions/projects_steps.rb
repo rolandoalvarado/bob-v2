@@ -116,14 +116,7 @@ Given /^I am authorized to create projects$/ do
 end
 
 Given /^a user named Arya Stark exists in the system$/ do
-  user_attrs       = CloudObjectBuilder.attributes_for(
-                                                       :user,
-                                                       :name => Unique.username('aryastark')
-                                                       )
-  identity_service = IdentityService.session
-  user             = identity_service.ensure_user_exists(user_attrs)
-
-  @current_user = user
+  # nothing to do.
 end
 
 
@@ -132,10 +125,23 @@ end
 # WHENs
 #=================
 
-When /^I create a project with attributes (.*), (.*)$/ do |pname,pdesc|
+When /^Fill in the (.+) field with$/ do |field|
+  #This step is called when there is no argument.
+  #So we ignore the step. 
+end
 
-  attributes = CloudObjectBuilder.attributes_for(:tenant, :name => pname)
-  IdentityService.session.delete_tenant(attributes)
+When /^I create a project with attributes (.*), (.*)$/ do |pname,pdesc|
+  if pname.downcase == "(none)"
+    pname = ""
+  else
+    pname = Unique.name(pname)
+    attributes = CloudObjectBuilder.attributes_for(:tenant, :name => pname)
+    IdentityService.session.delete_tenant(attributes)
+  end
+
+  if pdesc.downcase == "(none)"
+    pdesc = ""
+  end
 
   steps %{
     * Click the logout button if currently logged in
@@ -152,13 +158,18 @@ When /^I create a project with attributes (.*), (.*)$/ do |pname,pdesc|
     * Fill in the project_description field with #{pdesc}
     * Click the save_project button
   }
-  @project_name = pname
+  if pname == ""
+    @project_name = "(none)"
+  else
+    @project_name = pname
+  end
+
 
 end
 
 When /^I create a project$/ do
   steps %{
-    * I create a project with attributes Unique.name, "This project is created by cucumber"
+    * I create a project with attributes DPBLOG91A, "This project is created by cucumber"
   }
 end
 
@@ -168,9 +179,6 @@ end
 #=================
 
 Then /^I Cannot Create a project$/ do
-  project_name = Unique.name("DPBLOG91N")
-  attributes = CloudObjectBuilder.attributes_for(:tenant, :name => project_name)
-  IdentityService.session.delete_tenant(attributes)
 
   steps %{
     * Click the logout button if currently logged in
@@ -189,7 +197,7 @@ end
 
 
 Then /^I Can Create a project$/ do
-  project_name = Unique.name("DPBLOG91")
+  project_name = Unique.name("DPBLOG91B")
   attributes = CloudObjectBuilder.attributes_for(:tenant, :name => project_name)
   IdentityService.session.delete_tenant(attributes)
 
@@ -207,18 +215,28 @@ Then /^I Can Create a project$/ do
     * Fill in the project_name field with #{project_name}
     * Fill in the project_description field with "This project is created by cucumber."
     * Click the save_project button
+
+    * Visit the projects page
+    * A project named #{project_name} exists
   }
+
 end
 
 Then /^A project named (.+) exists$/ do |project_name|
+  if project_name.downcase == "(none)" 
+    project_name = ""
+  end
   unless @current_page.has_project_link?( name: project_name )
     raise ("project #{project_name} should exist, but it doesn't! user is #{@current_user.name} ")
   end
 end
 
 Then /^A project named (.+) does not exist$/ do |project_name|
+  if project_name.downcase == "(none)" 
+    project_name = ""
+  end
   if @current_page.has_project_link?( name: project_name )
-    raise ("project #{project_name} should not exist, but it does! user is #{@current_user.name}")
+    raise ("project #{project_name} should not exist, but it does! Username is #{@current_user.name}")
   end
 end
 
@@ -229,13 +247,33 @@ Then /^the (.+) button is disabled$/ do |button_name|
 end
 
 Then /^I can view that project$/ do
-  pending # express the regexp above with the code you wish you had
+  steps %{
+    * Visit the projects page
+    * A project named #{@project_name} exists
+  }
 end
 
 
 
 Then /^Arya Stark cannot view that project$/ do
-  pending # express the regexp above with the code you wish you had
+  user_attrs       = CloudObjectBuilder.attributes_for(
+                                                       :user,
+                                                       :name => Unique.username('aryastark')
+                                                       )
+  identity_service = IdentityService.session
+  user             = identity_service.ensure_user_exists(user_attrs)
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ user.name }
+    * Fill in the password field with #{ user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * A project named #{@project_name} does not exist
+  }
+
 end
 
 
@@ -248,10 +286,13 @@ Then /^the project will be Created$/ do
 end
 
 Then /^the project will be Not Created$/ do
-  steps %{
-    * Visit the projects page
-    * A project named #{@project_name} does not exist
- }
+
+  # current_page should still have a new project form
+  # new project form should have the error message "This field is required".
+  if !@current_page.has_new_project_name_error_span? && !@current_page.has_new_project_description_error_span?
+    raise ("#{@project_name} should have new_project_name_error. but not.")    
+  end
+
 end
 
 Then /^I Can Delete the instance$/ do
