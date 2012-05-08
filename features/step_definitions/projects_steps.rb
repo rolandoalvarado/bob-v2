@@ -66,7 +66,21 @@ Given /^I have a role of (.+) in the project$/ do |role_name|
   # Make variable(s) available for use in succeeding steps
   @current_user = user
 end
-  # Ensure user has the following role in the project
+
+Given /^I have a role of (.+) in the system$/ do |role_name|
+  user_attrs       = CloudObjectBuilder.attributes_for(
+                       :user,
+                       :name => Unique.username('rstark')
+                     )
+  identity_service = IdentityService.session
+  user = identity_service.ensure_user_exists(user_attrs)
+
+  project = identity_service.ensure_project_exists(:name => 'admin')
+  if project.nil? or project.id.empty?
+    raise "Project couldn't be found!"
+  end
+
+  # Ensure user has the following role in the system
   unless role_name.downcase == "(none)"
     role = identity_service.roles.find_by_name(RoleNameDictionary.db_name(role_name))
 
@@ -77,9 +91,9 @@ end
     end
 
     begin
-      @project.add_user_role(user.id, role.id)
+      project.grant_user_role(user.id, role.id)
     rescue Fog::Identity::OpenStack::NotFound => e
-      raise "Couldn't add #{ user.name } to #{ @project.name } as #{ role.name }"
+      raise "Couldn't add #{ user.name } to #{ project.name } as #{ role.name }"
     end
   end
 
