@@ -67,6 +67,7 @@ Given /^I have a role of (.+) in the project$/ do |role_name|
   @current_user = user
 end
 
+
 Given /^I have a role of (.+) in the system$/ do |role_name|
   user_attrs       = CloudObjectBuilder.attributes_for(
                        :user,
@@ -100,6 +101,7 @@ Given /^I have a role of (.+) in the system$/ do |role_name|
   # Make variable(s) available for use in succeeding steps
   @current_user = user
 end
+
 
 Given /^I am authorized to create projects$/ do
   pending # express the regexp above with the code you wish you had

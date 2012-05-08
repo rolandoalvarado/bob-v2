@@ -12,7 +12,7 @@ Feature: Create an Instance
     * The project has 0 instances
 
 
-  @permissions @wip
+  @permissions
   Scenario Outline: Check User Permissions
     Given I have a role of <Role> in the project
      Then I <Can or Cannot Create> an instance in the project

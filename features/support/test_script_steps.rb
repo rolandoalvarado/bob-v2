@@ -76,6 +76,20 @@ Then /^The (.+) table should include the text (.+)$/ do |table_name, text|
   end
 end
 
+Then /^The (.+) button should be disabled$/ do |button_name|
+  button_name = button_name.split.join('_').downcase
+  unless @current_page.send("has_#{ button_name }_button?")
+    raise "Couldn't find '#{ button_name } button."
+  end
+end
+
+Then /^The (.+) project should not be visible$/ do |project_name|
+  project_name = project_name.split.join('_').downcase
+  if @current_page.has_project_link?( name: project_name )
+    raise "The project '#{ project_name }' should not be visible, but it is."
+  end
+end
+
 Then /^Visit the (.+) page$/ do |page_name|
   page_class_name = "#{ page_name.downcase.capitalize }Page"
   unless Object.const_defined?( page_class_name )

@@ -4,7 +4,9 @@ class ProjectPage < WebClientPage
   path '/projects'
 
 # Type      Name               Selector
-  button    'new instance',    '#create-instance:not(.disabled)'
+  button    'new instance',          '#create-instance:not(.disabled)'
+  button    'disabled new instance', '#create-instance.disabled'
+
   form      'new instance',    '#create-instance-modal'
   radiolist 'images',          '#instances-list'
   field     'server name',     '#server-name'
