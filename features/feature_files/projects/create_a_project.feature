@@ -26,7 +26,6 @@ Feature: Create a Project
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Create |
         | Member          | Cannot Create        |
-        | (None)          | Cannot Create        |
 
 
   Scenario Outline: Create a Project

@@ -82,7 +82,10 @@ Given /^I have a role of (.+) in the system$/ do |role_name|
   end
 
   # Ensure user has the following role in the system
-  unless role_name.downcase == "(none)"
+  if role_name.downcase == "(none)"
+    # This section is still under observation
+    pending
+  else
     role = identity_service.roles.find_by_name(RoleNameDictionary.db_name(role_name))
 
     if role.nil?
@@ -100,7 +103,7 @@ Given /^I have a role of (.+) in the system$/ do |role_name|
 
   # Make variable(s) available for use in succeeding steps
   @current_user = user
-
+end
 
 Given /^I am authorized to create projects$/ do
   pending # express the regexp above with the code you wish you had
