@@ -75,7 +75,7 @@ class ComputeService < BaseCloudService
 
       while addresses.length > desired_count
         addresses.reload
-        service.addresses[0].destroy rescue nil
+        addresses[0].destroy rescue nil
       end
 
     end
