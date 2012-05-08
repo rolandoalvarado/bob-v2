@@ -10,5 +10,5 @@ class ProjectsPage < WebClientPage
   button 'save project',        '#save-project'
 
   # To click on a project link, use ProjectsPage#project_link( name: NAME_OF_PROJECT ).click
-  link   'project',              xpath: "//*[@id='project-list']//td[text()='<name>']/..//a[@class='view-project']"
+  link   'project',              xpath: "//*[@id='project-list']//td[@title='<name>']/..//a[@class='view-project']"
 end
