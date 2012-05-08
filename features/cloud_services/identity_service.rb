@@ -20,6 +20,18 @@ class IdentityService < BaseCloudService
     tenant
   end
 
+  def delete_tenant(attributes)
+    tenant = find_test_tenant(attributes[:name])
+    if(tenant == nil or tenant.id == nil )
+      return
+    end
+    users = tenant.users
+    users.each do |user| 
+      revoke_all_user_roles(user, tenant)
+    end
+    tenant.destroy
+  end
+
   def create_user(attributes)
     attributes[:tenant_id] = test_tenant.id
     user = users.new(attributes)
@@ -78,7 +90,7 @@ class IdentityService < BaseCloudService
   end
 
   def add_user_to_project(user_id, project_id, role_id)
-    raise "Implement this method"
+    pending
   end
 
   def projects

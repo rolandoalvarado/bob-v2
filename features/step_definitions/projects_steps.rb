@@ -76,23 +76,36 @@ Given /^a user named Arya Stark exists in the system$/ do
   pending # express the regexp above with the code you wish you had
 end
 
-Given /^I have a role of (.+) in the system$/ do |role_name|
-  identity_service = IdentityService.session
-  project          = identity_service.ensure_project_exists(:name => 'admin')
 
-  if project.nil? or project.id.empty?
-    raise "Project couldn't be initialized!"
+Given /^I have a role of (.+) in the system$/ do |role_name|
+  user_attrs       = CloudObjectBuilder.attributes_for(
+                       :user,
+                       :name => Unique.username('rstark')
+                     )
+  identity_service = IdentityService.session
+  user             = identity_service.ensure_user_exists(user_attrs)
+  project          = identity_service.ensure_project_exists(:name => 'admin')
+  identity_service.revoke_all_user_roles(user, project)
+
+  # Ensure user has the following role in the project
+  unless role_name.downcase == "(none)"
+    role = identity_service.roles.find_by_name(RoleNameDictionary.db_name(role_name))
+
+    if role.nil?
+      raise "Role #{ role_name } couldn't be found. Make sure it's defined in " +
+            "features/support/role_name_dictionary.rb and that it exists in " +
+            "#{ ConfigFile.web_client_url }."
+    end
+
+    begin
+      project.grant_user_role(user.id, role.id)
+    rescue Fog::Identity::OpenStack::NotFound => e
+      raise "Couldn't add #{ user.name } to #{ project.name } as #{ role.name }"
+    end
   end
 
   # Make variable(s) available for use in succeeding steps
-  old_project = @project
-  @project = project
-
-  steps %{
-   * I have a role of #{role_name} in the project
-  }
-
-  @project = old_project
+  @current_user = user
 
 end
 
@@ -130,6 +143,10 @@ end
 #=================
 
 Then /^I Cannot Create a project$/ do
+  project_name = Unique.name("DPBLOG91N")
+  attributes = CloudObjectBuilder.attributes_for(:tenant, :name => project_name)
+  IdentityService.session.delete_tenant(attributes)
+
   steps %{
     * Click the logout button if currently logged in
 
@@ -140,14 +157,17 @@ Then /^I Cannot Create a project$/ do
 
     * Visit the projects page
 
-    * the create project button is disabled.
+    * the create project button is disabled
   }
 end
 
 
 
 Then /^I Can Create a project$/ do
-  project_name = Unique.name("DPBLOG-9-1")
+  project_name = Unique.name("DPBLOG91")
+  attributes = CloudObjectBuilder.attributes_for(:tenant, :name => project_name)
+  IdentityService.session.delete_tenant(attributes)
+
   steps %{
     * Click the logout button if currently logged in
 
@@ -175,10 +195,9 @@ Then /^A project named (.+) exists$/ do |project_name|
 
 end
 
-Then /^the create project button is disabled\.$/ do
-  button = @current_page.find('disabled create project')
-  if button.nil?
-    raise ("create project button should not exist. but it is.")      	  
+Then /^the (.+) button is disabled$/ do |button_name|
+  if @current_page.has_content?(button_name)
+    raise ("#{button name} button should not exist. but it is.")      	  
   end
 end
 
