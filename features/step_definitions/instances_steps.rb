@@ -2,6 +2,10 @@
 # GIVENs
 #=================
 
+Given /^The project does not have any floating IPs$/ do
+  compute_service = ComputeService.session
+  compute_service.ensure_project_floating_ip_count(@project, 0)
+end
 
 #=================
 # WHENs
@@ -11,6 +15,42 @@
 #=================
 # THENs
 #=================
+
+Then /^I [Cc]an [Aa]ssign a floating IP to an instance in the project$/ do
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * Click the #{ @project.name } project
+
+    * Click the access security tab link
+    * Click the new floating IP allocation button
+    * Current page should have the new floating IP allocation form
+    * Choose the 2nd item of the pool dropdown
+    * Choose the 2nd item of the instance dropdown
+    * Click the create floating IP allocation button
+  }
+end
+
+Then /^I [Cc]annot [Aa]ssign a floating IP to an instance in the project$/ do
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * The #{ @project.name } project should not be visible
+  }
+end
+
 
 Then /^I [Cc]an [Cc]reate an instance in the project$/ do
 
