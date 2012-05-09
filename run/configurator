@@ -43,7 +43,7 @@ OptionParser.new do |opts|
     @options[OPENSTACK_TENANT] = v
   end
 
-  opts.on("-d", "--driver DRIVER", "Cabybara drivers: selenium, webkit, phantomjs") do |v|
+  opts.on("-d", "--driver DRIVER", "Cabybara drivers: selenium, phantomjs") do |v|
     @options[CAPYBARA_DRIVER] = v
   end
 
@@ -101,7 +101,7 @@ openstack_options[OPENSTACK_TENANT] = @options[OPENSTACK_TENANT] || openstack_op
 configure openstack_options, OPENSTACK_TENANT  , "tenant name for #{openstack_options[OPENSTACK_USERNAME]}? "
 
 @config[CAPYBARA_DRIVER] = @options[CAPYBARA_DRIVER] || @config[CAPYBARA_DRIVER] || 'selenium'
-configure @config, CAPYBARA_DRIVER  , "capybara driver? (selenium, webkit, phantomjs)"
+configure @config, CAPYBARA_DRIVER  , "capybara driver? (selenium, phantomjs)"
 
 
 puts "Writing #{config_path} with contents:"
