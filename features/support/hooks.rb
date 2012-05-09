@@ -7,6 +7,7 @@ end
 AfterConfiguration do |config|
   FileUtils.rm_rf(tmp_screenshots_dir) if Dir.exists?(tmp_screenshots_dir)
   Dir.mkdir(tmp_screenshots_dir)
+  puts "Verifying requirements against #{ ConfigFile.web_client_url }"
   puts "Your Unique.alpha value is #{ Unique.alpha }"
 end
 
