@@ -242,7 +242,7 @@ class Page
 
   def raise_missing_element_declaration_error(element_name, element_type)
     raise "I don't know how to find the #{ element_name } #{ element_type }. " +
-          "Make sure you define it by adding \"#{ element_type } '#{ element_name }'" +
+          "Make sure you define it by adding \"#{ element_type } '#{ element_name }', " +
           "<css_selector>\" in #{ self.class }"
   end
 
