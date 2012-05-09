@@ -1,10 +1,10 @@
-#=================
+
 # GIVENs
 #=================
 
 Given /^[Aa] project exists in the system$/ do
   identity_service = IdentityService.session
-  project          = identity_service.ensure_project_exists(:name => Unique.name('Existing'))
+  project          = identity_service.ensure_project_exists(:name => ('project2'))
 
   if project.nil? or project.id.empty?
     raise "Project couldn't be initialized!"
@@ -72,54 +72,25 @@ Given /^I have a role of (.+) in the project$/ do |role_name|
   @current_user = user
 end
 
-Given /^I have a role of (.+) in the system$/ do |role_name|
-  user_attrs       = CloudObjectBuilder.attributes_for(
-                       :user,
-                       :name => Unique.username('rstark')
-                     )
-  identity_service = IdentityService.session
-
-  user             = identity_service.ensure_user_exists(user_attrs)
-
-  project = identity_service.tenants.find { |t| t.name == 'admin' }
-  if project.nil? or project.id.empty?
-    raise "Project couldn't be found!"
-  end
-
-  # Ensure user has the following role in the system
-  if role_name.downcase == "(none)"
-    # This section is still under observation
-    pending
-  end
-
-  role = identity_service.roles.find_by_name(RoleNameDictionary.db_name(role_name))
-  if role.nil?
-    raise "Role #{ role_name } couldn't be found. Make sure it's defined in " +
-      "features/support/role_name_dictionary.rb and that it exists in " +
-      "#{ ConfigFile.web_client_url }."
-  end
-
-  begin
-    project.grant_user_role(user.id, role.id)
-  rescue Fog::Identity::OpenStack::NotFound => e
-    raise "Couldn't add #{ user.name } to #{ project.name } as #{ role.name }"
-  end
-
-  # Make variable(s) available for use in succeeding steps
-  @current_user = user
-end
 
 Given /^I am authorized to create projects$/ do
   steps %{
-    * I have a role of Admin in the system
+    * I am a System Admin
   }
 end
+
+
+Given /^I am authorized to edit the project$/ do
+  steps %{
+    * I am a System Admin
+    * I have a role of Project Manager in the project
+  }
+end
+
 
 Given /^a user named Arya Stark exists in the system$/ do
   # nothing to do.
 end
-
-
 
 #=================
 # WHENs
@@ -152,6 +123,35 @@ When /^I create a project with attributes (.*), (.*)$/ do |name, desc|
 
   # Make the project name available to subsequent steps
   @project_attrs = attrs
+end
+
+When /^I edit the project.s attributes to (.*), (.*)$/ do |name, desc|
+
+  attrs = CloudObjectBuilder.attributes_for(
+            :project,
+            :name        => name.downcase == '(none)' ? name : Unique.name(name),
+            :description => desc
+          )
+
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+
+    * Edit the #{@project.name} project
+    * Fill in the project name field with #{ attrs.name }
+    * Fill in the project description field with #{ attrs.description }
+    * Click the modify project button
+  }
+
+  # Make the project name available to subsequent steps
+  @project_attrs = attrs
+
 end
 
 When /^I create a project$/ do
@@ -243,6 +243,7 @@ Then /^I [Cc]an [Vv]iew (?:that|the) project$/ do
 
     * Visit the projects page
     * The #{ (@project || @project_attrs).name  } project should be visible
+    * Click the #{ (@project || @project_attrs).name } project
   }
 end
 
@@ -260,6 +261,44 @@ Then /^I [Cc]annot [Vv]iew (?:that|the) project$/ do
   }
 end
 
+Then /^I [Cc]an [Ee]dit (?:that|the) project$/ do
+  steps %{
+
+    * Click the logout button if currently logged in
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * The #{ (@project || @project_attrs).name } project should be visible
+
+    * Edit the #{ (@project || @project_attrs).name } project
+    * Fill in the project description field with "editting project"
+    * Click the modify project button
+  }
+
+end
+
+
+Then /^I [Cc]annot [Ee]dit (?:that|the) project$/ do
+  steps %{
+
+    * Click the logout button if currently logged in
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * The #{ (@project || @project_attrs).name } project should be visible
+  }
+
+  if ( @current_page.has_edit_project_link?(name: (@project || @project_attrs).name) )
+    raise "The project edit should not have been created, but it seems that it was."
+  end
+
+end
 
 Then /^Arya Stark cannot view that project$/ do
   user_attrs       = CloudObjectBuilder.attributes_for(
@@ -293,9 +332,22 @@ end
 Then /^the project will be Not Created$/ do
   # current_page should still have a new project form
   # new project form should have the error message "This field is required".
-  if !@current_page.has_new_project_name_error_span? &&
-     !@current_page.has_new_project_description_error_span?
-    raise ("The project should not have been created, but it seems that it was.")
+  if ( !@current_page.has_new_project_name_error_span? && !@current_page.has_new_project_description_error_span? )
+    raise "The project should not have been created, but it seems that it was."
   end
 end
 
+Then /^the project will be [Uu]pdated$/ do
+  steps %{
+    * Visit the projects page
+    * The #{ @project_attrs.name } project should be visible
+  }
+end
+
+Then /^the project will be Not Updated$/ do
+  # current_page should still have a new project form
+  # new project form should have the error message "This field is required".
+  if ( !@current_page.has_project_name_error_span? && !@current_page.has_project_description_error_span? )
+    raise "The project should not have been created, but it seems that it was."
+  end
+end

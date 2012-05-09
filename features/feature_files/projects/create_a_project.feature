@@ -1,4 +1,4 @@
-@jira-DPBLOG-9
+@jira-DPBLOG-9 @MCF-4
 Feature: Create a Project
   As a user, I want to create a project in mCloud so that I can group my
   resources together and control who has access to them.
@@ -21,11 +21,11 @@ Feature: Create a Project
 
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Create |
-        | Admin           | Can Create           |
+        | System Admin    | Can Create           |
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Create |
-        | Member          | Cannot Create        |
+        | User            | Cannot Create        |
 
 
   Scenario Outline: Create a Project
@@ -42,7 +42,6 @@ Feature: Create a Project
         | Name            | Description     | Created or Not | Reason           |
         | (None)          | Wrong name      | Not Created    | Name is required |
         | Wrong Desc      | (None)          | Not Created    | Description is required |
-
 
   Scenario: Create a Project That is Not Accessible to Another User
    Given I am authorized to create projects
