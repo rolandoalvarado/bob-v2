@@ -29,7 +29,7 @@ Capybara.default_wait_time = 30
 
 class Page
 
-  ELEMENT_TYPES    = 'button|field|link|checkbox|form|table|span'
+  ELEMENT_TYPES    = 'button|field|link|checkbox|form|table|span|label'
   RADIO_LIST_TYPES = 'radiolist'
   CHECK_LIST_TYPES = 'checklist'
   SELECTION_TYPES  = 'selection|dropdown'
