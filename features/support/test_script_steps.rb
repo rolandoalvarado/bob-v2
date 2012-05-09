@@ -81,6 +81,14 @@ Then /^Choose the (\d+)(?:st|nd|rd|th) item of the (.+) dropdown$/ do |item_numb
   @current_page.send("#{ dropdown_name }_dropdown_items")[item_number.to_i - 1].click
 end
 
+Then /^Choose (.+) in the (.+) dropdown$/ do |item_text, dropdown_name|
+  if item = @current_page.send("#{ dropdown_name }_dropdown_items").find { |d| d.text == item_text }
+    item.click
+  else
+    raise "Couldn't find the dropdown option '#{ item_text }'."
+  end
+end
+
 Then /^The (.+) table should include the text (.+)$/ do |table_name, text|
   unless @current_page.send("#{ table_name }_table").has_content?(text)
     raise "Couldn't find the text '#{ text }' in the #{ table_name } table."
