@@ -2,7 +2,6 @@ require 'capybara'
 require 'capybara/dsl'
 
 require 'capybara/poltergeist'
-require 'capybara-webkit'
 
 begin
   require 'headless'
@@ -14,10 +13,6 @@ begin
 rescue LoadError
 end
 
-
-Capybara.register_driver :webkit do |app|
-  Capybara::Driver::Webkit.new(app, {:ignore_ssl_errors => true} )
-end
 
 Capybara.register_driver :poltergeist do |app|
   Capybara::Poltergeist::Driver.new(app, {:phantomjs => (ENV['PHANTOMJS_PATH'] || "/usr/local/bin/phantomjs"), :debug => (ENV['POLTERGEIST_DEBUG'] || false)})

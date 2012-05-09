@@ -12,7 +12,7 @@ Feature: Assign a Floating IP to an Instance
 
   Background:
     * A project exists in the system
-    * The project has one running instance
+    * The project has 1 instance
     * The project does not have any floating IPs
 
 
@@ -25,11 +25,6 @@ Feature: Assign a Floating IP to an Instance
         | Role            | Can or Cannot Assign |
         | Member          | Can Assign           |
         | Admin           | Can Assign           |
-
-      Scenarios: Unauthorized Roles
-        | Role            | Can or Cannot Assign |
-        | (None)          | Cannot Assign        |
-
 
   Scenario: Assign Floating IP
     Given I am authorized to assign floating IPs to instances in the project

@@ -15,11 +15,8 @@ module RoleNameDictionary
 
   def self.roles
     [
-      { DB_NAME => 'projectmanager', FRIENDLY_NAME => 'Project Manager' },
-      { DB_NAME => 'admin',          FRIENDLY_NAME => 'Admin'           },
-      { DB_NAME => 'itsec',          FRIENDLY_NAME => 'IT Security'     },
-      { DB_NAME => 'netadmin',       FRIENDLY_NAME => 'Network Admin'   },
-      { DB_NAME => 'projectmanager', FRIENDLY_NAME => 'Project Manager' },
+      { DB_NAME => 'admin',          FRIENDLY_NAME => 'Project Manager' },
+      { DB_NAME => 'admin',          FRIENDLY_NAME => 'System Admin'    },
       { DB_NAME => 'Member',         FRIENDLY_NAME => 'Member'          }
     ]
   end

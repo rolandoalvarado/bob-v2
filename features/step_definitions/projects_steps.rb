@@ -1,4 +1,4 @@
-#=================
+
 # GIVENs
 #=================
 
@@ -111,20 +111,20 @@ Given /^I have a role of (.+) in the system$/ do |role_name|
   @current_user = user
 end
 
-Given /^I am authorized to create the projects$/ do
+Given /^I am authorized to create projects$/ do
   steps %{
-    * I have a role of Admin in the system
+    * I have a role of System Admin in the system
   }
 end
 Given /^I am authorized to edit the project$/ do
   steps %{
-    * I have a role of Admin in the system
+    * I have a role of System Admin in the system
   }
 end
 
 Given /^I am a System Administrator in the system$/ do
   steps %{
-    * I have a role of Admin in the system
+    * I have a role of System Admin in the system
   }
 end
 
@@ -276,7 +276,6 @@ Then /^I Can Create a project$/ do
     * Visit the projects page
     * The #{ attrs.name } project should be visible
   }
-  @project = nil
   @project_attrs = attrs
 end
 
@@ -291,22 +290,9 @@ Then /^I [Cc]an [Vv]iew (?:that|the) project$/ do
     * Click the login button
 
     * Visit the projects page
+    * The #{ (@project || @project_attrs).name  } project should be visible
+    * Click the #{ (@project || @project_attrs).name } project
   }
-
-  if (@project != nil) 
-    project_name = @project.name
-  elsif (@project_attrs != nil) 
-    project_name = @project_attrs.name
-  else
-    raise "Project should be visiable. but it isn't. User is #{ @current_user.name } "
-  end
-
-  steps %{
-    * The #{ project_name } project should be visible
-    * Click the #{ project_name } project
-  }
-
-
 end
 
 Then /^I [Cc]annot [Vv]iew (?:that|the) project$/ do
@@ -319,17 +305,8 @@ Then /^I [Cc]annot [Vv]iew (?:that|the) project$/ do
     * Click the login button
 
     * Visit the projects page
+    * The #{ (@project || @project_attrs).name } project should not be visible
   }
-
-  if (@project != nil) 
-    step "The #{ @project.name } project should not be visible"
-  elsif (@project_attrs != nil) 
-    step "The #{ @project_attrs.name } project should not be visible"
-  else
-    raise "Project should be defined. but it isn't. User is #{ @current_user.name } "
-  end
-
-
 end
 
 Then /^I [Cc]an [Ee]dit (?:that|the) project$/ do
@@ -342,19 +319,9 @@ Then /^I [Cc]an [Ee]dit (?:that|the) project$/ do
     * Click the login button
 
     * Visit the projects page
-  }
+    * The #{ (@project || @project_attrs).name } project should be visible
 
-  if (@project != nil) 
-    project_name = @project.name
-  elsif (@project_attrs != nil) 
-    project_name = @project_attrs.name
-  else
-    raise "Project should be visiable. but it isn't. User is #{ @current_user.name } "
-  end
-
-  steps %{
-    * The #{ project_name } project should be visible
-    * Edit the #{ project_name } project 
+    * Edit the #{ (@project || @project_attrs).name } project 
     * Fill in the project description field with "editting project"
     * Click the modify project button
   }
@@ -372,25 +339,14 @@ Then /^I [Cc]annot [Ee]dit (?:that|the) project$/ do
     * Click the login button
 
     * Visit the projects page
+    * The #{ (@project || @project_attrs).name } project should be visible
   }
 
-  if (@project != nil) 
-    project_name = @project.name
-  elsif (@project_attrs != nil) 
-    project_name = @project_attrs.name
-  else
-    raise "Project should be visiable. but it isn't. User is #{ @current_user.name } "
-  end
-
-  if ( @current_page.has_edit_project_link?(name: project_name) )
+  if ( @current_page.has_edit_project_link?(name: (@project || @project_attrs).name) )
     raise "The project edit should not have been created, but it seems that it was."
   end
 
-
 end
-
-
-
 
 Then /^Arya Stark cannot view that project$/ do
   user_attrs       = CloudObjectBuilder.attributes_for(

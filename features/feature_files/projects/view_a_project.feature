@@ -1,7 +1,9 @@
 @MCF-30
 Feature: View a Project
   As a user, I should be able to see the details of a project
-
+  # Currently, if user does not have project role and he is the system admin,
+  # he can see the project. so last test may fail.  
+ 
   Background:
     * A project exists in the system
 
@@ -14,7 +16,7 @@ Feature: View a Project
       Scenarios: Authorized Roles
         | Role            | Can or Cannot View |
         | Member          | Can View           |
-        | Admin           | Can View           |
+        | Project Manager | Can View           |
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot View |
