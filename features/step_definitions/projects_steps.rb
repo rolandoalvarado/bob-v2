@@ -4,7 +4,7 @@
 
 Given /^[Aa] project exists in the system$/ do
   identity_service = IdentityService.session
-  project          = identity_service.ensure_project_exists(:name => 'Test Project')
+  project          = identity_service.ensure_project_exists(:name => Unique.name('Existing'))
 
   if project.nil? or project.id.empty?
     raise "Project couldn't be initialized!"
@@ -62,7 +62,7 @@ Given /^I have a role of (.+) in the project$/ do |role_name|
     end
 
     begin
-      @project.grant_user_role(user.id, role.id)
+      role.add_to_user(user,@project)
     rescue Fog::Identity::OpenStack::NotFound => e
       raise "Couldn't add #{ user.name } to #{ @project.name } as #{ role.name }"
     end
@@ -182,7 +182,6 @@ When /^I create a project$/ do
   @project_attrs = attrs
 end
 
-
 #=================
 # THENs
 #=================
@@ -229,15 +228,35 @@ Then /^I Can Create a project$/ do
     * Visit the projects page
     * The #{ attrs.name } project should be visible
   }
-
   @project_attrs = attrs
 end
 
 
-Then /^I can view that project$/ do
+Then /^I [Cc]an [Vv]iew (?:that|the) project$/ do
   steps %{
+
+    * Click the logout button if currently logged in
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
     * Visit the projects page
-    * The #{ @project_attrs.name } project should be visible
+    * The #{ (@project || @project_attrs).name  } project should be visible
+  }
+end
+
+Then /^I [Cc]annot [Vv]iew (?:that|the) project$/ do
+  steps %{
+
+    * Click the logout button if currently logged in
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * The #{ (@project || @project_attrs).name } project should not be visible
   }
 end
 
@@ -279,3 +298,4 @@ Then /^the project will be Not Created$/ do
     raise ("The project should not have been created, but it seems that it was.")
   end
 end
+

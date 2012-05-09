@@ -1,3 +1,4 @@
+@MCF-30
 Feature: View a Project
   As a user, I should be able to see the details of a project
 
@@ -8,7 +9,7 @@ Feature: View a Project
   @permissions
   Scenario Outline: Check User Permissions
     Given I have a role of <Role> in the project
-     Then I <Can or Cannot View> the project
+    Then I <Can or Cannot View> the project
 
       Scenarios: Authorized Roles
         | Role            | Can or Cannot View |
