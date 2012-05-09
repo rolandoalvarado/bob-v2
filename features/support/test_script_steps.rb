@@ -59,7 +59,14 @@ end
 Then /^Edit the (.+) project$/ do |project_name|
   project_name.strip!
   @current_page.project_menu_button( name: project_name ).click
-  @current_page.edit_project_link( name: project_name ).click
+
+  begin
+    edit_project_link = @current_page.edit_project_link( name: project_name )
+  rescue
+    raise "Expected a link to edit the project '#{ project_name }' but none was found."
+  end
+
+  edit_project_link.click
   @current_page = ProjectPage.new
 end
 
