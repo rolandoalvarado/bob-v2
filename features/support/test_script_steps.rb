@@ -25,6 +25,11 @@ Then /^Click the (.+) button$/ do |button_name|
   @current_page.send("#{ button_name }_button").click
 end
 
+Then /^Click the (.+) link$/ do |link_name|
+  link_name = link_name.split.join('_').downcase
+  @current_page.send("#{ link_name }_link").click
+end
+
 Then /^Click the (.+) project$/ do |project_name|
   @current_page.project_link( name: project_name ).click
   @current_page = ProjectPage.new

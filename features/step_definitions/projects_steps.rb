@@ -228,7 +228,6 @@ Then /^I Can Create a project$/ do
     * Visit the projects page
     * The #{ attrs.name } project should be visible
   }
-  @project = nil
   @project_attrs = attrs
 end
 
@@ -243,14 +242,8 @@ Then /^I [Cc]an [Vv]iew (?:that|the) project$/ do
     * Click the login button
 
     * Visit the projects page
+    * The #{ (@project || @project_attrs).name  } project should be visible
   }
-  if (@project != nil) 
-    step  "The #{ @project.name } project should be visible"
-  elsif (@project_attrs != nil) 
-    step  "The #{ @project_attrs.name } project should be visible"
-  else
-    raise "Project should be visiable. but it isn't. User is #{ @current_user.name } "
-  end
 end
 
 Then /^I [Cc]annot [Vv]iew (?:that|the) project$/ do
@@ -263,17 +256,8 @@ Then /^I [Cc]annot [Vv]iew (?:that|the) project$/ do
     * Click the login button
 
     * Visit the projects page
-    * The #{ @project.name } project should not be visible
+    * The #{ (@project || @project_attrs).name } project should not be visible
   }
-
-  if (@project != nil) 
-    step "The #{ @project.name } project should not be visible"
-  elsif (@project_attrs != nil) 
-    step "The #{ @project_attrs.name } project should not be visible"
-  else
-    raise "Project should be defined. but it isn't. User is #{ @current_user.name } "
-  end
-
 end
 
 

@@ -9,7 +9,6 @@ gem 'diego_formatter', :git => 'git://github.com/relaxdiego/diego_formatter.git'
 gem 'rspec'
 gem 'syntax'
 gem 'capybara'
-gem 'capybara-webkit'
 gem 'poltergeist'
 gem 'rb-fsevent', :require => false
 gem 'guard-cucumber', :require => false

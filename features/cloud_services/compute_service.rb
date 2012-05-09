@@ -11,7 +11,7 @@ class ComputeService < BaseCloudService
 
   def create_instance_in_project(project)
     service.create_server(
-      Faker.Name.name,
+      Faker::Name.name,
       service.images[0].id,
       service.flavors[0].id,
       {
@@ -56,6 +56,36 @@ class ComputeService < BaseCloudService
     end
 
     instances.length
+  end
+
+  def ensure_project_floating_ip_count(project, desired_count)
+    service.set_tenant project
+    addresses = service.addresses
+    actual_count = addresses.count
+
+    if desired_count > actual_count
+
+      how_many = desired_count - actual_count
+      how_many.times do |n|
+        service.allocate_address
+      end
+      addresses.reload
+
+    elsif desired_count < addresses.length
+
+      while addresses.length > desired_count
+        addresses.reload
+        addresses[0].destroy rescue nil
+      end
+
+    end
+
+    if addresses.length != desired_count
+      raise "Couldn't ensure that #{ project.name } has #{ desired_count } " +
+            "floating IPs. Current number of floating IPs is #{ addresses.length }."
+    end
+
+    addresses.length
   end
 
 end

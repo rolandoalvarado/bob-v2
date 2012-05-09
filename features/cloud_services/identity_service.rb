@@ -26,17 +26,20 @@ class IdentityService < BaseCloudService
       return
     end
     users = tenant.users
-    users.each do |user| 
+    users.each do |user|
       revoke_all_user_roles(user, tenant)
     end
-    tenant.destroy
+
+    sleeping(1).seconds.between_tries.failing_after(20).tries do
+      tenant.destroy
+    end
   end
 
   def create_user(attributes)
     attributes[:tenant_id] = test_tenant.id
     user = users.new(attributes)
     user.save
-    admin_role = roles.find_by_name(RoleNameDictionary.db_name('Admin'))
+    admin_role = roles.find_by_name(RoleNameDictionary.db_name('System Admin'))
     test_tenant.grant_user_role(user.id, admin_role.id)
     user
   end
@@ -56,8 +59,12 @@ class IdentityService < BaseCloudService
     # can manipulate it as needed. Turns out the 'admin' role in Keystone is
     # not really a global role
     admin_user  = users.find_by_name(ConfigFile.admin_username)
-    admin_role  = roles.find_by_name(RoleNameDictionary.db_name('Admin'))
-    tenant.grant_user_role(admin_user.id, admin_role.id)
+    raise "The user #{ ConfigFile.admin_username } could not be found!" unless admin_user
+
+    manager_role  = roles.find_by_name(RoleNameDictionary.db_name('Project Manager'))
+    raise "The role #{ RoleNameDictionary.db_name('Project Manager') } could not be found!" unless manager_role
+
+    tenant.grant_user_role(admin_user.id, manager_role.id)
 
     tenant
   end
