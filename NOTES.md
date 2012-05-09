@@ -43,11 +43,12 @@ To push your topic branch to your remote repo
 
 After the above, you can then send a pull request to wdamarillo. Set the source branch to your topic branch's name and set the target branch to wdamarillo/master
 
+# Save the HTML file to /tmp/hoge.html
 
 # Testing CSS and XPath selectors using the Nokogiri gem
 
     bundle console
-    html = Nokogiri::HTML.parse(%{ PASTE_YOUR_HTML_HERE })
+    html = Nokogiri::HTML.parse(File.open("/tmp/hoge.html"))
 
 The `html` variable now points to a `Nokogiri::HTML::Document` object that you can
 play around with. For example, assuming your html string contains an element
