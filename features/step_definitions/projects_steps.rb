@@ -72,73 +72,25 @@ Given /^I have a role of (.+) in the project$/ do |role_name|
   @current_user = user
 end
 
-Given /^I have a role of (.+) in the system$/ do |role_name|
-  user_attrs       = CloudObjectBuilder.attributes_for(
-                       :user,
-                       :name => Unique.username('rstark')
-                     )
-  identity_service = IdentityService.session
-
-  user             = identity_service.ensure_user_exists(user_attrs)
-
-  admin_project = identity_service.tenants.find { |t| t.name == 'admin' }
-  if admin_project.nil? or admin_project.id.empty?
-    raise "Project couldn't be found!"
-  end
-
-  identity_service.revoke_all_user_roles(user, admin_project)
-
-  # Ensure user has the following role in the system
-  if role_name.downcase == "(none)"
-    # This section is still under observation
-    pending
-  end
-
-  role = identity_service.roles.find_by_name(RoleNameDictionary.db_name(role_name))
-  if role.nil?
-    raise "Role #{ role_name } couldn't be found. Make sure it's defined in " +
-      "features/support/role_name_dictionary.rb and that it exists in " +
-      "#{ ConfigFile.web_client_url }."
-  end
-
-  begin
-    admin_project.grant_user_role(user.id, role.id)
-  rescue Fog::Identity::OpenStack::NotFound => e
-    raise "Couldn't add #{ user.name } to #{ admin_project.name } as #{ role.name }"
-  end
-
-  # Make variable(s) available for use in succeeding steps
-  @current_user = user
-end
 
 Given /^I am authorized to create projects$/ do
   steps %{
-    * I have a role of System Admin in the system
+    * I am a System Admin
   }
 end
+
+
 Given /^I am authorized to edit the project$/ do
   steps %{
-    * I have a role of System Admin in the system
+    * I am a System Admin
+    * I have a role of Project Manager in the project
   }
 end
 
-Given /^I am a System Administrator in the system$/ do
-  steps %{
-    * I have a role of System Admin in the system
-  }
-end
-
-Given /^I am a Not System Administrator in the system$/ do
-  steps %{
-    * I have a role of Member in the system
-  }
-end
 
 Given /^a user named Arya Stark exists in the system$/ do
   # nothing to do.
 end
-
-
 
 #=================
 # WHENs
@@ -173,7 +125,7 @@ When /^I create a project with attributes (.*), (.*)$/ do |name, desc|
   @project_attrs = attrs
 end
 
-When /^I edit the project\'s attributes to (.*), (.*)$/ do |name, desc|
+When /^I edit the project.s attributes to (.*), (.*)$/ do |name, desc|
 
   attrs = CloudObjectBuilder.attributes_for(
             :project,
@@ -321,7 +273,7 @@ Then /^I [Cc]an [Ee]dit (?:that|the) project$/ do
     * Visit the projects page
     * The #{ (@project || @project_attrs).name } project should be visible
 
-    * Edit the #{ (@project || @project_attrs).name } project 
+    * Edit the #{ (@project || @project_attrs).name } project
     * Fill in the project description field with "editting project"
     * Click the modify project button
   }
