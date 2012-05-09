@@ -2,4 +2,6 @@
 
 class WebClientPage < Page
   button "logout", "a[href='/logout']"
+
+  form   "login",  "div.login-container"
 end
