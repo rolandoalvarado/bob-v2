@@ -46,6 +46,10 @@ Then /^Click the (.+) project$/ do |project_name|
   @current_page = ProjectPage.new
 end
 
+Then /^Click the (.+) image$/ do |image_name|
+  @current_page.image_element( name: image_name.strip ).click
+end
+
 Then /^Connect to instance on (.+) via (.+)$/ do |ip_address, remote_client|
   case remote_client.upcase
   when 'SSH'
