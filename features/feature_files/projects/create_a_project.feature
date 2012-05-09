@@ -43,7 +43,6 @@ Feature: Create a Project
         | (None)          | Wrong name      | Not Created    | Name is required |
         | Wrong Desc      | (None)          | Not Created    | Description is required |
 
-
   Scenario: Create a Project That is Not Accessible to Another User
    Given I am authorized to create projects
      And a user named Arya Stark exists in the system

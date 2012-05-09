@@ -81,10 +81,12 @@ Given /^I have a role of (.+) in the system$/ do |role_name|
 
   user             = identity_service.ensure_user_exists(user_attrs)
 
-  project = identity_service.tenants.find { |t| t.name == 'admin' }
-  if project.nil? or project.id.empty?
+  admin_project = identity_service.tenants.find { |t| t.name == 'admin' }
+  if admin_project.nil? or admin_project.id.empty?
     raise "Project couldn't be found!"
   end
+
+  identity_service.revoke_all_user_roles(user, admin_project)
 
   # Ensure user has the following role in the system
   if role_name.downcase == "(none)"
@@ -100,18 +102,35 @@ Given /^I have a role of (.+) in the system$/ do |role_name|
   end
 
   begin
-    project.grant_user_role(user.id, role.id)
+    admin_project.grant_user_role(user.id, role.id)
   rescue Fog::Identity::OpenStack::NotFound => e
-    raise "Couldn't add #{ user.name } to #{ project.name } as #{ role.name }"
+    raise "Couldn't add #{ user.name } to #{ admin_project.name } as #{ role.name }"
   end
 
   # Make variable(s) available for use in succeeding steps
   @current_user = user
 end
 
-Given /^I am authorized to create projects$/ do
+Given /^I am authorized to create the projects$/ do
   steps %{
     * I have a role of Admin in the system
+  }
+end
+Given /^I am authorized to edit the project$/ do
+  steps %{
+    * I have a role of Admin in the system
+  }
+end
+
+Given /^I am a System Administrator in the system$/ do
+  steps %{
+    * I have a role of Admin in the system
+  }
+end
+
+Given /^I am a Not System Administrator in the system$/ do
+  steps %{
+    * I have a role of Member in the system
   }
 end
 
@@ -152,6 +171,35 @@ When /^I create a project with attributes (.*), (.*)$/ do |name, desc|
 
   # Make the project name available to subsequent steps
   @project_attrs = attrs
+end
+
+When /^I edit the project\'s attributes to (.*), (.*)$/ do |name, desc|
+
+  attrs = CloudObjectBuilder.attributes_for(
+            :project,
+            :name        => name.downcase == '(none)' ? name : Unique.name(name),
+            :description => desc
+          )
+
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+
+    * Edit the #{@project.name} project
+    * Fill in the project name field with #{ attrs.name }
+    * Fill in the project description field with #{ attrs.description }
+    * Click the modify project button
+  }
+
+  # Make the project name available to subsequent steps
+  @project_attrs = attrs
+
 end
 
 When /^I create a project$/ do
@@ -244,13 +292,21 @@ Then /^I [Cc]an [Vv]iew (?:that|the) project$/ do
 
     * Visit the projects page
   }
+
   if (@project != nil) 
-    step  "The #{ @project.name } project should be visible"
+    project_name = @project.name
   elsif (@project_attrs != nil) 
-    step  "The #{ @project_attrs.name } project should be visible"
+    project_name = @project_attrs.name
   else
     raise "Project should be visiable. but it isn't. User is #{ @current_user.name } "
   end
+
+  steps %{
+    * The #{ project_name } project should be visible
+    * Click the #{ project_name } project
+  }
+
+
 end
 
 Then /^I [Cc]annot [Vv]iew (?:that|the) project$/ do
@@ -263,7 +319,6 @@ Then /^I [Cc]annot [Vv]iew (?:that|the) project$/ do
     * Click the login button
 
     * Visit the projects page
-    * The #{ @project.name } project should not be visible
   }
 
   if (@project != nil) 
@@ -274,7 +329,67 @@ Then /^I [Cc]annot [Vv]iew (?:that|the) project$/ do
     raise "Project should be defined. but it isn't. User is #{ @current_user.name } "
   end
 
+
 end
+
+Then /^I [Cc]an [Ee]dit (?:that|the) project$/ do
+  steps %{
+
+    * Click the logout button if currently logged in
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+  }
+
+  if (@project != nil) 
+    project_name = @project.name
+  elsif (@project_attrs != nil) 
+    project_name = @project_attrs.name
+  else
+    raise "Project should be visiable. but it isn't. User is #{ @current_user.name } "
+  end
+
+  steps %{
+    * The #{ project_name } project should be visible
+    * Edit the #{ project_name } project 
+    * Fill in the project description field with "editting project"
+    * Click the modify project button
+  }
+
+end
+
+
+Then /^I [Cc]annot [Ee]dit (?:that|the) project$/ do
+  steps %{
+
+    * Click the logout button if currently logged in
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+  }
+
+  if (@project != nil) 
+    project_name = @project.name
+  elsif (@project_attrs != nil) 
+    project_name = @project_attrs.name
+  else
+    raise "Project should be visiable. but it isn't. User is #{ @current_user.name } "
+  end
+
+  if ( @current_page.has_edit_project_link?(name: project_name) )
+    raise "The project edit should not have been created, but it seems that it was."
+  end
+
+
+end
+
+
 
 
 Then /^Arya Stark cannot view that project$/ do
@@ -309,9 +424,22 @@ end
 Then /^the project will be Not Created$/ do
   # current_page should still have a new project form
   # new project form should have the error message "This field is required".
-  if !@current_page.has_new_project_name_error_span? &&
-     !@current_page.has_new_project_description_error_span?
-    raise ("The project should not have been created, but it seems that it was.")
+  if ( !@current_page.has_new_project_name_error_span? && !@current_page.has_new_project_description_error_span? )
+    raise "The project should not have been created, but it seems that it was."
   end
 end
 
+Then /^the project will be [Uu]pdated$/ do
+  steps %{
+    * Visit the projects page
+    * The #{ @project_attrs.name } project should be visible
+  }
+end
+
+Then /^the project will be Not Updated$/ do
+  # current_page should still have a new project form
+  # new project form should have the error message "This field is required".
+  if ( !@current_page.has_project_name_error_span? && !@current_page.has_project_description_error_span? )
+    raise "The project should not have been created, but it seems that it was."
+  end
+end

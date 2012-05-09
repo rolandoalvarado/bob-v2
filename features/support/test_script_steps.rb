@@ -26,6 +26,7 @@ Then /^Click the (.+) button$/ do |button_name|
 end
 
 Then /^Click the (.+) project$/ do |project_name|
+  project_name.strip!
   @current_page.project_link( name: project_name ).click
   @current_page = ProjectPage.new
 end
@@ -48,6 +49,13 @@ Then /^Current page should have the correct path$/ do
   unless @current_page.has_expected_path?
     raise "Expected #{ @current_page.expected_path } but another page was returned: #{ @current_page.actual_path }"
   end
+end
+
+Then /^Edit the (.+) project$/ do |project_name|
+  project_name.strip!
+  @current_page.project_menu_button( name: project_name ).click
+  @current_page.edit_project_link( name: project_name ).click
+  @current_page = ProjectPage.new
 end
 
 Then /^Ensure that a user with username (.+) and password (.+) exists$/ do |username, password|
