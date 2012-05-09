@@ -4,7 +4,7 @@
 
 Given /^[Aa] project exists in the system$/ do
   identity_service = IdentityService.session
-  project          = identity_service.ensure_project_exists(:name => Unique.name('Existing'))
+  project          = identity_service.ensure_project_exists(:name => ('project2'))
 
   if project.nil? or project.id.empty?
     raise "Project couldn't be initialized!"
