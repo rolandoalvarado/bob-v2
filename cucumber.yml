@@ -9,16 +9,16 @@
 
 # Runs all scenarios that are not tagged with @wip
 # (which are considered works in progress)
-default: --strict --tags ~@wip --require features --format progress --format Cucumber::Formatter::Relaxdiego::Html --out output/html --format rerun --out rerun.txt
+default: --strict --tags ~@wip --require features --format progress --format Cucumber::Formatter::Html --out output/html/index.html --format rerun --out rerun.txt
 
-upcoming_only: --strict --tags ~@future --require features --format progress --format Cucumber::Formatter::Relaxdiego::Html --out output/html --format rerun --out rerun.txt
+upcoming_only: --strict --tags ~@future --require features --format progress --format Cucumber::Formatter::Html --out output/html/index.html --format rerun --out rerun.txt
 
 # Used by run/feature
-single_feature: --strict --tags ~@wip --require features --format progress --format Cucumber::Formatter::Relaxdiego::Html --out output/html --format rerun --out rerun.txt
+single_feature: --strict --tags ~@wip --require features --format progress --format Cucumber::Formatter::Html --out output/html/index.html --format rerun --out rerun.txt
 
 # Use this profile when running these tests in a
 # CI environment
-ci: --strict --tags ~@wip --require features --format junit --out output/junit --format Cucumber::Formatter::Relaxdiego::Html --out output/html
+ci: --strict --tags ~@wip --require features --format junit --out output/junit --format Cucumber::Formatter::Html --out output/html/index.html
 
 # This profile runs scenarios that are taged as works
 # in progress. To ensure that you are not working on

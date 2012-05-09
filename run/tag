@@ -13,4 +13,4 @@ elif [ $# -eq 1 ] && [ $1 == '--help' ]; then
 fi
 
 printf "Running features tagged with $1\n"
-bundle exec cucumber --no-profile --tags $1 --require features --format progress --format rerun --out rerun.txt
+bundle exec cucumber --no-profile --tags $1 --require features --format html --out output/html/index.html --format progress --format rerun --out rerun.txt
