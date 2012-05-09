@@ -9,24 +9,6 @@ class ComputeService < BaseCloudService
     @instances = service.servers
   end
 
-  def create_floating_ip_in_project(project, instance=nil)
-    service.set_tenant project
-    service.allocate_address
-
-    address = service.addresses.last
-    raise "Floating IP can't be found!" unless address
-
-    if instance
-      begin
-        service.associate_address(instance.id, address.ip)
-      rescue
-        raise "Cannot associate floating IP #{ address.ip } to instance #{ instance.id }."
-      end
-    end
-
-    address
-  end
-
   def create_instance_in_project(project)
     service.create_server(
       Faker::Name.name,
@@ -41,6 +23,28 @@ class ComputeService < BaseCloudService
     )
   rescue
     raise "Couldn't initialize instance in #{ project.name }"
+  end
+
+  def ensure_floating_ip_exists(project, instance=nil)
+    service.set_tenant project
+    instances.reload
+
+    # Instance must be of active status to associate floating IP addresses
+    active_instances = instances.select { |i| i.state == 'ACTIVE' }
+
+    addresses = service.addresses
+    address   = addresses.last
+
+    if instance
+      raise "Couldn't find active instance #{ instance.name } in #{ project.name }" unless active_instances.include?(instance)
+
+      address = addresses.find { |a| a.instance_id == instance.id }
+      raise "Couldn't find address associated with instance #{ instance.name }" if address.nil?
+    end
+
+    raise "Couldn't find address in #{ project.name }" if address.nil?
+
+    address
   end
 
   def ensure_project_floating_ip_count(project, desired_count)
@@ -106,7 +110,7 @@ class ComputeService < BaseCloudService
     instances.length
   end
 
-  def project_instance(project)
+  def get_project_instance(project)
     service.set_tenant project
 
     instance = service.servers.first
