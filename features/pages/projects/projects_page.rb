@@ -14,5 +14,7 @@ class ProjectsPage < WebClientPage
   # To click on a project link, use ProjectsPage#project_link( name: NAME_OF_PROJECT ).click
   link   'project',              xpath: "//*[@id='project-list']//td[@title='<name>']/..//a[@class='view-project']"
   link   'edit project',         xpath: "//*[@id='project-list']//td[@title='<name>']/..//a[@class='modify-project']"
+  link   'delete project',         xpath: "//*[@id='project-list']//td[@title='<name>']/..//a[@class='destroy-project']"
   button 'project menu',         xpath: "//*[@id='project-list']//td[@title='<name>']/..//a[@class='dropdown-toggle']"
+  button 'delete confirmation',         xpath: "//*[@class='btn btn-danger okay']"
 end

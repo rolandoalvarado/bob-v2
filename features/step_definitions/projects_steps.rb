@@ -14,6 +14,10 @@ Given /^[Aa] project exists in the system$/ do
   @project = project
 end
 
+Given /^the project has a running instance$/ do
+  step "The project has 1 instances?"
+  pending
+end
 
 Given /^I have a role of (.+) in the system$/ do |role_name|
   user_attrs       = CloudObjectBuilder.attributes_for(
@@ -71,10 +75,12 @@ Given /^At least (\d+) images? should be available for use in the project$/ do |
 end
 
 
-Given /^The project has (\d+) instances?$/ do |number_of_instances|
+Given /^The project has (\d+) instances\?$/ do |number_of_instances|
   number_of_instances = number_of_instances.to_i
   compute_service     = ComputeService.session
   total_instances     = compute_service.ensure_project_instance_count(@project, number_of_instances)
+  # I have to implement running instance.
+  pending
 end
 
 
@@ -123,6 +129,12 @@ Given /^I am authorized to create projects$/ do
   }
 end
 
+Given /^I am authorized to delete the project$/ do
+  steps %{
+    * I am a System Admin
+    * I have a role of Project Manager in the project
+  }
+end
 
 Given /^I am authorized to edit the project$/ do
   steps %{
@@ -226,6 +238,11 @@ When /^I create a project$/ do
   @project_attrs = attrs
 end
 
+When /^I delete the project$/ do
+  pending # express the regexp above with the code you wish you had
+end
+
+
 #=================
 # THENs
 #=================
@@ -305,6 +322,47 @@ Then /^I [Cc]annot [Vv]iew (?:that|the) project$/ do
   }
 end
 
+Then /^I [Cc]an [Dd]elete (?:that|the) project$/ do
+
+  steps %{
+    * Click the logout button if currently logged in
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * The #{ (@project || @project_attrs).name } project should be visible
+
+    * Delete the #{ (@project || @project_attrs).name } project
+  }
+
+  # Deleting row in the page is asynchronous. So script has to wait 5 seconds.
+  sleep(10)
+  step "The #{ (@project || @project_attrs).name } project should not be visible"
+
+end
+
+Then /^I [Cc]annot [Dd]elete (?:that|the) project$/ do
+  steps %{
+    * Click the logout button if currently logged in
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * The #{ (@project || @project_attrs).name } project should be visible
+  }
+
+  # Deleting row in the page is asynchronous. So script has to wait 5 seconds.
+  sleep(10)
+  if ( @current_page.has_delete_project_link?(name: (@project || @project_attrs).name) )
+    raise "The project delete link should not have been created, but it seems that it was."
+  end
+
+end
+
 Then /^I [Cc]an [Ee]dit (?:that|the) project$/ do
   steps %{
 
@@ -326,8 +384,8 @@ end
 
 
 Then /^I [Cc]annot [Ee]dit (?:that|the) project$/ do
-  steps %{
 
+  steps %{
     * Click the logout button if currently logged in
     * Visit the login page
     * Fill in the username field with #{ @current_user.name }
@@ -394,4 +452,8 @@ Then /^the project will be Not Updated$/ do
   if ( !@current_page.has_project_name_error_span? && !@current_page.has_project_description_error_span? )
     raise "The project should not have been created, but it seems that it was."
   end
+end
+
+Then /^the project and all its resources will be deleted$/ do
+  pending # express the regexp above with the code you wish you had
 end
