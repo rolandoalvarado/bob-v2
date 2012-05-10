@@ -1,10 +1,10 @@
-mCloud Features
-===============
-This the repository for mCloud requirements and their associated automated test
-scripts. It is built with Cucumber which means that you can execute the
-documentation and it will be automatically verified against an existing
-mCloud installation. After verification, it will generate a
-[business-friendly progress report](http://dl.dropbox.com/u/1355795/misc/progress_report.png).
+Bob the mCloud QA Robot
+=======================
+![Bob](http://dl.dropbox.com/u/1355795/bob.jpg "Bob")
+
+Bob is a tool that automatically verifies an mCloud installation against documented requirements. After verification, he generates a [business-friendly progress report](http://dl.dropbox.com/u/1355795/misc/progress_report.png).
+
+Bob is built with Cucumber, Ruby, and awesomeness. His eye is made out of a knob, and it goes to eleven.
 
 Prerequisites
 -------------
@@ -18,28 +18,24 @@ Additional Prerequisites for Mac OS X
 
 Installation
 ------------
-1. `git clone git@bitbucket.org:wdamarillo/mcloud_features.git`
-2. `cd mcloud_features`
+1. `git clone git@bitbucket.org:wdamarillo/bob.git`
+2. `cd bob`
 3. `run/setup`
 
 Usage
 -----
 
-To run mCloud Features:
+To make Bob verify the mCloud environment you specified when you ran `run/setup`:
 
     run/verifier
 
-The above command will generate a report in the `output` directory.
+The above command makes Bob generate a report in the `output` directory.
 
-To automatically run mCloud Features every time something changes in any of
-the files declared in [the Guardfile](https://bitbucket.org/wdamarillo/mcloud_features/src/master/Guardfile):
-
-    run/autoverifier
 
 Other useful commands
 ---------------------
 
-Getting updates:
+Updating Bob:
 
     run/updater
 
@@ -52,7 +48,7 @@ __NOTE:__ The above command assumes that you've already set the URL for
 `remote_repo_name`. For help on adding a remote repo to your local repo,
 see [this page](http://progit.org/book/ch2-5.html).
 
-To see a full list of available commands:
+To see a full list of available commands you can give Bob:
 
     run/help
 
@@ -60,8 +56,7 @@ To see a full list of available commands:
 Need More Help?
 ---------------
 If you're stuck, email me at mmaglana@morphlabs.com or ping me through my Skype
-ID mark.maglana. Optionally, you can suggest ways to further improve mCloud
-Features by creating tickets [here](https://bitbucket.org/wdamarillo/mcloud_features/issues/new).
+ID mark.maglana. Optionally, you can suggest ways to further improve Bob by creating tickets [here](https://issues.morphlabs.com/browse/MCF).
 
 Contributing
 ------------
@@ -70,8 +65,8 @@ and then, you may skip this section and write .feature files directly.
 Afterwards, email it to me and I will commit your file for you. If you plan on
 contributing on an ongoing basis, we highly recommend you follow this process.
 
-1. Fork `https://bitbucket.org/wdamarillo/mcloud_features`
-2. Create a branch for whatever it is you plan to do. ALWAYS create a branch so that when there are changes in origin/master, you only need to rebase your local branch and keep your commits in order. Also, this allows you to squash multiple commits into one before submitting a pull request.
+1. Fork `https://bitbucket.org/wdamarillo/bob`
+2. Create a branch for whatever it is you plan to do. ALWAYS create a branch so that when there are changes in wdamarillo/master, you only need to rebase your local branch and keep your commits in order. Also, this allows you to squash multiple commits into one before submitting a pull request.
 3. Change stuff
 4. Send a pull request
 
@@ -94,7 +89,7 @@ How to write Features
             |    $100 |              $50 | Dispensed        |
             |    $100 |             $150 | Not Dispensed    |
 
-* For more sample feature files, see [the actual mCloud Features feature files](https://bitbucket.org/wdamarillo/mcloud_features/src/master/features/feature_files/).
+* For more sample feature files, see [the actual feature files](https://bitbucket.org/wdamarillo/bob/src/master/features/feature_files/).
 
 Helpful references for development
 ----------------------------------
