@@ -61,10 +61,19 @@ class IdentityService < BaseCloudService
     admin_user  = users.find_by_name(ConfigFile.admin_username)
     raise "The user #{ ConfigFile.admin_username } could not be found!" unless admin_user
 
-    manager_role  = roles.find_by_name(RoleNameDictionary.db_name('Project Manager'))
-    raise "The role #{ RoleNameDictionary.db_name('Project Manager') } could not be found!" unless manager_role
+    # This is just a work around for openstack bug:
+    # - https://bugs.launchpad.net/horizon/+bug/967882
+    #
+    # The bug is the wrong scoping of certain project resources on a
+    # user using an admin role. The right role should be a project manager role.
+    member_role   = roles.find_by_name(RoleNameDictionary.db_name('Member'))
+    raise "The role #{ RoleNameDictionary.db_name('Member') } could not be found!" unless member_role
 
-    tenant.grant_user_role(admin_user.id, manager_role.id)
+    # Make sure user has no project manager role in project
+    response = service.list_roles_for_user_on_tenant(tenant.id, admin_user.id)
+    manager_role = response.body['roles'].find {|r| r['name'] == RoleNameDictionary.db_name('Project Manager') }
+    tenant.revoke_user_role(admin_user.id, manager_role['id']) if manager_role
+    tenant.grant_user_role(admin_user.id, member_role.id)
 
     tenant
   end

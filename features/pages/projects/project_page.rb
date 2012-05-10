@@ -15,9 +15,19 @@ class ProjectPage < WebClientPage
   button    'create instance',       '#create-instance-modal .create-instance'
   table     'instances',             '#instances-template .table-list'
 
+# Type      Name                    Selector
+  button    'new volume',          '#add-volume:not(.disabled)'
+  button    'disabled new volume', '#add-volume.disabled'
+  form      'new volume',          '#add-volume-modal'
+  field     'volume name',         '#name'
+  field     'volume description',  '#textarea'
+  field     'volume size',         '#appendedInput'
+  button    'create volume',       '#save-volume'
+  table     'volumes',             '#volume-template tbody'
+
+# Type      Name                         Selector
   span      'project name error',        "span.error[for='project-name']"
   span      'project description error', "span.error[for='project-description']"
-
 
   #==========================
   # Instance-reated elements

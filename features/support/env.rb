@@ -3,6 +3,7 @@ require 'bundler/setup'
 require 'faker'
 require 'cucumber/formatter/html'
 require 'anticipate'
+require 'pry'
 
 # Ensure that features are sorted by their filenames alphabetically
 #==================================================================

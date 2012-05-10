@@ -42,7 +42,7 @@ module CloudConfiguration
 
     def self.capybara_driver
       self.instance[CAPYBARA_DRIVER].to_sym
-    end    
+    end
 
     def self.unique_alpha
       self.instance.ensure_unique_helper_key

@@ -33,6 +33,12 @@ module CloudObjectBuilder
     attributes_for_tenant(attributes)
   end
 
+  def self.attributes_for_volume(attributes)
+    attributes[:name]        ||= attributes.delete('name') || Faker::Company.name
+    attributes[:description] ||= attributes.delete('description') || Faker::Lorem.paragraph
+    attributes[:size]        ||= attributes.delete('size') || 1
+    BetterHash.new.merge(attributes)
+  end
 end
 
 class BetterHash < Hash
