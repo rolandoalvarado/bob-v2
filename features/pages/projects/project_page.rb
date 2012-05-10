@@ -25,4 +25,9 @@ class ProjectPage < WebClientPage
   dropdown  'pool',                          '#pool'
   dropdown  'instance',                      '#instance-id' 
   button    'create floating IP allocation', '#floating-ip-allocate-modal .action-allocate'
+
+  link      'more instance options',    xpath: "//tr[@id='instance-item-<id>']//a[@title='More Options']"
+  link      'delete instance',          xpath: "//tr[@id='instance-item-<id>']//a[@class='destroy']"
+
+  button    'confirm alert',            '#alert-template .okay'
 end

@@ -114,7 +114,7 @@ end
 
 
 
-Then /^I [Cc]annot [Cc]reate an instance in the project$/ do
+Then /^I [Cc]annot (?:[Cc]reate|[Dd]elete) an instance in the project$/ do
   steps %{
     * Click the logout button if currently logged in
 
@@ -125,6 +125,30 @@ Then /^I [Cc]annot [Cc]reate an instance in the project$/ do
 
     * Visit the projects page
     * The #{ @project.name } project should not be visible
+  }
+end
+
+Then /^I [Cc]an [Dd]elete an instance in the project$/ do
+  compute_service = ComputeService.session
+  compute_service.service.set_tenant @project
+  instance        = compute_service.instances.first
+
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * Click the #{ @project.name } project
+
+    * Click the more instance options link for instance #{ instance.id }
+    * Click the delete instance link for instance #{ instance.id }
+    * Click the confirm alert button
+
+    * The instances table should not include the text #{ instance.name }
   }
 end
 
