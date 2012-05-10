@@ -300,10 +300,10 @@ Then /^I [Cc]an [Dd]elete (?:that|the) project$/ do
     * Delete the #{ (@project || @project_attrs).name } project
   }
 
-  project =  IdentityService.find_test_tenant((@project || @project_attrs).name)
+  project =  IdentityService.session.tenants.find_by_name((@project || @project_attrs).name)
 
-  if project 
-    "Project #{ (@project || @project_attrs).name } should be deleted. but it is"
+  if project != nil && project.id != nil 
+     raise "Project #{ project.name } should be deleted. but it is"
   end
 
 end
