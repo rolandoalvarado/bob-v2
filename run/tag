@@ -13,5 +13,5 @@ elif [ $# -eq 1 ] && [ $1 == '--help' ]; then
 fi
 printf "Verifying requirements tagged with $1\n"
 printf "Start at %s GMT\n" `TZ=GMT date '+%F-%T'`
-bundle exec cucumber --no-profile --tags $1 --require features --format html --out output/report.html --format progress --format rerun --out rerun.txt
+bundle exec cucumber --no-profile --tags $1 --require features --format html --out output/report.html --format rerun --out rerun.txt --format 'Slowhandcuke::Formatter'
 printf "Finished at %s GMT\n" `TZ=GMT date '+%F-%T'`

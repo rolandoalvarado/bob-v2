@@ -9,12 +9,12 @@
 
 # Runs all scenarios that are not tagged with @wip
 # (which are considered works in progress)
-default: --strict --tags ~@wip --require features --format progress --format Cucumber::Formatter::Html --out output/report.html --format rerun --out rerun.txt
+default: --strict --tags ~@wip --require features --format 'Slowhandcuke::Formatter' --format Cucumber::Formatter::Html --out output/report.html --format rerun --out rerun.txt
 
-upcoming_only: --strict --tags ~@future --require features --format progress --format Cucumber::Formatter::Html --out output/report.html --format rerun --out rerun.txt
+upcoming_only: --strict --tags ~@future --require features --format 'Slowhandcuke::Formatter' --format Cucumber::Formatter::Html --out output/report.html --format rerun --out rerun.txt
 
 # Used by run/feature
-single_feature: --strict --tags ~@wip --require features --format progress --format Cucumber::Formatter::Html --out output/report.html --format rerun --out rerun.txt
+single_feature: --strict --tags ~@wip --require features --format 'Slowhandcuke::Formatter' --format Cucumber::Formatter::Html --out output/report.html --format rerun --out rerun.txt
 
 # Use this profile when running these tests in a
 # CI environment
@@ -27,7 +27,7 @@ ci: --strict --tags ~@wip --require features --format junit --out output/junit -
 # to ensure that you don't forget to remove the @wip
 # tag on finished scenarios, it will generate an error
 # when one of the @wip scenarios passes.
-wip: --tags @wip:3 --wip --require features --format progress --format rerun --out rerun.txt
+wip: --tags @wip:3 --wip --require features --format 'Slowhandcuke::Formatter' --format rerun --out rerun.txt
 
 # Use this profile to show the step definitions that
 # are not being used by any of the feature files.
@@ -40,6 +40,6 @@ steps_duration: --require features --format usage
 # Rerun failed steps, if any
 <%
 rerun = File.file?('rerun.txt') ? IO.read('rerun.txt') : ""
-rerun_opts = rerun.to_s.strip.empty? ? "--format #{ENV['CUCUMBER_FORMAT'] || 'progress'} features" : "--format #{ENV['CUCUMBER_FORMAT'] || 'pretty'} #{rerun}"
+rerun_opts = rerun.to_s.strip.empty? ? "--format #{ENV['CUCUMBER_FORMAT'] || 'Slowhandcuke::Formatter' } features" : "--format #{ENV['CUCUMBER_FORMAT'] || 'pretty'} #{rerun}"
 %>
 rerun: <%= rerun_opts %> --format rerun --out rerun.txt --strict
