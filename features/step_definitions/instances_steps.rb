@@ -144,10 +144,9 @@ Then /^I [Cc]an [Dd]elete an instance in the project$/ do
     * Visit the projects page
     * Click the #{ @project.name } project
 
-    * Click the more instance options link for instance #{ instance.id }
-    * Click the delete instance link for instance #{ instance.id }
-    * Click the confirm alert button
-
+    * Click the instance menu button for instance #{ instance.id }
+    * Click the delete instance button for instance #{ instance.id }
+    * Click the confirm instance deletion button
     * The instances table should not include the text #{ instance.name }
   }
 end
