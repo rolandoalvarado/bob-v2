@@ -32,6 +32,11 @@ Then /^Click the (.+) link$/ do |link_name|
   @current_page.send("#{ link_name }_link").click
 end
 
+Then /^Click the (.+) button for instance (.+)$/ do |button_name, instance_id|
+  button_name = button_name.split.join('_').downcase
+  @current_page.send("#{ button_name }_button", id: instance_id).click
+end
+
 Then /^Click the (.+) project$/ do |project_name|
   project_name.strip!
   @current_page.project_link( name: project_name ).click
@@ -109,6 +114,12 @@ end
 Then /^The (.+) table should include the text (.+)$/ do |table_name, text|
   unless @current_page.send("#{ table_name }_table").has_content?(text)
     raise "Couldn't find the text '#{ text }' in the #{ table_name } table."
+  end
+end
+
+Then /^The (.+) table should not include the text (.+)$/ do |table_name, text|
+  if @current_page.send("#{ table_name }_table").wait_for_content_to_disappear(text)
+    raise "The text '#{ text }' should not be in the #{ table_name } table, but it is."
   end
 end
 
