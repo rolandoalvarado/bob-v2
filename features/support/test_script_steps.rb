@@ -157,6 +157,25 @@ Then /^The (.+) project should not be visible$/ do |project_name|
   end
 end
 
+Then /^The (.+) table should have (.+) rows$/ do |table_name, num_rows|
+  table_name      = table_name.split.join('_').downcase
+  table           = @current_page.send("#{ table_name }_table")
+  actual_num_rows = table.has_content?('There are currently no') ? 0 : table.all( xpath: './tbody/tr' ).count
+  num_rows        = num_rows.to_i
+
+  if actual_num_rows != num_rows
+    raise "Expected #{ num_rows } rows in the #{ table_name } table, but counted #{ actual_num_rows }."
+  end
+end
+
+Then /^The last row in the (.+) table should include the text (.+)$/ do |table_name, text|
+  table_name = table_name.split.join('_').downcase
+  table_rows = @current_page.send("#{ table_name }_table").all( xpath: './tbody/tr' )
+  unless table_rows.last.has_content?(text)
+    raise "Couldn't find the text '#{ text }' in the last row of the #{ table_name } table."
+  end
+end
+
 Then /^Visit the (.+) page$/ do |page_name|
   page_class_name = "#{ page_name.downcase.capitalize }Page"
   unless Object.const_defined?( page_class_name )

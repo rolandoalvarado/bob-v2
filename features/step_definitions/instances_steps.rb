@@ -55,6 +55,10 @@ end
 #=================
 
 Then /^I [Cc]an [Aa]ssign a floating IP to an instance in the project$/ do
+  compute_service = ComputeService.session
+  instance        = compute_service.instances.first
+  num_addresses   = compute_service.addresses.count
+
   steps %{
     * Click the logout button if currently logged in
 
@@ -72,6 +76,9 @@ Then /^I [Cc]an [Aa]ssign a floating IP to an instance in the project$/ do
     * Choose the 2nd item of the pool dropdown
     * Choose the 2nd item of the instance dropdown
     * Click the create floating IP allocation button
+
+    * The floating IPs table should have #{ num_addresses + 1 } rows
+    * The last row in the floating IPs table should include the text #{ instance.name } 
   }
 end
 
