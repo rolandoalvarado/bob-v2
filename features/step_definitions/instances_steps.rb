@@ -21,8 +21,10 @@ end
 
 When /^I assign a floating IP to the instance$/ do
   compute_service = ComputeService.session
-  instance        = compute_service.get_project_instance(@project)
-  compute_service.ensure_project_floating_ip_count(@project, 0)
+  compute_service.service.set_tenant @project
+
+  instance        = compute_service.instances.first
+  addresses       = compute_service.addresses
 
   steps %{
     * Click the logout button if currently logged in
@@ -39,11 +41,13 @@ When /^I assign a floating IP to the instance$/ do
     * Click the new floating IP allocation button
     * Current page should have the new floating IP allocation form
     * Choose the 2nd item of the pool dropdown
-    * Choose #{ instance.name } in the instance dropdown
+    * Choose the 2nd item of the instance dropdown
     * Click the create floating IP allocation button
   }
 
-  @floating = compute_service.ensure_floating_ip_exists(@project, instance)
+  addresses.reload
+  @floating = addresses.find { |a| a.instance_id == instance.id }
+  raise "No floating IP associated to instance #{ instance.name }" if @floating.nil?
 end
 
 #=================
@@ -129,11 +133,7 @@ Then /^I [Cc]annot [Cc]reate an instance in the project$/ do
 end
 
 Then /^the instance is publicly accessible via that floating IP$/ do
-  begin
-    Net::SSH.start(@floating.ip, 'root', password: 's3l3ct10n') do |ssh|
-      # Test connection and automatically close
-    end
-  rescue
-    raise "The instance is not publicly accessible via floating IP #{ @floating.ip }."
-  end
+  steps %{
+    * Connect to instance on #{ @floating.ip } via SSH
+  }
 end

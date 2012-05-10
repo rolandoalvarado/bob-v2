@@ -36,6 +36,19 @@ Then /^Click the (.+) project$/ do |project_name|
   @current_page = ProjectPage.new
 end
 
+Then /^Connect to instance on (.+) via (.+)$/ do |ip_address, remote_client|
+  case remote_client.upcase
+  when 'SSH'
+    begin
+      Net::SSH.start(ip_address, 'root', password: 's3l3ct10n') do |ssh|
+        # Test connection and automatically close
+      end
+    rescue
+      raise "The instance is not publicly accessible via IP #{ ip_address }."
+    end
+  end
+end
+
 Then /^Current page should be the (.+) page$/ do |page_name|
   @current_page = eval("#{ page_name.downcase.capitalize }Page").new
   unless @current_page.has_expected_path?

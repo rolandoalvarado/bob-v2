@@ -2,10 +2,11 @@ require_relative 'base_cloud_service'
 
 class ComputeService < BaseCloudService
 
-  attr_reader :instances
+  attr_reader :addresses, :instances
 
   def initialize
     initialize_service Compute
+    @addresses = service.addresses
     @instances = service.servers
   end
 
@@ -25,31 +26,9 @@ class ComputeService < BaseCloudService
     raise "Couldn't initialize instance in #{ project.name }"
   end
 
-  def ensure_floating_ip_exists(project, instance=nil)
-    service.set_tenant project
-    instances.reload
-
-    # Instance must be of active status to associate floating IP addresses
-    active_instances = instances.select { |i| i.state == 'ACTIVE' }
-
-    addresses = service.addresses
-    address   = addresses.last
-
-    if instance
-      raise "Couldn't find active instance #{ instance.name } in #{ project.name }" unless active_instances.include?(instance)
-
-      address = addresses.find { |a| a.instance_id == instance.id }
-      raise "Couldn't find address associated with instance #{ instance.name }" if address.nil?
-    end
-
-    raise "Couldn't find address in #{ project.name }" if address.nil?
-
-    address
-  end
-
   def ensure_project_floating_ip_count(project, desired_count)
     service.set_tenant project
-    addresses = service.addresses
+    addresses.reload
     actual_count = addresses.count
 
     if desired_count > actual_count
@@ -108,17 +87,6 @@ class ComputeService < BaseCloudService
     end
 
     instances.length
-  end
-
-  def get_project_instance(project)
-    service.set_tenant project
-
-    instance = service.servers.first
-    if instance.nil? or instance.id.empty?
-      raise "Instance can't be found!"
-    end
-
-    instance
   end
 
 end
