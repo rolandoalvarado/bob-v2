@@ -31,9 +31,6 @@ When /^I login with the following credentials: (.*), (.*)$/ do |username, passwo
   steps %{
     * Visit the login page
     * Current page should have the correct path
-    * Current page should have the username field
-    * Current page should have the password field
-    * Current page should have the login button
 
     * Fill in the username field with #{ username }
     * Fill in the password field with #{ password }

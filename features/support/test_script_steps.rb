@@ -17,7 +17,9 @@ end
 
 Then /^Click the logout button if currently logged in$/ do
   @current_page ||= WebClientPage.new
-  @current_page.logout_button.click if @current_page.has_logout_button?
+  unless @current_page.actual_url.empty?
+    @current_page.logout_button.click if @current_page.has_no_login_form?
+  end
 end
 
 Then /^Click the (.+) button$/ do |button_name|
@@ -140,7 +142,7 @@ end
 
 
 Then /^The (.+) project should be visible$/ do |project_name|
-  unless @current_page.has_project_link?( name: project_name )
+  unless @current_page.has_project_name_element?( name: project_name )
     raise "The project '#{ project_name }' should be visible, but it's not."
   end
 end

@@ -1,6 +1,6 @@
 require 'capybara'
 require 'capybara/dsl'
-
+require 'anticipate'
 require 'capybara/poltergeist'
 
 begin
@@ -25,11 +25,103 @@ Capybara.javascript_driver = ConfigFile.capybara_driver
 
 Capybara.run_server = false
 Capybara.app_host = ConfigFile.web_client_url
-Capybara.default_wait_time = 30
+
+# NOTE: Total waiting time will be default_wait_time * MAX_NODE_QUERY_RETRIES
+# You want to avoid raising the total waiting time beyond 30 seconds or the
+# tests will slow down to a crawl. Play around with the time between retries
+# instead, but always be mindful that the total waiting time doesn't get too
+# high or you'll be pulling your hair waiting for your tests to finish
+Capybara.default_wait_time = 1
+MAX_NODE_QUERY_RETRIES     = 40
+
+
+module NodeMethods
+  include Anticipate
+
+  #=====================
+  # ACTIONS
+  #=====================
+
+  def find(selector)
+    n = retry_before_failing { self.node.find selector }
+    Node.new(n)
+  end
+
+  def find_by_xpath(selector)
+    n = retry_before_failing { self.node.find :xpath, selector }
+    Node.new(n)
+  end
+
+  #=====================
+  # QUERIES
+  #=====================
+
+  def has_css_selector?(selector)
+    retry_before_returning_false { self.node.has_selector? selector }
+  end
+
+  def has_no_css_selector?(selector)
+    self.node.has_no_selector? selector
+  end
+
+  def has_content?(content)
+    retry_before_returning_false { self.node.has_content? content }
+  end
+
+  def has_no_content?(content)
+    self.node.has_no_text? content
+  end
+
+  def has_xpath?(selector)
+    retry_before_returning_false { self.node.has_xpath? selector }
+  end
+
+  def has_no_xpath?(selector)
+    self.node.has_no_xpath? selector
+  end
+
+  #=====================
+  # PRIVATE
+  #=====================
+
+  private
+
+  # This method keeps executing the block called by yield
+  # until the block stops raising an error OR until x tries
+  def retry_before_failing
+    sleeping(sleep_time).seconds.between_tries.failing_after(number_of_retries).tries do
+      yield
+    end
+    yield
+  end
+
+  def retry_before_returning_false
+    begin
+      retry_before_failing { raise 'e' unless yield }
+    rescue
+      return false
+    end
+    return true
+  end
+
+  def node
+    raise "NodeMethods#node must be defined by the class."
+  end
+
+  def sleep_time
+    Capybara.default_wait_time
+  end
+
+  def number_of_retries
+    MAX_NODE_QUERY_RETRIES
+  end
+end
+
 
 class Page
+  include NodeMethods
 
-  ELEMENT_TYPES    = 'button|field|link|checkbox|form|table|span'
+  ELEMENT_TYPES    = 'button|field|link|checkbox|form|table|span|element'
   RADIO_LIST_TYPES = 'radiolist'
   CHECK_LIST_TYPES = 'checklist'
   SELECTION_TYPES  = 'selection|dropdown'
@@ -76,6 +168,12 @@ class Page
         vars.each { |k, v| selector.gsub!("<#{ k }>", v) }
         has_xpath? selector
       end
+
+      send :define_method, "has_no_#{ name }_#{ type }?" do |vars = {}|
+        selector = options[:xpath]
+        vars.each { |k, v| selector.gsub!("<#{ k }>", v) }
+        has_no_xpath? selector
+      end
     elsif options.class == String || (options.class == Hash && options.has_key?(:css))
       send :define_method, "#{ name }_#{ type }" do |vars = {}|
         selector = (options.class == String ? options : options[:css])
@@ -87,6 +185,12 @@ class Page
         selector = (options.class == String ? options : options[:css])
         vars.each { |k, v| selector.gsub!("<#{ k }>", v) }
         has_css_selector? selector
+      end
+
+      send :define_method, "has_no_#{ name }_#{ type }?" do |vars = {}|
+        selector = (options.class == String ? options : options[:css])
+        vars.each { |k, v| selector.gsub!("<#{ k }>", v) }
+        has_no_css_selector? selector
       end
     else
       raise "Invalid element selector #{ selector.inspect }"
@@ -153,10 +257,14 @@ class Page
     end
   end
 
-  attr_reader :path
+  attr_reader :path, :session
 
   def initialize
     @session = Capybara.current_session
+  end
+
+  def node
+    session
   end
 
   #=====================
@@ -165,14 +273,6 @@ class Page
 
   def visit
     session.visit path
-  end
-
-  def find(selector)
-    session.find(selector)
-  end
-
-  def find_by_xpath(selector)
-    session.find(:xpath, selector)
   end
 
   #=====================
@@ -185,18 +285,6 @@ class Page
 
   def has_expected_url?
     expected_url == actual_url
-  end
-
-  def has_css_selector?(selector)
-    session.has_selector? selector.to_s
-  end
-
-  def has_content?(content)
-    session.has_content? content
-  end
-
-  def has_xpath?(selector)
-    session.has_xpath? selector
   end
 
   #=====================
@@ -224,6 +312,7 @@ class Page
   #=====================
 
   def method_missing(name, *args, &block)
+    query_without_question_mark  = /^has_(?<name>.+)_(?<type>#{ ELEMENT_TYPES })$/.match(name)
     element_query  = /^has_(?<name>.+)_(?<type>#{ ELEMENT_TYPES })\??$/.match(name)
     element_find   = /^(?<name>.+)_(?<type>#{ ELEMENT_TYPES })$/.match(name)
     element_action = /^(?<action>click|fill_in|select|check)_(?<name>.+)_(?<type>#{ ELEMENT_TYPES })/.match(name)
@@ -231,6 +320,10 @@ class Page
     if element_action
       raise "Undefined method '#{ element_action[0] }'. Maybe you mean " +
             "#{ self.class }##{ element_action['name'] }_#{ element_action['type'] }.#{ element_action['action'] }?"
+    elsif query_without_question_mark
+      q = query_without_question_mark
+      raise "#{ self.class} doesn't have a method named has_#{ q['name'] }_#{ q['type'] }. " +
+            "Try using 'has_#{ q['name'] }_#{ q['type'] }?' (with a trailing question mark) instead."
     elsif element_query
       raise_missing_element_declaration_error(element_query['name'], element_query['type'])
     elsif element_find
@@ -245,14 +338,20 @@ class Page
           "Make sure you define it by adding \"#{ element_type } '#{ element_name }', " +
           "<css_selector>\" in #{ self.class }"
   end
+end
 
-  #=====================
-  # PRIVATE METHODS
-  #=====================
 
-  private
+class Node
+  include NodeMethods
 
-  def session
-    @session
+  attr_reader :node
+
+  def initialize(capybara_node)
+    @node = capybara_node
   end
+
+  def method_missing(name, *args, &block)
+    node.send(name, *args, &block)
+  end
+
 end

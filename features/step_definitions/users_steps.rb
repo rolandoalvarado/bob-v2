@@ -2,6 +2,12 @@
 # GIVENs
 #=================
 
+Given /^I have a role of (.+) in the system$/ do |role_name|
+  steps %{
+    * I am a #{ role_name }
+  }
+end
+
 Given /^I am an? (System Admin|User)$/ do |role_name|
   user_attrs       = CloudObjectBuilder.attributes_for(
                        :user,
