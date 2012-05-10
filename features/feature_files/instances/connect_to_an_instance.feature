@@ -5,7 +5,8 @@ Feature: Connect to an Instance
 
   Background:
     * A project exists in the system
-    * The project has 0 instances
+    * The project does not have any running instances
+
 
   Scenario Outline:
     Given I am authorized to create instances in the project

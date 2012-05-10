@@ -25,6 +25,4 @@ class ProjectPage < WebClientPage
   dropdown  'pool',                          '#pool'
   dropdown  'instance',                      '#instance-id' 
   button    'create floating IP allocation', '#floating-ip-allocate-modal .action-allocate'
-
-  label     'image', xpath: "//*[@id='instances-list']//label[text()='<name>']"
 end

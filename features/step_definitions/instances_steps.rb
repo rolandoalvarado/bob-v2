@@ -9,7 +9,7 @@ Given /^The project does not have any floating IPs$/ do
   compute_service.ensure_project_floating_ip_count(@project, 0)
 end
 
-Given /^I am authorized to (?:assign floating IPs to|create) instances in the project$/ do
+Given /^I am authorized to assign floating IPs to instances in the project$/ do
   steps %{
     * I have a role of Project Manager in the project
   }
@@ -44,31 +44,6 @@ When /^I assign a floating IP to the instance$/ do
   }
 
   @floating = compute_service.ensure_floating_ip_exists(@project, instance)
-end
-
-When /^I create an instance on that project based on the image (.+)$/ do |image_name|
-  compute_service = ComputeService.session
-  instance_name = Unique.name('Instance')
-
-  steps %{
-    * Click the logout button if currently logged in
-
-    * Visit the login page
-    * Fill in the username field with #{ @current_user.name }
-    * Fill in the password field with #{ @current_user.password }
-    * Click the login button
-
-    * Visit the projects page
-    * Click the #{ @project.name } project
-    * Click the new instance button
-    * Current page should have the new instance form
-    * Click the #{ image_name } image
-    * Fill in the server name field with #{ instance_name }
-    * Check the 1st item in the security groups checklist
-    * Click the create instance button
-  }
-
-  @instance = compute_service.instances.find { |i| i.name == instance_name }
 end
 
 #=================
@@ -110,24 +85,6 @@ Then /^I [Cc]annot [Aa]ssign a floating IP to an instance in the project$/ do
   }
 end
 
-Then /^I can connect to that instance via (.+)/ do |remote_client|
-  compute_service = ComputeService.session
-  compute_service.ensure_project_floating_ip_count(@project, 0)
-  floating = compute_service.ensure_floating_ip_exists(@project, @instance)
-
-  begin
-    case remote_client
-    when 'RDP'
-      %x{ rdesktop #{ floating.ip } -u Administrator -p s3l3ct10n }
-    when 'SSH'
-      Net::SSH.start(floating.ip, 'root', password: 's3l3ct10n') do |ssh|
-        # Test connection and automatically close
-      end
-    end
-  rescue
-    raise "Cannot connect to instance via #{ remote_client }."
-  end
-end
 
 Then /^I [Cc]an [Cc]reate an instance in the project$/ do
 

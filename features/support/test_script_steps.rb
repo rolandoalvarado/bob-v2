@@ -36,10 +36,6 @@ Then /^Click the (.+) project$/ do |project_name|
   @current_page = ProjectPage.new
 end
 
-Then /^Click the (.+) image$/ do |image_name|
-  @current_page.image_label( name: image_name.strip ).click
-end
-
 Then /^Current page should be the (.+) page$/ do |page_name|
   @current_page = eval("#{ page_name.downcase.capitalize }Page").new
   unless @current_page.has_expected_path?
