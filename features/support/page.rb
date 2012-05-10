@@ -81,6 +81,14 @@ module NodeMethods
   end
 
   #=====================
+  # EXPERIMENTAL
+  #=====================
+
+  def wait_for_content_to_disappear(content)
+    retry_before_returning_false { self.node.has_no_text? content }
+  end
+
+  #=====================
   # PRIVATE
   #=====================
 
@@ -89,7 +97,7 @@ module NodeMethods
   # This method keeps executing the block called by yield
   # until the block stops raising an error OR until x tries
   def retry_before_failing
-    sleeping(sleep_time).seconds.between_tries.failing_after(number_of_retries).tries do
+    sleeping(0).seconds.between_tries.failing_after(number_of_retries).tries do
       yield
     end
     yield
@@ -142,16 +150,21 @@ class Page
     checklist = /^(?<type>#{ CHECK_LIST_TYPES })$/.match(name)
     selection = /^(?<type>#{ SELECTION_TYPES  })$/.match(name)
 
-    if element
-      register_element args[0].split.join('_').downcase, element['type'], args[1]
-    elsif radiolist
-      register_radiolist args[0].split.join('_').downcase, radiolist['type'], args[1]
-    elsif checklist
-      register_checklist args[0].split.join('_').downcase, checklist['type'], args[1]
-    elsif selection
-      register_selection args[0].split.join('_').downcase, selection['type'], args[1]
-    else
+    name         = args[0].split.join('_').downcase
+    match_object = element || radiolist || checklist || selection
+
+    unless match_object
       super name, args, block
+    end
+
+    if element
+      register_element   name, element['type'], args[1]
+    elsif radiolist
+      register_radiolist name, radiolist['type'], args[1]
+    elsif checklist
+      register_checklist name, checklist['type'], args[1]
+    elsif selection
+      register_selection name, selection['type'], args[1]
     end
   end
 
@@ -335,7 +348,7 @@ class Page
 
   def raise_missing_element_declaration_error(element_name, element_type)
     raise "I don't know how to find the #{ element_name } #{ element_type }. " +
-          "Make sure you define it by adding \"#{ element_type } '#{ element_name }', " +
+          "Make sure you define it by adding \"#{ element_type } '#{ element_name.gsub('_', ' ') }', " +
           "<css_selector>\" in #{ self.class }"
   end
 end

@@ -11,16 +11,12 @@ Feature: Delete an Instance
     * The project has 1 instance
 
 
-  @permissions @dave
+  @permissions
   Scenario Outline: Check User Permissions
     Given I have a role of <Role> in the project
-     Then I <Can or Cannot Delete> the instance
+     Then I <Can or Cannot Delete> an instance in the project
 
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Delete |
         | Member          | Can Delete           |
-        | Admin           | Can Delete           |
-
-      Scenarios: Unauthorized Roles
-        | Role            | Can or Cannot Delete |
-        | (None)          | Cannot Delete        |
+        | Project Manager | Can Delete           |

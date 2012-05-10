@@ -24,9 +24,9 @@ Feature: Assign a Floating IP to an Instance
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Assign |
         | Member          | Can Assign           |
-        | Admin           | Can Assign           |
+        | Project Manager | Can Assign           |
 
   Scenario: Assign Floating IP
     Given I am authorized to assign floating IPs to instances in the project
      When I assign a floating IP to the instance
-     Then the instance is accessible via that floating IP
+     Then the instance is publicly accessible via that floating IP

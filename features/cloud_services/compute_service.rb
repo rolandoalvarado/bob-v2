@@ -25,6 +25,58 @@ class ComputeService < BaseCloudService
     raise "Couldn't initialize instance in #{ project.name }"
   end
 
+  def ensure_floating_ip_exists(project, instance=nil)
+    service.set_tenant project
+    instances.reload
+
+    # Instance must be of active status to associate floating IP addresses
+    active_instances = instances.select { |i| i.state == 'ACTIVE' }
+
+    addresses = service.addresses
+    address   = addresses.last
+
+    if instance
+      raise "Couldn't find active instance #{ instance.name } in #{ project.name }" unless active_instances.include?(instance)
+
+      address = addresses.find { |a| a.instance_id == instance.id }
+      raise "Couldn't find address associated with instance #{ instance.name }" if address.nil?
+    end
+
+    raise "Couldn't find address in #{ project.name }" if address.nil?
+
+    address
+  end
+
+  def ensure_project_floating_ip_count(project, desired_count)
+    service.set_tenant project
+    addresses = service.addresses
+    actual_count = addresses.count
+
+    if desired_count > actual_count
+
+      how_many = desired_count - actual_count
+      how_many.times do |n|
+        service.allocate_address
+      end
+      addresses.reload
+
+    elsif desired_count < addresses.length
+
+      while addresses.length > desired_count
+        addresses.reload
+        addresses[0].destroy rescue nil
+      end
+
+    end
+
+    if addresses.length != desired_count
+      raise "Couldn't ensure that #{ project.name } has #{ desired_count } " +
+            "floating IPs. Current number of floating IPs is #{ addresses.length }."
+    end
+
+    addresses.length
+  end
+
   def ensure_project_instance_count(project, desired_count)
     service.set_tenant project
     instances.reload
@@ -58,34 +110,15 @@ class ComputeService < BaseCloudService
     instances.length
   end
 
-  def ensure_project_floating_ip_count(project, desired_count)
+  def get_project_instance(project)
     service.set_tenant project
-    addresses = service.addresses
-    actual_count = addresses.count
 
-    if desired_count > actual_count
-
-      how_many = desired_count - actual_count
-      how_many.times do |n|
-        service.allocate_address
-      end
-      addresses.reload
-
-    elsif desired_count < addresses.length
-
-      while addresses.length > desired_count
-        addresses.reload
-        addresses[0].destroy rescue nil
-      end
-
+    instance = service.servers.first
+    if instance.nil? or instance.id.empty?
+      raise "Instance can't be found!"
     end
 
-    if addresses.length != desired_count
-      raise "Couldn't ensure that #{ project.name } has #{ desired_count } " +
-            "floating IPs. Current number of floating IPs is #{ addresses.length }."
-    end
-
-    addresses.length
+    instance
   end
 
 end
