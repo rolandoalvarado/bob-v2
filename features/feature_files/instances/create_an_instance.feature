@@ -21,11 +21,11 @@ Feature: Create an Instance
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Create |
         | Member          | Can Create           |
-      #   | Admin           | Can Create           |
-      #
-      # Scenarios: Unauthorized Roles
-      #   | Role            | Can or Cannot Create |
-      #   | (None)          | Cannot Create        |
+        | System Admin    | Can Create           |
+
+      Scenarios: Unauthorized Roles
+        | Role            | Can or Cannot Create |
+        | (None)          | Cannot Create        |
 
 
   Scenario Outline: Create an Instance
