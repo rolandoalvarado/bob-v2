@@ -34,6 +34,13 @@ Given /^The project has (\d+) instances?$/ do |number_of_instances|
 end
 
 
+Given /^The project has (\d+) running instances?$/ do |number_of_instances|
+  number_of_instances = number_of_instances.to_i
+  compute_service     = ComputeService.session
+  total_instances     = compute_service.ensure_running_project_instance_count(@project, number_of_instances)
+end
+
+
 
 Given /^I have a role of (.+) in the project$/ do |role_name|
 

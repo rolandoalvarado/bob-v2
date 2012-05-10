@@ -4,6 +4,8 @@
 # to http://www.relaxdiego.com/2012/04/using-cucumber.html for a better
 # understanding on how to organize steps.
 
+include Anticipate
+
 Then /^Check the (\d+)(?:st|nd|rd|th) item in the (.+) checklist$/ do |item_number, list_name|
   list_name = list_name.split.join('_').downcase
   checkbox  = @current_page.send("#{ list_name }_checklist_items")[item_number.to_i - 1]
@@ -158,21 +160,25 @@ Then /^The (.+) project should not be visible$/ do |project_name|
 end
 
 Then /^The (.+) table should have (.+) rows$/ do |table_name, num_rows|
-  table_name      = table_name.split.join('_').downcase
-  table           = @current_page.send("#{ table_name }_table")
-  actual_num_rows = table.has_content?('There are currently no') ? 0 : table.all( xpath: './tbody/tr' ).count
-  num_rows        = num_rows.to_i
+  sleeping(1).seconds.between_tries.failing_after(5).tries do
+    table_name      = table_name.split.join('_').downcase
+    table           = @current_page.send("#{ table_name }_table")
+    actual_num_rows = table.has_content?('There are currently no') ? 0 : table.all('tbody tr').count
+    num_rows        = num_rows.to_i
 
-  if actual_num_rows != num_rows
-    raise "Expected #{ num_rows } rows in the #{ table_name } table, but counted #{ actual_num_rows }."
+    if actual_num_rows != num_rows
+      raise "Expected #{ num_rows } rows in the #{ table_name } table, but counted #{ actual_num_rows }."
+    end
   end
 end
 
-Then /^The last row in the (.+) table should include the text (.+)$/ do |table_name, text|
-  table_name = table_name.split.join('_').downcase
-  table_rows = @current_page.send("#{ table_name }_table").all( xpath: './tbody/tr' )
-  unless table_rows.last.has_content?(text)
-    raise "Couldn't find the text '#{ text }' in the last row of the #{ table_name } table."
+Then /^The (.+) table's last row should include the text (.+)$/ do |table_name, text|
+  sleeping(1).seconds.between_tries.failing_after(5).tries do
+    table_name = table_name.split.join('_').downcase
+    table_rows = @current_page.send("#{ table_name }_table").all('tbody tr')
+    unless table_rows.last.has_content?(text)
+      raise "Couldn't find the text '#{ text }' in the last row of the #{ table_name } table."
+    end
   end
 end
 

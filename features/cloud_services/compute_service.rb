@@ -89,4 +89,41 @@ class ComputeService < BaseCloudService
     instances.length
   end
 
+  def ensure_running_project_instance_count(project, desired_count)
+    service.set_tenant project
+    instances.reload
+    running_instances = instances.select { |i| i.state == 'ACTIVE' }
+    actual_count = running_instances.count
+
+    if desired_count > actual_count
+
+      how_many = desired_count - actual_count
+      how_many.times do |n|
+        create_instance_in_project(project)
+      end
+      instances.reload
+
+    elsif desired_count < running_instances.length
+
+      while running_instances.length > desired_count
+        instances.reload
+        running_instances = instances.select { |i| i.state == 'ACTIVE' }
+
+        begin
+          running_instances[0].destroy
+        rescue
+        end
+      end
+
+    end
+
+    running_instances = instances.select { |i| i.state == 'ACTIVE' }
+    if running_instances.length != desired_count
+      raise "Couldn't ensure that #{ project.name } has #{ desired_count } " +
+            "instances. Current number of running instances is #{ running_instances.length }."
+    end
+
+    running_instances.length
+  end
+
 end

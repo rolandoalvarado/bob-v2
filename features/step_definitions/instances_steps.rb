@@ -23,7 +23,7 @@ When /^I assign a floating IP to the instance$/ do
   compute_service = ComputeService.session
   compute_service.service.set_tenant @project
 
-  instance        = compute_service.instances.first
+  instance        = compute_service.instances.find { |i| i.state == 'ACTIVE' }
   addresses       = compute_service.addresses
 
   steps %{
@@ -56,7 +56,7 @@ end
 
 Then /^I [Cc]an [Aa]ssign a floating IP to an instance in the project$/ do
   compute_service = ComputeService.session
-  instance        = compute_service.instances.first
+  instance        = compute_service.instances.find { |i| i.state == 'ACTIVE' }
   num_addresses   = compute_service.addresses.count
 
   steps %{
@@ -78,7 +78,7 @@ Then /^I [Cc]an [Aa]ssign a floating IP to an instance in the project$/ do
     * Click the create floating IP allocation button
 
     * The floating IPs table should have #{ num_addresses + 1 } rows
-    * The last row in the floating IPs table should include the text #{ instance.name } 
+    * The floating IPs table's last row should include the text #{ instance.name } 
   }
 end
 

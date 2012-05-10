@@ -13,7 +13,7 @@ Feature: Assign a Floating IP to an Instance
 
   Background:
     * A project exists in the system
-    * The project has 1 instance
+    * The project has 1 running instance
     * The project does not have any floating IPs
 
 
