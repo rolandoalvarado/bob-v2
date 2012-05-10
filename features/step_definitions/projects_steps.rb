@@ -14,55 +14,6 @@ Given /^[Aa] project exists in the system$/ do
   @project = project
 end
 
-Given /^the project has a running instance$/ do
-  step "The project has 1 instances?"
-  pending
-end
-
-Given /^I have a role of (.+) in the system$/ do |role_name|
-  user_attrs       = CloudObjectBuilder.attributes_for(
-                       :user,
-                       :name => Unique.username('rstark')
-                     )
-  identity_service = IdentityService.session
-  user             = identity_service.ensure_user_exists(user_attrs)
- 
-  project = identity_service.tenants.find { |t| t.name == 'admin' }
-  if project.nil? or project.id.empty?
-    raise "Project couldn't be found!"
-  end
-
-  # Revoke all roles
-  identity_service.revoke_all_user_roles(user, project)
-
-  unless role_name.downcase == "(none)"
-    #Find the role
-    role = identity_service.roles.find_by_name(RoleNameDictionary.db_name(role_name))
-    if role.nil?
-      raise "Role #{ role_name } couldn't be found. Make sure it's defined in " +
-        "features/support/role_name_dictionary.rb and that it exists in " +
-        "#{ ConfigFile.web_client_url }."
-    end
-
-    #grant the role to user in admin tenant
-    begin
-      project.grant_user_role(user.id, role.id)
-    rescue Fog::Identity::OpenStack::NotFound => e
-      raise "Couldn't add #{ user.name } to #{ project.name } as #{ role.name }"
-    end
-  end
-
-  # Make variable(s) available for use in succeeding steps
-  @current_user = user
-end
-
-Given /^I am a System Admin in the system$/ do
-  step "I have a role of System Admin in the system"
-end
-
-Given /^I am a User in the system$/ do
-  step "I have a role of Member in the system"
-end
 
 Given /^At least (\d+) images? should be available for use in the project$/ do |number_of_images|
   number_of_images = number_of_images.to_i
@@ -74,16 +25,11 @@ Given /^At least (\d+) images? should be available for use in the project$/ do |
   end
 end
 
-
-Given /^The project has (\d+) instances\?$/ do |number_of_instances|
+Given /^The project has (\d+) instances?$/ do |number_of_instances|
   number_of_instances = number_of_instances.to_i
   compute_service     = ComputeService.session
   total_instances     = compute_service.ensure_project_instance_count(@project, number_of_instances)
-  # I have to implement running instance.
-  pending
 end
-
-
 
 Given /^I have a role of (.+) in the project$/ do |role_name|
 
@@ -239,7 +185,24 @@ When /^I create a project$/ do
 end
 
 When /^I delete the project$/ do
-  pending # express the regexp above with the code you wish you had
+
+  steps %{
+    * Click the logout button if currently logged in
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * The #{ (@project || @project_attrs).name } project should be visible
+
+    * Delete the #{ (@project || @project_attrs).name } project
+  }
+
+  # Deleting row in the page is asynchronous. So script has to wait 5 seconds.
+  sleep(10)
+  step "The #{ (@project || @project_attrs).name } project should not be visible"
+
 end
 
 
@@ -337,9 +300,11 @@ Then /^I [Cc]an [Dd]elete (?:that|the) project$/ do
     * Delete the #{ (@project || @project_attrs).name } project
   }
 
-  # Deleting row in the page is asynchronous. So script has to wait 5 seconds.
-  sleep(10)
-  step "The #{ (@project || @project_attrs).name } project should not be visible"
+  project =  IdentityService.find_test_tenant((@project || @project_attrs).name)
+
+  if project 
+    "Project #{ (@project || @project_attrs).name } should be deleted. but it is"
+  end
 
 end
 
@@ -356,7 +321,7 @@ Then /^I [Cc]annot [Dd]elete (?:that|the) project$/ do
   }
 
   # Deleting row in the page is asynchronous. So script has to wait 5 seconds.
-  sleep(10)
+
   if ( @current_page.has_delete_project_link?(name: (@project || @project_attrs).name) )
     raise "The project delete link should not have been created, but it seems that it was."
   end
