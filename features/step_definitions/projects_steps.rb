@@ -15,6 +15,50 @@ Given /^[Aa] project exists in the system$/ do
 end
 
 
+Given /^I have a role of (.+) in the system$/ do |role_name|
+  user_attrs       = CloudObjectBuilder.attributes_for(
+                       :user,
+                       :name => Unique.username('rstark')
+                     )
+  identity_service = IdentityService.session
+  user             = identity_service.ensure_user_exists(user_attrs)
+ 
+  project = identity_service.tenants.find { |t| t.name == 'admin' }
+  if project.nil? or project.id.empty?
+    raise "Project couldn't be found!"
+  end
+
+  # Revoke all roles
+  identity_service.revoke_all_user_roles(user, project)
+
+  unless role_name.downcase == "(none)"
+    #Find the role
+    role = identity_service.roles.find_by_name(RoleNameDictionary.db_name(role_name))
+    if role.nil?
+      raise "Role #{ role_name } couldn't be found. Make sure it's defined in " +
+        "features/support/role_name_dictionary.rb and that it exists in " +
+        "#{ ConfigFile.web_client_url }."
+    end
+
+    #grant the role to user in admin tenant
+    begin
+      project.grant_user_role(user.id, role.id)
+    rescue Fog::Identity::OpenStack::NotFound => e
+      raise "Couldn't add #{ user.name } to #{ project.name } as #{ role.name }"
+    end
+  end
+
+  # Make variable(s) available for use in succeeding steps
+  @current_user = user
+end
+
+Given /^I am a System Admin in the system$/ do
+  step "I have a role of System Admin in the system"
+end
+
+Given /^I am a User in the system$/ do
+  step "I have a role of Member in the system"
+end
 
 Given /^At least (\d+) images? should be available for use in the project$/ do |number_of_images|
   number_of_images = number_of_images.to_i
