@@ -2,10 +2,11 @@ require_relative 'base_cloud_service'
 
 class ComputeService < BaseCloudService
 
-  attr_reader :instances
+  attr_reader :addresses, :instances
 
   def initialize
     initialize_service Compute
+    @addresses = service.addresses
     @instances = service.servers
   end
 
@@ -25,31 +26,9 @@ class ComputeService < BaseCloudService
     raise "Couldn't initialize instance in #{ project.name }"
   end
 
-  def ensure_floating_ip_exists(project, instance=nil)
-    service.set_tenant project
-    instances.reload
-
-    # Instance must be of active status to associate floating IP addresses
-    active_instances = instances.select { |i| i.state == 'ACTIVE' }
-
-    addresses = service.addresses
-    address   = addresses.last
-
-    if instance
-      raise "Couldn't find active instance #{ instance.name } in #{ project.name }" unless active_instances.include?(instance)
-
-      address = addresses.find { |a| a.instance_id == instance.id }
-      raise "Couldn't find address associated with instance #{ instance.name }" if address.nil?
-    end
-
-    raise "Couldn't find address in #{ project.name }" if address.nil?
-
-    address
-  end
-
   def ensure_project_floating_ip_count(project, desired_count)
     service.set_tenant project
-    addresses = service.addresses
+    addresses.reload
     actual_count = addresses.count
 
     if desired_count > actual_count
@@ -110,15 +89,41 @@ class ComputeService < BaseCloudService
     instances.length
   end
 
-  def get_project_instance(project)
+  def ensure_running_project_instance_count(project, desired_count)
     service.set_tenant project
+    instances.reload
+    running_instances = instances.select { |i| i.state == 'ACTIVE' }
+    actual_count = running_instances.count
 
-    instance = service.servers.first
-    if instance.nil? or instance.id.empty?
-      raise "Instance can't be found!"
+    if desired_count > actual_count
+
+      how_many = desired_count - actual_count
+      how_many.times do |n|
+        create_instance_in_project(project)
+      end
+      instances.reload
+
+    elsif desired_count < running_instances.length
+
+      while running_instances.length > desired_count
+        instances.reload
+        running_instances = instances.select { |i| i.state == 'ACTIVE' }
+
+        begin
+          running_instances[0].destroy
+        rescue
+        end
+      end
+
     end
 
-    instance
+    running_instances = instances.select { |i| i.state == 'ACTIVE' }
+    if running_instances.length != desired_count
+      raise "Couldn't ensure that #{ project.name } has #{ desired_count } " +
+            "instances. Current number of running instances is #{ running_instances.length }."
+    end
+
+    running_instances.length
   end
 
 end

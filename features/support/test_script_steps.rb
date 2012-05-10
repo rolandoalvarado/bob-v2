@@ -4,6 +4,8 @@
 # to http://www.relaxdiego.com/2012/04/using-cucumber.html for a better
 # understanding on how to organize steps.
 
+include Anticipate
+
 Then /^Check the (\d+)(?:st|nd|rd|th) item in the (.+) checklist$/ do |item_number, list_name|
   list_name = list_name.split.join('_').downcase
   checkbox  = @current_page.send("#{ list_name }_checklist_items")[item_number.to_i - 1]
@@ -41,6 +43,19 @@ Then /^Click the (.+) project$/ do |project_name|
   project_name.strip!
   @current_page.project_link( name: project_name ).click
   @current_page = ProjectPage.new
+end
+
+Then /^Connect to instance on (.+) via (.+)$/ do |ip_address, remote_client|
+  case remote_client.upcase
+  when 'SSH'
+    begin
+      Net::SSH.start(ip_address, 'root', password: 's3l3ct10n') do |ssh|
+        # Test connection and automatically close
+      end
+    rescue
+      raise "The instance is not publicly accessible via IP #{ ip_address }."
+    end
+  end
 end
 
 Then /^Current page should be the (.+) page$/ do |page_name|

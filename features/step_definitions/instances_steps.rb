@@ -152,11 +152,7 @@ Then /^I [Cc]an [Dd]elete an instance in the project$/ do
 end
 
 Then /^the instance is publicly accessible via that floating IP$/ do
-  begin
-    Net::SSH.start(@floating.ip, 'root', password: 's3l3ct10n') do |ssh|
-      # Test connection and automatically close
-    end
-  rescue
-    raise "The instance is not publicly accessible via floating IP #{ @floating.ip }."
-  end
+  steps %{
+    * Connect to instance on #{ @floating.ip } via SSH
+  }
 end

@@ -2,6 +2,7 @@ require 'rubygems'
 require 'bundler/setup'
 require 'faker'
 require 'cucumber/formatter/html'
+require 'anticipate'
 
 # Ensure that features are sorted by their filenames alphabetically
 #==================================================================
