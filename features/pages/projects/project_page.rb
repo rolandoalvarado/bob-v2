@@ -34,8 +34,7 @@ class ProjectPage < WebClientPage
   table     'volumes',             '#volume-template tbody'
 
 # Type      Name                    Selector
-  span      'new volume name error', 'span.error[for="name"]'
-  span      'new volume size error', 'span.error[for="appendedInput"]'
+  span      'new volume form error', 'span.error[for="name"], span.error[for="appendedInput"]'
 
   #==========================
   # Instance-related elements

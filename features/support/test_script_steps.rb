@@ -171,14 +171,14 @@ end
 
 Then /^The (.+) message should be visible$/ do |span_name|
   span_name = span_name.split.join('_').downcase
-  unless @current_page.send("has_#{ message_name }_span?")
+  unless @current_page.send("has_#{ span_name }_span?")
     raise "The '#{ span_name.gsub('_',' ') }' message should be visible, but it's not."
   end
 end
 
 Then /^The (.+) message should not be visible$/ do |span_name|
   span_name = span_name.split.join('_').downcase
-  if @current_page.send("has_#{ message_name }_span?")
+  if @current_page.send("has_#{ span_name }_span?")
     raise "The '#{ span_name.gsub('_',' ') }' message should not be visible, but it is."
   end
 end
