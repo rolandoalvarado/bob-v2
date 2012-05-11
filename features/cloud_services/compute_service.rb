@@ -32,6 +32,23 @@ class ComputeService < BaseCloudService
     raise "Couldn't initialize instance in #{ project.name }"
   end
 
+  def delete_instances_in_project(project)
+    deleted_instances = []
+    service.set_tenant project
+    instances.reload
+
+    if project_instances = instances.find_all{ |i| i.tenant_id == project.id }
+      project_instances.each do |instance|
+        deleted_instances << { name: instance.name, id: instance.id }
+        service.delete_server(instance.id)
+      end
+    end
+
+    service.set_tenant 'admin'
+    deleted_instances
+  end
+
+
   def ensure_project_floating_ip_count(project, desired_count)
     service.set_tenant project
     keep_trying do

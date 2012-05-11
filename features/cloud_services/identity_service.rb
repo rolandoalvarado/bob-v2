@@ -14,17 +14,35 @@ class IdentityService < BaseCloudService
     @test_tenant = find_test_tenant(test_tenant_name) || create_test_tenant(test_tenant_name)
   end
 
+
+  #=================================================
+  # CATCH METHOD CALLS THAT HAVE 'project' in them
+  # Since 'project' is just an alias for 'tenant',
+  # let's automatically translate such method calls.
+  #=================================================
+
+  def method_missing(name, *args, &block)
+    xlated_name = name.to_s.gsub('project', 'tenant')
+    if name =~ /project/ && respond_to?(xlated_name)
+      send xlated_name, *args, &block
+    else
+      super name, *args, &block
+    end
+  end
+
+  def respond_to_missing?(name)
+    respond_to? name.to_s.gsub('project', 'tenant')
+  end
+
+  #=================================================
+
   def create_tenant(attributes)
     tenant = tenants.new(attributes)
     tenant.save
     tenant
   end
 
-  def delete_tenant(attributes)
-    tenant = find_test_tenant(attributes[:name])
-    if(tenant == nil or tenant.id == nil )
-      return
-    end
+  def delete_tenant(tenant)
     users = tenant.users
     users.each do |user|
       revoke_all_user_roles(user, tenant)
@@ -42,6 +60,14 @@ class IdentityService < BaseCloudService
     admin_role = roles.find_by_name(RoleNameDictionary.db_name('System Admin'))
     test_tenant.grant_user_role(user.id, admin_role.id)
     user
+  end
+
+  def delete_user(user)
+    tenants.each do |tenant|
+      revoke_all_user_roles(user, tenant)
+    end
+
+    user.destroy
   end
 
   def ensure_tenant_exists(attributes)
@@ -93,24 +119,6 @@ class IdentityService < BaseCloudService
     user.roles(tenant.id).each do |role|
       tenant.revoke_user_role(user.id, role['id'])
     end
-  end
-
-  #================================================
-  # COMPUTE SERVICE-RELATED METHODS
-  # Convenience methods to make the DSL consistent
-  # with the Compute Service's language
-  #================================================
-
-  def ensure_project_exists(attributes)
-    ensure_tenant_exists(attributes)
-  end
-
-  def add_user_to_project(user_id, project_id, role_id)
-    pending
-  end
-
-  def projects
-    tenants
   end
 
   #================================================

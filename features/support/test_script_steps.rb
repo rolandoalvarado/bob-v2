@@ -118,8 +118,8 @@ Then /^Ensure that a user with username (.+) and password (.+) exists$/ do |user
   username           = Unique.username(username)
   @user_attrs        = CloudObjectBuilder.attributes_for(:user, :name => username, :password => password)
   @user_attrs[:name] = Unique.username(@user_attrs[:name])
-
   @user = IdentityService.instance.ensure_user_exists(@user_attrs)
+  EnvironmentCleaner.register(:user, @user.id)
 end
 
 

@@ -4,8 +4,8 @@
 
 Given /^[Aa] project exists in the system$/ do
   identity_service = IdentityService.session
-  project          = identity_service.ensure_project_exists(:name => ('project2'))
-
+  project          = identity_service.ensure_project_exists(:name => ('project'))
+  EnvironmentCleaner.register(:project, project.id)
   if project.nil? or project.id.empty?
     raise "Project couldn't be initialized!"
   end
@@ -51,7 +51,7 @@ Given /^I have a role of (.+) in the project$/ do |role_name|
                      )
   identity_service = IdentityService.session
   user             = identity_service.ensure_user_exists(user_attrs)
-
+  EnvironmentCleaner.register(:user, user.id)
   identity_service.revoke_all_user_roles(user, @project)
 
   # Ensure user has the following role in the project
@@ -381,6 +381,7 @@ Then /^Arya Stark cannot view that project$/ do
                      )
   identity_service = IdentityService.session
   user             = identity_service.ensure_user_exists(user_attrs)
+  EnvironmentCleaner.register(:user, user.id)
 
   steps %{
     * Click the logout button if currently logged in
