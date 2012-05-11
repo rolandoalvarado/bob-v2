@@ -14,7 +14,7 @@ Feature: Create a Volume on the Storage Node
     * A storage node is available for use
 
 
-  @permissions @nelvin
+  @permissions
   Scenario Outline: Check User Permissions
     Given I have a role of <Role> in the project
      Then I <Can or Cannot Create> a volume in the project
@@ -27,7 +27,6 @@ Feature: Create a Volume on the Storage Node
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Create |
         | (None)          | Cannot Create        |
-
 
   Scenario Outline: Create a Volume Given Some Attributes
     Given I am authorized to create volumes in the project

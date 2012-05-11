@@ -15,6 +15,14 @@ class ProjectPage < WebClientPage
   button    'create instance',       '#create-instance-modal .create-instance'
   table     'instances',             '#instances-template .table-list'
 
+# Type      Name                         Selector
+  span      'project name error',        "span.error[for='project-name']"
+  span      'project description error', "span.error[for='project-description']"
+
+  #==========================
+  # Volume-related elements
+  #==========================
+
 # Type      Name                    Selector
   button    'new volume',          '#add-volume:not(.disabled)'
   button    'disabled new volume', '#add-volume.disabled'
@@ -25,12 +33,12 @@ class ProjectPage < WebClientPage
   button    'create volume',       '#save-volume'
   table     'volumes',             '#volume-template tbody'
 
-# Type      Name                         Selector
-  span      'project name error',        "span.error[for='project-name']"
-  span      'project description error', "span.error[for='project-description']"
+# Type      Name                    Selector
+  span      'new volume name error', 'span.error[for="name"]'
+  span      'new volume size error', 'span.error[for="appendedInput"]'
 
   #==========================
-  # Instance-reated elements
+  # Instance-related elements
   #==========================
   link      'access security tab',           '.nav-tabs .access-and-security a'
   button    'new floating IP allocation',    '#allocate-btn'
