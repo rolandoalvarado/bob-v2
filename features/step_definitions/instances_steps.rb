@@ -168,18 +168,9 @@ Then /^I can connect to that instance via (.+)/ do |remote_client|
   compute_service.ensure_project_floating_ip_count(@project, 0)
   floating = compute_service.ensure_floating_ip_exists(@project, @instance)
 
-  begin
-    case remote_client
-    when 'RDP'
-      %x{ rdesktop #{ floating.ip } -u Administrator -p s3l3ct10n }
-    when 'SSH'
-      Net::SSH.start(floating.ip, 'root', password: 's3l3ct10n') do |ssh|
-        # Test connection and automatically close
-      end
-    end
-  rescue
-    raise "Cannot connect to instance via #{ remote_client }."
-  end
+  steps %{
+    * Connect to instance on #{ floating.ip } via #{ remote_client }
+  }
 end
 
 Then /^I [Cc]an [Cc]reate an instance in the project$/ do
