@@ -84,6 +84,6 @@ Then /^the volume will be [Nn]ot [Cc]reated$/ do
   # new volume form should have the error message "This field is required".
   if(!@current_page.has_new_volume_name_error_span? &&
      !@current_page.has_new_volume_size_error_span?   )
-    raise "The project should not have been created, but it seems that it was."
+    raise "The volume should not have been created, but it seems that it was."
   end
 end
