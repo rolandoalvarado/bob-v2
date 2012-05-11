@@ -75,7 +75,7 @@ Then /^Delete the (.+) project$/ do |project_name|
 
   delete_project_link.click
   @current_page.delete_confirmation_button.click
- 
+
 end
 
 Then /^Edit the (.+) project$/ do |project_name|

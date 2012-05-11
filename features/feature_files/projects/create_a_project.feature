@@ -16,7 +16,7 @@ Feature: Create a Project
 
   @permissions
   Scenario Outline: Check User Permissions
-    Given I am a <System Admin or User>
+    Given I have a role of <Role> in the system
      Then I <Can or Cannot Create> a project
 
       Scenarios: Authorized Roles

@@ -27,7 +27,7 @@ Given /^I am an? (System Admin|User)$/ do |role_name|
   # Ensure user has the following role in the system
   if role_name.downcase == "user"
     role_name = "Member"
-  end  
+  end
 
   role = identity_service.roles.find_by_name(RoleNameDictionary.db_name(role_name))
   if role.nil?
