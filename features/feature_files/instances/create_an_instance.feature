@@ -17,7 +17,6 @@ Feature: Create an Instance
     Given I have a role of <Role> in the project
      Then I <Can or Cannot Create> an instance in the project
 
-      @mark
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Create |
         | Member          | Can Create           |
