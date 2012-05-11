@@ -31,6 +31,14 @@ Given /^The project has (\d+) instances?$/ do |number_of_instances|
   total_instances     = compute_service.ensure_project_instance_count(@project, number_of_instances)
 end
 
+
+Given /^The project has (\d+) active instances?$/ do |number_of_instances|
+  number_of_instances = number_of_instances.to_i
+  compute_service     = ComputeService.session
+  total_instances     = compute_service.ensure_active_project_instance_count(@project, number_of_instances)
+end
+
+
 Given /^I have a role of (.+) in the project$/ do |role_name|
 
   if @project.nil?
@@ -302,7 +310,7 @@ Then /^I [Cc]an [Dd]elete (?:that|the) project$/ do
 
   project =  IdentityService.session.tenants.find_by_name((@project || @project_attrs).name)
 
-  if project != nil && project.id != nil 
+  if project != nil && project.id != nil
      raise "Project #{ project.name } should be deleted. but it is"
   end
 

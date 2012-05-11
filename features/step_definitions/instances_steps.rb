@@ -9,7 +9,7 @@ Given /^The project does not have any floating IPs$/ do
   compute_service.ensure_project_floating_ip_count(@project, 0)
 end
 
-Given /^I am authorized to assign floating IPs to instances in the project$/ do
+Given /^I am authorized to (?:assign floating IPs to|reboot (?:an)) instances? in the project$/ do
   steps %{
     * I have a role of Project Manager in the project
   }
@@ -44,6 +44,48 @@ When /^I assign a floating IP to the instance$/ do
   }
 
   @floating = compute_service.ensure_floating_ip_exists(@project, instance)
+end
+
+When /^I hard reboot the instance$/ do
+  compute_service = ComputeService.session
+  @instance       = compute_service.instances.find { |i| i.state == 'ACTIVE' }
+
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * Click the #{ @project.name } project
+
+    * Click the instance menu button for instance #{ @instance.id }
+    * Click the hard reboot instance button for instance #{ @instance.id }
+    * Click the confirm instance reboot button
+  }
+end
+
+When /^I soft reboot the instance$/ do
+  compute_service = ComputeService.session
+  @instance       = compute_service.instances.find { |i| i.state == 'ACTIVE' }
+
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * Click the #{ @project.name } project
+
+    * Click the instance menu button for instance #{ @instance.id }
+    * Click the soft reboot instance button for instance #{ @instance.id }
+    * Click the confirm instance reboot button
+  }
 end
 
 #=================
@@ -112,22 +154,6 @@ Then /^I [Cc]an [Cc]reate an instance in the project$/ do
   }
 end
 
-
-
-Then /^I [Cc]annot (?:[Cc]reate|[Dd]elete) an instance in the project$/ do
-  steps %{
-    * Click the logout button if currently logged in
-
-    * Visit the login page
-    * Fill in the username field with #{ @current_user.name }
-    * Fill in the password field with #{ @current_user.password }
-    * Click the login button
-
-    * Visit the projects page
-    * The #{ @project.name } project should not be visible
-  }
-end
-
 Then /^I [Cc]an [Dd]elete an instance in the project$/ do
   compute_service = ComputeService.session
   compute_service.service.set_tenant @project
@@ -151,12 +177,53 @@ Then /^I [Cc]an [Dd]elete an instance in the project$/ do
   }
 end
 
+Then /^I [Cc]an [Rr]eboot an instance in the project$/ do
+  compute_service = ComputeService.session
+  compute_service.service.set_tenant @project
+  instance        = compute_service.instances.find { |i| i.state == 'ACTIVE' }
+
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * Click the #{ @project.name } project
+
+    * Click the instance menu button for instance #{ instance.id }
+    * Click the soft reboot instance button for instance #{ instance.id }
+    * Click the confirm instance reboot button
+
+    * The instance #{ instance.id } should be shown as rebooting
+  }
+end
+
+
+Then /^I [Cc]annot (?:[Cc]reate|[Dd]elete|[Rr]eboot) an instance in the project$/ do
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * The #{ @project.name } project should not be visible
+  }
+end
+
 Then /^the instance is publicly accessible via that floating IP$/ do
-  begin
-    Net::SSH.start(@floating.ip, 'root', password: 's3l3ct10n') do |ssh|
-      # Test connection and automatically close
-    end
-  rescue
-    raise "The instance is not publicly accessible via floating IP #{ @floating.ip }."
-  end
+  steps %{
+    * Connect to instance on #{ @floating.ip } via SSH
+  }
+end
+
+Then /^the instance will reboot$/ do
+  steps %{
+    * The instance #{ @instance.id } should be shown as rebooting
+  }
 end

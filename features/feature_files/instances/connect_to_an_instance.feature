@@ -5,7 +5,7 @@ Feature: Connect to an Instance
 
   Background:
     * A project exists in the system
-    * The project does not have any running instances
+    * The project does not have any instances
 
 
   Scenario Outline:

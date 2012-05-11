@@ -1,3 +1,4 @@
+@jira-MCF-17
 Feature: Reboot an Instance
   As a user, I want to reboot an instance so that any new updates will be
   fully installed.
@@ -10,22 +11,18 @@ Feature: Reboot an Instance
 
   Background:
     * A project exists in the system
-    * The project has a running instance
+    * The project has 1 active instance
 
 
   @permissions
   Scenario Outline: Check User Permissions
     Given I have a role of <Role> in the project
-     Then I <Can or Cannot Reboot> the instance
+     Then I <Can or Cannot Reboot> an instance in the project
 
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Reboot |
         | Member          | Can Reboot           |
-        | Admin           | Can Reboot           |
-
-      Scenarios: Unauthorized Roles
-        | Role            | Can or Cannot Reboot |
-        | (None)          | Cannot Reboot        |
+        | Project Manager | Can Reboot           |
 
 
   Scenario: Soft Reboot

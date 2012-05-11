@@ -129,7 +129,7 @@ end
 class Page
   include NodeMethods
 
-  ELEMENT_TYPES    = 'button|field|link|checkbox|form|table|span|element'
+  ELEMENT_TYPES    = 'button|field|link|checkbox|form|table|span|element|row'
   RADIO_LIST_TYPES = 'radiolist'
   CHECK_LIST_TYPES = 'checklist'
   SELECTION_TYPES  = 'selection|dropdown'
@@ -266,7 +266,7 @@ class Page
     end
 
     send :define_method, "#{ name }_#{ type }_items" do
-      send("#{ name }_#{ type }").all(:xpath, "//option")
+      send("#{ name }_#{ type }").all(:xpath, "./option")
     end
   end
 
