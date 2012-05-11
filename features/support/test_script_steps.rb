@@ -16,7 +16,8 @@ Then /^Choose the (\d+)(?:st|nd|rd|th) item in the (.+) radiolist$/ do |item_num
 end
 
 Then /^Click the logout button if currently logged in$/ do
-  @current_page ||= WebClientPage.new
+  @current_page ||= RootPage.new
+  @current_page.visit                      # This removes any modal overlay
   unless @current_page.actual_url.empty?
     @current_page.logout_button.click if @current_page.has_no_login_form?
   end
