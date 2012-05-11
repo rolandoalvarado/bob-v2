@@ -36,4 +36,10 @@ class BaseCloudService
   def initialize_service(service_type)
     @service = service_type.new(ConfigFile.cloud_credentials)
   end
+
+  def keep_trying
+    sleeping(1).seconds.between_tries.failing_after(5).tries do
+      yield
+    end
+  end
 end

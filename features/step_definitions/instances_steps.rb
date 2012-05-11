@@ -72,7 +72,7 @@ When /^I create an instance on that project based on the image (.+)$/ do |image_
     * Click the create instance button
   }
 
-  @instance = compute_service.instances.find { |i| i.name == instance_name }
+  @instance = compute_service.ensure_active_project_instance_exists(@project, instance_name)
 end
 
 When /^I hard reboot the instance$/ do
