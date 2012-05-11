@@ -120,7 +120,8 @@ class ComputeService < BaseCloudService
     running_instances = instances.select { |i| i.state == 'ACTIVE' }
     if running_instances.length != desired_count
       raise "Couldn't ensure that #{ project.name } has #{ desired_count } " +
-            "instances. Current number of running instances is #{ running_instances.length }."
+            "active instances. Current number of running instances is " +
+            "#{ running_instances.length }."
     end
 
     running_instances.length
