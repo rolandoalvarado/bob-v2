@@ -21,8 +21,10 @@ end
 
 When /^I assign a floating IP to the instance$/ do
   compute_service = ComputeService.session
-  instance        = compute_service.get_project_instance(@project)
-  compute_service.ensure_project_floating_ip_count(@project, 0)
+  compute_service.service.set_tenant @project
+
+  instance        = compute_service.instances.find { |i| i.state == 'ACTIVE' }
+  addresses       = compute_service.addresses
 
   steps %{
     * Click the logout button if currently logged in
@@ -39,11 +41,13 @@ When /^I assign a floating IP to the instance$/ do
     * Click the new floating IP allocation button
     * Current page should have the new floating IP allocation form
     * Choose the 2nd item of the pool dropdown
-    * Choose #{ instance.name } in the instance dropdown
+    * Choose the 2nd item of the instance dropdown
     * Click the create floating IP allocation button
   }
 
-  @floating = compute_service.ensure_floating_ip_exists(@project, instance)
+  addresses.reload
+  @floating = addresses.find { |a| a.instance_id == instance.id }
+  raise "No floating IP associated to instance #{ instance.name }" if @floating.nil?
 end
 
 When /^I hard reboot the instance$/ do
@@ -93,6 +97,10 @@ end
 #=================
 
 Then /^I [Cc]an [Aa]ssign a floating IP to an instance in the project$/ do
+  compute_service = ComputeService.session
+  instance        = compute_service.instances.find { |i| i.state == 'ACTIVE' }
+  num_addresses   = compute_service.addresses.count
+
   steps %{
     * Click the logout button if currently logged in
 
@@ -110,6 +118,9 @@ Then /^I [Cc]an [Aa]ssign a floating IP to an instance in the project$/ do
     * Choose the 2nd item of the pool dropdown
     * Choose the 2nd item of the instance dropdown
     * Click the create floating IP allocation button
+
+    * The floating IPs table should have #{ num_addresses + 1 } rows
+    * The floating IPs table's last row should include the text #{ instance.name } 
   }
 end
 

@@ -38,7 +38,6 @@ Given /^The project has (\d+) active instances?$/ do |number_of_instances|
   total_instances     = compute_service.ensure_active_project_instance_count(@project, number_of_instances)
 end
 
-
 Given /^I have a role of (.+) in the project$/ do |role_name|
 
   if @project.nil?
