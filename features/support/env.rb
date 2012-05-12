@@ -4,6 +4,8 @@ require 'faker'
 require 'cucumber/formatter/html'
 require 'anticipate'
 require 'pry'
+# NOTE: Look at gems.rb for other gems being required
+
 
 # Ensure that features are sorted by their filenames alphabetically
 #==================================================================
