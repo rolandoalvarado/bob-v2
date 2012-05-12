@@ -7,6 +7,7 @@ irb > image_service    = Fog::Image.new(ConfigFile.cloud_credentials)
 irb > compute_service  = Fog::Compute.new(ConfigFile.cloud_credentials)
 irb > identity_service = Fog::Identity.new(ConfigFile.cloud_credentials)
 ```
+You should now be able to interact with the OpenStack services in the target mCloud environment
 
 # Working on your local copy of MCF
 
