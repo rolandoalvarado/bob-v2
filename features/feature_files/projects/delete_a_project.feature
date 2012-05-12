@@ -13,7 +13,7 @@ Feature: Delete a project
     Given I am a <System Admin or User>
     Given I have a role of <Role> in the project
      Then I <Can or Cannot Delete> the project
-      @take
+
       Scenarios: Authorized Roles
         | Role            | System Admin or User | Can or Cannot Delete |
         | Project Manager | System Admin         | Can Delete           |
