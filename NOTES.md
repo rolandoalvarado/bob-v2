@@ -10,9 +10,9 @@ irb > identity_service = Fog::Identity.new(ConfigFile.cloud_credentials)
 
 # Working on your local copy of MCF
 
-Add wdamarillo/mcloud_features to your remote repos and nickname it as 'upstream'
+Add wdamarillo/bob to your remote repos and nickname it as 'upstream'
 
-    git remote add upstream git@bitbucket.org:wdamarillo/mcloud_features.git
+    git remote add upstream git@bitbucket.org:wdamarillo/bob.git
 
 Create a topic branch where you will commit your local work
 

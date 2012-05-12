@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-description="Verifies features everytime a change is detected in this repo"
+description="Automatically runs Bob everytime you change a file"
 
 if [ $# -eq 2 ] && [ $1 == 'describe' ]; then
   printf "  %-0$2s - $description\n" `basename $0`
@@ -9,7 +9,7 @@ elif [ $# -eq 1 ] && [ $1 == '--help' ]; then
   exit 0
 fi
 
-echo "Press Ctrl-C anytime to stop validating features"
-echo "Press Enter anytime to re-validate all features"
+echo "Press Ctrl-C anytime to stop autoexecuting Bob"
+echo "Press Enter anytime to execute Bob"
 rm -rf output/*
 bundle exec guard

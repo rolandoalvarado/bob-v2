@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-description = "Configure this copy of mcloud_features"
+description = "Configure Bob"
 
 if ARGV.length == 2 and ARGV[0] == 'describe'
   basename = File.basename(__FILE__).to_s.ljust(ARGV[1].to_i)
@@ -23,7 +23,7 @@ OptionParser.new do |opts|
     @options[:force] = v
   end
 
-  opts.on("-h", "--host HOST", "URL of the mCloud instance you want to verify") do |v|
+  opts.on("-h", "--host HOST", "Web Client URL of the mCloud instance you want to verify") do |v|
     @options[WEB_CLIENT_HOST] = v
   end
 
@@ -84,7 +84,7 @@ end
 openstack_options = @config[OPENSTACK_OPTIONS] ||= {}
 
 @config[WEB_CLIENT_HOST] = @options[WEB_CLIENT_HOST] || @config[WEB_CLIENT_HOST]
-configure @config, WEB_CLIENT_HOST, "URL of the mCloud instance you want to verify? "
+configure @config, WEB_CLIENT_HOST, "Web Client URL of the mCloud instance you want to verify? "
 cleanup_url(@config, WEB_CLIENT_HOST)
 
 openstack_options[OPENSTACK_AUTH_URL] = @options[OPENSTACK_AUTH_URL] || openstack_options[OPENSTACK_AUTH_URL] || "#{ @config[WEB_CLIENT_HOST] }:35357/v2.0/tokens"
@@ -92,7 +92,7 @@ configure openstack_options, OPENSTACK_AUTH_URL, "openstack_auth_url for #{@conf
 cleanup_url(openstack_options, OPENSTACK_AUTH_URL)
 
 openstack_options[OPENSTACK_USERNAME] = @options[OPENSTACK_USERNAME] || openstack_options[OPENSTACK_USERNAME]
-configure openstack_options, OPENSTACK_USERNAME, "cloud admin username for #{openstack_options[OPENSTACK_AUTH_URL]}? "
+configure openstack_options, OPENSTACK_USERNAME, "admin username for #{openstack_options[OPENSTACK_AUTH_URL]}? "
 
 openstack_options[OPENSTACK_API_KEY] = @options[OPENSTACK_API_KEY] || openstack_options[OPENSTACK_API_KEY]
 configure openstack_options, OPENSTACK_API_KEY , "password for #{openstack_options[OPENSTACK_USERNAME]}? "

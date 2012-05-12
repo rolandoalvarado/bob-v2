@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-description="Setup dependencies and configure mcloud_features"
+description="Setup dependencies and configure Bob"
 
 if [ $# -eq 2 ] && [ $1 == 'describe' ]; then
   printf "  %-0$2s - $description\n" `basename $0`
   exit 0
 elif [ $# -eq 1 ] && [ $1 == '--help' ]; then
   printf "Just execute \`run/`basename $0`\` without arguments\n"
-  printf "Alternatively \`run/`basename $0`\` with ENV variables WEB_CLIENT_HOST, WEB_CLIENT_USER, WEB_CLIENT_API_KEY, WEB_CLIENT_TENANT to configute mcloud_features\n"
+  printf "Alternatively \`run/`basename $0`\` with ENV variables WEB_CLIENT_HOST, WEB_CLIENT_USER, WEB_CLIENT_API_KEY, WEB_CLIENT_TENANT to configute Bob\n"
   exit 0
 fi
 

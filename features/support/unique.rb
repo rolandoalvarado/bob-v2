@@ -2,12 +2,11 @@
 # do not clash with values submitted by other instances of this suite. Consider
 # this scenario:
 #
-#   Chris is running the mcloud_features suite from his machine. While Chris is
-#   halfway through the process, Taut decides to run the suite from his own
-#   machine. Since they're both running their mcloud_features suite against the
-#   same mCloud environment, there's a high possibility that Chris machine will
-#   delete an object that Taut's machine is still using, resulting in an
-#   inaccurate error.
+#   Chris is running Bob from his machine. While Chris is halfway through the
+#   process, Taut decides to also run Bob from his own machine. Since they're
+#   both running Bob against the same mCloud environment, there's a high
+#   possibility that Chris machine will delete an object that Taut's machine
+#   is still using, resulting in an inaccurate error.
 #
 # To prevent the above scenario from happening, this module can add a random
 # prefix or suffix or both to values provided to it. The prefix and suffix are
