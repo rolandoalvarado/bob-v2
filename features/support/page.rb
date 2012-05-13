@@ -1,3 +1,69 @@
+# Page Class and Friends
+#
+# When you subclass Page, the following methods become available to your class:
+#
+# path(path_to_page)
+# ------------------
+# declares the expected path of the page
+#
+# Example: (Assume ConfigFile.web_client_url == http://mc.morphlabs.com)
+# ```
+#   class LoginPage < Page
+#     path '/login'
+#   end
+#
+#   page = LoginPage.new
+#   page.expected_path      #=> '/login'
+#   page.expected_url       #=> 'http://mc.morphlabs.com/login'
+#   page.visit              # visits 'http://mc.morphlabs.com/login'
+#   page.actual_path        #=> '/login'
+#   page.actual_path        #=> 'http://mc.morphlabs.com/login'
+#   page.has_expected_path? #=> true
+#   page.has_expected_url?  #=> true
+# ```
+#
+#
+# element(name, selector)
+# -----------------------
+# declares an element that may be found in the html of the page
+#
+# Parameters:
+#
+#   name (String) - An arbitrary name you can give the element. Spaces are allowed.
+#
+#   selector (String or Hash) - The CSS selector for the element. Optionally, you
+#     can supply a Hash object. In the Hash object, you can use the key :css or
+#     :xpath. E.g. :css => '#login-form' or :xpath => '//*[@id='login-form']
+#
+# Example:
+# ```
+#   class LoginPage < Page
+#     element 'username', '#login-form .username'
+#   end
+#
+#   page = LoginPage.new
+#   page.visit
+#   page.has_username_element?    #=> boolean
+#   page.has_no_username_element? #=> boolean
+#   page.username_element         #=> if '#username' exists in the html, returns a Node object
+# ```
+# Alternative keywords: button, field, link, checkbox, form, table, span, element
+#
+# Supplying additional selector/locator information at runtime:
+# Sometimes, part of your css selector or xpath locator can't be determine until
+# at runtime. In this case, you can add variable placeholder surrounded by angle
+# brackets in your css or xpath string and you can substitute it at runtime.
+#
+# Example:
+# ```
+#   class UsersPage < Page
+#     button 'edit user', '#user-<user_id> .edit-button'
+#   end
+#
+#   page = UsersPage.new
+#   page.visit
+#   page.edit_user_button(:user_id => @user.id).click
+
 require 'capybara'
 require 'capybara/dsl'
 require 'anticipate'
