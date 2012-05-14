@@ -43,10 +43,14 @@ When /^I assign a floating IP to the instance$/ do
     * Choose the 2nd item of the pool dropdown
     * Choose the 2nd item of the instance dropdown
     * Click the create floating IP allocation button
+
+    * The floating IPs table should have #{ addresses.count + 1 } rows
+    * The floating IPs table's last row should include the text #{ instance.name }
   }
 
   addresses.reload
-  @floating = addresses.find { |a| a.instance_id == instance.id }
+  @floating = addresses.find {|a| a.instance_id == instance.id}
+
   raise "No floating IP associated to instance #{ instance.name }" if @floating.nil?
 end
 
@@ -120,7 +124,7 @@ Then /^I [Cc]an [Aa]ssign a floating IP to an instance in the project$/ do
     * Click the create floating IP allocation button
 
     * The floating IPs table should have #{ num_addresses + 1 } rows
-    * The floating IPs table's last row should include the text #{ instance.name } 
+    * The floating IPs table's last row should include the text #{ instance.name }
   }
 end
 
@@ -228,8 +232,12 @@ Then /^I [Cc]annot (?:[Cc]reate|[Dd]elete|[Rr]eboot) an instance in the project$
 end
 
 Then /^the instance is publicly accessible via that floating IP$/ do
+  compute_service = ComputeService.session
+  compute_service.ensure_security_group_rule @project
+  public_ip = @current_page.floating_ip_row(:id => "#{ @floating.id }").find('.public-ip').text
+
   steps %{
-    * Connect to instance on #{ @floating.ip } via SSH
+    * Connect to instance on #{ public_ip } via SSH
   }
 end
 

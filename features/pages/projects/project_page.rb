@@ -46,6 +46,7 @@ class ProjectPage < WebClientPage
   dropdown  'instance',                      '#instance-id'
   button    'create floating IP allocation', '#floating-ip-allocate-modal .action-allocate'
   table     'floating IPs',                  '#floating-ip-list'
+  row       'floating IP',                   '#floating-ip-list #floating-ip-item-<id>'
 
   row       'instance',                      '#instances-template .table-list #instance-item-<id>'
 

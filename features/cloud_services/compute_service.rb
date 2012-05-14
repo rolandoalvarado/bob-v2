@@ -127,4 +127,19 @@ class ComputeService < BaseCloudService
     running_instances.length
   end
 
+  def ensure_security_group_rule(project, ip_protocol='tcp', from_port=2222, to_port=2222, cidr='0.0.0.0/0')
+    service.set_tenant project
+    security_group = service.security_groups.first
+    parent_group_id = security_group.id
+
+    # Ensure that there are no security group rule before adding anything
+    security_group.rules.each do |r|
+      service.delete_security_group_rule(r['id'])
+    end
+
+    service.create_security_group_rule(parent_group_id, ip_protocol, from_port, to_port, cidr)
+
+  rescue => e
+    raise "#{ JSON.parse(e.response.body)['badRequest']['message'] }"
+  end
 end
