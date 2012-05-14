@@ -85,6 +85,20 @@ Then /^Current page should have the correct path$/ do
   end
 end
 
+Then /^Delete the (.+) user$/ do |user_name|
+  user_name.strip!
+  @current_page.user_menu_button( name: user_name ).click
+
+  begin
+    delete_user_link = @current_page.delete_user_link( name: user_name )
+  rescue
+    raise "Expected a link to delete the user '#{ user_name }' but none was found."
+  end
+
+  delete_user_link.click
+  @current_page.delete_confirmation_button.click
+end
+
 Then /^Delete the (.+) project$/ do |project_name|
   project_name.strip!
   @current_page.project_menu_button( name: project_name ).click
@@ -189,6 +203,11 @@ Then /^The (.+) message should not be visible$/ do |span_name|
   end
 end
 
+Then /^The (.+) user should be visible$/ do |user_name|
+  unless @current_page.has_user_name_element?( name: user_name )
+    raise "The user '#{ user_name }' should be visible, but it's not."
+  end
+end
 
 Then /^The (.+) project should be visible$/ do |project_name|
   unless @current_page.has_project_name_element?( name: project_name )

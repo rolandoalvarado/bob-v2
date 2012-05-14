@@ -73,12 +73,118 @@ Given /^[Aa] user with a role of (.+) exists in the project$/ do |role_name|
   pending # express the regexp above with the code you wish you had
 end
 
+Given /^A user named (.+) exists in the system$/ do |user_name|
+  user_attrs       = CloudObjectBuilder.attributes_for(
+                       :user,
+                       :name => Unique.username(user_name)
+                     )
+  identity_service = IdentityService.session
+
+  user             = identity_service.ensure_user_exists(user_attrs)
+
+  if user.nil? or user.id.empty?
+    raise "User couldn't be initialized!"
+  end
+
+  # Make variable(s) available for use in succeeding steps
+  @user = user
+end
+
+Given /^I am authorized to delete users$/ do
+  steps %{
+    * I am a System Admin
+  }
+end
 
 #=================
 # WHENs
 #=================
 
+When /^I delete the user (.+)$/ do |user_name|
+  user_name = Unique.name(user_name).gsub(' ', '_')
+
+  steps %{
+    * Click the logout button if currently logged in
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the users page
+    * The #{ user_name } user should be visible
+
+    * Delete the #{ user_name } user
+  }
+
+end
 
 #=================
 # THENs
 #=================
+ 
+Then /^user (.+) will be deleted$/ do |user_name|
+  user_name = Unique.name(user_name).gsub(' ', '_')
+  user      = IdentityService.session.users.select { |u| u.name == user_name }.first
+
+  if user != nil && user.id != nil
+    raise "User #{ user_name } should be deleted, but is not."
+  end
+end
+
+Then /^s?he will not be able to log in$/ do 
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @user.name }
+    * Fill in the password field with #{ @user.password } 
+    * Click the login button
+
+    * Current page should be the login page
+  }
+end
+
+Then /^I [Cc]an [Dd]elete (?:that|the) user (.+)$/ do |user_name|
+  user_name = Unique.name(user_name).gsub(' ', '_')
+
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the users page
+    * The #{ @user.name } user should be visible
+
+    * Delete the #{ user_name } user
+  }
+
+  user =  IdentityService.session.tenants.find_by_name(@user.name)
+
+  if user != nil && user.id != nil
+     raise "User #{ user.name } should be deleted, but is not."
+  end
+
+end
+
+Then /^I [Cc]annot [Dd]elete (?:that|the) user (.+)$/ do |user_name|
+  user_name = Unique.name(user_name).gsub(' ', '_')
+
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the root page
+  }
+
+  if ( @current_page.has_user_page_link? )
+    raise "The user page link should not have been created, but it seems that it was."
+  end
+
+end
