@@ -139,12 +139,14 @@ class ComputeService < BaseCloudService
     end
   end
 
-  def ensure_active_project_instance_exists(project, name)
+  def ensure_project_instance_is_active(project, name)
     service.set_tenant project
     keep_trying do
       instances.reload
 
-      instance = instances.find_by_name(name)
+      instance_search = instances.select { |i| i.name == name }
+      instance = instance_search.last
+
       if instance
         if instance.state != 'ACTIVE'
           while instances.include?(instance)
@@ -163,8 +165,8 @@ class ComputeService < BaseCloudService
       end
 
       if instance.state != 'ACTIVE'
-        raise "Couldn't ensure that active instance #{ name } exists in " +
-              "#{ project.name }."
+        raise "Couldn't ensure that instance #{ name } in #{ project.name }" +
+              "is active."
       end
 
       instance
