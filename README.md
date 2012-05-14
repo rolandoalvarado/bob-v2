@@ -1,15 +1,18 @@
-Bob the mCloud QA Robot
-=======================
+Bob the mCloud QA Bot
+=====================
 ![Bob](http://dl.dropbox.com/u/1355795/bob.jpg "Bob")
 
-Bob is a tool that automatically verifies an mCloud installation against documented requirements. After verification, he generates a [business-friendly progress report](http://dl.dropbox.com/u/1355795/misc/progress_report.png).
-
-Bob is built with Cucumber, Ruby, and awesomeness. His eye is made out of a knob, and it goes to eleven.
+Bob keeps a record of product requirements and test scripts. He uses these information to auto-verify the correctness of an mCloud environment. After verification, he generates a [business-friendly progress report](http://dl.dropbox.com/u/1355795/misc/progress_report.png). Bob is built with Cucumber and Ruby. His eye is made out of a knob, and it goes to eleven.
 
 Prerequisites
 -------------
 1. [Git](http://git-scm.com)
 2. [Ruby](ruby-lang.org/) 1.9.3-p125 or higher
+
+Optional Stuff
+--------------
+
+1. [RVM](http://beginrescueend.com) (Highly recommended)
 
 Additional Prerequisites for Mac OS X
 -------------------------------------
@@ -25,7 +28,7 @@ Installation
 Usage
 -----
 
-To make Bob verify the mCloud environment you specified when you ran `run/setup`:
+To make Bob verify an mCloud environment:
 
     run/verifier
 
@@ -39,8 +42,7 @@ Updating Bob:
 
     run/updater
 
-The above command will pull the latest changes from origin/master and run
-`setup`. If you want to pull changes from another remote or branch, use:
+The above command tells Bob to fetch the latest changes from origin/master, merge it to the current branch, and execute `run/setup`. If you want Bob to fetch and merge changes from another remote or branch, use:
 
     run/updater <remote_repo_name> <remote_branch_name>
 
@@ -63,7 +65,7 @@ Contributing
 __NOTE:__ If you just plan on contributing to the .feature files every now
 and then, you may skip this section and write .feature files directly.
 Afterwards, email it to me and I will commit your file for you. If you plan on
-contributing on an ongoing basis, we highly recommend you follow this process.
+contributing on an ongoing basis, I highly recommend you follow this process.
 
 1. Fork `https://bitbucket.org/wdamarillo/bob`
 2. Create a branch for whatever it is you plan to do. ALWAYS create a branch so that when there are changes in wdamarillo/master, you only need to rebase your local branch and keep your commits in order. Also, this allows you to squash multiple commits into one before submitting a pull request.

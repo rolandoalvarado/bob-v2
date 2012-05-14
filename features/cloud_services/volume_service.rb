@@ -19,17 +19,7 @@ class VolumeService < BaseCloudService
   def ensure_volume_count(project, desired_count)
     set_tenant(project)
     @volumes = service.list_volumes.body['volumes']
-
-    if(@volumes.count > desired_count)
-      try_fixing_volume_count(project, desired_count) do
-        service.delete_volume(@volumes.pop['id'])
-      end
-    elsif(@volumes.count < desired_count)
-      try_fixing_volume_count(project, desired_count) do
-        create_volume
-      end
-    end
-
+    try_fixing_volume_count(project, desired_count)
     true
   end
 
@@ -48,9 +38,17 @@ private
   def try_fixing_volume_count(project, desired_count)
     sleeping(2).seconds.between_tries.failing_after(10).tries do
       difference = (@volumes.count - desired_count).abs
-      difference.times do
-        yield(project, desired_count)
+
+      if(@volumes.count > desired_count)
+        difference.times do
+          service.delete_volume(@volumes.pop['id'])
+        end
+      elsif(@volumes.count < desired_count)
+        difference.times do
+          create_volume
+        end
       end
+
       assert_volume_count(project, desired_count)
     end
   end
