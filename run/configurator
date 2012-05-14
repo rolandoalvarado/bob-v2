@@ -43,7 +43,7 @@ OptionParser.new do |opts|
     @options[OPENSTACK_TENANT] = v
   end
 
-  opts.on("-d", "--driver DRIVER", "Cabybara drivers: selenium, poltergeist") do |v|
+  opts.on("-d", "--driver DRIVER", "Cabybara drivers: selenium, webkit, poltergeist") do |v|
     @options[CAPYBARA_DRIVER] = v
   end
 

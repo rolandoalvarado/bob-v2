@@ -11,7 +11,6 @@ elif [ $# -eq 1 ] && [ $1 == '--help' ]; then
 fi
 
 ruby_string="ruby 1.9.3"
-phantomjs_string="1.5.0"
 
 if ruby --version | grep -q "${ruby_string}" ; then
   echo "${ruby_string} found!"
@@ -21,24 +20,25 @@ else
   exit 1
 fi
 
-if phantomjs --version | grep -q "${phantomjs_string}" ; then
-  echo "PhantomJS ${phantomjs_string} found!"
-else
-  echo "PhantomJS ${phantomjs_string} not found."
-fi
-
-
 if bundle --version | grep "Bundler version"; then
   echo "Bundler gem found!"
 else
   echo "Installing Bundler gem..."
   gem install bundler
 fi
+
+
+if qmake --version | grep "QMake version" ; then
+  echo "Webkit found"
+else
+  echo "No installed QT library"
+  echo "Please install using: brew install qt"
+fi
 bundle update
 
 if [ "${WEB_CLIENT_HOST}" ]; then
   echo "Using ENV options for configuration... "
-  run/configurator --host $WEB_CLIENT_HOST --username $WEB_CLIENT_USER --password $WEB_CLIENT_API_KEY --tenant $WEB_CLIENT_TENANT
+  run/configurator --host $WEB_CLIENT_HOST --username $WEB_CLIENT_USER --password $WEB_CLIENT_API_KEY --tenant $WEB_CLIENT_TENANT  --driver $CAPYBARA_DRIVER
 else
   run/configurator
 fi

@@ -8,6 +8,7 @@ Prerequisites
 -------------
 1. [Git](http://git-scm.com)
 2. [Ruby](ruby-lang.org/) 1.9.3-p125 or higher
+3. [QT](http://qt.nokia.com/products/)
 
 Optional Stuff
 --------------
@@ -21,9 +22,10 @@ Additional Prerequisites for Mac OS X
 
 Installation
 ------------
-1. `git clone git@bitbucket.org:wdamarillo/bob.git`
-2. `cd bob`
-3. `run/setup`
+1. `brew install qt`
+2. `git clone git@bitbucket.org:wdamarillo/bob.git`
+3. `cd bob`
+4. `run/setup`
 
 Usage
 -----
