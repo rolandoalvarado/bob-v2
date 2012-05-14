@@ -237,37 +237,37 @@ class Page
   def self.register_element(name, type, options)
     if options.class == Hash && options.has_key?(:xpath)
       send :define_method, "#{ name }_#{ type }" do |vars = {}|
-        selector = options[:xpath]
+        selector = options[:xpath].clone
         vars.each { |k, v| selector.gsub!("<#{ k }>", v) }
         find_by_xpath selector
       end
 
       send :define_method, "has_#{ name }_#{ type }?" do |vars = {}|
-        selector = options[:xpath]
+        selector = options[:xpath].clone
         vars.each { |k, v| selector.gsub!("<#{ k }>", v) }
         has_xpath? selector
       end
 
       send :define_method, "has_no_#{ name }_#{ type }?" do |vars = {}|
-        selector = options[:xpath]
+        selector = options[:xpath].clone
         vars.each { |k, v| selector.gsub!("<#{ k }>", v) }
         has_no_xpath? selector
       end
     elsif options.class == String || (options.class == Hash && options.has_key?(:css))
       send :define_method, "#{ name }_#{ type }" do |vars = {}|
-        selector = (options.class == String ? options : options[:css])
+        selector = (options.class == String ? options : options[:css]).clone
         vars.each { |k, v| selector.gsub!("<#{ k }>", v) }
         find selector
       end
 
       send :define_method, "has_#{ name }_#{ type }?" do |vars = {}|
-        selector = (options.class == String ? options : options[:css])
+        selector = (options.class == String ? options : options[:css]).clone
         vars.each { |k, v| selector.gsub!("<#{ k }>", v) }
         has_css_selector? selector
       end
 
       send :define_method, "has_no_#{ name }_#{ type }?" do |vars = {}|
-        selector = (options.class == String ? options : options[:css])
+        selector = (options.class == String ? options : options[:css]).clone
         vars.each { |k, v| selector.gsub!("<#{ k }>", v) }
         has_no_css_selector? selector
       end
@@ -279,12 +279,12 @@ class Page
   def self.register_radiolist(name, type, options)
     if options.class == Hash && options.has_key?(:xpath)
       send :define_method, "#{ name }_#{ type }" do
-        selector = options[:xpath]
+        selector = options[:xpath].clone
         find_by_xpath selector
       end
     elsif options.class == String || (options.class == Hash && options.has_key?(:css))
       send :define_method, "#{ name }_#{ type }" do
-        selector = (options.class == String ? options : options[:css])
+        selector = (options.class == String ? options : options[:css]).clone
         find selector
       end
     else
@@ -299,12 +299,12 @@ class Page
   def self.register_checklist(name, type, options)
     if options.class == Hash && options.has_key?(:xpath)
       send :define_method, "#{ name }_#{ type }" do
-        selector = options[:xpath]
+        selector = options[:xpath].clone
         find_by_xpath selector
       end
     elsif selector = (options.class == String ? options : options[:css])
       send :define_method, "#{ name }_#{ type }" do
-        selector = (options.class == String ? options : options[:css])
+        selector = (options.class == String ? options : options[:css]).clone
         find selector
       end
     else
@@ -319,12 +319,12 @@ class Page
   def self.register_selection(name, type, options)
     if options.class == Hash && options.has_key?(:xpath)
       send :define_method, "#{ name }_#{ type }" do
-        selector = options[:xpath]
+        selector = options[:xpath].clone
         find_by_xpath selector
       end
     elsif selector = (options.class == String ? options : options[:css])
       send :define_method, "#{ name }_#{ type }" do
-        selector = (options.class == String ? options : options[:css])
+        selector = (options.class == String ? options : options[:css]).clone
         find selector
       end
     else
