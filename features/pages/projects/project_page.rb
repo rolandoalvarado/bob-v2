@@ -48,12 +48,15 @@ class ProjectPage < WebClientPage
   table     'floating IPs',                  '#floating-ip-list'
 
   row       'instance',                      '#instances-template .table-list #instance-item-<id>'
+  
+  element   'console output',                '#logsModal'
 
   # These buttons are accessible via 'Click the <name> button for instance <instance id>'
   button    'instance menu',                 "#instance-item-<id> .dropdown-toggle"
   button    'delete instance',               "#instance-item-<id> .destroy"
   button    'soft reboot instance',          "#instance-item-<id> .soft-reboot"
   button    'hard reboot instance',          "#instance-item-<id> .hard-reboot"
+  button    'view console output',           "#instance-item-<id> .logs"
 
   button    'confirm instance deletion',     '#alert-template .okay'
   button    'confirm instance reboot',       "#alert-template .okay"

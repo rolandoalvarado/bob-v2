@@ -85,6 +85,12 @@ Then /^Current page should have the correct path$/ do
   end
 end
 
+Then /^Current page should show the instance's console output$/ do
+  unless @current_page.has_console_output_element?
+    raise "Current page doesn't show the instance's console output."
+  end
+end
+
 Then /^Delete the (.+) project$/ do |project_name|
   project_name.strip!
   @current_page.project_menu_button( name: project_name ).click
