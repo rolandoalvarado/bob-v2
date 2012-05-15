@@ -46,16 +46,22 @@ Then /^Click the (.+) project$/ do |project_name|
   @current_page = ProjectPage.new
 end
 
+Then /^Click the (.+) image$/ do |image_name|
+  @current_page.image_element( name: image_name.strip ).click
+end
+
 Then /^Connect to instance on (.+) via (.+)$/ do |ip_address, remote_client|
-  case remote_client.upcase
-  when 'SSH'
-    begin
+  begin
+    case remote_client.upcase
+    when 'RDP'
+      %x{ rdesktop #{ ip_address } -u Administrator -p s3l3ct10n }
+    when 'SSH'
       Net::SSH.start(ip_address, 'root', password: 's3l3ct10n', port: 2222) do |ssh|
         # Test connection and automatically close
       end
-    rescue
-      raise "The instance is not publicly accessible via IP #{ ip_address }."
     end
+  rescue
+    raise "The instance is not publicly accessible on #{ ip_address } via #{ remote_client }."
   end
 end
 
@@ -112,8 +118,8 @@ Then /^Ensure that a user with username (.+) and password (.+) exists$/ do |user
   username           = Unique.username(username)
   @user_attrs        = CloudObjectBuilder.attributes_for(:user, :name => username, :password => password)
   @user_attrs[:name] = Unique.username(@user_attrs[:name])
-
   @user = IdentityService.instance.ensure_user_exists(@user_attrs)
+  EnvironmentCleaner.register(:user, @user.id)
 end
 
 

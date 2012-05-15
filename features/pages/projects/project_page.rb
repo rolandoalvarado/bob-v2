@@ -58,4 +58,6 @@ class ProjectPage < WebClientPage
 
   button    'confirm instance deletion',     '#alert-template .okay'
   button    'confirm instance reboot',       "#alert-template .okay"
+
+  element   'image', xpath: "//*[@id='instances-list']//label[text()='<name>']"
 end

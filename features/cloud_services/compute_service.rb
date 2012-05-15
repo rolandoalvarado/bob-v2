@@ -10,11 +10,15 @@ class ComputeService < BaseCloudService
     @instances = service.servers
   end
 
-  def create_instance_in_project(project)
+  def create_instance_in_project(project, attributes={})
+    attributes[:name]   ||= Faker::Name.name
+    attributes[:image]  ||= service.images[0].id
+    attributes[:flavor] ||= service.flavors[0].id
+
     service.create_server(
-      Faker::Name.name,
-      service.images[0].id,
-      service.flavors[0].id,
+      attributes[:name],
+      attributes[:image],
+      attributes[:flavor],
       {
         'tenant_id'      => project.id,
         'key_name'       => service.key_pairs[0].name,
@@ -22,109 +26,168 @@ class ComputeService < BaseCloudService
         'user_id'        => service.current_user['id']
       }
     )
+
+    service.servers.find { |s| s.name == attributes[:name] }
   rescue
     raise "Couldn't initialize instance in #{ project.name }"
   end
 
+  def delete_instances_in_project(project)
+    deleted_instances = []
+    service.set_tenant project
+    instances.reload
+
+    if project_instances = instances.find_all{ |i| i.tenant_id == project.id }
+      project_instances.each do |instance|
+        deleted_instances << { name: instance.name, id: instance.id }
+        service.delete_server(instance.id)
+      end
+    end
+
+    service.set_tenant 'admin'
+    deleted_instances
+  end
+
+
   def ensure_project_floating_ip_count(project, desired_count)
     service.set_tenant project
-    addresses.reload
-    actual_count = addresses.count
-
-    if desired_count > actual_count
-
-      how_many = desired_count - actual_count
-      how_many.times do |n|
-        service.allocate_address
-      end
+    keep_trying do
       addresses.reload
+      actual_count = addresses.count
 
-    elsif desired_count < addresses.length
+      if desired_count > actual_count
 
-      while addresses.length > desired_count
+        how_many = desired_count - actual_count
+        how_many.times do |n|
+          service.allocate_address
+        end
         addresses.reload
-        addresses[0].destroy rescue nil
+
+      elsif desired_count < addresses.length
+
+        while addresses.length > desired_count
+          addresses.reload
+          addresses[0].destroy rescue nil
+        end
+
       end
 
-    end
+      if addresses.length != desired_count
+        raise "Couldn't ensure that #{ project.name } has #{ desired_count } " +
+              "floating IPs. Current number of floating IPs is #{ addresses.length }."
+      end
 
-    if addresses.length != desired_count
-      raise "Couldn't ensure that #{ project.name } has #{ desired_count } " +
-            "floating IPs. Current number of floating IPs is #{ addresses.length }."
+      addresses.length
     end
-
-    addresses.length
   end
 
   def ensure_project_instance_count(project, desired_count)
     service.set_tenant project
-    instances.reload
-    actual_count = instances.count
-
-    if desired_count > actual_count
-
-      how_many = desired_count - actual_count
-      how_many.times do |n|
-        create_instance_in_project(project)
-      end
+    keep_trying do
       instances.reload
+      actual_count = instances.count
 
-    elsif desired_count < instances.length
+      if desired_count > actual_count
 
-      while instances.length > desired_count
-        instances.reload
-        begin
-          instances[0].destroy
-        rescue
+        how_many = desired_count - actual_count
+        how_many.times do |n|
+          create_instance_in_project(project)
         end
+        instances.reload
+
+      elsif desired_count < instances.length
+
+        while instances.length > desired_count
+          instances.reload
+          begin
+            instances[0].destroy
+          rescue
+          end
+        end
+
       end
 
-    end
+      if instances.length != desired_count
+        raise "Couldn't ensure that #{ project.name } has #{ desired_count } " +
+              "instances. Current number of instances is #{ instances.length }."
+      end
 
-    if instances.length != desired_count
-      raise "Couldn't ensure that #{ project.name } has #{ desired_count } " +
-            "instances. Current number of instances is #{ instances.length }."
+      instances.length
     end
-
-    instances.length
   end
 
   def ensure_active_project_instance_count(project, desired_count)
     service.set_tenant project
-    instances.reload
-    running_instances = instances.select { |i| i.state == 'ACTIVE' }
-    actual_count = running_instances.count
+    keep_trying do
+      instances.reload
+      running_instances = instances.select { |i| i.state == 'ACTIVE' }
+      actual_count = running_instances.count
 
-    if desired_count > actual_count
+      if desired_count > actual_count
 
-      how_many = desired_count - actual_count
-      how_many.times do |n|
-        create_instance_in_project(project)
+        how_many = desired_count - actual_count
+        how_many.times do |n|
+          create_instance_in_project(project)
+        end
+        instances.reload
+
+      elsif desired_count < running_instances.length
+
+        while running_instances.length > desired_count
+          instances.reload
+          running_instances = instances.select { |i| i.state == 'ACTIVE' }
+
+          begin
+            running_instances[0].destroy
+          rescue
+          end
+        end
+
       end
+
+      running_instances = instances.select { |i| i.state == 'ACTIVE' }
+      if running_instances.length != desired_count
+        raise "Couldn't ensure that #{ project.name } has #{ desired_count } " +
+              "active instances. Current number of running instances is " +
+              "#{ running_instances.length }."
+      end
+
+      running_instances.length
+    end
+  end
+
+  def ensure_project_instance_is_active(project, name)
+    service.set_tenant project
+    keep_trying do
       instances.reload
 
-    elsif desired_count < running_instances.length
+      instance_search = instances.select { |i| i.name == name }
+      instance = instance_search.last
 
-      while running_instances.length > desired_count
-        instances.reload
-        running_instances = instances.select { |i| i.state == 'ACTIVE' }
+      if instance
+        if instance.state != 'ACTIVE'
+          while instances.include?(instance)
+            instances.reload
+            instance.destroy rescue nil
+          end
 
-        begin
-          running_instances[0].destroy
-        rescue
+          instance = create_instance_in_project(project, { name:   instance.name,
+                                                           image:  instance.image['id'],
+                                                           flavor: instance.flavor['id'] })
         end
+      else
+        instance = create_instance_in_project(project, { name:   instance.name,
+                                                         image:  instance.image['id'],
+                                                         flavor: instance.flavor['id'] })
       end
 
-    end
+      if instance.state != 'ACTIVE'
+        raise "Couldn't ensure that instance #{ name } in #{ project.name }" +
+              "is active."
+      end
 
-    running_instances = instances.select { |i| i.state == 'ACTIVE' }
-    if running_instances.length != desired_count
-      raise "Couldn't ensure that #{ project.name } has #{ desired_count } " +
-            "active instances. Current number of running instances is " +
-            "#{ running_instances.length }."
+      instance
     end
-
-    running_instances.length
   end
 
   def ensure_security_group_rule(project, ip_protocol='tcp', from_port=2222, to_port=2222, cidr='0.0.0.0/0')

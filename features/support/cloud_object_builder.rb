@@ -46,7 +46,7 @@ class BetterHash < Hash
     if has_key?(name)
       self[name]
     else
-        super
+        super name, *args, &block
     end
   end
 end
