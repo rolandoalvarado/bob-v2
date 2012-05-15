@@ -112,7 +112,7 @@ When /^I create a project with attributes (.*), (.*)$/ do |name, desc|
             :description => desc
           )
 
-  IdentityService.session.delete_tenant(attrs)
+  IdentityService.session.ensure_project_does_not_exist(attrs)
 
   steps %{
     * Click the logout button if currently logged in
@@ -169,7 +169,7 @@ When /^I create a project$/ do
             :name => Unique.name('project')
           )
 
-  IdentityService.session.delete_tenant(attrs)
+  IdentityService.session.ensure_project_does_not_exist(attrs)
 
   steps %{
     * Click the logout button if currently logged in
