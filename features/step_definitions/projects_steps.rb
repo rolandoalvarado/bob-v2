@@ -130,6 +130,10 @@ When /^I create a project with attributes (.*), (.*)$/ do |name, desc|
     * Click the save project button
   }
 
+  # Register created project for post-test deletion
+  created_project = IdentityService.session.find_project_by_name(attrs.name)
+  EnvironmentCleaner.register(:project, created_project.id) if created_project
+
   # Make the project name available to subsequent steps
   @project_attrs = attrs
 end
@@ -157,6 +161,10 @@ When /^I edit the project.s attributes to (.*), (.*)$/ do |name, desc|
     * Fill in the project description field with #{ attrs.description }
     * Click the modify project button
   }
+
+  # Register created project for post-test deletion
+  created_project = IdentityService.session.find_project_by_name(attrs.name)
+  EnvironmentCleaner.register(:project, created_project.id) if created_project
 
   # Make the project name available to subsequent steps
   @project_attrs = attrs
@@ -186,6 +194,10 @@ When /^I create a project$/ do
     * Fill in the project description field with #{ attrs.description }
     * Click the save project button
   }
+
+  # Register created project for post-test deletion
+  created_project = IdentityService.session.find_project_by_name(attrs.name)
+  EnvironmentCleaner.register(:project, created_project.id) if created_project
 
   # Make the project name available to subsequent steps
   @project_attrs = attrs
@@ -261,7 +273,7 @@ Then /^I Can Create a project$/ do
 
   # Register created project for post-test deletion
   created_project = IdentityService.session.find_project_by_name(attrs.name)
-  EnvironmentCleaner.register(:project, created_project.id)
+  EnvironmentCleaner.register(:project, created_project.id) if created_project
 
   # Make project attributes available to subsequent steps
   @project_attrs = attrs
