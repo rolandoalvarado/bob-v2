@@ -70,6 +70,12 @@ class IdentityService < BaseCloudService
     user.destroy
   end
 
+  def ensure_tenant_does_not_exist(attributes)
+    if tenant = tenants.find_by_name(attributes[:name])
+      delete_tenant(tenant)
+    end
+  end
+
   def ensure_tenant_exists(attributes)
     attributes        = CloudObjectBuilder.attributes_for(:tenant, attributes)
     attributes[:name] = Unique.name(attributes[:name], 25)
@@ -113,6 +119,10 @@ class IdentityService < BaseCloudService
     end
     user.password = attributes[:password]
     user
+  end
+
+  def find_tenant_by_name(name)
+    tenants.find_by_name(name)
   end
 
   def revoke_all_user_roles(user, tenant)

@@ -236,10 +236,9 @@ end
 Then /^I Can Create a project$/ do
   attrs = CloudObjectBuilder.attributes_for(
             :project,
-            :name => Unique.name('project')
+            :name => Unique.name('projext_x')
           )
-
-  IdentityService.session.delete_tenant(attrs)
+  IdentityService.session.ensure_project_does_not_exist(attrs)
 
   steps %{
     * Click the logout button if currently logged in
@@ -259,6 +258,12 @@ Then /^I Can Create a project$/ do
     * Visit the projects page
     * The #{ attrs.name } project should be visible
   }
+
+  # Register created project for post-test deletion
+  created_project = IdentityService.session.find_project_by_name(attrs.name)
+  EnvironmentCleaner.register(:project, created_project.id)
+
+  # Make project attributes available to subsequent steps
   @project_attrs = attrs
 end
 
