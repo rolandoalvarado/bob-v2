@@ -44,7 +44,8 @@ Feature: Create an Instance
         | (Any)  | My Server   | (Any)  | (Any)   | (None)         | Not Created    | Instance should have at least one security group |
 
       Scenarios: Specific Images
-        | Image                 | Name        | Flavor | Keypair | Security Group | Created or Not |
-        | Windows2008-R2-server | My Server   | (Any)  | (Any)   | (Any)          | Created        |
-        | CentOS 5.8            | My Server   | (Any)  | (Any)   | (Any)          | Created        |
-        | Ubuntu 10.04 (lucid)  | My Server   | (Any)  | (Any)   | (Any)          | Created        |
+        | Image                  | Name        | Flavor | Keypair | Security Group | Created or Not |
+        | Windows2008 R2 Server  | My Server   | (Any)  | (Any)   | (Any)          | Created        |
+        | CentOS 5.8             | My Server   | (Any)  | (Any)   | (Any)          | Created        |
+        | Ubuntu 10.04 (Lucid)   | My Server   | (Any)  | (Any)   | (Any)          | Created        |
+        | Ubuntu 12.04 (Precise) | My Server   | (Any)  | (Any)   | (Any)          | Created        |
