@@ -78,24 +78,26 @@ class EnvironmentCleaner
       next if project.nil? || project.name == 'admin'
       puts "  #{ project.name }..."
 
-      puts "    Deleting instances..."
-      deleted_instances = @compute_service.delete_instances_in_project(project)
-      deleted_instances.each do |instance|
-        puts "      DELETED: #{ instance[:name] } (id: #{ instance[:id] })"
-      end
+      begin
+        puts "    Deleting instances..."
+        deleted_instances = @compute_service.delete_instances_in_project(project)
+        deleted_instances.each do |instance|
+          puts "      DELETED: #{ instance[:name] } (id: #{ instance[:id] })"
+        end
 
-      puts "    Deleting volumes..."
-      deleted_volumes = @volume_service.delete_volumes_in_project(project)
-      deleted_volumes.each do |volume|
-        puts "      DELETED: #{ volume[:name] } (id: #{ volume[:id] })"
-      end
+        puts "    Deleting volumes..."
+        deleted_volumes = @volume_service.delete_volumes_in_project(project)
+        deleted_volumes.each do |volume|
+          puts "      DELETED: #{ volume[:name] } (id: #{ volume[:id] })"
+        end
 
-      puts "    Deleting #{ project.name }..."
-      @identity_service.delete_project(project)
+        puts "    Deleting #{ project.name }..."
+        @identity_service.delete_project(project)
+      rescue Exception => e
+        puts "\033[0;33m  ERROR: #{ project.name } could not be deleted. The error returned was: " +
+             e.inspect + "\033[m"
+      end
     end
-  rescue Exception => e
-    puts "\033[0;33m  WARNING: 1 or more projects could not be deleted. The error returned was: " +
-         e.inspect + "\033[m"
   end
 
   def delete_test_users
@@ -107,13 +109,15 @@ class EnvironmentCleaner
     user_ids.uniq.each do |user_id|
       user = @identity_service.users.reload.find { |u| u.id == user_id }
       next if user.nil? || user.name == 'admin'
-
       puts "  #{ user.name }..."
-      @identity_service.delete_user(user)
+
+      begin
+        @identity_service.delete_user(user)
+      rescue Exception => e
+        puts "\033[0;33m  ERROR: #{ user.name } could not be deleted. The error returned was: " +
+             e.inspect + "\033[m"
+      end
     end
-  rescue Exception => e
-    puts "\033[0;33m  WARNING: 1 or more users could not be deleted. The error returned was: " +
-         e.inspect + "\033[m"
   end
 
 end
