@@ -37,8 +37,11 @@ class BaseCloudService
     @service = service_type.new(ConfigFile.cloud_credentials)
   end
 
-  def keep_trying
-    sleeping(1).seconds.between_tries.failing_after(5).tries do
+  def keep_trying(options={})
+    wait = (options[:wait] || 1).to_i
+    max  = (options[:max] || 5).to_i
+
+    sleeping(wait).seconds.between_tries.failing_after(max).tries do
       yield
     end
   end

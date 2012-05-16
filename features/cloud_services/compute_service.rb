@@ -120,39 +120,44 @@ class ComputeService < BaseCloudService
     service.set_tenant project
     keep_trying do
       instances.reload
-      running_instances = instances.select { |i| i.state == 'ACTIVE' }
-      actual_count = running_instances.count
 
-      if desired_count > actual_count
+      active_instances      = instances.select { |i| i.state == 'ACTIVE' }
+      building_instances    = instances.select { |i| i.state == 'BUILDING' }
+      actual_active_count   = active_instances.count
+      actual_building_count = building_instances.count
 
-        how_many = desired_count - actual_count
-        how_many.times do |n|
-          create_instance_in_project(project)
-        end
-        instances.reload
+      if desired_count > actual_active_count
 
-      elsif desired_count < running_instances.length
-
-        while running_instances.length > desired_count
-          instances.reload
-          running_instances = instances.select { |i| i.state == 'ACTIVE' }
-
-          begin
-            running_instances[0].destroy
-          rescue
+        if actual_building_count > 0
+          expected_finished_count = desired_count - (actual_active_count - actual_building_count).abs
+          check_building_project_instance_progress(building_instances, expected_finished_count)
+        else
+          how_many = desired_count - actual_active_count
+          how_many.times do |n|
+            create_instance_in_project(project)
           end
+          instances.reload
+        end
+
+      elsif desired_count < actual_active_count
+
+        while actual_active_count > desired_count
+          instances.reload
+          active_instances = instances.select { |i| i.state == 'ACTIVE' }
+
+          active_instances[0].destroy rescue nil
         end
 
       end
 
-      running_instances = instances.select { |i| i.state == 'ACTIVE' }
-      if running_instances.length != desired_count
+      active_instances = instances.select { |i| i.state == 'ACTIVE' }
+      if active_instances.length != desired_count
         raise "Couldn't ensure that #{ project.name } has #{ desired_count } " +
-              "active instances. Current number of running instances is " +
-              "#{ running_instances.length }."
+              "active instances. Current number of active instances is " +
+              "#{ active_instances.length }."
       end
 
-      running_instances.length
+      active_instances.length
     end
   end
 
@@ -205,4 +210,17 @@ class ComputeService < BaseCloudService
   rescue => e
     raise "#{ JSON.parse(e.response.body)['badRequest']['message'] }"
   end
+
+  private
+
+  def check_building_project_instance_progress(instances, expected_count)
+    keep_trying(wait: 5.seconds) do
+      count = instances.count { |i| i.state == 'ACTIVE' }
+      if count < expected_count
+        raise "Instances are taking too long to build! " +
+              "Expected #{ expected_count } building instances to be active."
+      end
+    end
+  end
+
 end
