@@ -49,6 +49,7 @@ class ProjectPage < WebClientPage
   row       'floating IP',                   '#floating-ip-list #floating-ip-item-<id>'
 
   row       'instance',                      '#instances-template .table-list #instance-item-<id>'
+  form      'resize instance',               '#resize-instance-modal'
 
   element   'console output',                '#logsModal'
 
@@ -57,10 +58,12 @@ class ProjectPage < WebClientPage
   button    'delete instance',               "#instance-item-<id> .destroy"
   button    'soft reboot instance',          "#instance-item-<id> .soft-reboot"
   button    'hard reboot instance',          "#instance-item-<id> .hard-reboot"
+  button    'resize instance',               "#instance-item-<id> .resize"
   button    'view console output',           "#instance-item-<id> .logs"
 
   button    'confirm instance deletion',     '#alert-template .okay'
   button    'confirm instance reboot',       "#alert-template .okay"
+  button    'confirm instance resize',       "#resize-instance-modal .action-resize-instance"
 
   element   'image', xpath: "//*[@id='instances-list']//label[text()='<name>']"
 end

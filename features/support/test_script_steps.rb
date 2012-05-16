@@ -123,6 +123,19 @@ Then /^Delete the (.+) project$/ do |project_name|
 
 end
 
+Then /^Drag the instance flavor slider to a different flavor$/ do
+  @current_page.execute_script %{
+    var slider = $('#flavor-slider'),
+      value = slider.slider('option', 'value'),
+      min = slider.slider('option', 'min'),
+      max = slider.slider('option', 'max');
+
+    // change value to min or max
+    if(value > min) { slider.slider('option', 'value', min); }
+    else if(value < max) { slider.slider('option', 'value', max); }
+  }
+end
+
 Then /^Edit the (.+) project$/ do |project_name|
   project_name.strip!
   @current_page.project_menu_button( name: project_name ).click
@@ -194,6 +207,15 @@ Then /^The instance (.+) should be shown as rebooting$/ do |instance_id|
   sleeping(1).seconds.between_tries.failing_after(5).tries do
     unless @current_page.instance_row( id: instance_id ).find('.task').has_content?('rebooting')
       raise "Instance #{ instance_id } is not shown as rebooting."
+    end
+  end
+end
+
+Then /^The instance (.+) should not have flavor (.+)$/ do |instance_id, flavor_name|
+  sleeping(1).seconds.between_tries.failing_after(5).tries do
+    if @current_page.instance_row( id: instance_id ).find('.flavor').has_content?(flavor_name)
+      raise "Expected flavor of instance #{ instance_id } to change. " +
+            "Current flavor is #{ flavor_name }."
     end
   end
 end

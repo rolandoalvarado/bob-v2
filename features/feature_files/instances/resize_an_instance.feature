@@ -1,3 +1,4 @@
+@jira-MCF-18
 Feature: Resize an Instance
   As a user, I want to resize an instance so that I can adjust its capacity
   according to its resource demands.
@@ -12,8 +13,8 @@ Feature: Resize an Instance
 
   Background:
     * A project exists in the system
-    * The project has a running instance
-    * The project has more than one instance flavor
+    * The project has 1 active instance
+    * The project has more than 1 instance flavor
 
 
   @permissions
@@ -24,11 +25,7 @@ Feature: Resize an Instance
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Resize |
         | Member          | Can Resize           |
-        | Admin           | Can Resize           |
-
-      Scenarios: Unauthorized Roles
-        | Role            | Can or Cannot Resize |
-        | (None)          | Cannot Resize        |
+        | Project Manager | Can Resize           |
 
 
   Scenario: Resize an Instance

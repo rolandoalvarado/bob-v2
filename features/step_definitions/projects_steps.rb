@@ -38,6 +38,16 @@ Given /^The project has (\d+) active instances?$/ do |number_of_instances|
   total_instances     = compute_service.ensure_active_project_instance_count(@project, number_of_instances)
 end
 
+Given /^The project has more than (\d+) instance flavors?$/ do |number_of_flavors|
+  number_of_flavors = number_of_flavors.to_i
+  compute_service   = ComputeService.session
+  compute_service.service.set_tenant @project
+
+  unless compute_service.flavors.count > number_of_flavors
+    raise "Project does not have more than #{ number_of_flavors } flavors."
+  end
+end
+
 Given /^I have a role of (.+) in the project$/ do |role_name|
 
   if @project.nil?
