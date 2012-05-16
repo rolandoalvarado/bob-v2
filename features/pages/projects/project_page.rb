@@ -1,4 +1,4 @@
-require_relative '../web_client_page'
+require_relative '../secure_page'
 
 class ProjectPage < WebClientPage
   path '/projects'
@@ -49,7 +49,7 @@ class ProjectPage < WebClientPage
   row       'floating IP',                   '#floating-ip-list #floating-ip-item-<id>'
 
   row       'instance',                      '#instances-template .table-list #instance-item-<id>'
-  
+
   element   'console output',                '#logsModal'
 
   # These buttons are accessible via 'Click the <name> button for instance <instance id>'

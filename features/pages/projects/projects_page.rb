@@ -1,4 +1,4 @@
-require_relative '../web_client_page'
+require_relative '../secure_page'
 
 class ProjectsPage < WebClientPage
   path '/projects'
