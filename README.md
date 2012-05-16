@@ -1,8 +1,15 @@
-Bob the mCloud QA Bot
-=====================
+Bob the mCloud Bot
+==================
 ![Bob](http://dl.dropbox.com/u/1355795/bob.jpg "Bob")
 
-Bob keeps a record of product requirements and test scripts. He uses these information to auto-verify the correctness of an mCloud environment. After verification, he generates a [business-friendly progress report](http://dl.dropbox.com/u/1355795/misc/progress_report.png). Bob is built with Cucumber and Ruby. His eye is made out of a knob, and it goes to eleven.
+Bob is the central repository for mCloud business requirements. It is used by:
+
+* PPC to record product requirements
+* Engineering to understand what to implement
+* QA to auto-verify an mCloud environment, and
+* Documentation to keep track of what features are supported by mCloud.
+
+Bob is built with Cucumber and Ruby. His eye is made out of a knob, and it goes to eleven.
 
 Prerequisites
 -------------

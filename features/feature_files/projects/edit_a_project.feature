@@ -1,4 +1,4 @@
-@MCF-26
+@jira-MCF-26
 Feature: Edit a Project
   As an authorized user, I want to edit a project's details
 

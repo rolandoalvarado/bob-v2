@@ -6,6 +6,7 @@ irb > require File.expand_path('features/support/cloud_configuration.rb')
 irb > image_service    = Fog::Image.new(ConfigFile.cloud_credentials)
 irb > compute_service  = Fog::Compute.new(ConfigFile.cloud_credentials)
 irb > identity_service = Fog::Identity.new(ConfigFile.cloud_credentials)
+irb > volume_service   = Fog::Volume.new(ConfigFile.cloud_credentials)
 ```
 You should now be able to interact with the OpenStack services in the target mCloud environment
 

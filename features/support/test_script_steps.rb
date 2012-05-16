@@ -56,7 +56,7 @@ Then /^Connect to instance on (.+) via (.+)$/ do |ip_address, remote_client|
     when 'RDP'
       %x{ rdesktop #{ ip_address } -u Administrator -p s3l3ct10n }
     when 'SSH'
-      Net::SSH.start(ip_address, 'root', password: 's3l3ct10n') do |ssh|
+      Net::SSH.start(ip_address, 'root', password: 's3l3ct10n', port: 2222) do |ssh|
         # Test connection and automatically close
       end
     end
@@ -99,6 +99,12 @@ Then /^Delete the (.+) user$/ do |user_name|
   @current_page.delete_confirmation_button.click
 end
 
+Then /^Current page should show the instance.s console output$/ do
+  unless @current_page.has_console_output_element?
+    raise "Current page doesn't show the instance's console output."
+  end
+end
+
 Then /^Delete the (.+) project$/ do |project_name|
   project_name.strip!
   @current_page.project_menu_button( name: project_name ).click
@@ -132,8 +138,8 @@ Then /^Ensure that a user with username (.+) and password (.+) exists$/ do |user
   username           = Unique.username(username)
   @user_attrs        = CloudObjectBuilder.attributes_for(:user, :name => username, :password => password)
   @user_attrs[:name] = Unique.username(@user_attrs[:name])
-
   @user = IdentityService.instance.ensure_user_exists(@user_attrs)
+  EnvironmentCleaner.register(:user, @user.id)
 end
 
 

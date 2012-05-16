@@ -16,6 +16,7 @@ Given /^I am an? (System Admin|User)$/ do |role_name|
   identity_service = IdentityService.session
 
   user             = identity_service.ensure_user_exists(user_attrs)
+  EnvironmentCleaner.register(:user, user.id)
 
   admin_project = identity_service.tenants.find { |t| t.name == 'admin' }
   if admin_project.nil? or admin_project.id.empty?

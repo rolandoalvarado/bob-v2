@@ -1,3 +1,4 @@
+@jira-MCF-23
 Feature: View an Instance's Console Output
   As a user, I want to view the console output of an instance in my project
   so that I will know if there are any errors in the instance.
@@ -10,7 +11,7 @@ Feature: View an Instance's Console Output
 
   Background:
     * A project exists in the system
-    * The project has one running instance
+    * The project has 1 active instance
 
 
   @permissions
@@ -21,8 +22,4 @@ Feature: View an Instance's Console Output
       Scenarios: Authorized Roles
         | Role            | Can or Cannot View |
         | Member          | Can View           |
-        | Admin           | Can View           |
-
-      Scenarios: Unauthorized Roles
-        | Role            | Can or Cannot View |
-        | (None)          | Cannot View        |
+        | Project Manager | Can View           |

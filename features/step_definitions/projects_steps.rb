@@ -4,8 +4,8 @@
 
 Given /^[Aa] project exists in the system$/ do
   identity_service = IdentityService.session
-  project          = identity_service.ensure_project_exists(:name => ('project2'))
-
+  project          = identity_service.ensure_project_exists(:name => ('project'))
+  EnvironmentCleaner.register(:project, project.id)
   if project.nil? or project.id.empty?
     raise "Project couldn't be initialized!"
   end
@@ -51,7 +51,7 @@ Given /^I have a role of (.+) in the project$/ do |role_name|
                      )
   identity_service = IdentityService.session
   user             = identity_service.ensure_user_exists(user_attrs)
-
+  EnvironmentCleaner.register(:user, user.id)
   identity_service.revoke_all_user_roles(user, @project)
 
   # Ensure user has the following role in the project
@@ -112,7 +112,7 @@ When /^I create a project with attributes (.*), (.*)$/ do |name, desc|
             :description => desc
           )
 
-  IdentityService.session.delete_tenant(attrs)
+  IdentityService.session.ensure_project_does_not_exist(attrs)
 
   steps %{
     * Click the logout button if currently logged in
@@ -129,6 +129,10 @@ When /^I create a project with attributes (.*), (.*)$/ do |name, desc|
     * Fill in the project description field with #{ attrs.description }
     * Click the save project button
   }
+
+  # Register created project for post-test deletion
+  created_project = IdentityService.session.find_project_by_name(attrs.name)
+  EnvironmentCleaner.register(:project, created_project.id) if created_project
 
   # Make the project name available to subsequent steps
   @project_attrs = attrs
@@ -158,6 +162,10 @@ When /^I edit the project.s attributes to (.*), (.*)$/ do |name, desc|
     * Click the modify project button
   }
 
+  # Register created project for post-test deletion
+  created_project = IdentityService.session.find_project_by_name(attrs.name)
+  EnvironmentCleaner.register(:project, created_project.id) if created_project
+
   # Make the project name available to subsequent steps
   @project_attrs = attrs
 
@@ -169,7 +177,7 @@ When /^I create a project$/ do
             :name => Unique.name('project')
           )
 
-  IdentityService.session.delete_tenant(attrs)
+  IdentityService.session.ensure_project_does_not_exist(attrs)
 
   steps %{
     * Click the logout button if currently logged in
@@ -186,6 +194,10 @@ When /^I create a project$/ do
     * Fill in the project description field with #{ attrs.description }
     * Click the save project button
   }
+
+  # Register created project for post-test deletion
+  created_project = IdentityService.session.find_project_by_name(attrs.name)
+  EnvironmentCleaner.register(:project, created_project.id) if created_project
 
   # Make the project name available to subsequent steps
   @project_attrs = attrs
@@ -236,10 +248,9 @@ end
 Then /^I Can Create a project$/ do
   attrs = CloudObjectBuilder.attributes_for(
             :project,
-            :name => Unique.name('project')
+            :name => Unique.name('projext_x')
           )
-
-  IdentityService.session.delete_tenant(attrs)
+  IdentityService.session.ensure_project_does_not_exist(attrs)
 
   steps %{
     * Click the logout button if currently logged in
@@ -259,6 +270,12 @@ Then /^I Can Create a project$/ do
     * Visit the projects page
     * The #{ attrs.name } project should be visible
   }
+
+  # Register created project for post-test deletion
+  created_project = IdentityService.session.find_project_by_name(attrs.name)
+  EnvironmentCleaner.register(:project, created_project.id) if created_project
+
+  # Make project attributes available to subsequent steps
   @project_attrs = attrs
 end
 
@@ -381,6 +398,7 @@ Then /^Arya Stark cannot view that project$/ do
                      )
   identity_service = IdentityService.session
   user             = identity_service.ensure_user_exists(user_attrs)
+  EnvironmentCleaner.register(:user, user.id)
 
   steps %{
     * Click the logout button if currently logged in
