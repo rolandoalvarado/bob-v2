@@ -2,11 +2,12 @@ require_relative 'base_cloud_service'
 
 class ComputeService < BaseCloudService
 
-  attr_reader :addresses, :instances
+  attr_reader :addresses, :flavors, :instances
 
   def initialize
     initialize_service Compute
     @addresses = service.addresses
+    @flavors   = service.flavors
     @instances = service.servers
   end
 

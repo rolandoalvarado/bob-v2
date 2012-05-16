@@ -9,7 +9,7 @@ Given /^The project does not have any floating IPs$/ do
   compute_service.ensure_project_floating_ip_count(@project, 0)
 end
 
-Given /^I am authorized to (?:assign floating IPs to|create|reboot (?:an)) instances? in the project$/ do
+Given /^I am authorized to (?:assign floating IPs to|create|reboot|resize)(?: an) instances?(?: in the project)$/ do
   steps %{
     * I have a role of Project Manager in the project
   }
@@ -118,6 +118,29 @@ When /^I soft reboot the instance$/ do
     * Click the instance menu button for instance #{ @instance.id }
     * Click the soft reboot instance button for instance #{ @instance.id }
     * Click the confirm instance reboot button
+  }
+end
+
+When /^I resize the instance to a different flavor$/ do
+  compute_service = ComputeService.session
+  @instance       = compute_service.instances.find { |i| i.state == 'ACTIVE' }
+
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * Click the #{ @project.name } project
+
+    * Click the instance menu button for instance #{ @instance.id }
+    * Click the resize instance button for instance #{ @instance.id }
+    * Current page should have the resize instance form
+    * Drag the instance flavor slider to a different flavor
+    * Click the confirm instance resize button
   }
 end
 
@@ -250,6 +273,32 @@ Then /^I [Cc]an [Rr]eboot an instance in the project$/ do
   }
 end
 
+Then /^I [Cc]an [Rr]esize (?:that|the) instance$/ do
+  compute_service = ComputeService.session
+  compute_service.service.set_tenant @project
+  instance        = compute_service.instances.find { |i| i.state == 'ACTIVE' }
+  old_flavor      = instance.flavor
+
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * Click the #{ @project.name } project
+
+    * Click the instance menu button for instance #{ instance.id }
+    * Click the resize instance button for instance #{ instance.id }
+    * Current page should have the resize instance form
+    * Drag the instance flavor slider to the left
+    * Click the confirm instance resize button
+    * The instance #{ instance.id } should not have flavor #{ old_flavor.name }
+  }
+end
+
 Then /^I [Cc]an [Vv]iew console output of the instance$/ do
   compute_service = ComputeService.session
   compute_service.service.set_tenant @project
@@ -294,6 +343,13 @@ Then /^the instance is publicly accessible via that floating IP$/ do
 
   steps %{
     * Connect to instance on #{ public_ip } via SSH
+  }
+end
+
+Then /^the instance should be resized$/ do
+  old_flavor = @instance.flavor
+  step %{
+    * The instance #{ @instance.id } should not have flavor #{ old_flavor }
   }
 end
 
