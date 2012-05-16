@@ -86,6 +86,7 @@ Given /^A user named (.+) exists in the system$/ do |user_name|
   if user.nil? or user.id.empty?
     raise "User couldn't be initialized!"
   end
+  EnvironmentCleaner.register(:user, user.id)
 
   # Make variable(s) available for use in succeeding steps
   @user = user
@@ -101,9 +102,7 @@ end
 # WHENs
 #=================
 
-When /^I delete the user (.+)$/ do |user_name|
-  user_name = Unique.name(user_name).gsub(' ', '_')
-
+When /^I delete the user (.+)$/ do |username|
   steps %{
     * Click the logout button if currently logged in
     * Visit the login page
@@ -111,10 +110,11 @@ When /^I delete the user (.+)$/ do |user_name|
     * Fill in the password field with #{ @current_user.password }
     * Click the login button
 
-    * Visit the users page
-    * The #{ user_name } user should be visible
-
-    * Delete the #{ user_name } user
+    * Click the users link
+    * Current page should be the users page
+    * Click the context menu button for user #{ username }
+    * Click the delete user link for user #{ username }
+    * Click the confirm user deletion button
   }
 
 end
@@ -122,32 +122,27 @@ end
 #=================
 # THENs
 #=================
- 
-Then /^user (.+) will be deleted$/ do |user_name|
-  user_name = Unique.name(user_name).gsub(' ', '_')
-  user      = IdentityService.session.users.select { |u| u.name == user_name }.first
 
-  if user != nil && user.id != nil
-    raise "User #{ user_name } should be deleted, but is not."
-  end
+Then /^user (.+) will be deleted$/ do |user_name|
+  steps %{
+    * The user #{ user_name } should not exist in the system
+  }
 end
 
-Then /^s?he will not be able to log in$/ do 
+Then /^s?he will not be able to log in$/ do
   steps %{
     * Click the logout button if currently logged in
 
     * Visit the login page
     * Fill in the username field with #{ @user.name }
-    * Fill in the password field with #{ @user.password } 
+    * Fill in the password field with #{ @user.password }
     * Click the login button
 
     * Current page should be the login page
   }
 end
 
-Then /^I [Cc]an [Dd]elete (?:that|the) user (.+)$/ do |user_name|
-  user_name = Unique.name(user_name).gsub(' ', '_')
-
+Then /^I [Cc]an [Dd]elete (?:that|the) user (.+)$/ do |username|
   steps %{
     * Click the logout button if currently logged in
 
@@ -156,23 +151,16 @@ Then /^I [Cc]an [Dd]elete (?:that|the) user (.+)$/ do |user_name|
     * Fill in the password field with #{ @current_user.password }
     * Click the login button
 
-    * Visit the users page
-    * The #{ @user.name } user should be visible
-
-    * Delete the #{ user_name } user
+    * Click the users link
+    * Current page should be the users page
+    * Click the context menu button for user #{ username }
+    * Click the delete user link for user #{ username }
+    * Click the confirm user deletion button
+    * The user #{ username } should not exist in the system
   }
-
-  user =  IdentityService.session.tenants.find_by_name(@user.name)
-
-  if user != nil && user.id != nil
-     raise "User #{ user.name } should be deleted, but is not."
-  end
-
 end
 
 Then /^I [Cc]annot [Dd]elete (?:that|the) user (.+)$/ do |user_name|
-  user_name = Unique.name(user_name).gsub(' ', '_')
-
   steps %{
     * Click the logout button if currently logged in
 
@@ -180,12 +168,6 @@ Then /^I [Cc]annot [Dd]elete (?:that|the) user (.+)$/ do |user_name|
     * Fill in the username field with #{ @current_user.name }
     * Fill in the password field with #{ @current_user.password }
     * Click the login button
-
-    * Visit the root page
+    * The Users link should not be visible
   }
-
-  if ( @current_page.has_user_page_link? )
-    raise "The user page link should not have been created, but it seems that it was."
-  end
-
 end

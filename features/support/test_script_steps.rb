@@ -17,6 +17,19 @@ Then /^Choose the (\d+)(?:st|nd|rd|th) item in the (.+) radiolist$/ do |item_num
   @current_page.send("#{ list_name }_radiolist_items")[item_number.to_i - 1].click
 end
 
+Then /^Click the context menu button for user (.+)$/ do |username|
+  username = Unique.username(username)
+  @current_page.context_menu_button(name: username).click
+end
+
+Then /^Click the (.+) link for user (.+)$/ do |link_name, username|
+  username  = Unique.username(username)
+  link_name = link_name.split.join('_').downcase
+
+  @current_page.send("#{ link_name }_link", name: username).click
+end
+
+
 Then /^Click the logout button if currently logged in$/ do
   @current_page ||= RootPage.new
   @current_page.visit                      # This removes any modal overlay
@@ -28,6 +41,10 @@ end
 Then /^Click the (.+) button$/ do |button_name|
   button_name = button_name.split.join('_').downcase
   @current_page.send("#{ button_name }_button").click
+
+  if button_name == 'login'
+    @current_page = SecurePage.new
+  end
 end
 
 Then /^Click the (.+) link$/ do |link_name|
@@ -83,20 +100,6 @@ Then /^Current page should have the correct path$/ do
   unless @current_page.has_expected_path?
     raise "Expected #{ @current_page.expected_path } but another page was returned: #{ @current_page.actual_path }"
   end
-end
-
-Then /^Delete the (.+) user$/ do |user_name|
-  user_name.strip!
-  @current_page.user_menu_button( name: user_name ).click
-
-  begin
-    delete_user_link = @current_page.delete_user_link( name: user_name )
-  rescue
-    raise "Expected a link to delete the user '#{ user_name }' but none was found."
-  end
-
-  delete_user_link.click
-  @current_page.delete_confirmation_button.click
 end
 
 Then /^Current page should show the instance.s console output$/ do
@@ -195,6 +198,20 @@ Then /^The instance (.+) should be shown as rebooting$/ do |instance_id|
   end
 end
 
+Then /^The (.+) link should be visible$/ do |link_name|
+  link_name = link_name.split.join('_').downcase
+  unless @current_page.send("has_#{ link_name }_link?")
+    raise "The '#{ link_name.gsub('_',' ') }' link should be visible, but it's not."
+  end
+end
+
+Then /^The (.+) link should not be visible$/ do |link_name|
+  link_name = link_name.split.join('_').downcase
+  if @current_page.send("has_#{ link_name }_link?")
+    raise "The '#{ link_name.gsub('_',' ') }' link should not be visible, but it is."
+  end
+end
+
 Then /^The (.+) message should be visible$/ do |span_name|
   span_name = span_name.split.join('_').downcase
   unless @current_page.send("has_#{ span_name }_span?")
@@ -247,6 +264,15 @@ Then /^The (.+) table's last row should include the text (.+)$/ do |table_name, 
     unless table_rows.last.has_content?(text)
       raise "Couldn't find the text '#{ text }' in the last row of the #{ table_name } table."
     end
+  end
+end
+
+Then /^The user (.+) should not exist in the system$/ do |username|
+  username = Unique.username(username)
+
+  sleeping(1).seconds.between_tries.failing_after(20).tries do
+    user = IdentityService.session.users.find_by_name(username)
+    raise "User #{ username } should not exist, but it does." if user
   end
 end
 
