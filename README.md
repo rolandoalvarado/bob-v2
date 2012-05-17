@@ -16,21 +16,24 @@ Prerequisites
 1. [Git](http://git-scm.com)
 2. [Ruby](ruby-lang.org/) 1.9.3-p125 or higher
 
-Optional Stuff
---------------
-
-1. [RVM](http://beginrescueend.com) (Highly recommended)
-
 Additional Prerequisites for Mac OS X
 -------------------------------------
 1. Xcode 4.1+ or the [Command Line Tools](https://developer.apple.com/downloads/index.action)
 2. If you have Xcode 4.2 or above, you'll need to work around LLVM GCC. Here's [a suggestion](http://www.relaxdiego.com/2012/02/using-gcc-when-xcode-43-is-installed.html).
 
+Optional Stuff
+--------------
+
+1. [RVM](http://beginrescueend.com) (Highly recommended)
+2. [QT](http://qt.nokia.com/products/) (You'll need this to use the Capybara Webkit driver)
+
+
 Installation
 ------------
-1. `git clone git@bitbucket.org:wdamarillo/bob.git`
-2. `cd bob`
-3. `run/setup`
+1. `brew install qt`
+2. `git clone git@bitbucket.org:wdamarillo/bob.git`
+3. `cd bob`
+4. `run/setup`
 
 Usage
 -----

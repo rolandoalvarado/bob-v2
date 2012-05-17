@@ -67,21 +67,32 @@
 require 'capybara'
 require 'capybara/dsl'
 require 'anticipate'
-require 'capybara/poltergeist'
 
-begin
-  require 'headless'
-  headless = Headless.new
-  headless.start
-  at_exit do
-    headless.destroy
+
+if ConfigFile.capybara_driver == :webkit
+
+  begin
+    require 'headless'
+    headless = Headless.new
+    headless.start
+    at_exit do
+      headless.destroy
+    end
+  rescue LoadError
   end
-rescue LoadError
+
+  require 'capybara-webkit'
+  Capybara.register_driver :webkit do |app|
+    Capybara::Driver::Webkit.new(app, {:ignore_ssl_errors => true} )
+  end
 end
 
+if ConfigFile.capybara_driver == :poltergeist
+  require 'capybara/poltergeist'
 
-Capybara.register_driver :poltergeist do |app|
-  Capybara::Poltergeist::Driver.new(app, {:phantomjs => (ENV['PHANTOMJS_PATH'] || "/usr/local/bin/phantomjs"), :debug => (ENV['POLTERGEIST_DEBUG'] || false)})
+  Capybara.register_driver :poltergeist do |app|
+    Capybara::Poltergeist::Driver.new(app, {:phantomjs => (ENV['PHANTOMJS_PATH'] || "/usr/local/bin/phantomjs"), :debug => (ENV['POLTERGEIST_DEBUG'] || false)})
+  end
 end
 
 puts "Driver: #{ConfigFile.capybara_driver}"
