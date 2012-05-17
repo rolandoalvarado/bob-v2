@@ -7,6 +7,13 @@ if ARGV.length == 2 and ARGV[0] == 'describe'
   exit 0
 end
 
+def available_capybara_drivers
+  drivers = ['selenium']
+  drivers << 'webkit' if Gem::Specification.find_all_by_name('capybara-webkit').count > 0
+  drivers << 'poltergeist' if  Gem::Specification.find_all_by_name('capybara/poltergeist').count > 0
+  drivers.join(', ')
+end
+
 require 'rubygems'
 require 'yaml'
 require 'fileutils'
@@ -43,7 +50,7 @@ OptionParser.new do |opts|
     @options[OPENSTACK_TENANT] = v
   end
 
-  opts.on("-d", "--driver DRIVER", "Cabybara drivers: selenium, webkit, poltergeist") do |v|
+  opts.on("-d", "--driver DRIVER", "Cabybara drivers: #{ available_capybara_drivers }") do |v|
     @options[CAPYBARA_DRIVER] = v
   end
 
@@ -101,7 +108,7 @@ openstack_options[OPENSTACK_TENANT] = @options[OPENSTACK_TENANT] || openstack_op
 configure openstack_options, OPENSTACK_TENANT  , "tenant name for #{openstack_options[OPENSTACK_USERNAME]}? "
 
 @config[CAPYBARA_DRIVER] = @options[CAPYBARA_DRIVER] || @config[CAPYBARA_DRIVER] || 'selenium'
-configure @config, CAPYBARA_DRIVER  , "capybara driver? (selenium, poltergeist)"
+configure @config, CAPYBARA_DRIVER  , "capybara driver? (#{ available_capybara_drivers })"
 
 
 puts "Writing #{config_path} with contents:"
