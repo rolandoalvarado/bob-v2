@@ -8,7 +8,7 @@ Feature: Delete an Instance
 
   Background:
     * A project exists in the system
-    * The project has 1 instance
+    * The project has 1 active instance
 
 
   @permissions

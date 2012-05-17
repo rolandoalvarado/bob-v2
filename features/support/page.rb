@@ -227,21 +227,20 @@ class Page
     checklist = /^(?<type>#{ CHECK_LIST_TYPES })$/.match(name)
     selection = /^(?<type>#{ SELECTION_TYPES  })$/.match(name)
 
-    name         = args[0].split.join('_').downcase
-    match_object = element || radiolist || checklist || selection
-
-    unless match_object
-      super name, args, block
+    unless element || radiolist || checklist || selection
+      super(name, *args, &block)
     end
 
+    element_name = args[0].split.join('_').downcase
+
     if element
-      register_element   name, element['type'], args[1]
+      register_element   element_name, element['type'], args[1]
     elsif radiolist
-      register_radiolist name, radiolist['type'], args[1]
+      register_radiolist element_name, radiolist['type'], args[1]
     elsif checklist
-      register_checklist name, checklist['type'], args[1]
+      register_checklist element_name, checklist['type'], args[1]
     elsif selection
-      register_selection name, selection['type'], args[1]
+      register_selection element_name, selection['type'], args[1]
     end
   end
 
