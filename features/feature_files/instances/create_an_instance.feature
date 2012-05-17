@@ -13,7 +13,7 @@ Feature: Create an Instance
   Background:
     * A project exists in the system
     * At least 1 image should be available for use in the project
-    * The project has 0 instances
+    * The project has 0 active instances
 
 
   @permissions
