@@ -82,84 +82,49 @@ class ComputeService < BaseCloudService
     end
   end
 
-  def ensure_project_instance_count(project, desired_count)
+  # Ensures that there are `desired_count` number of instances in the project
+  # Set `strict` to false if you don't mind having more than `desired_count`
+  # number of instances in the project.
+  def ensure_active_instance_count(project, desired_count, strict = true)
     service.set_tenant project
-    keep_trying do
+
+    # This block will keep running until it stops raising an error, or until
+    # the max number of tries is reached. In the last try, whatever error is
+    # raised by the block is thrown.
+    sleeping(1).seconds.between_tries.failing_after(60).tries do
       instances.reload
-      actual_count = instances.count
 
-      if desired_count > actual_count
+      non_active_instances  = instances.select{ |i| i.state !~ /^ACTIVE|ERROR$/}
+      instances_with_errors = instances.select{ |i| i.state =~ /^ERROR$/}
 
-        how_many = desired_count - actual_count
-        how_many.times do |n|
+      # Do pre-checks
+      if non_active_instances.count > 0
+        raise_ensure_active_instance_count_error "Some instances took too long to transition to a specific state.", desired_count
+      elsif instances_with_errors.count > 0
+        # We have to remove instances that have errors because they also
+        # occuppy slots in the quota, preventing us from firing up more
+        # instances.
+        instances_with_errors.each{ |i| i.destroy }
+        raise_ensure_active_instance_count_error "Some instances that have errors took too long to delete.", desired_count
+      end
+
+      # At this point, we should be guaranteed that all instances are ACTIVE
+
+      if desired_count > instances.count
+        (desired_count - instances.count).times do
           create_instance_in_project(project)
+          sleep(0.5)      # Don't send too many requests at once
         end
-        instances.reload
-
-      elsif desired_count < instances.length
-
-        while instances.length > desired_count
-          instances.reload
-          begin
-            instances[0].destroy
-          rescue
-          end
+        raise_ensure_active_instance_count_error "The compute service doesn't seem to be responding to my 'launch instance' requests.", desired_count
+      elsif strict && desired_count < instances.count
+        (instances.count - desired_count).times do |i|
+          instances[i].destroy
         end
-
+        raise_ensure_active_instance_count_error "Some extra instances took to long to delete.", desired_count
       end
+    end # sleeping(x).seconds.between_tries.failing_after(y).tries
 
-      if instances.length != desired_count
-        raise "Couldn't ensure that #{ project.name } has #{ desired_count } " +
-              "instances. Current number of instances is #{ instances.length }."
-      end
-
-      instances.length
-    end
-  end
-
-  def ensure_active_project_instance_count(project, desired_count)
-    service.set_tenant project
-    keep_trying do
-      instances.reload
-
-      active_instances      = instances.select { |i| i.state == 'ACTIVE' }
-      building_instances    = instances.select { |i| i.state == 'BUILDING' }
-      actual_active_count   = active_instances.count
-      actual_building_count = building_instances.count
-
-      if desired_count > actual_active_count
-
-        if actual_building_count > 0
-          expected_finished_count = desired_count - (actual_active_count - actual_building_count).abs
-          check_building_project_instance_progress(building_instances, expected_finished_count)
-        else
-          how_many = desired_count - actual_active_count
-          how_many.times do |n|
-            create_instance_in_project(project)
-          end
-          instances.reload
-        end
-
-      elsif desired_count < actual_active_count
-
-        while actual_active_count > desired_count
-          instances.reload
-          active_instances = instances.select { |i| i.state == 'ACTIVE' }
-
-          active_instances[0].destroy rescue nil
-        end
-
-      end
-
-      active_instances = instances.select { |i| i.state == 'ACTIVE' }
-      if active_instances.length != desired_count
-        raise "Couldn't ensure that #{ project.name } has #{ desired_count } " +
-              "active instances. Current number of active instances is " +
-              "#{ active_instances.length }."
-      end
-
-      active_instances.length
-    end
+    instances.length
   end
 
   def ensure_project_instance_is_active(project, name)
@@ -222,6 +187,11 @@ class ComputeService < BaseCloudService
               "Expected #{ expected_count } building instances to be active."
       end
     end
+  end
+
+  def raise_ensure_active_instance_count_error(message, desired_count)
+    raise "ERROR: Couldn't ensure #{ desired_count } active instances in project. " +
+          message
   end
 
 end
