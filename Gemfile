@@ -12,9 +12,19 @@ gem 'syntax'
 
 gem 'capybara'
 gem 'poltergeist'
-gem 'capybara-webkit'
 
 gem 'rb-fsevent', :require => false
 gem 'guard-cucumber', :require => false
 gem 'pry'
+
+
+begin
+  result = `qmake --version`
+rescue
+  result = ''
+end
+
+if result =~ /QMake version/
+  gem 'capybara-webkit'
+end
 
