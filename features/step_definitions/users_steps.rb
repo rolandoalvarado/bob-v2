@@ -55,14 +55,6 @@ Given /^My username is (.+) and my password is (.+)$/ do |username, password|
 end
 
 Given /^[Aa] user with a role of (.+) exists in the project$/ do |role_name|
-  # identity_service = IdentityService.instance
-  # @user_attrs      = CloudObjectBuilder.attributes_for(:user, :name => Unique.username('rstark'))
-  # user             = identity_service.ensure_user_exists(@user_attrs)
-  #
-  # role_name = RoleNameDictionary.db_name(friendly_name)
-  # role      = identity_service.roles.find_by_name(role_name)
-  # @project.add_user(user.id, role.id)
-
   username = 'rstark'
 
   steps %{
@@ -139,6 +131,48 @@ Then /^s?he will not be able to log in$/ do
     * Click the login button
 
     * Current page should be the login page
+  }
+end
+
+Then /^I Can Create a user$/ do
+  user = CloudObjectBuilder.attributes_for(:user, :name => Unique.username('davos'))
+
+  steps %{
+    * Ensure that a user with username #{ user.name } does not exist
+    * Click the Logout button if currently logged in
+
+    * Visit the Login page
+    * Fill in the Username field with #{ @current_user.name }
+    * Fill in the Password field with #{ @current_user.password }
+    * Click the Login button
+
+    * Click the Users link
+    * Current page should be the Users page
+
+    * Click the New User button
+    * Fill in the Username field with #{ user.name }
+    * Fill in the Email field with #{ user.email }
+    * Fill in the Password field with #{ user.password }
+    * Choose the 2nd item in the Primary Project dropdown
+    * Check the Project Manager checkbox
+    * Click the Create User button
+    * The New User form should not be visible
+    * The #{ user.name } user row should be visible
+
+    * Register user #{ user.name } for deletion on exit
+  }
+end
+
+Then /^I Cannot Create a user$/ do
+  steps %{
+    * Click the Logout button if currently logged in
+
+    * Visit the Login page
+    * Fill in the Username field with #{ @current_user.name }
+    * Fill in the Password field with #{ @current_user.password }
+    * Click the Login button
+
+    * The Users link should not be visible
   }
 end
 

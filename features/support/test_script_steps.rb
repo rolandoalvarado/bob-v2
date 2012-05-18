@@ -4,6 +4,12 @@
 # to http://www.relaxdiego.com/2012/04/using-cucumber.html for a better
 # understanding on how to organize steps.
 
+
+#
+# PLEASE ARRANGE ALPHABETICALLY when adding a new stepdef
+#
+
+
 include Anticipate
 
 Then /^Check the (\d+)(?:st|nd|rd|th) item in the (.+) checklist$/ do |item_number, list_name|
@@ -12,9 +18,29 @@ Then /^Check the (\d+)(?:st|nd|rd|th) item in the (.+) checklist$/ do |item_numb
   checkbox.click unless checkbox.checked?
 end
 
+Then /^Check the (.+) checkbox$/ do |checkbox_name|
+  checkbox_name = checkbox_name.split.join('_').downcase
+  checkbox = @current_page.send("#{ checkbox_name }_checkbox")
+  checkbox.click unless checkbox.checked?
+end
+
 Then /^Choose the (\d+)(?:st|nd|rd|th) item in the (.+) radiolist$/ do |item_number, list_name|
   list_name = list_name.split.join('_').downcase
   @current_page.send("#{ list_name }_radiolist_items")[item_number.to_i - 1].click
+end
+
+Then /^Choose the (\d+)(?:st|nd|rd|th) item in the (.+) dropdown$/ do |item_number, dropdown_name|
+  dropdown_name = dropdown_name.split.join('_').downcase
+  @current_page.send("#{ dropdown_name }_dropdown_items")[item_number.to_i - 1].click
+end
+
+Then /^Choose the item with text (.+) in the (.+) dropdown$/ do |item_text, dropdown_name|
+  dropdown_name = dropdown_name.split.join('_').downcase
+  if item = @current_page.send("#{ dropdown_name }_dropdown_items").find { |d| d.text == item_text }
+    item.click
+  else
+    raise "Couldn't find the dropdown option '#{ item_text }'."
+  end
 end
 
 Then /^Click the context menu button for user (.+)$/ do |username|
@@ -30,7 +56,7 @@ Then /^Click the (.+) link for user (.+)$/ do |link_name, username|
 end
 
 
-Then /^Click the logout button if currently logged in$/ do
+Then /^Click the [Ll]ogout button if currently logged in$/ do
   @current_page ||= RootPage.new
   @current_page.visit                      # This removes any modal overlay
   unless @current_page.actual_url.empty?
@@ -158,6 +184,10 @@ Then /^Ensure that a user with username (.+) and password (.+) exists$/ do |user
   EnvironmentCleaner.register(:user, @user.id)
 end
 
+Then /^Ensure that a user with username (.+) does not exist$/ do |username|
+  user = IdentityService.session.users.reload.find { |u| u.name == username }
+  IdentityService.session.delete_user(user) if user
+end
 
 Then /^Fill in the (.+) field with (.+)$/ do |field_name, value|
   value      = value.gsub(/^\([Nn]one\)$/, '')
@@ -171,16 +201,21 @@ Then /^Fill in the (.+) field with (.+)$/ do |field_name, value|
   @current_page.send("#{ field_name }_field").set value
 end
 
-Then /^Choose the (\d+)(?:st|nd|rd|th) item of the (.+) dropdown$/ do |item_number, dropdown_name|
-  dropdown_name = dropdown_name.split.join('_').downcase
-  @current_page.send("#{ dropdown_name }_dropdown_items")[item_number.to_i - 1].click
+Then /^[Rr]egister project (.+) for deletion on exit$/ do |name|
+  project = IdentityService.session.tenants.reload.find { |p| p.name == name }
+  EnvironmentCleaner.register(:project, project.id) if project
 end
 
-Then /^Choose (.+) in the (.+) dropdown$/ do |item_text, dropdown_name|
-  if item = @current_page.send("#{ dropdown_name }_dropdown_items").find { |d| d.text == item_text }
-    item.click
-  else
-    raise "Couldn't find the dropdown option '#{ item_text }'."
+
+Then /^[Rr]egister user (.+) for deletion on exit$/ do |username|
+  user = IdentityService.session.users.reload.find { |u| u.name == username }
+  EnvironmentCleaner.register(:user, user.id) if user
+end
+
+Then /^The (.+) form should not be visible$/ do |form_name|
+  name = form_name.split.join('_').downcase
+  unless @current_page.send("has_no_#{ name }_form?")
+    raise "The #{ form_name } should not be visible, but it is."
   end
 end
 
@@ -200,6 +235,17 @@ Then /^The (.+) button should be disabled$/ do |button_name|
   button_name = button_name.split.join('_').downcase
   unless @current_page.send("has_#{ button_name }_button?")
     raise "Couldn't find '#{ button_name } button."
+  end
+end
+
+Then /^The (.+) user row should be visible$/ do |username|
+  user = IdentityService.session.users.find_by_name(username)
+  unless user
+    raise "Couldn't find a user named #{ username } in the system!"
+  end
+
+  unless @current_page.has_user_row?( user_id: user.id )
+    raise "The row for user #{ username } should exist, but it doesn't."
   end
 end
 
@@ -297,6 +343,19 @@ Then /^The user (.+) should not exist in the system$/ do |username|
     raise "User #{ username } should not exist, but it does." if user
   end
 end
+
+Then /^Uncheck the (\d+)(?:st|nd|rd|th) item in the (.+) checklist$/ do |item_number, list_name|
+  list_name = list_name.split.join('_').downcase
+  checkbox  = @current_page.send("#{ list_name }_checklist_items")[item_number.to_i - 1]
+  checkbox.click if checkbox.checked?
+end
+
+Then /^Uncheck the (.+) checkbox$/ do |checkbox_name|
+  checkbox_name = checkbox_name.split.join('_').downcase
+  checkbox = @current_page.send("#{ checkbox_name }_checkbox")
+  checkbox.click if checkbox.checked?
+end
+
 
 Then /^Visit the (.+) page$/ do |page_name|
   page_class_name = "#{ page_name.downcase.capitalize }Page"
