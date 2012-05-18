@@ -534,7 +534,7 @@ Then /^I [Cc]an [Vv]iew the instance's web-based VNC console$/ do
   }
 end
 
-Then /^I [Cc]annot (?:[Cc]reate|[Dd]elete|[Rr]eboot) (?:an|the) instance(?: in the project)$/ do
+Then /^I [Cc]annot (?:[Cc]reate|[Dd]elete|[Rr]eboot|[Pp]ause|[Rr]esume) (?:an|the) instance(?:| in the project)$/ do
   steps %{
     * Click the logout button if currently logged in
 
