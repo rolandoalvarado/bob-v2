@@ -38,7 +38,12 @@ class ComputeService < BaseCloudService
     service.set_tenant project
     instances.reload
     project_instances = instances.find_all{ |i| i.tenant_id == project.id }
-    service.set_tenant 'admin'
+
+    # There seems to be a bug in OpenStack. Sometimes this fails,
+    # sometimes this works just fine.
+    sleeping(0.5).seconds.between_tries.failing_after(10).tries do
+      service.set_tenant 'admin'
+    end
 
     if project_instances
       project_instances.each do |instance|
