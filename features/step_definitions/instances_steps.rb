@@ -4,12 +4,7 @@ require 'net/ssh'
 # GIVENs
 #=================
 
-Given /^[Tt]he project does not have any floating IPs$/ do
-  compute_service = ComputeService.session
-  compute_service.ensure_project_floating_ip_count(@project, 0)
-end
-
-Given /^I am authorized to (?:assign floating IPs to|create|reboot|resize|resume|suspend|unpause)(?:| an) instances?(?:| in the project)$/ do
+Given /^I am authorized to (?:assign floating IPs to|create|pause|reboot|resize|resume|suspend|unpause)(?:| an) instances?(?:| in the project)$/ do
   steps %{
     * I have a role of Project Manager in the project
   }
@@ -562,15 +557,77 @@ Then /^the instance is publicly accessible via that floating IP$/ do
   }
 end
 
-Then /^the instance should be resized$/ do
+Then /^Select OS image (.+)$/ do |imagename|
+ if imagename == "(Any)"
+   step "Choose the 1st item in the images radiolist"
+ elsif  @current_page.exists_in_the_list_by_xpath?(imagename,'//div[@class="instance-item clearfix"]/label[text()]')
+   raise "#{imagename} image does not exist in server images list."
+ else
+   @current_page.image_option( name: imagename ).click
+ end
+end
+
+Then /^Select flavor (.+)$/ do |flavor|
+ if flavor == "(Any)"
+   #nothing
+ else
+   pending
+ end
+end
+
+Then /^Select keypair (.+)$/ do |keypair|
+ if keypair == "(Any)"
+   #nothing
+ elsif keypair  == "(None)"
+   #nothing
+ else
+   pending
+ end
+end
+
+Then /^Select instance count (.+)$/ do |count|
+ if count == "(Any)"
+   #nothing
+ else
+   pending
+ end
+end
+
+Then /^Select Security Group (.+)$/ do |security_group|
+ if security_group == "(Any)"
+   #nothing
+ elsif security_group == "(None)"
+   #nothing
+ else
+   pending
+ end
+end
+
+Then /^Set instance name with (.+)$/ do |instance_name|
+  if instance_name.downcase == "(any)"
+    step "Fill in the server name field with #{Unique.name('Instance')}"
+  elsif instance_name.downcase  != "(none)"
+    step "Fill in the server name field with #{instance_name}"
+  end
+end
+
+Then /^[Tt]he instance should be resized$/ do
   old_flavor = @instance.flavor
   step %{
     * The instance #{ @instance.id } should not have flavor #{ old_flavor }
   }
 end
 
-Then /^the instance will reboot$/ do
+Then /^[Tt]he instance will reboot$/ do
   steps %{
     * The instance #{ @instance.id } should be shown as rebooting
   }
+end
+
+Then /^[Tt]he instance will be Created$/ do
+  step "The instances table should include the text #{ @instance_name }"
+end
+
+Then /^[Tt]he instance will be Not Created$/ do
+  step "The instances table should not include the text #{ @instance_name }"
 end
