@@ -37,15 +37,16 @@ class ComputeService < BaseCloudService
     deleted_instances = []
     service.set_tenant project
     instances.reload
+    project_instances = instances.find_all{ |i| i.tenant_id == project.id }
+    service.set_tenant 'admin'
 
-    if project_instances = instances.find_all{ |i| i.tenant_id == project.id }
+    if project_instances
       project_instances.each do |instance|
         deleted_instances << { name: instance.name, id: instance.id }
         service.delete_server(instance.id)
       end
     end
 
-    service.set_tenant 'admin'
     deleted_instances
   end
 
