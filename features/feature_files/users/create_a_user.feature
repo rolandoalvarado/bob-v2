@@ -1,4 +1,4 @@
-@jira-DPBLOG-16 @jira-DPBLOG-17
+@jira-DPBLOG-16 @jira-DPBLOG-17 @jira-MCF-7
 Feature: Create a User
   As a system administrator, I want to create users.
 
