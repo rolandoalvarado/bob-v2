@@ -12,6 +12,12 @@
 
 include Anticipate
 
+Then /^A new window should show the instance's VNC console$/ do
+  unless @current_page.has_popup_window?('noVNC')
+    raise "A new window with the instance's VNC console was not shown!"
+  end
+end
+
 Then /^Check the (\d+)(?:st|nd|rd|th) item in the (.+) checklist$/ do |item_number, list_name|
   list_name = list_name.split.join('_').downcase
   checkbox  = @current_page.send("#{ list_name }_checklist_items")[item_number.to_i - 1]

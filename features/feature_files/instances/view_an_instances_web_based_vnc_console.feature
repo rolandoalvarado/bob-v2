@@ -1,3 +1,4 @@
+@jira-MCF-24
 Feature: View an Instance's Web-based VNC Console
   As a user, I want to view my instance's web-based VNC console so that I can
   connect and manage it graphically without installing a VNC client in my
@@ -22,7 +23,7 @@ Feature: View an Instance's Web-based VNC Console
 
   Background:
     * A project exists in the system
-    * The project has one running instance
+    * The project has 1 active instance
 
 
   @permissions
@@ -33,8 +34,4 @@ Feature: View an Instance's Web-based VNC Console
       Scenarios: Authorized Roles
         | Role            | Can or Cannot View |
         | Member          | Can View           |
-        | Admin           | Can View           |
-
-      Scenarios: Unauthorized Roles
-        | Role            | Can or Cannot View |
-        | (None)          | Cannot View        |
+        | Project Manager | Can View           |
