@@ -13,9 +13,7 @@
 include Anticipate
 
 Then /^A new window should show the instance's VNC console$/ do
-  begin
-    @current_page.find_window('noVNC')
-  rescue
+  unless @current_page.has_popup_window?('noVNC')
     raise "A new window with the instance's VNC console was not shown!"
   end
 end

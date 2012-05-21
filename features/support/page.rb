@@ -376,6 +376,11 @@ class Page
     expected_url == actual_url
   end
 
+  def has_popup_window?(selector)
+    driver = session.driver
+    driver.respond_to?(:find_window) && driver.find_window(selector) rescue false
+  end
+
   #=====================
   # OTHERS
   #=====================
