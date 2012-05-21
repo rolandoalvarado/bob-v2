@@ -1,11 +1,15 @@
 require 'rubygems'
 require 'bundler/setup'
 require 'faker'
+require 'headless'
 require 'cucumber/formatter/html'
 require 'anticipate'
 require 'pry'
 # NOTE: Look at gems.rb for other gems being required
 
+# Ensure capybara webkit is working in headless mode
+headless = Headless.new
+headless.start
 
 # Ensure that features are sorted by their filenames alphabetically
 #==================================================================
