@@ -212,11 +212,84 @@ Then /^[Rr]egister project (.+) for deletion on exit$/ do |name|
   EnvironmentCleaner.register(:project, project.id) if project
 end
 
-
 Then /^[Rr]egister user (.+) for deletion on exit$/ do |username|
   user = IdentityService.session.users.reload.find { |u| u.name == username }
   EnvironmentCleaner.register(:user, user.id) if user
 end
+
+Then /^Select OS image (.+) item from the images radiolist$/ do |imagename|
+ if imagename == "(Any)"
+   step "Choose the 1st item in the images radiolist"
+ else
+   pending
+ end
+end
+
+Then /^Select flavor (.+) item from the flavor slider$/ do |flavor|
+ if flavor == "(Any)"
+   #nothing
+ else
+   pending
+ end
+end
+
+Then /^Select keypair (.+) item from the keypair dropdown$/ do |keypair|
+ if keypair == "(Any)"
+   #nothing
+ elsif keypair  == "(None)"
+   #nothing
+ else
+   pending
+ end
+end
+
+Then /^Select instance count (.+)$/ do |count|
+ if count == "(Any)"
+   #nothing
+ else
+   pending
+ end
+end
+
+Then /^Select Security Group (.+) item from the security group checklist$/ do |security_group|
+ if security_group == "(Any)"
+   #nothing
+ elsif security_group == "(None)"
+   #nothing
+ else
+   pending
+ end
+end
+
+Then /^Set instance name field with (.+)$/ do |instance_name|
+  if instance_name.downcase == "(any)"
+    step "Fill in the server name field with #{Unique.name('Instance')}"
+  elsif instance_name.downcase  != "(none)"
+    step "Fill in the server name field with #{instance_name}"
+  end
+end
+
+Then /^[Tt]he instance should be resized$/ do
+  old_flavor = @instance.flavor
+  step %{
+    * The instance #{ @instance.id } should not have flavor #{ old_flavor }
+  }
+end
+
+Then /^[Tt]he instance will reboot$/ do
+  steps %{
+    * The instance #{ @instance.id } should be shown as rebooting
+  }
+end
+
+Then /^[Tt]he instance will be Created$/ do
+  step "The instances table should include the text #{ @instance_name }"
+end
+
+Then /^[Tt]he instance will be Not Created$/ do
+  step "The instances table should not include the text #{ @instance_name }"
+end
+
 
 Then /^The (.+) form should not be visible$/ do |form_name|
   name = form_name.split.join('_').downcase

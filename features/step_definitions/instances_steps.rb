@@ -4,15 +4,13 @@ require 'net/ssh'
 # GIVENs
 #=================
 
-Given /^The project does not have any floating IPs$/ do
+Given /^[Tt]he project does not have any floating IPs$/ do
   compute_service = ComputeService.session
   compute_service.ensure_project_floating_ip_count(@project, 0)
 end
 
-Given /^I am authorized to (?:assign floating IPs to|create|reboot|resize)(?: an) instances?(?: in the project)$/ do
-  steps %{
-    * I have a role of Project Manager in the project
-  }
+Given /^I am authorized to (?:assign floating IPs to|create|resize|reboot)(?: an||) instances? in the project$/ do
+  step "I have a role of Project Manager in the project"
 end
 
 #=================
@@ -98,6 +96,34 @@ When /^I hard reboot the instance$/ do
     * Click the hard reboot instance button for instance #{ @instance.id }
     * Click the confirm instance reboot button
   }
+end
+
+When /^I create an instance with attributes (.+), (.+), (.+), (.+) and (.+)$/ do |image,name,flavor,keypair,security_group |
+
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * Click the #{ @project.name } project
+
+    * Click the new instance button
+    * Current page should have the new instance form
+
+    * Select OS image #{ image } item from the images radiolist
+    * Set instance name field with #{ name }
+    * Select flavor #{ flavor } item from the flavor slider
+    * Select keypair #{ keypair } item from the keypair dropdown
+    * Select Security Group #{ security_group } item from the security group checklist
+    * Click the create instance button
+  }
+
+  @instance_name = name
+
 end
 
 When /^I soft reboot the instance$/ do
@@ -359,25 +385,3 @@ Then /^I [Cc]annot (?:[Cc]reate|[Dd]elete|[Rr]eboot) (?:an|the) instance(?: in t
   }
 end
 
-Then /^the instance is publicly accessible via that floating IP$/ do
-  compute_service = ComputeService.session
-  compute_service.ensure_security_group_rule @project
-  public_ip = @current_page.floating_ip_row(:id => "#{ @floating.id }").find('.public-ip').text
-
-  steps %{
-    * Connect to instance on #{ public_ip } via SSH
-  }
-end
-
-Then /^the instance should be resized$/ do
-  old_flavor = @instance.flavor
-  step %{
-    * The instance #{ @instance.id } should not have flavor #{ old_flavor }
-  }
-end
-
-Then /^the instance will reboot$/ do
-  steps %{
-    * The instance #{ @instance.id } should be shown as rebooting
-  }
-end
