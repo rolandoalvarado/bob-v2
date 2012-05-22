@@ -31,6 +31,12 @@ Given /^The project has (\d+) active instances?$/ do |number_of_instances|
   total_instances     = compute_service.ensure_active_instance_count(@project, number_of_instances)
 end
 
+Given /^The project has (\d+) suspended instances?$/ do |number_of_instances|
+  number_of_instances = number_of_instances.to_i
+  compute_service     = ComputeService.session
+  total_instances     = compute_service.ensure_suspended_instance_count(@project, number_of_instances)
+end
+
 Given /^The project has more than (\d+) instance flavors?$/ do |number_of_flavors|
   number_of_flavors = number_of_flavors.to_i
   compute_service   = ComputeService.session

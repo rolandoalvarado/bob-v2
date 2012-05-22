@@ -65,6 +65,7 @@ class ProjectPage < WebClientPage
   button    'soft reboot instance',          "#instance-item-<id> .soft-reboot"
   button    'hard reboot instance',          "#instance-item-<id> .hard-reboot"
   button    'resize instance',               "#instance-item-<id> .resize"
+  button    'resume instance',               "#instance-item-<id> .resume"
   button    'view console output',           "#instance-item-<id> .logs"
   button    'VNC console',                   "#instance-item-<id> .vnc-console"
 

@@ -143,6 +143,45 @@ class ComputeService < BaseCloudService
     instances.length
   end
 
+  # Ensures that there are `desired_count` number of instances in the project
+  # Set `strict` to false if you don't mind having more than `desired_count`
+  # number of instances in the project.
+  def ensure_suspended_instance_count(project, desired_count, strict = true)
+    service.set_tenant project
+
+    # This block will keep running until it stops raising an error, or until
+    # the max number of tries is reached. In the last try, whatever error is
+    # raised by the block is thrown.
+    sleeping(1).seconds.between_tries.failing_after(60).tries do
+      instances.reload
+
+      suspended_instances = instances.select{ |i| i.state =~ /^SUSPENDED$/ }
+
+      if desired_count > suspended_instances.count
+        # Cannot suspend without any active instances so we need to ensure active instance count
+        ensure_active_instance_count(project, desired_count - suspended_instances.count)
+
+        active_instances = instances.select{ |i| i.state =~ /^ACTIVE$/ }
+
+        (desired_count - suspended_instances.count).times do |i|
+          service.suspend_server(active_instances[i].id)
+          sleep(0.5)      # Don't send too many requests at once
+        end
+
+        raise_ensure_suspended_instance_count_error "Some instances took to long to suspend.", desired_count
+      elsif strict && desired_count < suspended_instances.count
+        (suspended_instances.count - desired_count).times do |i|
+          service.resume_server(suspended_instances[i].id)
+          sleep(0.5)      # Don't send too many requests at once
+        end
+
+        raise_ensure_suspended_instance_count_error "Some extra instances took to long to resume.", desired_count
+      end
+    end # sleeping(x).seconds.between_tries.failing_after(y).tries
+
+    instances.length
+  end
+
   def ensure_project_instance_is_active(project, name)
     service.set_tenant project
     keep_trying do
@@ -207,6 +246,11 @@ class ComputeService < BaseCloudService
 
   def raise_ensure_active_instance_count_error(message, desired_count)
     raise "ERROR: Couldn't ensure #{ desired_count } active instances in project. " +
+          message
+  end
+
+  def raise_ensure_suspended_instance_count_error(message, desired_count)
+    raise "ERROR: Couldn't ensure #{ desired_count } suspended instances in project. " +
           message
   end
 
