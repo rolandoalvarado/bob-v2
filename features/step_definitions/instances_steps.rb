@@ -219,11 +219,9 @@ end
 Then /^I can connect to that instance via (.+)/ do |remote_client|
   compute_service = ComputeService.session
 
-  compute_service.ensure_project_floating_ip_count(@project, 0)
-  floating = compute_service.ensure_floating_ip_exists(@project, @instance)
-
+  compute_service.ensure_project_floating_ip_count(@project, 1)
   compute_service.ensure_security_group_rule @project
-  public_ip = @current_page.floating_ip_row( id: "#{ floating.id }" ).find('.public-ip').text
+  public_ip = @current_page.floating_ips_table.find('tr .public-ip').text
 
   steps %{
     * Connect to instance on #{ public_ip } via SSH
