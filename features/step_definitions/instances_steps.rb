@@ -218,10 +218,27 @@ end
 
 Then /^I can connect to that instance via (.+)/ do |remote_client|
   compute_service = ComputeService.session
-
   compute_service.ensure_project_floating_ip_count(@project, 1)
   compute_service.ensure_security_group_rule @project
+
+  # These steps ensure that we can get the public ip even if we are not
+  # currently on the access security tab of the project page
+
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * Click the #{ @project.name } project
+    * Click the access security tab link
+  }
+
   public_ip = @current_page.floating_ips_table.find('tr .public-ip').text
+  raise "No public IP found for instance!" if public_ip.empty?
 
   steps %{
     * Connect to instance on #{ public_ip } via SSH
