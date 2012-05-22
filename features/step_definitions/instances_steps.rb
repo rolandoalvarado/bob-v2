@@ -348,6 +348,29 @@ Then /^I [Cc]an [Vv]iew console output of the instance$/ do
   }
 end
 
+Then /^I [Cc]an [Vv]iew the instance's web-based VNC console$/ do
+  compute_service = ComputeService.session
+  compute_service.service.set_tenant @project
+  instance        = compute_service.instances.find { |i| i.state == 'ACTIVE' }
+
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * Click the #{ @project.name } project
+
+    * Click the instance menu button for instance #{ instance.id }
+    * Click the VNC console button for instance #{ instance.id }
+
+    * A new window should show the instance's VNC console
+  }
+end
+
 Then /^I [Cc]annot (?:[Cc]reate|[Dd]elete|[Rr]eboot) (?:an|the) instance(?: in the project)$/ do
   steps %{
     * Click the logout button if currently logged in

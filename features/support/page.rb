@@ -206,7 +206,7 @@ end
 class Page
   include NodeMethods
 
-  ELEMENT_TYPES    = 'button|field|link|checkbox|form|table|span|element|row'
+  ELEMENT_TYPES    = 'button|field|link|checkbox|form|table|span|element|row|option'
   RADIO_LIST_TYPES = 'radiolist'
   CHECK_LIST_TYPES = 'checklist'
   SELECTION_TYPES  = 'selection|dropdown'
@@ -227,21 +227,20 @@ class Page
     checklist = /^(?<type>#{ CHECK_LIST_TYPES })$/.match(name)
     selection = /^(?<type>#{ SELECTION_TYPES  })$/.match(name)
 
-    name         = args[0].split.join('_').downcase
-    match_object = element || radiolist || checklist || selection
-
-    unless match_object
-      super name, args, block
+    unless element || radiolist || checklist || selection
+      super(name, *args, &block)
     end
 
+    element_name = args[0].split.join('_').downcase
+
     if element
-      register_element   name, element['type'], args[1]
+      register_element   element_name, element['type'], args[1]
     elsif radiolist
-      register_radiolist name, radiolist['type'], args[1]
+      register_radiolist element_name, radiolist['type'], args[1]
     elsif checklist
-      register_checklist name, checklist['type'], args[1]
+      register_checklist element_name, checklist['type'], args[1]
     elsif selection
-      register_selection name, selection['type'], args[1]
+      register_selection element_name, selection['type'], args[1]
     end
   end
 
@@ -375,6 +374,11 @@ class Page
 
   def has_expected_url?
     expected_url == actual_url
+  end
+
+  def has_popup_window?(selector)
+    driver = session.driver
+    driver.respond_to?(:find_window) && driver.find_window(selector) rescue false
   end
 
   #=====================

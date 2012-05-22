@@ -16,7 +16,7 @@ module CloudObjectBuilder
   def self.attributes_for_user(attributes)
     attributes[:email]      ||= attributes.delete('email') || attributes.delete('Email') || Faker::Internet.email
     attributes[:enabled]    ||= attributes.delete('enabled') || true
-    attributes[:name]       ||= attributes.delete('name') || attributes.delete('Username') || Faker::Name.name
+    attributes[:name]       ||= attributes.delete('name') || attributes.delete('Username') || Unique.username(Faker::Name.name.gsub(' ', '_')[0, 5].downcase)
     attributes[:tenant_id]  ||= attributes.delete('tenant_id')
     attributes[:password]   ||= attributes.delete('password') || attributes.delete('Password') || "123qwe"
     BetterHash.new.merge(attributes)

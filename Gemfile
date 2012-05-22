@@ -10,6 +10,7 @@ gem 'rspec'
 gem 'slowhandcuke'
 gem 'syntax'
 
+gem 'headless'
 gem 'capybara'
 gem 'poltergeist'
 

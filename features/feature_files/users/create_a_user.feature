@@ -1,21 +1,23 @@
-@jira-DPBLOG-16 @jira-DPBLOG-17
+@jira-DPBLOG-16 @jira-DPBLOG-17 @jira-MCF-7
 Feature: Create a User
-  As a cloud administrator, I want to create users.
+  As a system administrator, I want to create users.
 
+  Background:
+    * A project exists in the system
+    * I have a role of Project Manager in the project
 
   @permissions
   Scenario Outline: Check User Permissions
-    Given I have a role of <Role> in the project
+    Given I have a role of <Role> in the system
      Then I <Can or Cannot Create> a user
 
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Create |
-        | Admin           | Can Create           |
+        | System Admin    | Can Create           |
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Create |
-        | Member          | Cannot Create        |
-        | (None)          | Cannot Create        |
+        | User            | Cannot Create        |
 
 
   Scenario Outline: Create a user with certain attributes
