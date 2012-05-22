@@ -14,6 +14,12 @@ class ProjectPage < WebClientPage
   checklist 'security groups',       xpath: "//input[@name='securityGroupCheckbox']/../../.."
   button    'create instance',       '#create-instance-modal .create-instance'
   table     'instances',             '#instances-template .table-list'
+  option    'imageslist',             xpath: '//div[@class="instance-item clearfix"]/label[text()]'
+  option    'image',                  xpath: '//div[@class="instance-item clearfix"]/label[text()="<name>"]'
+  option    'security group',         xpath: "//input[@name='securityGroupCheckbox' and @value='<name>']"
+  option    'keypair',                xpath: '//select[@id="keypair"]/option[@value="<name>"]'
+  row       'instance',               '#instances-template .table-list #instance-item-<id>'
+  form      'resize instance',        '#resize-instance-modal'
 
 # Type      Name                         Selector
   span      'project name error',        "span.error[for='project-name']"
