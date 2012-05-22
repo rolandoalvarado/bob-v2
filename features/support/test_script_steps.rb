@@ -99,6 +99,24 @@ Then /^Click the (.+) image$/ do |image_name|
   @current_page.image_element( name: image_name.strip ).click
 end
 
+Then /^Connect to instance (.+) via (.+)$/ do |instance_id, remote_client|
+  ip_address = @current_page.floating_ip_row( id: instance_id ).find('.public-ip').text
+  raise "No public IP found for instance #{ instance_id }!" if ip_address.empty?
+
+  begin
+    case remote_client.upcase
+    when 'RDP'
+      %x{ rdesktop #{ ip_address } -u Administrator -p s3l3ct10n }
+    when 'SSH'
+      Net::SSH.start(ip_address, 'root', password: 's3l3ct10n', port: 2222) do |ssh|
+        # Test connection and automatically close
+      end
+    end
+  rescue
+    raise "The instance is not publicly accessible on #{ ip_address } via #{ remote_client }."
+  end
+end
+
 Then /^Connect to instance on (.+) via (.+)$/ do |ip_address, remote_client|
   begin
     case remote_client.upcase

@@ -235,13 +235,7 @@ Then /^I can connect to that instance via (.+)/ do |remote_client|
     * Visit the projects page
     * Click the #{ @project.name } project
     * Click the access security tab link
-  }
-
-  public_ip = @current_page.floating_ips_table.find('tr .public-ip').text
-  raise "No public IP found for instance!" if public_ip.empty?
-
-  steps %{
-    * Connect to instance on #{ public_ip } via SSH
+    * Connect to instance #{ @instance.id } via SSH
   }
 end
 
