@@ -99,9 +99,9 @@ Then /^Click the (.+) image$/ do |image_name|
   @current_page.image_element( name: image_name.strip ).click
 end
 
-Then /^Connect to instance (.+) via (.+)$/ do |instance_id, remote_client|
-  ip_address = @current_page.floating_ip_row( id: instance_id ).find('.public-ip').text
-  raise "No public IP found for instance #{ instance_id }!" if ip_address.empty?
+Then /^Connect to instance with floating IP (.+) via (.+)$/ do |floating_ip, remote_client|
+  ip_address = @current_page.floating_ip_row( id: floating_ip ).text
+  raise "No public IP found for instance!" if ip_address.empty?
 
   begin
     case remote_client.upcase

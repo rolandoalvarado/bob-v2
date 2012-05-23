@@ -6,11 +6,13 @@ require 'net/ssh'
 
 Given /^[Tt]he project does not have any floating IPs$/ do
   compute_service = ComputeService.session
-  compute_service.ensure_project_floating_ip_count(@project, 0)
+  compute_service.ensure_project_floating_ip_count(@project, nil, 0)
 end
 
-Given /^I am authorized to (?:assign floating IPs to|create|resize|reboot)(?: an||) instances? in the project$/ do
-  step "I have a role of Project Manager in the project"
+Given /^I am authorized to (?:assign floating IPs to|create|reboot|resize)(?:| an) instances?(?:| in the project)$/ do
+  steps %{
+    * I have a role of Project Manager in the project
+  }
 end
 
 #=================
@@ -38,8 +40,8 @@ When /^I assign a floating IP to the instance$/ do
     * Click the access security tab link
     * Click the new floating IP allocation button
     * Current page should have the new floating IP allocation form
-    * Choose the 2nd item of the pool dropdown
-    * Choose the 2nd item of the instance dropdown
+    * Choose the 2nd item in the pool dropdown
+    * Choose the 2nd item in the instance dropdown
     * Click the create floating IP allocation button
 
     * The floating IPs table should have #{ addresses.count + 1 } rows
@@ -193,8 +195,8 @@ Then /^I [Cc]an [Aa]ssign a floating IP to an instance in the project$/ do
     * Click the access security tab link
     * Click the new floating IP allocation button
     * Current page should have the new floating IP allocation form
-    * Choose the 2nd item of the pool dropdown
-    * Choose the 2nd item of the instance dropdown
+    * Choose the 2nd item in the pool dropdown
+    * Choose the 2nd item in the instance dropdown
     * Click the create floating IP allocation button
 
     * The floating IPs table should have #{ num_addresses + 1 } rows
@@ -218,11 +220,10 @@ end
 
 Then /^I can connect to that instance via (.+)/ do |remote_client|
   compute_service = ComputeService.session
-  compute_service.ensure_project_floating_ip_count(@project, 1)
+  compute_service.ensure_project_floating_ip_count(@project, @instance, 1)
   compute_service.ensure_security_group_rule @project
 
-  # These steps ensure that we can get the public ip even if we are not
-  # currently on the access security tab of the project page
+  floating_ip = compute_service.addresses.find { |a| a.instance_id == @instance.id }
 
   steps %{
     * Click the logout button if currently logged in
@@ -235,7 +236,7 @@ Then /^I can connect to that instance via (.+)/ do |remote_client|
     * Visit the projects page
     * Click the #{ @project.name } project
     * Click the access security tab link
-    * Connect to instance #{ @instance.id } via SSH
+    * Connect to instance with floating IP #{ floating_ip.id } via SSH
   }
 end
 
@@ -398,3 +399,25 @@ Then /^I [Cc]annot (?:[Cc]reate|[Dd]elete|[Rr]eboot) (?:an|the) instance(?: in t
   }
 end
 
+Then /^the instance is publicly accessible via that floating IP$/ do
+  compute_service = ComputeService.session
+  compute_service.ensure_security_group_rule @project
+  public_ip = @current_page.floating_ip_row(:id => "#{ @floating.id }").find('.public-ip').text
+
+  steps %{
+    * Connect to instance on #{ public_ip } via SSH
+  }
+end
+
+Then /^the instance should be resized$/ do
+  old_flavor = @instance.flavor
+  step %{
+    * The instance #{ @instance.id } should not have flavor #{ old_flavor }
+  }
+end
+
+Then /^the instance will reboot$/ do
+  steps %{
+    * The instance #{ @instance.id } should be shown as rebooting
+  }
+end
