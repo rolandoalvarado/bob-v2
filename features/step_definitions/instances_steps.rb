@@ -175,7 +175,7 @@ end
 When /^I resume the instance in the project$/ do
   compute_service = ComputeService.session
   compute_service.service.set_tenant @project
-  instance        = compute_service.instances.find { |i| i.state == 'SUSPENDED' }
+  @instance       = compute_service.instances.find { |i| i.state == 'SUSPENDED' }
 
   steps %{
     * Click the logout button if currently logged in
@@ -188,8 +188,8 @@ When /^I resume the instance in the project$/ do
     * Visit the projects page
     * Click the #{ @project.name } project
 
-    * Click the instance menu button for instance #{ instance.id }
-    * Click the resume instance button for instance #{ instance.id }
+    * Click the instance menu button for instance #{ @instance.id }
+    * Click the resume instance button for instance #{ @instance.id }
   }
 end
 
