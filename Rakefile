@@ -38,7 +38,7 @@ Cucumber::Rake::Task.new(:test) do |t|
 end
 
 task :upcoming_only => :mkoutputdir
-Cucumber::Rake::Task.new(:upcoming_only, "Runs all scenarios that are not tagged with @future") do |t|
+Cucumber::Rake::Task.new(:upcoming_only, "Runs all scenarios that are tagged with @future") do |t|
    t.profile =  "upcoming_only"
 end
 
@@ -48,7 +48,7 @@ Cucumber::Rake::Task.new(:ci, "Run Cucumber features for a CI environment.") do 
 end
 
 task :wip => :mkoutputdir
-Cucumber::Rake::Task.new(:wip, "Runs all scenarios that are not tagged with @wip") do |t|
+Cucumber::Rake::Task.new(:wip, "Runs all scenarios that are tagged with @wip") do |t|
    t.profile =  "wip"
 end
 
