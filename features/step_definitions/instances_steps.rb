@@ -6,7 +6,7 @@ require 'net/ssh'
 
 Given /^[Tt]he project does not have any floating IPs$/ do
   compute_service = ComputeService.session
-  compute_service.ensure_project_floating_ip_count(@project, nil, 0)
+  compute_service.ensure_project_floating_ip_count(@project, 0)
 end
 
 Given /^I am authorized to (?:assign floating IPs to|create|reboot|resize)(?:| an) instances?(?:| in the project)$/ do
@@ -220,7 +220,7 @@ end
 
 Then /^I can connect to that instance via (.+)/ do |remote_client|
   compute_service = ComputeService.session
-  compute_service.ensure_project_floating_ip_count(@project, @instance, 1)
+  compute_service.ensure_project_floating_ip_count(@project, 1, @instance)
   compute_service.ensure_security_group_rule @project
 
   floating_ip = compute_service.addresses.find { |a| a.instance_id == @instance.id }

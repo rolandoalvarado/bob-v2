@@ -56,7 +56,7 @@ class ComputeService < BaseCloudService
   end
 
 
-  def ensure_project_floating_ip_count(project, instance=nil, desired_count)
+  def ensure_project_floating_ip_count(project, desired_count, instance=nil)
     service.set_tenant project
     keep_trying do
       addresses.reload
