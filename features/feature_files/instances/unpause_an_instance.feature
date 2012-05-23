@@ -1,3 +1,4 @@
+@jira-MCF-22
 Feature: Unpause a Paused Instance
   As a user, I want to unpause a paused instance so that I can use it again after
   I'm done doing any maintenance work on it.
@@ -9,8 +10,7 @@ Feature: Unpause a Paused Instance
 
   Background:
     * A project exists in the system
-    * The project has an instance that is running on KVM
-    * The instance is paused
+    * The project has 1 paused instance
 
 
   @permissions
@@ -21,14 +21,10 @@ Feature: Unpause a Paused Instance
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Unpause |
         | Member          | Can Unpause           |
-        | Admin           | Can Unpause           |
-
-      Scenarios: Unauthorized Roles
-        | Role            | Can or Cannot Unpause |
-        | (None)          | Cannot Unpause        |
+        | Project Manager | Can Unpause           |
 
 
   Scenario: Unpause an Instance
     Given I am authorized to unpause instances in the project
      When I unpause the instance in the project
-     Then I can connect to that instance via ssh
+     Then I can connect to that instance via SSH
