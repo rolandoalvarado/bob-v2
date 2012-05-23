@@ -402,10 +402,9 @@ end
 Then /^the instance is publicly accessible via that floating IP$/ do
   compute_service = ComputeService.session
   compute_service.ensure_security_group_rule @project
-  public_ip = @current_page.floating_ip_row(:id => "#{ @floating.id }").find('.public-ip').text
 
   steps %{
-    * Connect to instance on #{ public_ip } via SSH
+    * Connect to instance with floating IP #{ @floating.id } via SSH
   }
 end
 

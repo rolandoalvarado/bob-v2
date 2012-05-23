@@ -117,21 +117,6 @@ Then /^Connect to instance with floating IP (.+) via (.+)$/ do |floating_ip, rem
   end
 end
 
-Then /^Connect to instance on (.+) via (.+)$/ do |ip_address, remote_client|
-  begin
-    case remote_client.upcase
-    when 'RDP'
-      %x{ rdesktop #{ ip_address } -u Administrator -p s3l3ct10n }
-    when 'SSH'
-      Net::SSH.start(ip_address, 'root', password: 's3l3ct10n', port: 2222) do |ssh|
-        # Test connection and automatically close
-      end
-    end
-  rescue
-    raise "The instance is not publicly accessible on #{ ip_address } via #{ remote_client }."
-  end
-end
-
 Then /^Current page should be the (.+) page$/ do |page_name|
   @current_page = eval("#{ page_name.downcase.capitalize }Page").new
   unless @current_page.has_expected_path?
