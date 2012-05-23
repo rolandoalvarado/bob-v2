@@ -159,10 +159,15 @@ class ComputeService < BaseCloudService
 
       if desired_count > suspended_instances.count
         # Cannot suspend without any active instances so we need to ensure active instance count
-        ensure_active_instance_count(project, desired_count - suspended_instances.count)
-
         active_instances = instances.select{ |i| i.state =~ /^ACTIVE$/ }
+        if active_instances.count < desired_count - suspended_instances.count
+          ensure_active_instance_count(project, desired_count - suspended_instances.count, false)
 
+          # Reload list of active instances
+          instances.reload
+          active_instances = instances.select{ |i| i.state =~ /^ACTIVE$/ }
+        end
+        
         (desired_count - suspended_instances.count).times do |i|
           service.suspend_server(active_instances[i].id)
           sleep(0.5)      # Don't send too many requests at once
