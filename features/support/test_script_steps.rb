@@ -100,7 +100,7 @@ Then /^Click the (.+) image$/ do |image_name|
 end
 
 Then /^Connect to instance with floating IP (.+) via (.+)$/ do |floating_ip, remote_client|
-  ip_address = @current_page.floating_ip_row( id: floating_ip ).text
+  ip_address = @current_page.floating_ip_row( id: floating_ip ).find('.public-ip').text
   raise "No public IP found for instance!" if ip_address.empty?
 
   begin
