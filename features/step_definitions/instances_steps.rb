@@ -9,7 +9,7 @@ Given /^[Tt]he project does not have any floating IPs$/ do
   compute_service.ensure_project_floating_ip_count(@project, 0)
 end
 
-Given /^I am authorized to (?:assign floating IPs to|create|reboot|resize|resume)(?:| an) instances?(?:| in the project)$/ do
+Given /^I am authorized to (?:assign floating IPs to|create|reboot|resize|resume|suspend)(?:| an) instances?(?:| in the project)$/ do
   steps %{
     * I have a role of Project Manager in the project
   }
@@ -193,6 +193,28 @@ When /^I resume the instance in the project$/ do
   }
 end
 
+When /^I suspend the instance in the project$/ do
+  compute_service = ComputeService.session
+  compute_service.service.set_tenant @project
+  @instance       = compute_service.instances.find { |i| i.state == 'SUSPENDED' }
+
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * Click the #{ @project.name } project
+
+    * Click the instance menu button for instance #{ @instance.id }
+    * Click the suspend instance button for instance #{ @instance.id }
+  }
+end
+
+
 #=================
 # THENs
 #=================
@@ -258,6 +280,28 @@ Then /^I can connect to that instance via (.+)/ do |remote_client|
     * Click the #{ @project.name } project
     * Click the access security tab link
     * Connect to instance with floating IP #{ floating_ip.id } via SSH
+  }
+end
+
+Then /^I cannot connect to that instance via (.+)/ do |remote_client|
+  compute_service = ComputeService.session
+  compute_service.ensure_project_floating_ip_count(@project, 1, @instance)
+  compute_service.ensure_security_group_rule @project
+
+  floating_ip = compute_service.addresses.find { |a| a.instance_id == @instance.id }
+
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * Click the #{ @project.name } project
+    * Click the access security tab link
+    * Fail connecting to instance with floating IP #{ floating_ip.id } via SSH
   }
 end
 
@@ -380,6 +424,29 @@ Then /^I [Cc]an [Rr]esume the instance$/ do
     * Click the resume instance button for instance #{ instance.id }
 
     * The instance #{ instance.id } should be of active status
+  }
+end
+
+Then /^I [Cc]an [Ss]uspend (?:an|the) instance(?:| in the project)$/ do
+  compute_service = ComputeService.session
+  compute_service.service.set_tenant @project
+  @instance       = compute_service.instances.find { |i| i.state == 'ACTIVE' }
+
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * Click the #{ @project.name } project
+
+    * Click the instance menu button for instance #{ @instance.id }
+    * Click the suspend instance button for instance #{ @instance.id }
+
+    * The instance #{ @instance.id } should be shown as suspending
   }
 end
 
