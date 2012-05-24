@@ -9,7 +9,7 @@ Given /^[Tt]he project does not have any floating IPs$/ do
   compute_service.ensure_project_floating_ip_count(@project, 0)
 end
 
-Given /^I am authorized to (?:assign floating IPs to|create|reboot|resize|resume|suspend)(?:| an) instances?(?:| in the project)$/ do
+Given /^I am authorized to (?:assign floating IPs to|create|reboot|resize|resume|suspend|unpause)(?:| an) instances?(?:| in the project)$/ do
   steps %{
     * I have a role of Project Manager in the project
   }
@@ -214,6 +214,26 @@ When /^I suspend the instance in the project$/ do
   }
 end
 
+When /^I unpause the instance in the project$/ do
+  compute_service = ComputeService.session
+  compute_service.service.set_tenant @project
+  @instance       = compute_service.instances.find { |i| i.state == 'PAUSED' }
+
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * Click the #{ @project.name } project
+
+    * Click the instance menu button for instance #{ @instance.id }
+    * Click the unpause instance button for instance #{ @instance.id }
+  }
+end
 
 #=================
 # THENs
@@ -447,6 +467,29 @@ Then /^I [Cc]an [Ss]uspend (?:an|the) instance(?:| in the project)$/ do
     * Click the suspend instance button for instance #{ @instance.id }
 
     * The instance #{ @instance.id } should be in suspended status
+  }
+end
+
+Then /^I [Cc]an [Uu]npause (?:that|the) instance$/ do
+  compute_service = ComputeService.session
+  compute_service.service.set_tenant @project
+  instance        = compute_service.instances.find { |i| i.state == 'PAUSED' }
+
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * Click the #{ @project.name } project
+
+    * Click the instance menu button for instance #{ instance.id }
+    * Click the unpause instance button for instance #{ instance.id }
+
+    * The instance #{ instance.id } should be in active status
   }
 end
 

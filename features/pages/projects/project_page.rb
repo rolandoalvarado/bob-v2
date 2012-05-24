@@ -67,6 +67,7 @@ class ProjectPage < WebClientPage
   button    'resize instance',               "#instance-item-<id> .resize"
   button    'resume instance',               "#instance-item-<id> .resume"
   button    'suspend instance',              "#instance-item-<id> .suspend"
+  button    'unpause instance',              "#instance-item-<id> .unpause"
   button    'view console output',           "#instance-item-<id> .logs"
   button    'VNC console',                   "#instance-item-<id> .vnc-console"
 
