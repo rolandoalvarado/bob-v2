@@ -347,6 +347,14 @@ Then /^The instance (.+) should be shown as resuming$/ do |instance_id|
   end
 end
 
+Then /^The instance (.+) should be (?:in|of) (.+) status$/ do |instance_id, status|
+  sleeping(1).seconds.between_tries.failing_after(5).tries do
+    unless @current_page.instance_row( id: instance_id ).find('.status').has_content?(status.upcase.gsub(' ', '_'))
+      raise "Instance #{ instance_id } does not have #{ status } status."
+    end
+  end
+end
+
 Then /^The instance (.+) should not have flavor (.+)$/ do |instance_id, flavor_name|
   sleeping(1).seconds.between_tries.failing_after(5).tries do
     if @current_page.instance_row( id: instance_id ).find('.flavor').has_content?(flavor_name)
