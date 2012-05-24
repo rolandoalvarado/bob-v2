@@ -108,7 +108,7 @@ Then /^Connect to instance with floating IP (.+) via (.+)$/ do |floating_ip, rem
     when 'RDP'
       %x{ rdesktop #{ ip_address } -u Administrator -p s3l3ct10n }
     when 'SSH'
-      Net::SSH.start(ip_address, 'root', password: 's3l3ct10n', port: 2222) do |ssh|
+      Net::SSH.start(ip_address, 'root', password: 's3l3ct10n', port: 2222, timeout: 10) do |ssh|
         # Test connection and automatically close
       end
     end

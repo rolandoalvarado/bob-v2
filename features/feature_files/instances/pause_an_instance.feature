@@ -1,3 +1,4 @@
+@jira-MCF-16
 Feature: Pause an Instance
   As a user, I want to pause an instance so that I can do maintenance work on it
 
@@ -8,25 +9,20 @@ Feature: Pause an Instance
 
   Background:
     * A project exists in the system
-    * The project has an instance that is running on KVM
-
+    * The project has 1 active instance
 
   @permissions
   Scenario Outline: Check User Permissions
     Given I have a role of <Role> in the project
-     Then I <Can or Cannot Pause> the instance
+     Then I <Can or Cannot Pause> the instance in the project
 
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Pause |
         | Member          | Can Pause           |
-        | Admin           | Can Pause           |
-
-      Scenarios: Unauthorized Roles
-        | Role            | Can or Cannot Pause |
-        | (None)          | Cannot Pause        |
-
+        | Project Manager | Can Pause           |
+        | System Admin    | Can Pause           |
 
   Scenario: Pause an Instance
     Given I am authorized to pause instances in the project
      Then I can pause the instance in the project
-      And I cannot connect to that instance via ssh
+      And I cannot connect to that instance via SSH

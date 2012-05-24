@@ -4,12 +4,7 @@ require 'net/ssh'
 # GIVENs
 #=================
 
-Given /^[Tt]he project does not have any floating IPs$/ do
-  compute_service = ComputeService.session
-  compute_service.ensure_project_floating_ip_count(@project, 0)
-end
-
-Given /^I am authorized to (?:assign floating IPs to|create|reboot|resize|resume|suspend|unpause)(?:| an) instances?(?:| in the project)$/ do
+Given /^I am authorized to (?:assign floating IPs to|create|pause|reboot|resize|resume|suspend|unpause)(?:| an) instances?(?:| in the project)$/ do
   steps %{
     * I have a role of Project Manager in the project
   }
@@ -77,6 +72,27 @@ When /^I create an instance on that project based on the image (.+)$/ do |image_
   }
 
   @instance = compute_service.ensure_project_instance_is_active(@project, instance_name)
+end
+
+When /^I pause the instance in the project$/ do
+  compute_service = ComputeService.session
+  compute_service.service.set_tenant @project
+  @instance       = compute_service.instances.find { |i| i.state == 'ACTIVE' }
+
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * Click the #{ @project.name } project
+
+    * Click the instance menu button for instance #{ @instance.id }
+    * Click the pause instance button for instance #{ @instance.id }
+  }
 end
 
 When /^I hard reboot the instance$/ do
@@ -374,6 +390,29 @@ Then /^I [Cc]an [Dd]elete an instance in the project$/ do
   }
 end
 
+Then /^I [Cc]an [Pp]ause the instances?(?:| in the project)$/ do
+  compute_service = ComputeService.session
+  compute_service.service.set_tenant @project
+  instance        = compute_service.instances.find { |i| i.state == 'ACTIVE' }
+
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * Click the #{ @project.name } project
+
+    * Click the instance menu button for instance #{ instance.id }
+    * Click the pause instance button for instance #{ instance.id }
+
+    * The instance #{ instance.id } should be of paused status
+  }
+end
+
 Then /^I [Cc]an [Rr]eboot an instance in the project$/ do
   compute_service = ComputeService.session
   compute_service.service.set_tenant @project
@@ -539,7 +578,7 @@ Then /^I [Cc]an [Vv]iew the instance's web-based VNC console$/ do
   }
 end
 
-Then /^I [Cc]annot (?:[Cc]reate|[Dd]elete|[Rr]eboot) (?:an|the) instance(?: in the project)$/ do
+Then /^I [Cc]annot (?:[Cc]reate|[Dd]elete|[Rr]eboot|[Pp]ause|[Rr]esume) (?:an|the) instance(?:| in the project)$/ do
   steps %{
     * Click the logout button if currently logged in
 
