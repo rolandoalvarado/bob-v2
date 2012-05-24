@@ -11,6 +11,8 @@ require 'pry'
 headless = Headless.new
 headless.start
 
+include Anticipate
+
 # Ensure that features are sorted by their filenames alphabetically
 #==================================================================
 def override_method(obj, method_name, &block)
