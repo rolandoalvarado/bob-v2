@@ -2,13 +2,14 @@ require_relative 'base_cloud_service'
 
 class ComputeService < BaseCloudService
 
-  attr_reader :addresses, :flavors, :instances
+  attr_reader :addresses, :flavors, :instances, :security_groups
 
   def initialize
     initialize_service Compute
     @addresses = service.addresses
     @flavors   = service.flavors
     @instances = service.servers
+    @security_groups = service.security_groups
   end
 
   def create_instance_in_project(project, attributes={})
@@ -54,7 +55,6 @@ class ComputeService < BaseCloudService
 
     deleted_instances
   end
-
 
   def ensure_project_floating_ip_count(project, desired_count, instance=nil)
     service.set_tenant project
