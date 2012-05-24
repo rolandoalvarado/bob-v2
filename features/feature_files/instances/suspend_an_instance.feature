@@ -1,3 +1,4 @@
+@jira-MCF-21
 Feature: Suspend an Instance
   As a user, I want to suspend an instance so that I can free up some RAM and
   vCPUs without permanently losing my instance's state.
@@ -9,7 +10,7 @@ Feature: Suspend an Instance
 
   Background:
     * A project exists in the system
-    * The project has an instance that is running on KVM
+    * The project has 1 active instance
 
 
   @permissions
@@ -20,11 +21,7 @@ Feature: Suspend an Instance
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Suspend |
         | Member          | Can Suspend           |
-        | Admin           | Can Suspend           |
-
-      Scenarios: Unauthorized Roles
-        | Role            | Can or Cannot Suspend |
-        | (None)          | Cannot Suspend        |
+        | Project Manager | Can Suspend           |
 
 
   Scenario: Suspend an Instance
