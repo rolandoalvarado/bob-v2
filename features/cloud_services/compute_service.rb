@@ -56,7 +56,7 @@ class ComputeService < BaseCloudService
   end
 
 
-  def ensure_project_floating_ip_count(project, desired_count)
+  def ensure_project_floating_ip_count(project, desired_count, instance=nil)
     service.set_tenant project
     keep_trying do
       addresses.reload
@@ -67,8 +67,18 @@ class ComputeService < BaseCloudService
         how_many = desired_count - actual_count
         how_many.times do |n|
           service.allocate_address
+          sleep(0.5)
         end
         addresses.reload
+
+        # Floating IPs should usually be associated to an instance
+        if instance
+          how_many.times do |n|
+            service.associate_address(instance.id, addresses[n].id)
+            sleep(0.5)
+          end
+          addresses.reload
+        end
 
       elsif desired_count < addresses.length
 
@@ -163,7 +173,7 @@ class ComputeService < BaseCloudService
               "is active."
       end
 
-      instance
+      return instance
     end
   end
 
