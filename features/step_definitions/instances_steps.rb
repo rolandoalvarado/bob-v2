@@ -9,7 +9,7 @@ Given /^[Tt]he project does not have any floating IPs$/ do
   compute_service.ensure_project_floating_ip_count(@project, 0)
 end
 
-Given /^I am authorized to (?:assign floating IPs to|create|reboot|resize)(?:| an) instances?(?:| in the project)$/ do
+Given /^I am authorized to (?:assign floating IPs to|create|reboot|resize|resume)(?:| an) instances?(?:| in the project)$/ do
   steps %{
     * I have a role of Project Manager in the project
   }
@@ -169,6 +169,27 @@ When /^I resize the instance to a different flavor$/ do
     * Current page should have the resize instance form
     * Drag the instance flavor slider to a different flavor
     * Click the confirm instance resize button
+  }
+end
+
+When /^I resume the instance in the project$/ do
+  compute_service = ComputeService.session
+  compute_service.service.set_tenant @project
+  @instance       = compute_service.instances.find { |i| i.state == 'SUSPENDED' }
+
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * Click the #{ @project.name } project
+
+    * Click the instance menu button for instance #{ @instance.id }
+    * Click the resume instance button for instance #{ @instance.id }
   }
 end
 
@@ -336,6 +357,29 @@ Then /^I [Cc]an [Rr]esize (?:that|the) instance$/ do
     * Drag the instance flavor slider to the left
     * Click the confirm instance resize button
     * The instance #{ instance.id } should not have flavor #{ old_flavor.name }
+  }
+end
+
+Then /^I [Cc]an [Rr]esume the instance$/ do
+  compute_service = ComputeService.session
+  compute_service.service.set_tenant @project
+  instance        = compute_service.instances.find { |i| i.state == 'SUSPENDED' }
+
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * Click the #{ @project.name } project
+
+    * Click the instance menu button for instance #{ instance.id }
+    * Click the resume instance button for instance #{ instance.id }
+
+    * The instance #{ instance.id } should be of active status
   }
 end
 
