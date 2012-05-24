@@ -446,7 +446,7 @@ Then /^I [Cc]an [Ss]uspend (?:an|the) instance(?:| in the project)$/ do
     * Click the instance menu button for instance #{ @instance.id }
     * Click the suspend instance button for instance #{ @instance.id }
 
-    * The instance #{ @instance.id } should be shown as suspending
+    * The instance #{ @instance.id } should be in suspended status
   }
 end
 

@@ -115,7 +115,24 @@ class ComputeService < BaseCloudService
 
       # Do pre-checks
       if non_active_instances.count > 0
-        raise_ensure_active_instance_count_error "Some instances took too long to transition to a specific state.", desired_count
+        # Check if there are any suspended or paused instances,
+        # and reactivate them
+        non_active_instances.each do |instance|
+          case instance.state
+          when 'SUSPENDED'
+            service.resume_server(instance.id)
+          when 'PAUSED'
+            service.unpause_server(instance.id)
+          end
+          sleep(0.5)
+        end
+
+        # Check if any/all of the instances above have successfully activated
+        instances.reload
+        active_instances = instances.select { |i| i.state == 'ACTIVE' }
+        if active_instances.count < desired_count
+          raise_ensure_active_instance_count_error "Some instances took too long to transition to a specific state.", desired_count
+        end
       elsif instances_with_errors.count > 0
         # We have to remove instances that have errors because they also
         # occuppy slots in the quota, preventing us from firing up more
