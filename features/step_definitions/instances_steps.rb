@@ -74,6 +74,27 @@ When /^I create an instance on that project based on the image (.+)$/ do |image_
   @instance = compute_service.ensure_project_instance_is_active(@project, instance_name)
 end
 
+When /^I pause the instance in the project$/ do
+  compute_service = ComputeService.session
+  compute_service.service.set_tenant @project
+  @instance       = compute_service.instances.find { |i| i.state == 'ACTIVE' }
+
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * Click the #{ @project.name } project
+
+    * Click the instance menu button for instance #{ @instance.id }
+    * Click the pause instance button for instance #{ @instance.id }
+  }
+end
+
 When /^I hard reboot the instance$/ do
   compute_service = ComputeService.session
   @instance       = compute_service.instances.find { |i| i.state == 'ACTIVE' }
@@ -366,6 +387,29 @@ Then /^I [Cc]an [Dd]elete an instance in the project$/ do
     * Click the delete instance button for instance #{ instance.id }
     * Click the confirm instance deletion button
     * The instances table should not include the text #{ instance.name }
+  }
+end
+
+Then /^I [Cc]an [Pp]ause the instances?(?:| in the project)$/ do
+  compute_service = ComputeService.session
+  compute_service.service.set_tenant @project
+  instance        = compute_service.instances.find { |i| i.state == 'ACTIVE' }
+
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * Click the #{ @project.name } project
+
+    * Click the instance menu button for instance #{ instance.id }
+    * Click the pause instance button for instance #{ instance.id }
+
+    * The instance #{ instance.id } should be of paused status
   }
 end
 

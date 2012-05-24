@@ -22,11 +22,7 @@ Feature: Pause an Instance
         | Project Manager | Can Pause           |
         | System Admin    | Can Pause           |
 
-      Scenarios: Unauthorized Roles
-        | Role            | Can or Cannot Pause |
-        | (None)          | Cannot Pause        |
-
   Scenario: Pause an Instance
     Given I am authorized to pause instances in the project
      Then I can pause the instance in the project
-      And I cannot connect to that instance via ssh
+      And I cannot connect to that instance via SSH

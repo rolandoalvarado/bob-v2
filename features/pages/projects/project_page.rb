@@ -64,6 +64,7 @@ class ProjectPage < WebClientPage
   button    'delete instance',               "#instance-item-<id> .destroy"
   button    'soft reboot instance',          "#instance-item-<id> .soft-reboot"
   button    'hard reboot instance',          "#instance-item-<id> .hard-reboot"
+  button    'pause instance',                "#instance-item-<id> .pause"
   button    'resize instance',               "#instance-item-<id> .resize"
   button    'resume instance',               "#instance-item-<id> .resume"
   button    'suspend instance',              "#instance-item-<id> .suspend"
