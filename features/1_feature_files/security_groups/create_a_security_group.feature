@@ -27,7 +27,7 @@ Feature: Create a Security Group
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Create |
         | Member          | Can Create           |
-        | Admin           | Can Create           |
+        | Project Manager | Can Create           |
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Create |

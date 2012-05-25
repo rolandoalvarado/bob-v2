@@ -2,13 +2,14 @@ require_relative 'base_cloud_service'
 
 class ComputeService < BaseCloudService
 
-  attr_reader :addresses, :flavors, :instances
+  attr_reader :addresses, :flavors, :instances, :security_groups
 
   def initialize
     initialize_service Compute
     @addresses = service.addresses
     @flavors   = service.flavors
     @instances = service.servers
+    @security_groups = service.security_groups
   end
 
   def create_instance_in_project(project, attributes={})
@@ -296,6 +297,37 @@ class ComputeService < BaseCloudService
 
   rescue => e
     raise "#{ JSON.parse(e.response.body)['badRequest']['message'] }"
+  end
+
+   def create_security_group(attributes)
+    security_group = security_groups.new(attributes)
+    security_group.save
+    security_group
+  end
+
+  def delete_security_group(security_group)
+    security_group.destroy
+  end
+
+  def ensure_security_group_exists(attributes)
+    security_group = security_groups.find_by_name(attributes[:name]) rescue nil
+    if security_group
+      security_group.update(attributes)
+    else
+      security_group = create_security_group(attributes)
+    end
+    security_group.description = attributes[:description]
+    security_group
+  end
+
+  def ensure_security_group_does_not_exist(attributes)
+    if security_group = security_groups.find_by_name(attributes[:name])
+      delete_security_group(security_group)
+    end
+  end
+
+  def find_security_group_by_name(name)
+    security_groups.find_by_name(name)
   end
 
   private
