@@ -5,12 +5,6 @@ Then /^[Tt]he instance should be resized$/ do
   }
 end
 
-Then /^[Tt]he instance will reboot$/ do
-  steps %{
-    * The instance #{ @instance.id } should be shown as rebooting
-  }
-end
-
 Then /^[Tt]he instance will be Created$/ do
   step "The instances table should include the text #{ @instance_name }"
 end
