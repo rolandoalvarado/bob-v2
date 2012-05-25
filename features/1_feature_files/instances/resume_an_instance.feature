@@ -1,3 +1,4 @@
+@jira-MCF-19
 Feature: Resume an Instance
   As a user, I want to resume a suspended instance so that I can use it again
   after I'm done doing any maintenance work on it.
@@ -9,8 +10,7 @@ Feature: Resume an Instance
 
   Background:
     * A project exists in the system
-    * The project has an instance that is running on KVM
-    * The instance is suspended
+    * The project has 1 suspended instance
 
 
   @permissions
@@ -21,14 +21,10 @@ Feature: Resume an Instance
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Resume |
         | Member          | Can Resume           |
-        | Admin           | Can Resume           |
-
-      Scenarios: Unauthorized Roles
-        | Role            | Can or Cannot Resume |
-        | (None)          | Cannot Resume        |
+        | Project Manager | Can Resume           |
 
 
   Scenario: Resume an Instance
     Given I am authorized to resume instances in the project
      When I resume the instance in the project
-     Then I can connect to that instance via ssh
+     Then I can connect to that instance via SSH

@@ -64,7 +64,11 @@ class ProjectPage < WebClientPage
   button    'delete instance',               "#instance-item-<id> .destroy"
   button    'soft reboot instance',          "#instance-item-<id> .soft-reboot"
   button    'hard reboot instance',          "#instance-item-<id> .hard-reboot"
+  button    'pause instance',                "#instance-item-<id> .pause"
   button    'resize instance',               "#instance-item-<id> .resize"
+  button    'resume instance',               "#instance-item-<id> .resume"
+  button    'suspend instance',              "#instance-item-<id> .suspend"
+  button    'unpause instance',              "#instance-item-<id> .unpause"
   button    'view console output',           "#instance-item-<id> .logs"
   button    'VNC console',                   "#instance-item-<id> .vnc-console"
 

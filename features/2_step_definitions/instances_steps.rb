@@ -4,12 +4,7 @@ require 'net/ssh'
 # GIVENs
 #=================
 
-Given /^[Tt]he project does not have any floating IPs$/ do
-  compute_service = ComputeService.session
-  compute_service.ensure_project_floating_ip_count(@project, 0)
-end
-
-Given /^I am authorized to (?:assign floating IPs to|create|reboot|resize)(?:| an) instances?(?:| in the project)$/ do
+Given /^I am authorized to (?:assign floating IPs to|create|pause|reboot|resize|resume|suspend|unpause)(?:| an) instances?(?:| in the project)$/ do
   steps %{
     * I have a role of Project Manager in the project
   }
@@ -77,6 +72,27 @@ When /^I create an instance on that project based on the image (.+)$/ do |image_
   }
 
   @instance = compute_service.ensure_project_instance_is_active(@project, instance_name)
+end
+
+When /^I pause the instance in the project$/ do
+  compute_service = ComputeService.session
+  compute_service.service.set_tenant @project
+  @instance       = compute_service.instances.find { |i| i.state == 'ACTIVE' }
+
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * Click the #{ @project.name } project
+
+    * Click the instance menu button for instance #{ @instance.id }
+    * Click the pause instance button for instance #{ @instance.id }
+  }
 end
 
 When /^I hard reboot the instance$/ do
@@ -172,6 +188,69 @@ When /^I resize the instance to a different flavor$/ do
   }
 end
 
+When /^I resume the instance in the project$/ do
+  compute_service = ComputeService.session
+  compute_service.service.set_tenant @project
+  @instance       = compute_service.instances.find { |i| i.state == 'SUSPENDED' }
+
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * Click the #{ @project.name } project
+
+    * Click the instance menu button for instance #{ @instance.id }
+    * Click the resume instance button for instance #{ @instance.id }
+  }
+end
+
+When /^I suspend the instance in the project$/ do
+  compute_service = ComputeService.session
+  compute_service.service.set_tenant @project
+  @instance       = compute_service.instances.find { |i| i.state == 'SUSPENDED' }
+
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * Click the #{ @project.name } project
+
+    * Click the instance menu button for instance #{ @instance.id }
+    * Click the suspend instance button for instance #{ @instance.id }
+  }
+end
+
+When /^I unpause the instance in the project$/ do
+  compute_service = ComputeService.session
+  compute_service.service.set_tenant @project
+  @instance       = compute_service.instances.find { |i| i.state == 'PAUSED' }
+
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * Click the #{ @project.name } project
+
+    * Click the instance menu button for instance #{ @instance.id }
+    * Click the unpause instance button for instance #{ @instance.id }
+  }
+end
+
 #=================
 # THENs
 #=================
@@ -240,6 +319,28 @@ Then /^I can connect to that instance via (.+)/ do |remote_client|
   }
 end
 
+Then /^I cannot connect to that instance via (.+)/ do |remote_client|
+  compute_service = ComputeService.session
+  compute_service.ensure_project_floating_ip_count(@project, 1, @instance)
+  compute_service.ensure_security_group_rule @project
+
+  floating_ip = compute_service.addresses.find { |a| a.instance_id == @instance.id }
+
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * Click the #{ @project.name } project
+    * Click the access security tab link
+    * Fail connecting to instance with floating IP #{ floating_ip.id } via SSH
+  }
+end
+
 Then /^I [Cc]an [Cc]reate an instance in the project$/ do
 
   instance_name = Unique.name('Instance')
@@ -286,6 +387,29 @@ Then /^I [Cc]an [Dd]elete an instance in the project$/ do
     * Click the delete instance button for instance #{ instance.id }
     * Click the confirm instance deletion button
     * The instances table should not include the text #{ instance.name }
+  }
+end
+
+Then /^I [Cc]an [Pp]ause the instances?(?:| in the project)$/ do
+  compute_service = ComputeService.session
+  compute_service.service.set_tenant @project
+  instance        = compute_service.instances.find { |i| i.state == 'ACTIVE' }
+
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * Click the #{ @project.name } project
+
+    * Click the instance menu button for instance #{ instance.id }
+    * Click the pause instance button for instance #{ instance.id }
+
+    * The instance #{ instance.id } should be of paused status
   }
 end
 
@@ -339,6 +463,75 @@ Then /^I [Cc]an [Rr]esize (?:that|the) instance$/ do
   }
 end
 
+Then /^I [Cc]an [Rr]esume the instance$/ do
+  compute_service = ComputeService.session
+  compute_service.service.set_tenant @project
+  instance        = compute_service.instances.find { |i| i.state == 'SUSPENDED' }
+
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * Click the #{ @project.name } project
+
+    * Click the instance menu button for instance #{ instance.id }
+    * Click the resume instance button for instance #{ instance.id }
+
+    * The instance #{ instance.id } should be of active status
+  }
+end
+
+Then /^I [Cc]an [Ss]uspend (?:an|the) instance(?:| in the project)$/ do
+  compute_service = ComputeService.session
+  compute_service.service.set_tenant @project
+  @instance       = compute_service.instances.find { |i| i.state == 'ACTIVE' }
+
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * Click the #{ @project.name } project
+
+    * Click the instance menu button for instance #{ @instance.id }
+    * Click the suspend instance button for instance #{ @instance.id }
+
+    * The instance #{ @instance.id } should be in suspended status
+  }
+end
+
+Then /^I [Cc]an [Uu]npause (?:that|the) instance$/ do
+  compute_service = ComputeService.session
+  compute_service.service.set_tenant @project
+  instance        = compute_service.instances.find { |i| i.state == 'PAUSED' }
+
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * Click the #{ @project.name } project
+
+    * Click the instance menu button for instance #{ instance.id }
+    * Click the unpause instance button for instance #{ instance.id }
+
+    * The instance #{ instance.id } should be in active status
+  }
+end
+
 Then /^I [Cc]an [Vv]iew console output of the instance$/ do
   compute_service = ComputeService.session
   compute_service.service.set_tenant @project
@@ -385,7 +578,7 @@ Then /^I [Cc]an [Vv]iew the instance's web-based VNC console$/ do
   }
 end
 
-Then /^I [Cc]annot (?:[Cc]reate|[Dd]elete|[Rr]eboot) (?:an|the) instance(?: in the project)$/ do
+Then /^I [Cc]annot (?:[Cc]reate|[Dd]elete|[Rr]eboot|[Pp]ause|[Rr]esume) (?:an|the) instance(?:| in the project)$/ do
   steps %{
     * Click the logout button if currently logged in
 
