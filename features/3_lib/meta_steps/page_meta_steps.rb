@@ -255,7 +255,7 @@ end
 
 Then /^The instance (.+) should be shown as rebooting$/ do |instance_id|
   sleeping(1).seconds.between_tries.failing_after(5).tries do
-    unless @current_page.instance_row( id: instance_id ).find('.task').has_content?('rebooting')
+    unless @current_page.instance_row( id: instance_id ).find('.task').text.include?('rebooting')
       raise "Instance #{ instance_id } is not shown as rebooting."
     end
   end
