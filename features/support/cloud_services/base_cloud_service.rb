@@ -4,6 +4,7 @@
 # http://www.ruby-doc.org/stdlib-1.9.3/libdoc/singleton/rdoc/Singleton.html)
 require 'singleton'
 require 'anticipate'
+require_relative '../gems'
 
 class BaseCloudService
   include Anticipate
