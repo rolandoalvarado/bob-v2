@@ -28,6 +28,17 @@ class ProjectPage < WebClientPage
   span      'project description error', "span.error[for='project-description']"
 
   #==========================
+  # Security Group Elements
+  #==========================
+  button  'New Security',            "#create-security-group"
+  form    'New Security',            "#security-group-form"
+
+  #Elements in the New Security form
+  field    'Name',                   "#new-security-name"
+  field    'Description',            "#new-security-description"
+  button   'Create Security',        "#create-security-group"
+  
+  #==========================
   # Volume-related elements
   #==========================
 

@@ -57,31 +57,33 @@ end
 #=================
 
 Then /^I [Cc]an [Cc]reate a security group in the project$/ do
-  compute_service = ComputeService.session
-  instance        = compute_service.instances.find { |i| i.state == 'ACTIVE' }
-  num_security_groups   = compute_service.security_groups.count
+
+  security_group = CloudObjectBuilder.attributes_for(:security_group, :name => Unique.name('Web Server'))
+
+  ComputeService.session.ensure_security_group_does_not_exist(security_group)
 
   steps %{
-    * Click the logout button if currently logged in
+    * Click the Logout button if currently logged in
 
-    * Visit the login page
-    * Fill in the username field with #{ @current_user.name }
-    * Fill in the password field with #{ @current_user.password }
-    * Click the login button
+    * Visit the Login page
+    * Fill in the Username field with #{ @current_user.name }
+    * Fill in the Password field with #{ @current_user.password }
+    * Click the Login button
 
-    * Visit the projects page
+    * Visit the Projects page
     * Click the #{ @project.name } project
 
-    * Click the access security tab link
-    * Click the new security group button
-    * Current page should have the new security group form
-    * Fill in the name field with #{attrs.name}
-    * Fill in the description field with #{attrs.description}
-    * Click the create button
-
-    * The security groups table should have #{ num_security_groups + 1 } rows
-    * The security groups table's last row should include the text #{ @project.name }
+    * Click the access Security Tab link
+    * Click the New Security button
+    * Current page should have the New Security form
+    * Fill in the Name field with #{security_group.name}
+    * Fill in the Description field with #{security_group.description}
+    * Click the Create Security button    
+    * Current page should have the new security group
+    * The #{ security_group.name } security group row should be visible
   }
+
+  @security_group = security_group
 end
 
 Then /^I [Cc]annot [Cc]reate a security group in the project$/ do
@@ -114,9 +116,32 @@ Then /^the security group will be [Nn]ot [Cc]reated$/ do
   }
 end
 
+Then /^Current page should have the new security group$/ do
 
+  security_group_attrs  = CloudObjectBuilder.attributes_for(
+                :security_group,
+                :name => Unique.name('Web Server')
+              )
 
+  compute_service = ComputeService.session
+  security_group = compute_service.ensure_security_group_exists(security_group_attrs)  
+  
+  steps %{
+    * Click the logout button if currently logged in
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+    
+    * Visit the Projects page
+    * Click the #{ @project.name } project
+    * Click the access Security Tab link
+    * The #{ security_group.name } security group should be visible
+  }
+end
 
-
-
-
+Then /^The (.+) security group should be visible$/ do |security_group|
+  steps %{
+    * The security group #{ security_group } should be shown
+  }
+end
