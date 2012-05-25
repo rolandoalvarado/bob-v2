@@ -55,6 +55,24 @@ class ComputeService < BaseCloudService
     deleted_instances
   end
 
+  def release_addresses_from_project(project)
+    released_addresses = []
+    service.set_tenant project
+    addresses.reload
+
+    addresses.each do |address|
+      address_attributes = { ip: address.ip, id: address.id }
+      unless address.instance_id.blank?
+        address_attributes.merge!( instance_id: address.instance_id )
+        service.disassociate_address(address.instance_id, address.ip)
+      end
+
+      service.release_address(address.id)
+      released_addresses << address_attributes
+    end
+
+    released_addresses
+  end
 
   def ensure_project_floating_ip_count(project, desired_count, instance=nil)
     service.set_tenant project

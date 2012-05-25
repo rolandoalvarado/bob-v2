@@ -79,6 +79,12 @@ class EnvironmentCleaner
       puts "  #{ project.name }..."
 
       begin
+        puts "    Releasing addresses..."
+        released_addresses = @compute_service.release_addresses_from_project(project)
+        released_addresses.each do |address|
+          puts "     RELEASED: #{ address[:ip] } (id: #{ address[:id] })"
+        end
+
         puts "    Deleting instances..."
         deleted_instances = @compute_service.delete_instances_in_project(project)
         deleted_instances.each do |instance|
