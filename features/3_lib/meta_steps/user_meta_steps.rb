@@ -1,4 +1,4 @@
-Then /^Ensure that a user with username (.+) and password (.+) exists$/ do |username, password|
+Then /^Ensure that a user with username (.+) and password (.+) exists$/i do |username, password|
   username           = Unique.username(username)
   @user_attrs        = CloudObjectBuilder.attributes_for(:user, :name => username, :password => password)
   @user_attrs[:name] = Unique.username(@user_attrs[:name])
@@ -6,7 +6,8 @@ Then /^Ensure that a user with username (.+) and password (.+) exists$/ do |user
   EnvironmentCleaner.register(:user, @user.id)
 end
 
-Then /^Ensure that a user with username (.+) does not exist$/ do |username|
+
+Then /^Ensure that a user with username (.+) does not exist$/i do |username|
   user_attrs = CloudObjectBuilder.attributes_for(:user, :name => username)
   IdentityService.session.ensure_user_does_not_exist(user_attrs)
 end
@@ -56,7 +57,7 @@ Then /^Register the user named (.+) for deletion at exit$/i do |username|
 end
 
 
-Then /^The user (.+) should not exist in the system$/ do |username|
+Then /^The user (.+) should not exist in the system$/i do |username|
   username = Unique.username(username)
 
   sleeping(1).seconds.between_tries.failing_after(20).tries do

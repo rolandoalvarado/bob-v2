@@ -43,7 +43,8 @@ Then /^Ensure that I have a role of (.+) in the test project$/i do |role_name|
   end
 end
 
-Then /^[Rr]egister project (.+) for deletion on exit$/ do |name|
+
+Then /^Register project (.+) for deletion on exit$/i do |name|
   project = IdentityService.session.tenants.reload.find { |p| p.name == name }
   EnvironmentCleaner.register(:project, project.id) if project
 end
