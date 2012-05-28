@@ -8,12 +8,13 @@ class UsersPage < WebClientPage
   form    'New User',                "#user-form"
 
   # Elements in the New User form
-  field    'Username',               "#username"
-  field    'Email',                  "#email"
-  field    'Password',               "#password"
-  dropdown 'Primary Project',        "#project"
-  checkbox 'Project Manager',        "#admin"
-  button   'Create User',            "#submit-user"
+  field    'Username',                    "#username"
+  field    'Email',                       "#email"
+  field    'Password',                    "#password"
+  dropdown 'Primary Project',             "#project"
+  checkbox 'Project Manager',             "#admin"
+  button   'Create User',                 "#submit-user"
+  element  'New User Form Error Message', "#user-form .error"
 
   row      'User',                   "#user-item-<user_id>"
 
