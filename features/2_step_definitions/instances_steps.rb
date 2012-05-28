@@ -608,7 +608,7 @@ Then /^the instance should be resized$/ do
   }
 end
 
-Then /^the instance will reboot$/ do
+Then /^[Tt]he instance will reboot$/ do
   steps %{
     * The instance #{ @instance.id } should be shown as rebooting
   }
