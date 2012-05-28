@@ -112,6 +112,12 @@ class IdentityService < BaseCloudService
     tenant
   end
 
+  def ensure_user_does_not_exist(attributes)
+    if user = find_user_by_name(attributes[:name])
+      delete_user(user)
+    end
+  end
+
   def ensure_user_exists(attributes)
     user = users.find_by_name(attributes[:name])
     if user
@@ -121,6 +127,10 @@ class IdentityService < BaseCloudService
     end
     user.password = attributes[:password]
     user
+  end
+
+  def find_user_by_name(name)
+    users.reload.find_by_name(name)
   end
 
   def find_tenant_by_name(name)

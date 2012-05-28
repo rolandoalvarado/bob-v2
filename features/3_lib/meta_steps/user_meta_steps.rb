@@ -7,8 +7,8 @@ Then /^Ensure that a user with username (.+) and password (.+) exists$/ do |user
 end
 
 Then /^Ensure that a user with username (.+) does not exist$/ do |username|
-  user = IdentityService.session.users.reload.find { |u| u.name == username }
-  IdentityService.session.delete_user(user) if user
+  user_attrs = CloudObjectBuilder.attributes_for(:user, :name => username)
+  IdentityService.session.ensure_user_does_not_exist(user_attrs)
 end
 
 Then /^Ensure that I have a role of (.+) in the system$/i do |role_name|
