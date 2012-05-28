@@ -42,12 +42,12 @@ class EnvironmentCleaner
     @volume_service   = VolumeService.session
   end
 
-  def register(object_type, object_id)
+  def register(object_type, options)
     object_types = [USER, PROJECT]
 
     if object_types.include?(object_type)
       registry[object_type] ||= []
-      registry[object_type] << object_id
+      registry[object_type] << options
     else
       raise "Unknown cloud object type #{ object_type }. Recognized types are " +
             "#{ object_types.join(', ') }."
@@ -113,7 +113,14 @@ class EnvironmentCleaner
     puts "Deleting test users and their memberships..."
 
     user_ids.uniq.each do |user_id|
-      user = @identity_service.users.reload.find { |u| u.id == user_id }
+      if user_id.class == String || (user_id.class == Hash && user_id[:id])
+        user = @identity_service.users.reload.find { |u| u.id == user_id }
+      elsif user_id.class == Hash && user_id[:name]
+        user = @identity_service.users.reload.find { |u| u.name == user_id[:name] }
+      else
+        puts puts "\033[0;33m  WARNING: Unknown user identifier #{ user_id.inspect } \033[m"
+        next
+      end
       next if user.nil? || user.name == 'admin'
       puts "  #{ user.name }..."
 
