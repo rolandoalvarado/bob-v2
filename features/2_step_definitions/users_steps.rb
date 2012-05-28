@@ -4,47 +4,14 @@
 
 Given /^I have a role of (.+) in the system$/ do |role_name|
   steps %{
-    * I am a #{ role_name }
+    * Ensure I have a role of #{ role_name } in the system
   }
 end
 
 Given /^I am an? (System Admin|User)$/ do |role_name|
-  user_attrs       = CloudObjectBuilder.attributes_for(
-                       :user,
-                       :name => Unique.username('rstark')
-                     )
-  identity_service = IdentityService.session
-
-  user             = identity_service.ensure_user_exists(user_attrs)
-  EnvironmentCleaner.register(:user, user.id)
-
-  admin_project = identity_service.tenants.find { |t| t.name == 'admin' }
-  if admin_project.nil? or admin_project.id.empty?
-    raise "Project couldn't be found!"
-  end
-
-  identity_service.revoke_all_user_roles(user, admin_project)
-
-  # Ensure user has the following role in the system
-  if role_name.downcase == "user"
-    role_name = "Member"
-  end
-
-  role = identity_service.roles.find_by_name(RoleNameDictionary.db_name(role_name))
-  if role.nil?
-    raise "Role #{ role_name } couldn't be found. Make sure it's defined in " +
-      "features/support/role_name_dictionary.rb and that it exists in " +
-      "#{ ConfigFile.web_client_url }."
-  end
-
-  begin
-    admin_project.grant_user_role(user.id, role.id)
-  rescue Fog::Identity::OpenStack::NotFound => e
-    raise "Couldn't add #{ user.name } to #{ admin_project.name } as #{ role.name }"
-  end
-
-  # Make variable(s) available for use in succeeding steps
-  @current_user = user
+  steps %{
+    * Ensure I have a role of #{ role_name } in the system
+  }
 end
 
 
@@ -84,9 +51,16 @@ Given /^A user named (.+) exists in the system$/ do |user_name|
   @user = user
 end
 
+Given /^I am authorized to create users in the system$/ do
+  steps %{
+    * Ensure I have a role of System Admin in the system
+  }
+end
+
+
 Given /^I am authorized to delete users$/ do
   steps %{
-    * I am a System Admin
+    * Ensure I have a role of System Admin in the system
   }
 end
 
