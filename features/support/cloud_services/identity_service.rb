@@ -67,7 +67,11 @@ class IdentityService < BaseCloudService
       revoke_all_user_roles(user, tenant)
     end
 
-    user.destroy
+    # Sometimes, OpenStack takes a while to complete the deletion
+    # of all foreign key constraints. So we have to keep trying
+    sleeping(1).seconds.between_tries.failing_after(15).tries do
+      user.destroy
+    end
   end
 
   def ensure_tenant_does_not_exist(attributes)
@@ -140,6 +144,10 @@ class IdentityService < BaseCloudService
   def revoke_all_user_roles(user, tenant)
     user.roles(tenant.id).each do |role|
       tenant.revoke_user_role(user.id, role['id'])
+    end
+
+    sleeping(1).seconds.between_tries.failing_after(15).tries do
+      raise "Roles for user #{ user.name } on tenant #{ tenant.name } took too long to revoke!" if user.roles(tenant.id).length > 0
     end
   end
 
