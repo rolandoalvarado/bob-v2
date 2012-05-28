@@ -22,11 +22,11 @@ Feature: Create a User
       Scenarios: Valid User Attributes
         | Username | Email                | Password | Primary Project | Is PM or Not | Can or Cannot Create | Remarks                                           |
         | astark   | astark@morphlabs.com | fkd2350a | (Any)           | Yes          | Can Create           |                                                   |
-        | astark   | astark@morphlabs.com | ++afd]3b | (Any)           | No           | Can Create           |                                                   |
+        | astark   | astar2@morphlabs.com | ++afd]3b | (Any)           | No           | Can Create           |                                                   |
 
       Scenarios: Invalid User Attributes
         | Username | Email                | Password | Primary Project | Is PM or Not | Can or Cannot Create | Remarks                                           |
-        | (None)   | astark@morphlabs.com | fkd2350a | (Any)           | Yes          | Cannot Create        | Username can't be empty                           |
+        | (None)   | astar3@morphlabs.com | fkd2350a | (Any)           | Yes          | Cannot Create        | Username can't be empty                           |
         | astark   | (None)               | fkd2350a | (Any)           | Yes          | Cannot Create        | Email can't be empty                              |
         | astark   | astark.com           | fkd2350a | (Any)           | Yes          | Cannot Create        | Email format is invalid                           |
-        | astark   | astark@morphlabs.com | fkd2350a | (None)          | No           | Cannot Create        | User must have a primary project                  |
+        | astark   | astar4@morphlabs.com | fkd2350a | (None)          | No           | Cannot Create        | User must have a primary project                  |
