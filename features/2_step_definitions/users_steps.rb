@@ -4,13 +4,13 @@
 
 Given /^I have a role of (.+) in the system$/ do |role_name|
   steps %{
-    * Ensure I have a role of #{ role_name } in the system
+    * Ensure that I have a role of #{ role_name } in the system
   }
 end
 
 Given /^I am an? (System Admin|User)$/ do |role_name|
   steps %{
-    * Ensure I have a role of #{ role_name } in the system
+    * Ensure that I have a role of #{ role_name } in the system
   }
 end
 
@@ -53,14 +53,14 @@ end
 
 Given /^I am authorized to create users in the system$/ do
   steps %{
-    * Ensure I have a role of System Admin in the system
+    * Ensure that I have a role of System Admin in the system
   }
 end
 
 
 Given /^I am authorized to delete users$/ do
   steps %{
-    * Ensure I have a role of System Admin in the system
+    * Ensure that I have a role of System Admin in the system
   }
 end
 
@@ -109,15 +109,15 @@ Then /^s?he will not be able to log in$/ do
 end
 
 Then /^I can create a user$/i do
-  new_user = CloudObjectBuilder.attributes_for(:user, :username => Unique.username('new'))
+  new_user = CloudObjectBuilder.attributes_for(:user, :name => Unique.username('new'))
   me       = @me
 
   steps %{
-    * Delete the user named #{ new_user.name } at exit
+    * Register the user named #{ new_user.name } for deletion at exit
 
     * Ensure that a user with username #{ new_user.name } does not exist
     * Ensure that a test project is available for use
-    * Ensure that I have a role of Project Manager in the project
+    * Ensure that I have a role of Project Manager in the test project
 
     * Click the Logout button if currently logged in
     * Visit the Login page
@@ -158,11 +158,11 @@ end
 Then /^I can create a user with attributes (.+), (.+), (.+), (.+), and (.+)$/i do |username, email, password, primary_project, is_pm_or_not|
   new_user = CloudObjectBuilder.attributes_for(
                :user,
-               :username => Unique.username(username),
+               :name     => Unique.username(username),
                :email    => Unique.email(email),
                :password => password
              )
-  primary_project_choice = case choice
+  primary_project_choice = case primary_project
                            when '(Any)'
                              '2nd'
                            when '(None)'
@@ -173,11 +173,11 @@ Then /^I can create a user with attributes (.+), (.+), (.+), (.+), and (.+)$/i d
   me       = @me
 
   steps %{
-    * Delete the user named #{ new_user.name } at exit
+    * Register the user named #{ new_user.name } for deletion at exit
 
     * Ensure that a user with username #{ new_user.name } does not exist
     * Ensure that a test project is available for use
-    * Ensure that I have a role of Project Manager in the project
+    * Ensure that I have a role of Project Manager in the test project
 
     * Click the Logout button if currently logged in
     * Visit the Login page
@@ -203,11 +203,11 @@ end
 Then /^I cannot create a user with attributes (.+), (.+), (.+), (.+), and (.+)$/i do |username, email, password, primary_project, is_pm_or_not|
   new_user = CloudObjectBuilder.attributes_for(
                :user,
-               :username => Unique.username(username),
-               :email    => Unique.email(email),
+               :name     => ( username.downcase == "(none)" ? username : Unique.username(username) ),
+               :email    => ( email.downcase == "(none)" ? email : Unique.email(email) ),
                :password => password
              )
-  primary_project_choice = case choice
+  primary_project_choice = case primary_project
                            when '(Any)'
                              '2nd'
                            when '(None)'
@@ -218,11 +218,11 @@ Then /^I cannot create a user with attributes (.+), (.+), (.+), (.+), and (.+)$/
   me       = @me
 
   steps %{
-    * Delete the user named #{ new_user.name } at exit
+    * Register the user named #{ new_user.name } for deletion at exit
 
     * Ensure that a user with username #{ new_user.name } does not exist
     * Ensure that a test project is available for use
-    * Ensure that I have a role of Project Manager in the project
+    * Ensure that I have a role of Project Manager in the test project
 
     * Click the Logout button if currently logged in
     * Visit the Login page
