@@ -387,6 +387,11 @@ class ComputeService < BaseCloudService
     security_group
   end
 
+  def ensure_security_group_exist(attributes)
+    security_group = security_groups.find_by_name(attributes[:name]) #rescue nil
+    security_group
+  end
+
   def ensure_security_group_does_not_exist(attributes)
     if security_group = security_groups.find_by_name(attributes[:name])
       delete_security_group(security_group)
