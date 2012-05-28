@@ -72,8 +72,8 @@ class IdentityService < BaseCloudService
 
   def ensure_tenant_does_not_exist(attributes)
     if tenant = tenants.find_by_name(attributes[:name])
-      ComputeService.session.delete_instances_in_project(project)
-      VolumeService.session.delete_volumes_in_project(project)
+      ComputeService.session.delete_instances_in_project(tenant)
+      VolumeService.session.delete_volumes_in_project(tenant)
       delete_tenant(tenant)
     end
   end
