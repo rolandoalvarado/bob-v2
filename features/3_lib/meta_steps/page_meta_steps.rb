@@ -1,3 +1,11 @@
+Then /^(A|An) (.+) element should be visible$/i do |a_or_an, element_name|
+  element_name = element_name.split.join('_').downcase
+  unless @current_page.send("has_#{ element_name }_element?")
+    raise "#{ a_or_an.capitalize } '#{ element_name.gsub('_',' ') }' element should be visible, but it is not."
+  end
+end
+
+
 Then /^A new window should show the instance's VNC console$/ do
   unless @current_page.has_popup_window?('noVNC')
     raise "A new window with the instance's VNC console was not shown!"
@@ -207,6 +215,14 @@ Then /^Set instance name field with (.+)$/ do |instance_name|
     step "Fill in the server name field with #{Unique.name('Instance')}"
   elsif instance_name.downcase  != "(none)"
     step "Fill in the server name field with #{instance_name}"
+  end
+end
+
+
+Then /^The (.+) form should be visible$/ do |form_name|
+  form_name = form_name.split.join('_').downcase
+  unless @current_page.send("has_#{ form_name }_form?")
+    raise "The '#{ form_name.gsub('_',' ') }' form should be visible, but it's not."
   end
 end
 

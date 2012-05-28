@@ -51,9 +51,8 @@ Then /^Ensure that I have a role of (.+) in the system$/i do |role_name|
 end
 
 
-Then /^[Rr]egister user (.+) for deletion on exit$/ do |username|
-  user = IdentityService.session.users.reload.find { |u| u.name == username }
-  EnvironmentCleaner.register(:user, user.id) if user
+Then /^Register the user named (.+) for deletion at exit$/i do |username|
+  EnvironmentCleaner.register(:user, :name => username)
 end
 
 
