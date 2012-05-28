@@ -12,7 +12,7 @@ Then /^Ensure that a user with username (.+) does not exist$/ do |username|
 end
 
 
-Then /^[Rr]egister user (.+) for deletion on exit$/ do |username|
+Then /^Register the user named (.+) for deletion at exit$/ do |username|
   user = IdentityService.session.users.reload.find { |u| u.name == username }
   EnvironmentCleaner.register(:user, user.id) if user
 end
