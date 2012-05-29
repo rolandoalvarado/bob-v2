@@ -58,6 +58,13 @@ Given /^I am authorized to create users in the system$/ do
 end
 
 
+Given /^I am authorized to edit users in the system$/ do
+  steps %{
+    * Ensure that I have a role of System Admin in the system
+  }
+end
+
+
 Given /^I am authorized to delete users$/ do
   steps %{
     * Ensure that I have a role of System Admin in the system
@@ -272,5 +279,149 @@ Then /^I [Cc]annot [Dd]elete (?:that|the) user (.+)$/ do |user_name|
     * Fill in the password field with #{ @current_user.password }
     * Click the login button
     * The Users link should not be visible
+  }
+end
+
+
+Then /^I can edit a user$/i do
+  existing_user = CloudObjectBuilder.attributes_for(:user, :name => Unique.username('existing'))
+  new_attrs     = CloudObjectBuilder.attributes_for(:user, :name => Unique.username('updated'))
+  me            = @me
+
+  steps %{
+    * Register the user named #{ existing_user.name } for deletion at exit
+    * Register the user named #{ new_attrs.name } for deletion at exit
+
+    * Ensure that a user with username #{ existing_user.name } exists
+    * Ensure that a test project is available for use
+    * Ensure that I have a role of Project Manager in the test project
+
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ me.name }
+    * Fill in the Password field with #{ me.password }
+    * Click the Login button
+
+    * Click the Users link
+    * Current page should be the Users page
+    * Click the link for user with username #{ existing_user.name }
+    * Fill in the Username field with #{ new_attrs.name }
+    * Fill in the Email field with #{ new_attrs.email }
+    * Choose the 2nd item in the Primary Project dropdown
+    * Click the Update User button
+    * The Edit User form should not be visible
+    * The #{ new_attrs.name } user row should be visible
+  }
+end
+
+
+Then /^I can update a user with attributes (.+), (.+), (.+), (.+), and (.+)$/i do |username, email, password, primary_project, is_pm_or_not|
+  existing_user = CloudObjectBuilder.attributes_for(:user, :name => Unique.username('existing'))
+  new_attrs     = CloudObjectBuilder.attributes_for(
+                    :user,
+                    :name     => ( username.downcase == "(none)" ? username : Unique.username(username) ),
+                    :email    => ( email.downcase == "(none)" ? email : Unique.email(email) ),
+                    :password => password
+                  )
+  primary_project_choice = case primary_project
+                           when '(Any)'
+                             '2nd'
+                           when '(None)'
+                             '1st'
+                           end
+
+  check_or_uncheck = (is_pm_or_not == "Yes" ? "Check" : "Uncheck")
+  me = @me
+
+  steps %{
+    * Register the user named #{ existing_user.name } for deletion at exit
+    * Register the user named #{ new_attrs.name } for deletion at exit
+
+    * Ensure that a user with username #{ existing_user.name } exists
+    * Ensure that a user with username #{ new_attrs.name } does not exist
+    * Ensure that a test project is available for use
+    * Ensure that I have a role of Project Manager in the test project
+
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ me.name }
+    * Fill in the Password field with #{ me.password }
+    * Click the Login button
+
+    * Click the Users link
+    * Current page should be the Users page
+    * Click the link for user with username #{ existing_user.name }
+    * Fill in the Username field with #{ new_attrs.name }
+    * Fill in the Email field with #{ new_attrs.email }
+    * Fill in the Password field with #{ new_attrs.password }
+    * Choose the #{ primary_project_choice } item in the Primary Project dropdown
+    * #{ check_or_uncheck } the Project Manager checkbox
+    * Click the Update User button
+    * The Edit User form should not be visible
+    * The #{ new_attrs.name } user row should be visible
+  }
+end
+
+
+Then /^I cannot edit a user$/i do
+  me = @me
+
+  steps %{
+    * Click the Logout button if currently logged in
+
+    * Visit the Login page
+    * Fill in the Username field with #{ me.name }
+    * Fill in the Password field with #{ me.password }
+    * Click the Login button
+
+    * The Users link should not be visible
+  }
+end
+
+
+Then /^I cannot update a user with attributes (.+), (.+), (.+), (.+), and (.+)$/i do |username, email, password, primary_project, is_pm_or_not|
+  existing_user = CloudObjectBuilder.attributes_for(:user, :name => Unique.username('existing'))
+  new_attrs     = CloudObjectBuilder.attributes_for(
+                    :user,
+                    :name     => ( username.downcase == "(none)" ? username : Unique.username(username) ),
+                    :email    => ( email.downcase == "(none)" ? email : Unique.email(email) ),
+                    :password => password
+                  )
+  primary_project_choice = case primary_project
+                           when '(Any)'
+                             '2nd'
+                           when '(None)'
+                             '1st'
+                           end
+
+  check_or_uncheck = (is_pm_or_not == "Yes" ? "Check" : "Uncheck")
+  me = @me
+
+  steps %{
+    * Register the user named #{ existing_user.name } for deletion at exit
+    * Register the user named #{ new_attrs.name } for deletion at exit
+
+    * Ensure that a user with username #{ existing_user.name } exists
+    * Ensure that a user with username #{ new_attrs.name } does not exist
+    * Ensure that a test project is available for use
+    * Ensure that I have a role of Project Manager in the test project
+
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ me.name }
+    * Fill in the Password field with #{ me.password }
+    * Click the Login button
+
+    * Click the Users link
+    * Current page should be the Users page
+    * Click the link for user with username #{ existing_user.name }
+    * Fill in the Username field with #{ new_attrs.name }
+    * Fill in the Email field with #{ new_attrs.email }
+    * Fill in the Password field with #{ new_attrs.password }
+    * Choose the #{ primary_project_choice } item in the Primary Project dropdown
+    * #{ check_or_uncheck } the Project Manager checkbox
+    * Click the Update User button
+    * The Edit User form should be visible
+    * An Edit User Form Error Message element should be visible
   }
 end

@@ -98,6 +98,17 @@ Then /^Click the (.+) project$/ do |project_name|
   @current_page = ProjectPage.new
 end
 
+Then /^Click the row for user with id (.+)$/i do |user_id|
+  user_id.strip!
+  @current_page.user_link(id: user_id).click
+end
+
+Then /^Click the link for user with username (.+)$/i do |username|
+  user = IdentityService.session.find_user_by_name(username.strip)
+  raise "ERROR: I couldn't find a user with username '#{ username }'." unless user
+  @current_page.user_link(user_id: user.id).click
+end
+
 
 Then /^Click the (.+) image$/ do |image_name|
   @current_page.image_element( name: image_name.strip ).click
@@ -230,7 +241,7 @@ end
 Then /^The (.+) form should not be visible$/ do |form_name|
   name = form_name.split.join('_').downcase
   unless @current_page.send("has_no_#{ name }_form?")
-    raise "The #{ form_name } should not be visible, but it is."
+    raise "The #{ form_name } form should not be visible, but it is."
   end
 end
 

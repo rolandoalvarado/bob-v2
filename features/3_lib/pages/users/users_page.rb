@@ -6,17 +6,21 @@ class UsersPage < WebClientPage
 
   button  'New User',                "#create-user"
   form    'New User',                "#user-form"
+  form    'Edit User',               "#user-form"
 
-  # Elements in the New User form
+  # Elements in the User form
   field    'Username',                    "#username"
   field    'Email',                       "#email"
   field    'Password',                    "#password"
   dropdown 'Primary Project',             "#project"
   checkbox 'Project Manager',             "#admin"
   button   'Create User',                 "#submit-user"
+  button   'Update User',                 "#submit-user"
   element  'New User Form Error Message', "#user-form .error"
+  element  'Edit User Form Error Message', "#user-form .error"
 
   row      'User',                   "#user-item-<user_id>"
+  link     'User',                   "#user-item-<user_id> td"
 
   # The 'username' cell in the Users table
   element 'Username',              xpath: "//tr[@class='user']/td[text()='<name>']"
