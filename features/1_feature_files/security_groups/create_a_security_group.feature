@@ -19,7 +19,7 @@ Feature: Create a Security Group
     * A project exists in the system
 
 
-  @permissions @jira-MCF-32-scenario
+  @permissions @jira-MCF-32-cup
   Scenario Outline: Check User Permissions
     Given I have a role of <Role> in the project
      Then I <Can or Cannot Create> a security group in the project
@@ -33,7 +33,7 @@ Feature: Create a Security Group
         | Role            | Can or Cannot Create |
         | (None)          | Cannot Create        |
 
-
+  @jira-MCF-32-csg
   Scenario Outline: Create a Security Group
     Given I am authorized to create a security group in the project
       And the project has no security groups

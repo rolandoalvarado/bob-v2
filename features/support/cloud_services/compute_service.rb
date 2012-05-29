@@ -317,7 +317,9 @@ class ComputeService < BaseCloudService
     raise "#{ JSON.parse(e.response.body)['badRequest']['message'] }"
   end
 
-   def create_security_group(attributes)
+   def create_security_group(project, attributes)
+    service.set_tenant project
+    security_group = service.security_groups    
     security_group = security_groups.new(attributes)
     security_group.save
     security_group
@@ -327,30 +329,74 @@ class ComputeService < BaseCloudService
     security_group.destroy
   end
 
-  def ensure_security_group_exists(attributes)
-    security_group = security_groups.find_by_name(attributes[:name]) rescue nil
-    if security_group
-      security_group.update(attributes)
+  def ensure_security_group_exists(project, attributes)
+    service.set_tenant project
+    security_group = service.security_groups
+    security_group_attrs = security_groups.find_by_name(attributes[:name]) rescue nil
+    if security_group_attrs
+      security_group_attrs.update(attributes)
     else
-      security_group = create_security_group(attributes)
+      security_group_attrs = create_security_group(project, attributes)
     end
-    security_group.description = attributes[:description]
-    security_group
+    security_group_attrs.description = attributes[:description]
+    security_group_attrs
   end
 
-  def ensure_security_group_exist(attributes)
-    security_group = security_groups.find_by_name(attributes[:name]) #rescue nil
-    security_group
+  def ensure_project_security_group_count(project, desired_count, instance=nil)
+    service.set_tenant project
+    keep_trying do
+      security_groups.reload
+      actual_count = security_groups.count
+
+      if desired_count > actual_count
+
+        how_many = desired_count - actual_count
+        how_many.times do |n|
+          service.allocate_security_group
+          sleep(0.5)
+        end
+        security_groups.reload
+
+        # Security Groups should usually be associated to an instance
+        if instance
+          how_many.times do |n|
+            service.associate_security_group(instance.id, security_groups[n].id)
+            sleep(0.5)
+          end
+          security_groups.reload
+        end
+
+      elsif desired_count < security_groups.length
+
+        while security_groups.length > desired_count
+          security_groups.reload
+          security_groups[0].destroy rescue nil
+        end
+
+      end
+
+      if security_groups.length != desired_count
+        raise "Couldn't ensure that #{ project.name } has #{ desired_count } " +
+              "Security Groups. Current number of security groups is #{ security_groups.length }."
+      end
+
+      security_groups.length
+    end
   end
 
-  def ensure_security_group_does_not_exist(attributes)
+  def ensure_security_group_does_not_exist(project, attributes)
+    service.set_tenant project
+    security_group = service.security_groups
     if security_group = security_groups.find_by_name(attributes[:name])
       delete_security_group(security_group)
     end
   end
 
-  def find_security_group_by_name(name)
-    security_groups.find_by_name(name)
+  def find_security_group_by_name(project, name)
+    service.set_tenant project
+    security_group = service.security_groups  
+    security_group.find_by_name(name)
+    security_group
   end
 
   private
