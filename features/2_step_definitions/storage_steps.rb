@@ -83,6 +83,36 @@ Then /^I [Cc]an [Cc]reate a volume in the project$/ do
   @volume_attrs = attrs
 end
 
+Then /^I [Cc]an [Cc]reate a snapshot of the volume$/ do
+  volume_service = VolumeService.session
+  volume_service.set_tenant @project
+  volume_service.reload_volumes
+  volume         = volume_service.volumes.last
+  snapshot       = CloudObjectBuilder.attributes_for(:snapshot)
+
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * Click the #{ @project.name } project
+
+    * Click the volume menu button for volume #{ volume['id'] }
+    * Click the new volume snapshot button for volume #{ volume['id'] }
+    * Current page should have the new volume snapshot form
+    * Fill in the volume snapshot name field with #{ snapshot.name }
+    * Fill in the volume snapshot description field with #{ snapshot.description }
+    * Click the create volume snapshot button
+
+    * Click the snapshots tab link 
+    * The volume snapshots table should include the text #{ snapshot.name }
+  }
+end
+
 Then /^I [Cc]annot [Cc]reate a volume in the project$/ do
   steps %{
     * Click the logout button if currently logged in

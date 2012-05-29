@@ -6,7 +6,8 @@ class VolumeService < BaseCloudService
 
   def initialize
     initialize_service Volume
-    @volumes = service.list_volumes.body['volumes']
+    @volumes   = service.list_volumes.body['volumes']
+    @snapshots = service.list_snapshots.body['snapshots']
   end
 
   def assert_volume_count(project, desired_count)
@@ -41,11 +42,31 @@ class VolumeService < BaseCloudService
     deleted_volumes
   end
 
+  def delete_volume_snapshots_in_project(project)
+    deleted_snapshots = []
+    set_tenant project
+    reload_snapshots
+
+    @snapshots.each do |snapshot|
+      deleted_snapshots << { name: snapshot['display_name'], id: snapshot['id'] }
+      service.delete_snapshot snapshot['id']
+    end
+
+    set_tenant 'admin'
+    reload_snapshots
+    deleted_snapshots
+  end
+
   def ensure_volume_count(project, desired_count)
     set_tenant(project)
-    @volumes = service.list_volumes.body['volumes']
+    reload_volumes
     try_fixing_volume_count(project, desired_count)
-    true
+    reload_volumes
+    @volumes.count
+  end
+
+  def reload_snapshots
+    @snapshots = service.list_snapshots.body['snapshots']
   end
 
   def reload_volumes

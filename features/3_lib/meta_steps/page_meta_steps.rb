@@ -92,6 +92,12 @@ Then /^Click the (.+) button for instance (.+)$/ do |button_name, instance_id|
 end
 
 
+Then /^Click the (.+) button for volume (.+)$/ do |button_name, volume_id|
+  button_name = button_name.split.join('_').downcase
+  @current_page.send("#{ button_name }_button", id: volume_id).click
+end
+
+
 Then /^Click the (.+) project$/ do |project_name|
   project_name.strip!
   @current_page.project_link( name: project_name ).click
