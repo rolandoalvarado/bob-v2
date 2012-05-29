@@ -1,0 +1,34 @@
+---
+TTY:
+  username: root
+  password: password
+
+'Ubuntu 10.04 (Lucid)':
+  username: root
+  password: s3l3ct10n
+
+'Ubuntu 11.04 (Oneiric)':
+  username: root
+  password: s3l3ct10n
+
+'CentOS 5.8':
+  username: root
+  password: s3l3ct10n
+
+'CentOS 6.3':
+  username: root
+  password: s3l3ct10n
+
+'Windows 2008-R2-Server':
+  username: Administrator
+  password:
+    - s3l3ct10n
+    - !23admin
+
+'Windows 2003 Server':
+  username: Administrator
+  password: s3l3ct10n
+
+'Windows 7':
+  username: Administrator
+  password: s3l3ct10n
