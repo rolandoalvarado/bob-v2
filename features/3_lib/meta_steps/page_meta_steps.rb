@@ -108,6 +108,12 @@ Then /^Click the (.+) button for volume (.+)$/ do |button_name, volume_id|
 end
 
 
+Then /^Click the (.+) button for volume snapshot named (.+)$/ do |button_name, snapshot_name|
+  button_name = button_name.split.join('_').downcase
+  @current_page.send("#{ button_name }_button", name: snapshot_name).click
+end
+
+
 Then /^Click the (.+) project$/ do |project_name|
   project_name.strip!
   @current_page.project_link( name: project_name ).click
