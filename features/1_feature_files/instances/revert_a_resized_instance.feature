@@ -1,4 +1,4 @@
-@future
+@future @jira-MCF-20
 Feature: Revert a Resized Instance
   This is a placeholder. Not expected to be implemented in Chrysalis
 
