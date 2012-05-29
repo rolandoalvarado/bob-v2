@@ -2,7 +2,7 @@ require_relative 'base_cloud_service'
 
 class VolumeService < BaseCloudService
 
-  attr_reader :volumes, :current_project
+  attr_reader :volumes, :snapshots, :current_project
 
   def initialize
     initialize_service Volume
@@ -12,11 +12,10 @@ class VolumeService < BaseCloudService
 
   def assert_volume_count(project, desired_count)
     set_tenant(project)
-    @volumes = service.list_volumes.body['volumes']
 
-    if @volumes.count != desired_count
+    if volumes.count != desired_count
       raise "Couldn't ensure that #{ project.name } has #{ desired_count } " +
-            "volumes. Current number of volumes is #{ @volumes.length }."
+            "volumes. Current number of volumes is #{ volumes.length }."
     end
   end
 
@@ -30,7 +29,6 @@ class VolumeService < BaseCloudService
   def delete_volumes_in_project(project)
     deleted_volumes = []
     set_tenant project
-    reload_volumes
 
     volumes.each do |volume|
       deleted_volumes << { name: volume['display_name'], id: volume['id'] }
@@ -38,31 +36,56 @@ class VolumeService < BaseCloudService
     end
 
     set_tenant 'admin'
-    reload_volumes
     deleted_volumes
   end
 
   def delete_volume_snapshots_in_project(project)
     deleted_snapshots = []
     set_tenant project
-    reload_snapshots
 
-    @snapshots.each do |snapshot|
+    snapshots.each do |snapshot|
       deleted_snapshots << { name: snapshot['display_name'], id: snapshot['id'] }
       service.delete_snapshot snapshot['id']
     end
 
     set_tenant 'admin'
-    reload_snapshots
     deleted_snapshots
   end
 
   def ensure_volume_count(project, desired_count)
-    set_tenant(project)
-    reload_volumes
+    set_tenant project
     try_fixing_volume_count(project, desired_count)
     reload_volumes
-    @volumes.count
+    volumes.count
+  end
+
+  def ensure_volume_snapshot_count(project, volume, desired_count, strict = true)
+    set_tenant(project, false)
+
+    sleeping(5).seconds.between_tries.failing_after(10).tries do
+      reload_snapshots
+
+      count_difference = (snapshots.count - desired_count).abs
+      if snapshots.count < desired_count
+        count_difference.times do
+          create_volume_snapshot(volume)
+          sleep(0.5)
+        end
+      elsif strict && snapshots.count > desired_count
+        count_difference.times do |i|
+          service.delete_snapshot(snapshots[i]['id'])
+          sleep(0.5)
+        end
+      end
+
+      reload_snapshots
+      if snapshots.count != desired_count
+        raise "Couldn't ensure that #{ project.name } has #{ desired_count } " +
+              "volume snapshots. Current number of volume snapshots is #{ @snapshots.count }."
+      end
+
+      return snapshots.count
+    end
   end
 
   def reload_snapshots
@@ -71,6 +94,17 @@ class VolumeService < BaseCloudService
 
   def reload_volumes
     @volumes = service.list_volumes.body['volumes']
+  end
+
+  def set_tenant(project, reload = true)
+    if @current_project != project
+      @current_project = project
+      service.set_tenant(project)
+    end
+    if reload
+      reload_volumes
+      reload_snapshots
+    end
   end
 
 private
@@ -90,13 +124,6 @@ private
       end
 
       assert_volume_count(project, desired_count)
-    end
-  end
-
-  def set_tenant(project)
-    if(@current_project != project)
-      @current_project = project
-      service.set_tenant(project)
     end
   end
 

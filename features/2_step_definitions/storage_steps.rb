@@ -86,8 +86,8 @@ end
 Then /^I [Cc]an [Cc]reate a snapshot of the volume$/ do
   volume_service = VolumeService.session
   volume_service.set_tenant @project
-  volume_service.reload_volumes
   volume         = volume_service.volumes.last
+  volume_service.ensure_volume_snapshot_count(@project, volume, 0)
   snapshot       = CloudObjectBuilder.attributes_for(:snapshot)
 
   steps %{

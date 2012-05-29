@@ -253,6 +253,7 @@ end
 
 
 Then /^The (.+) table should include the text (.+)$/ do |table_name, text|
+  table_name = table_name.split.join('_').downcase
   unless @current_page.send("#{ table_name }_table").has_content?(text)
     raise "Couldn't find the text '#{ text }' in the #{ table_name } table."
   end
