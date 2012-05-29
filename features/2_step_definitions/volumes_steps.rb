@@ -26,6 +26,14 @@ Given /^I am authorized to create volumes in the project$/ do
   }
 end
 
+Given /^The volume has (\d+) saved snapshots?$/ do |number_of_snapshots|
+  number_of_snapshots = number_of_snapshots.to_i
+  volume_service      = VolumeService.session
+  volume_service.set_tenant @project
+  volume              = volume_service.volumes.last
+  total_snapshots     = volume_service.ensure_volume_snapshot_count(@project, volume, number_of_snapshots)
+end
+
 
 #=================
 # WHENs
@@ -191,6 +199,30 @@ Then /^I [Cc]an [Cc]reate a snapshot of the volume$/ do
 
     * Click the snapshots tab
     * The volume snapshots table should include the text #{ snapshot.name }
+  }
+end
+
+Then /^I [Cc]an [Dd]elete a snapshot of the volume$/ do
+  volume_service = VolumeService.session
+  volume_service.set_tenant @project
+  snapshot       = volume_service.snapshots.last
+
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * Click the #{ @project.name } project
+
+    * Click the snapshots tab
+    * Click the volume snapshot menu button for volume snapshot named #{ snapshot['display_name'] }
+    * Click the delete volume snapshot button for volume snapshot named #{ snapshot['display_name'] }
+    * Click the confirm volume snapshot deletion button
+    * The volume snapshots table should not include the text #{ snapshot['display_name'] }
   }
 end
 
