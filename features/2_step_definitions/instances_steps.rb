@@ -601,14 +601,14 @@ Then /^the instance is publicly accessible via that floating IP$/ do
   }
 end
 
-Then /^the instance should be resized$/ do
+Then /^the instance should be resized$/i do
   old_flavor = @instance.flavor
   step %{
     * The instance #{ @instance.id } should not have flavor #{ old_flavor }
   }
 end
 
-Then /^[Tt]he instance will reboot$/ do
+Then /^the instance will reboot$/i do
   steps %{
     * The instance #{ @instance.id } should be shown as rebooting
   }
