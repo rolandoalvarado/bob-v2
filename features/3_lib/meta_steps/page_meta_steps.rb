@@ -92,6 +92,12 @@ Then /^Click the (.+) button for instance (.+)$/ do |button_name, instance_id|
 end
 
 
+Then /^Click the (.+) button for volume (.+)$/ do |button_name, volume_id|
+  button_name = button_name.split.join('_').downcase
+  @current_page.send("#{ button_name }_button", id: volume_id).click
+end
+
+
 Then /^Click the (.+) project$/ do |project_name|
   project_name.strip!
   @current_page.project_link( name: project_name ).click
@@ -247,6 +253,7 @@ end
 
 
 Then /^The (.+) table should include the text (.+)$/ do |table_name, text|
+  table_name = table_name.split.join('_').downcase
   unless @current_page.send("#{ table_name }_table").has_content?(text)
     raise "Couldn't find the text '#{ text }' in the #{ table_name } table."
   end

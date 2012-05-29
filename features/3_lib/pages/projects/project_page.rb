@@ -39,6 +39,16 @@ class ProjectPage < WebClientPage
   button    'create volume',       '#save-volume'
   table     'volumes',             '#volume-template tbody'
 
+# Type      Name                           Selector
+  button    'volume menu',                 '#volume-item-<id> .dropdown-toggle'
+  button    'new volume snapshot',         '#volume-item-<id> #create-snapshot'
+  form      'new volume snapshot',         '#create-snapshot-modal'
+  field     'volume snapshot name',        '#create-snapshot-modal #name'
+  field     'volume snapshot description', '#create-snapshot-modal #textarea'
+  button    'create volume snapshot',      '#create-snapshot-modal .create-snapshot'
+  link      'snapshots tab',               '.nav-tabs .snapshots a'
+  table     'volume snapshots',            '#volume-snapshot-list'
+
 # Type      Name                    Selector
   span      'new volume form error', 'span.error[for="name"], span.error[for="appendedInput"]'
 

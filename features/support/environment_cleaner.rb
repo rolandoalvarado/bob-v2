@@ -91,6 +91,12 @@ class EnvironmentCleaner
           puts "      DELETED: #{ instance[:name] } (id: #{ instance[:id] })"
         end
 
+        puts "    Deleting volume snapshots..."
+        deleted_volume_snapshots = @volume_service.delete_volume_snapshots_in_project(project)
+        deleted_volume_snapshots.each do |snapshot|
+          puts "      DELETED: #{ snapshot[:name] } (id: #{ snapshot[:id] })"
+        end
+
         puts "    Deleting volumes..."
         deleted_volumes = @volume_service.delete_volumes_in_project(project)
         deleted_volumes.each do |volume|
