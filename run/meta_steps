@@ -1,0 +1,24 @@
+#!/usr/bin/env ruby
+description="Lists all meta steps in alphabetical order and where they are defined"
+
+if ARGV.length == 2 and ARGV[0] == 'describe'
+  basename = File.basename(__FILE__).to_s.ljust(ARGV[1].to_i)
+  print "  #{basename} - #{description}"
+  exit 0
+end
+
+@meta_steps = []
+
+def Then(regex)
+  @meta_steps << "\033[0;32m#{ regex.inspect.gsub(/(\/\^|\$\/.?)/, '').ljust(70) }\t\033[0;33m#{ caller[0].to_s.match(/^.+\/(.+\.rb:\d+)/)[1] }\033[m"
+end
+
+path = '../../features/3_lib/meta_steps'
+dir  = Dir.open(File.expand_path(path, __FILE__))
+rbs  = dir.entries.select { |e| /\.rb$/ =~ e }
+rbs.each do |rb|
+  require_relative "#{ File.expand_path(path, __FILE__) }/#{ rb }"
+end
+
+@meta_steps.sort! { |a,b| a <=> b }
+@meta_steps.each { |mt| puts mt }
