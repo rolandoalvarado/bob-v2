@@ -369,11 +369,11 @@ class Page
   #=====================
 
   def has_expected_path?
-    expected_path == actual_path
+    retry_before_returning_false { expected_path == actual_path }
   end
 
   def has_expected_url?
-    expected_url == actual_url
+    retry_before_returning_false { expected_url == actual_url }
   end
 
   def has_popup_window?(selector)

@@ -1,3 +1,11 @@
+Then /^(A|An) (.+) element should be visible$/i do |a_or_an, element_name|
+  element_name = element_name.split.join('_').downcase
+  unless @current_page.send("has_#{ element_name }_element?")
+    raise "#{ a_or_an.capitalize } '#{ element_name.gsub('_',' ') }' element should be visible, but it is not."
+  end
+end
+
+
 Then /^A new window should show the instance's VNC console$/ do
   unless @current_page.has_popup_window?('noVNC')
     raise "A new window with the instance's VNC console was not shown!"
@@ -88,6 +96,17 @@ Then /^Click the (.+) project$/ do |project_name|
   project_name.strip!
   @current_page.project_link( name: project_name ).click
   @current_page = ProjectPage.new
+end
+
+Then /^Click the row for user with id (.+)$/i do |user_id|
+  user_id.strip!
+  @current_page.user_link(id: user_id).click
+end
+
+Then /^Click the link for user with username (.+)$/i do |username|
+  user = IdentityService.session.find_user_by_name(username.strip)
+  raise "ERROR: I couldn't find a user with username '#{ username }'." unless user
+  @current_page.user_link(user_id: user.id).click
 end
 
 
@@ -211,10 +230,18 @@ Then /^Set instance name field with (.+)$/ do |instance_name|
 end
 
 
+Then /^The (.+) form should be visible$/ do |form_name|
+  form_name = form_name.split.join('_').downcase
+  unless @current_page.send("has_#{ form_name }_form?")
+    raise "The '#{ form_name.gsub('_',' ') }' form should be visible, but it's not."
+  end
+end
+
+
 Then /^The (.+) form should not be visible$/ do |form_name|
   name = form_name.split.join('_').downcase
   unless @current_page.send("has_no_#{ name }_form?")
-    raise "The #{ form_name } should not be visible, but it is."
+    raise "The #{ form_name } form should not be visible, but it is."
   end
 end
 

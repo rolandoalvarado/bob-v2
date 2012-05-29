@@ -21,6 +21,11 @@
 # can just re-use the objects each time it is executed.
 
 module Unique
+  def self.email(value)
+    prefix = alpha[0, 4]
+    "#{ prefix }_#{ value }"
+  end
+
   def self.username(value = '', length = 16)
     self.string_without_whitespace(value, length)
   end
