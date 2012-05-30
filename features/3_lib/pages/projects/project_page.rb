@@ -86,5 +86,16 @@ class ProjectPage < WebClientPage
   button    'confirm instance reboot',       "#alert-template .okay"
   button    'confirm instance resize',       "#resize-instance-modal .action-resize-instance"
 
-  element   'image', xpath: "//*[@id='instances-list']//label[text()='<name>']"
+  element   'image', xpath: "//*[@id='instances-list']//label[text()='<name>'
+
+  #==========================
+  # Collaborators
+  #==========================
+  link      'collaborators tab',           '.nav-tabs .collaborators a'  
+  button    'add collaborator',          '#add-collaborator:not(.disabled)'
+  button    'disabled add collaborator', '#add-collaborator.disabled'
+  
+
+]"
+
 end

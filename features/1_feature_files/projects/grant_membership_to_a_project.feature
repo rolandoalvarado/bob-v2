@@ -1,3 +1,4 @@
+@jira-MCF-28
 Feature: Grant Membership to a Project
   As a project owner, I want to grant project membership to other users so
   that they can help me manage the resources in it.
@@ -24,7 +25,8 @@ Feature: Grant Membership to a Project
 
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Grant |
-        | Admin           | Can Grant           |
+        | System Admin    | Can Grant           |
+        | Project Admin   | Can Grant           |
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Grant |

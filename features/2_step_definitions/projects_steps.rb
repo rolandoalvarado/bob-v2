@@ -305,6 +305,25 @@ Then /^I Can Create a project$/ do
   @project_attrs = attrs
 end
 
+Then /^I can grant project membership to (.+)$/i do |username|
+
+  steps %{
+
+    * Click the logout button if currently logged in
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * The #{ (@project || @project_attrs).name  } project should be visible
+    * Click the #{ (@project || @project_attrs).name } project
+
+    * Click the collaborators tab link
+    * Click the add collaborator button
+  }
+
+end
 
 Then /^I [Cc]an [Vv]iew (?:that|the) project$/ do
   steps %{
@@ -368,6 +387,7 @@ Then /^I [Cc]annot [Dd]elete (?:that|the) project$/ do
 
     * Visit the projects page
     * The #{ (@project || @project_attrs).name } project should be visible
+
   }
 
   # Deleting row in the page is asynchronous. So script has to wait 5 seconds.
