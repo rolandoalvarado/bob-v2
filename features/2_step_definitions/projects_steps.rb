@@ -31,6 +31,12 @@ Given /^The project has (\d+) active instances?$/ do |number_of_instances|
   total_instances     = compute_service.ensure_active_instance_count(@project, number_of_instances)
 end
 
+Given /^The project has (\d+) available volumes?$/ do |number_of_volumes|
+  number_of_volumes = number_of_volumes.to_i
+  volume_service    = VolumeService.session
+  total_volumes     = volume_service.ensure_volume_count(@project, number_of_volumes)
+end
+
 Given /^The project has (\d+) paused instances?$/ do |number_of_instances|
   number_of_instances = number_of_instances.to_i
   compute_service     = ComputeService.session

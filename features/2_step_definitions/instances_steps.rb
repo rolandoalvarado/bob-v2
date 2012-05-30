@@ -52,6 +52,7 @@ end
 When /^I create an instance on that project based on the image (.+)$/ do |image_name|
   compute_service = ComputeService.session
   instance_name = Unique.name('Instance')
+  @image_name = image_name
 
   steps %{
     * Click the logout button if currently logged in
@@ -65,13 +66,13 @@ When /^I create an instance on that project based on the image (.+)$/ do |image_
     * Click the #{ @project.name } project
     * Click the new instance button
     * Current page should have the new instance form
-    * Click the #{ image_name } image
+    * Click the #{ @image_name } image
     * Fill in the server name field with #{ instance_name }
     * Check the 1st item in the security groups checklist
     * Click the create instance button
   }
 
-  @instance = compute_service.ensure_project_instance_is_active(@project, instance_name)
+  @instance   = compute_service.ensure_project_instance_is_active(@project, instance_name)
 end
 
 When /^I pause the instance in the project$/ do
@@ -315,7 +316,7 @@ Then /^I can connect to that instance via (.+)/ do |remote_client|
     * Visit the projects page
     * Click the #{ @project.name } project
     * Click the access security tab link
-    * Connect to instance with floating IP #{ floating_ip.id } via SSH
+    * Connect to #{ @image_name } instance with floating IP #{ floating_ip.id } via SSH
   }
 end
 
@@ -337,7 +338,7 @@ Then /^I cannot connect to that instance via (.+)/ do |remote_client|
     * Visit the projects page
     * Click the #{ @project.name } project
     * Click the access security tab link
-    * Fail connecting to instance with floating IP #{ floating_ip.id } via SSH
+    * Fail connecting to #{ @image_name } instance with floating IP #{ floating_ip.id } via SSH
   }
 end
 
@@ -601,14 +602,14 @@ Then /^the instance is publicly accessible via that floating IP$/ do
   }
 end
 
-Then /^the instance should be resized$/ do
+Then /^the instance should be resized$/i do
   old_flavor = @instance.flavor
   step %{
     * The instance #{ @instance.id } should not have flavor #{ old_flavor }
   }
 end
 
-Then /^[Tt]he instance will reboot$/ do
+Then /^the instance will reboot$/i do
   steps %{
     * The instance #{ @instance.id } should be shown as rebooting
   }

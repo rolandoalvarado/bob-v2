@@ -1,12 +1,4 @@
-Then /^Ensure that a user with username (.+) exists$/ do |username|
-  username   = Unique.username(username)
-  user_attrs = CloudObjectBuilder.attributes_for(:user, :name => username)
-  user       = IdentityService.session.ensure_user_exists(user_attrs)
-  EnvironmentCleaner.register(:user, user.id)
-end
-
-
-Then /^Ensure that a user with username (.+) and password (.+) exists$/i do |username, password|
+Then /^Ensure that a user has password (.+) and username (.+) $/i do |password,username|
   username           = Unique.username(username)
   @user_attrs        = CloudObjectBuilder.attributes_for(:user, :name => username, :password => password)
   @user_attrs[:name] = Unique.username(@user_attrs[:name])
@@ -14,6 +6,12 @@ Then /^Ensure that a user with username (.+) and password (.+) exists$/i do |use
   EnvironmentCleaner.register(:user, @user.id)
 end
 
+Then /^Ensure that a user with username (.+) exists$/i do |username|
+  username   = Unique.username(username)
+  user_attrs = CloudObjectBuilder.attributes_for(:user, :name => username)
+  user       = IdentityService.session.ensure_user_exists(user_attrs)
+  EnvironmentCleaner.register(:user, user.id)
+end
 
 Then /^Ensure that a user with username (.+) does not exist$/i do |username|
   user_attrs = CloudObjectBuilder.attributes_for(:user, :name => username)

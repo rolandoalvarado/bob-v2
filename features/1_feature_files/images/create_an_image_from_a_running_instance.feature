@@ -1,3 +1,4 @@
+@jira-MCF-10
 Feature: Create an Image from a Running Instance
   As a user, I want to create an image from a running instance, so that I can
   easily create one or more exact copies of the instance.
@@ -10,8 +11,7 @@ Feature: Create an Image from a Running Instance
 
   Background:
     * A project exists in the system
-    * The project has a running instance
-
+    * The project has 1 active instance
 
   @permissions
   Scenario Outline: Check User Permissions
