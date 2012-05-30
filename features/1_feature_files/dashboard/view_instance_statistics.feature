@@ -1,4 +1,4 @@
-@jira-DWC-16
+@jira-DWC-16 @jira-MCF-8
 Feature: View Instance Statistics
   As a user, I want to see the statistics for my instance, so that I will know
   if I need to do something about its capacity or configuration.
@@ -18,7 +18,7 @@ Feature: View Instance Statistics
 
   Background:
     * A project exists in the system
-    * The project has a running instance
+    * The project has 1 active instance
 
 
   @permissions
@@ -29,7 +29,8 @@ Feature: View Instance Statistics
       Scenarios: Authorized Roles
         | Role            | Can or Cannot View |
         | Member          | Can View           |
-        | Admin           | Can View           |
+        | System Admin    | Can View           |
+        | Project Manager | Can View           |
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot View |

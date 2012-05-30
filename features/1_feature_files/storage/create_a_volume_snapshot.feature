@@ -1,11 +1,12 @@
+@jira-MCF-37
 Feature: Create a Volume Snapshot
   As an authorized user, I want to create a snapshot of one of my volumes so
   that I can revert to it as needed.
 
   Background:
     * A project exists in the system
-    * The project has a running instance
-    * The project has an available volume
+    * The project has 1 active instance
+    * The project has 1 available volume
 
 
   @permissions
@@ -16,9 +17,4 @@ Feature: Create a Volume Snapshot
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Create |
         | Member          | Can Create           |
-        | Admin           | Can Create           |
-
-      Scenarios: Unauthorized Roles
-        | Role            | Can or Cannot Create |
-        | (None)          | Cannot Create        |
-
+        | Project Manager | Can Create           |

@@ -39,6 +39,12 @@ module CloudObjectBuilder
     attributes[:size]        ||= attributes.delete('size') || 1
     BetterHash.new.merge(attributes)
   end
+
+  def self.attributes_for_snapshot(attributes)
+    attributes[:name]        ||= attributes.delete('name') || Faker::Company.name
+    attributes[:description] ||= attributes.delete('description') || Faker::Lorem.paragraph
+    BetterHash.new.merge(attributes)
+  end
 end
 
 class BetterHash < Hash
