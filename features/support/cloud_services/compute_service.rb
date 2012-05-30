@@ -342,46 +342,20 @@ class ComputeService < BaseCloudService
     security_group_attrs
   end
 
-  def ensure_project_security_group_count(project, desired_count, instance=nil)
+  def ensure_project_security_group_count(project, desired_count)
     service.set_tenant project
-    keep_trying do
-      security_groups.reload
-      actual_count = security_groups.count
-
-      if desired_count > actual_count
-
-        how_many = desired_count - actual_count
-        how_many.times do |n|
-          service.allocate_security_group
-          sleep(0.5)
-        end
+    security_groups = service.security_groups
+    security_groups_count = security_groups.count
+    #raise "Desired Count is #{desired_count}; security_groups_count is #{security_groups_count}"
+    if desired_count < security_groups_count
+      i = security_groups_count  
+      while i > desired_count
         security_groups.reload
-
-        # Security Groups should usually be associated to an instance
-        if instance
-          how_many.times do |n|
-            service.associate_security_group(instance.id, security_groups[n].id)
-            sleep(0.5)
-          end
-          security_groups.reload
-        end
-
-      elsif desired_count < security_groups.length
-
-        while security_groups.length > desired_count
-          security_groups.reload
-          security_groups[0].destroy rescue nil
-        end
-
+        security_groups[i].destroy rescue nil
+        i = i - 1
       end
-
-      if security_groups.length != desired_count
-        raise "Couldn't ensure that #{ project.name } has #{ desired_count } " +
-              "Security Groups. Current number of security groups is #{ security_groups.length }."
-      end
-
-      security_groups.length
     end
+    security_groups
   end
 
   def ensure_security_group_does_not_exist(project, attributes)
