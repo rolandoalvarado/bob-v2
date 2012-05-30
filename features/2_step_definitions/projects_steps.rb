@@ -244,13 +244,17 @@ When /^I delete the project$/ do
     * Delete the #{ (@project || @project_attrs).name } project
   }
 
-  # Deleting row in the page is asynchronous. So script has to wait 5 seconds.
+  # Deleting row in the page is asynchronous. So script has to wait 10 seconds.
   sleep(10)
   step "The #{ (@project || @project_attrs).name } project should not be visible"
 
 end
 
+When /^I grant project membership to (?:her|him)/i do
 
+  step "I can grant project membership to #{@user.name}"
+
+end
 #=================
 # THENs
 #=================
@@ -345,7 +349,7 @@ Then /^I cannot grant project membership to (.+)$/i do |username|
     * The #{ (@project || @project_attrs).name  } project should be visible
     * Click the #{ (@project || @project_attrs).name } project
 
-    * The collaborators tab link project should not be visible
+    * The disabled collaborators tab link should be visible
    }
 
 end
@@ -483,6 +487,22 @@ Then /^Arya Stark cannot view that project$/ do
     * The #{ @project_attrs.name } project should not be visible
   }
 end
+
+
+Then /^(?:She|He) can view the project$/ do
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @user.name }
+    * Fill in the password field with #{ @user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * The #{ (@project || @project_attrs).name } project should be visible
+  }
+end
+
 
 
 Then /^the project will be [Cc]reated$/ do

@@ -27,13 +27,11 @@ Feature: Grant Membership to a Project
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Grant |
         | System Admin    | Can Grant           |
-        | Project Admin   | Can Grant           |
+        | Project Manager | Can Grant           |
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Grant |
         | Member          | Cannot Grant        |
-        | (None)          | Cannot Grant        |
-
 
   Scenario Outline: Add a Member to A Project
     Given I am authorized to grant project memberships

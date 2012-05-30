@@ -9,7 +9,7 @@ Then /^Ensure that a user with username (.+) exists$/i do |username|
   username   = Unique.username(username)
   @user_attrs = CloudObjectBuilder.attributes_for(:user, :name => username)
   @user       = IdentityService.session.ensure_user_exists(user_attrs)
-  EnvironmentCleaner.register(:user, user.id)
+  EnvironmentCleaner.register(:user, @user.id)
 end
 
 Then /^Ensure that a user with username (.+) does not exist$/i do |username|
