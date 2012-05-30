@@ -15,6 +15,7 @@ Feature: Grant Membership to a Project
 
   Background:
     * A project exists in the system
+    * A project does not have collaborator
     * A user named Arya Stark exists in the system
 
 
@@ -36,6 +37,5 @@ Feature: Grant Membership to a Project
 
   Scenario Outline: Add a Member to A Project
     Given I am authorized to grant project memberships
-      And Arya Stark is not a member of the project
      When I grant project membership to her
      Then she can view the project

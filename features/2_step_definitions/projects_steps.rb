@@ -321,7 +321,32 @@ Then /^I can grant project membership to (.+)$/i do |username|
 
     * Click the collaborators tab link
     * Click the add collaborator button
+    * Click the collaborators tab link
+    * Click the add collaborator button
+    * Select Collaborator #{username}
+    * Click the add collaborator action button
+    * The collaborators table should include the text #{ username }
+
   }
+
+end
+
+Then /^I cannot grant project membership to (.+)$/i do |username|
+
+  steps %{
+
+    * Click the logout button if currently logged in
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * The #{ (@project || @project_attrs).name  } project should be visible
+    * Click the #{ (@project || @project_attrs).name } project
+
+    * The collaborators tab link project should not be visible
+   }
 
 end
 
