@@ -122,6 +122,12 @@ Given /^I am authorized to edit the project$/ do
   }
 end
 
+Given /^I am authorized to grant project memberships$/i do
+  steps %{
+    * I am a System Admin
+    * I have a role of Project Manager in the project
+  }
+end
 
 Given /^a user named Arya Stark exists in the system$/ do
   # nothing to do.

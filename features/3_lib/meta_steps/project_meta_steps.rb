@@ -3,7 +3,6 @@ Then /^A project does not have collaborator/i do
   @project.users.each do |user|
     next if user.name == "admin"
     identity_service.revoke_all_user_roles(user, @project)
-    puts "      Revoke: #{ user.name } (id: #{ user.id })" 
   end         
 end
 
