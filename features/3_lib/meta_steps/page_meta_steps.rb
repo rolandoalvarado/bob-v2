@@ -109,9 +109,13 @@ end
 
 
 Then /^Click the (.+) project$/ do |project_name|
-  project_name.strip!
-  @current_page.project_link( name: project_name ).click
-  @current_page = ProjectPage.new
+  #sleeping(1).seconds.between_tries.failing_after(15).tries do
+  require 'pry'
+  binding.pry
+    project_name.strip!
+    @current_page.project_link( name: project_name ).click
+    @current_page = ProjectPage.new
+  #end
 end
 
 

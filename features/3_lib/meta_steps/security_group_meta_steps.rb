@@ -51,3 +51,8 @@ Then /^Ensure that (.+) exist$/i do |security_group|
 
   @security_group = security_group
 end
+
+Then /^Ensure that the project has no security groups$/i do
+  compute_service = ComputeService.session
+  compute_service.ensure_project_security_group_count(@project, 0)
+end

@@ -14,16 +14,23 @@ Given /^I am authorized to create a security group in the project$/ do
   }
 end
 
-Given /^[Tt]he project has no security groups$/ do
-  compute_service = ComputeService.session
-  compute_service.ensure_project_security_group_count(@project, 0)
+Given /^the project has no security groups$/ do
+  steps %{
+    * Ensure that the project has no security groups
+  }
 end
 
 #=================
 # WHENs
 #=================
 
-When /^I create a security group with attributes (.+), (.+)$/ do |name,descripton|
+When /^I create a security group with attributes (.+), (.+)$/ do |name, description|
+  
+  new_security_group = CloudObjectBuilder.attributes_for(
+                      :security_group,
+                      :name     => Unique.name(name),
+                      :description    => description
+                    )
 
   steps %{
     * Click the logout button if currently logged in
@@ -39,8 +46,8 @@ When /^I create a security group with attributes (.+), (.+)$/ do |name,descripto
     * Click the new security group button
     * Current page should have the new securiy group form
 
-    * Fill in the security group name field with #{name}
-    * Fill in the security group description field with #{description}
+    * Fill in the security group name field with #{new_security_group.name}
+    * Fill in the security group description field with #{new_security_group.description}
     * Click the create security group button
   }
 end

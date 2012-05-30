@@ -30,14 +30,14 @@ class ProjectPage < WebClientPage
   #==========================
   # Security Group Elements
   #==========================
-  button  'new security',            "#create-security-group"
-  form    'new security',            "#security-group-form"
-  link    'access security tab',     '.nav-tabs .access-and-security a'
+  button    'new security',            "#create-security-group"
+  form      'new security',            "#security-group-form"
+  link      'access security tab',     '.nav-tabs .access-and-security a'
 
   #Elements in the New Security form
-  field    'security group name',           "#new-security-name"
-  field    'security group description',    "#new-security-description"
-  button   'create security',               "#create-security-group"
+  field     'security group name',           "#new-security-name"
+  field     'security group description',    "#new-security-description"
+  button    'create security',               "#create-security-group"
   
   #==========================
   # Volume-related elements
