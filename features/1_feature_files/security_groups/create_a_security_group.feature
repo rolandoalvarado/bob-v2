@@ -1,3 +1,4 @@
+@jira-MCF-32
 Feature: Create a Security Group
   As an authorized user, I want to create a security group so that I can
   control the incoming network traffic for one or more instances.
@@ -18,7 +19,7 @@ Feature: Create a Security Group
     * A project exists in the system
 
 
-  @permissions
+  @permissions @jira-MCF-32-scenario
   Scenario Outline: Check User Permissions
     Given I have a role of <Role> in the project
      Then I <Can or Cannot Create> a security group in the project
