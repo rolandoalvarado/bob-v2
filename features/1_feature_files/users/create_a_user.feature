@@ -14,7 +14,7 @@ Feature: Create a User
         | Role            | Can or Cannot Create |
         | User            | Cannot Create        |
 
-
+  @jira-MCF-7-cuwca
   Scenario Outline: Create a user with certain attributes
     Given I am authorized to create users in the system
      Then I <Can or Cannot Create> a user with attributes <Username>, <Email>, <Password>, <Primary Project>, and <Is PM or Not>

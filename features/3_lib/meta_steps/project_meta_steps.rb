@@ -51,12 +51,67 @@ Then /^Ensure that I have a role of (.+) in the test project$/i do |role_name|
   end
 end
 
+Then /^Ensure that a project is available for use$/i do
+  identity_service = IdentityService.session
+  project          = identity_service.ensure_project_exists(:name => 'project')
+
+  EnvironmentCleaner.register(:project, project.id)
+
+  if project.nil? or project.id.empty?
+    raise "Test project couldn't be initialized!"
+  end
+
+  @project = project
+end
+
+Then /^Ensure that I have a role of (.+) in the project$/i do |role_name|
+  
+  if @project.nil?
+    raise "No project is available. You need to call " +
+          "'* Ensure that a project is available for use' " +
+          "before this step."
+  end
+
+  user_attrs       = CloudObjectBuilder.attributes_for(
+                       :user,
+                       :name => Unique.username('rstark')
+                     )
+  
+  identity_service = IdentityService.session 
+  user             = identity_service.ensure_user_exists(user_attrs) 
+  EnvironmentCleaner.register(:user, user.id)
+
+  identity_service.revoke_all_user_roles(user, @project)
+
+  # Ensure user has the following role in the project
+  unless role_name.downcase == "(none)"
+    role = identity_service.roles.find_by_name(RoleNameDictionary.db_name(role_name))
+
+    if role.nil?
+      raise "Role #{ role_name } couldn't be found. Make sure it's defined in " +
+        "features/support/role_name_dictionary.rb and that it exists in " +
+        "#{ ConfigFile.web_client_url }."
+    end
+
+    begin
+      role.add_to_user(user, @project)
+    rescue Fog::Identity::OpenStack::NotFound => e
+      raise "Couldn't add #{ user.name } to #{ @project.name } as #{ role.name }"
+    end
+  end
+
+  @user = user
+end
+
+Then /^Ensure that the project has no security groups$/i do
+  compute_service = ComputeService.session
+  compute_service.ensure_project_security_group_count(@project, 0)
+end
 
 Then /^Register project (.+) for deletion on exit$/i do |name|
   project = IdentityService.session.tenants.reload.find { |p| p.name == name }
   EnvironmentCleaner.register(:project, project.id) if project
 end
-
 
 Then /^Select Collaborator (.+)$/ do |username|
   @current_page.collaborators_email_link.click

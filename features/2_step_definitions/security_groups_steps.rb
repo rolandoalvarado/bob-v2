@@ -9,7 +9,7 @@ Given /^I am a? (Project Manager|Member)$/ do |role_name|
 end
 
 Given /^I am authorized to create a security group in the project$/ do
-   steps %{
+  steps %{
     * Ensure that I have a role of Project Manager in the project
   }
 end
@@ -20,24 +20,30 @@ Given /^the project has no security groups$/ do
   }
 end
 
+Given /^the security group has an attributes of (.+), (.+)$/ do |name, description|
+  steps %{
+    * Ensure that a security group name #{ name } exists
+    * And a security group description #{ description }
+    * Raise an error if a security group does not have a name of #{ name }
+  }
+end
+
 #=================
 # WHENs
 #=================
 
 When /^I create a security group with attributes (.+), (.+)$/ do |name, description|
-  
-  new_security_group = CloudObjectBuilder.attributes_for(
-                      :security_group,
-                      :name     => Unique.name(name),
-                      :description    => description
-                    )
+    
+  security_group = CloudObjectBuilder.attributes_for(:security_group, :name => Unique.name(name))
+
+  ComputeService.session.ensure_security_group_does_not_exist(@project, security_group)
 
   steps %{
     * Click the logout button if currently logged in
 
     * Visit the login page
-    * Fill in the username field with #{ @current_user.name }
-    * Fill in the password field with #{ @current_user.password }
+    * Fill in the username field with #{ @user.name }
+    * Fill in the password field with #{ @user.password }
     * Click the login button
 
     * Visit the projects page
@@ -46,8 +52,8 @@ When /^I create a security group with attributes (.+), (.+)$/ do |name, descript
     * Click the new security group button
     * Current page should have the new securiy group form
 
-    * Fill in the security group name field with #{new_security_group.name}
-    * Fill in the security group description field with #{new_security_group.description}
+    * Fill in the security group name field with #{security_group.name}
+    * Fill in the security group description field with #{security_group.description}
     * Click the create security group button
   }
 end
@@ -66,8 +72,8 @@ Then /^I [Cc]an [Cc]reate a security group in the project$/ do
     * Click the logout button if currently logged in
 
     * Visit the login page
-    * Fill in the username field with #{ @current_user.name }
-    * Fill in the password field with #{ @current_user.password }
+    * Fill in the username field with #{ @user.name }
+    * Fill in the password field with #{ @user.password }
     * Click the login button
 
     * Visit the projects page
@@ -89,8 +95,8 @@ Then /^I [Cc]annot [Cc]reate a security group in the project$/ do
     * Click the logout button if currently logged in
 
     * Visit the login page
-    * Fill in the username field with #{ @current_user.name }
-    * Fill in the password field with #{ @current_user.password }
+    * Fill in the username field with #{ @user.name }
+    * Fill in the password field with #{ @user.password }
     * Click the login button
 
     * Visit the projects page
@@ -133,7 +139,68 @@ end
 
 Then /^The (.+) security group row should be visible$/ do |security_group|
   steps %{
-    * Ensure that #{security_group} exist
+    * Ensure that #{security_group} security group exist
   }
 end
 
+Then /^the security group with attributes (.+), (.+) will be [Cc]reated$/ do |name, description|
+  
+  security_group = CloudObjectBuilder.attributes_for(
+                    :security_group,
+                    :name     => Unique.name(name),
+                    :description    => description
+                  )
+
+  ComputeService.session.ensure_security_group_does_not_exist(@project, security_group)
+  
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @user.name }
+    * Fill in the password field with #{ @user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * Click the #{ @project.name } project
+
+    * Click the access security tab link
+    * Click the new security button
+    * Current page should have the new security form
+    * Fill in the security group name field with #{security_group.name}
+    * Fill in the security group description field with #{security_group.description}
+    * Click the create security button    
+    * Current page should have the new #{security_group.name} security group
+    * The #{security_group.name} security group row should be visible
+  }
+end
+
+Then /^the security group with attributes (.+), (.+) will be [Nn]ot [Cc]reated$/ do |name, description|
+  
+  security_group = CloudObjectBuilder.attributes_for(
+                    :security_group,
+                    :name     => Unique.name(name),
+                    :description    => description
+                  )
+  
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @user.name }
+    * Fill in the password field with #{ @user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * Click the #{ @project.name } project
+
+    * Click the access security tab link
+    * Click the new security button
+    * Current page should have the new security form
+    * Fill in the security group name field with #{security_group.name}
+    * Fill in the security group description field with #{security_group.description}
+    * Click the create security button    
+    * The new security form should be visible
+    * The new security form error message element should be visible
+  }
+end

@@ -38,6 +38,7 @@ class ProjectPage < WebClientPage
   field     'security group name',           "#new-security-name"
   field     'security group description',    "#new-security-description"
   button    'create security',               "#create-security-group"
+  element   'new security form error message', "#security-group-form .error"
   
   #==========================
   # Volume-related elements
