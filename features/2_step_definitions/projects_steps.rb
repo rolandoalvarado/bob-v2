@@ -122,6 +122,12 @@ Given /^I am authorized to edit the project$/ do
   }
 end
 
+Given /^I am authorized to grant project memberships$/i do
+  steps %{
+    * I am a System Admin
+    * I have a role of Project Manager in the project
+  }
+end
 
 Given /^a user named Arya Stark exists in the system$/ do
   # nothing to do.
@@ -244,13 +250,17 @@ When /^I delete the project$/ do
     * Delete the #{ (@project || @project_attrs).name } project
   }
 
-  # Deleting row in the page is asynchronous. So script has to wait 5 seconds.
+  # Deleting row in the page is asynchronous. So script has to wait 10 seconds.
   sleep(10)
   step "The #{ (@project || @project_attrs).name } project should not be visible"
 
 end
 
+When /^I grant project membership to (?:her|him)/i do
 
+  step "I can grant project membership to #{@user.name}"
+
+end
 #=================
 # THENs
 #=================
@@ -305,6 +315,50 @@ Then /^I Can Create a project$/ do
   @project_attrs = attrs
 end
 
+Then /^I can grant project membership to (.+)$/i do |username|
+
+  steps %{
+
+    * Click the logout button if currently logged in
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * The #{ (@project || @project_attrs).name  } project should be visible
+    * Click the #{ (@project || @project_attrs).name } project
+
+    * Click the collaborators tab link
+    * Click the add collaborator button
+    * Click the collaborators tab link
+    * Click the add collaborator button
+    * Select Collaborator #{username}
+    * Click the add collaborator action button
+    * The collaborators table should include the text #{ username }
+
+  }
+
+end
+
+Then /^I cannot grant project membership to (.+)$/i do |username|
+
+  steps %{
+
+    * Click the logout button if currently logged in
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * The #{ (@project || @project_attrs).name  } project should be visible
+    * Click the #{ (@project || @project_attrs).name } project
+
+    * The collaborators tab link should be disabled
+   }
+
+end
 
 Then /^I [Cc]an [Vv]iew (?:that|the) project$/ do
   steps %{
@@ -368,6 +422,7 @@ Then /^I [Cc]annot [Dd]elete (?:that|the) project$/ do
 
     * Visit the projects page
     * The #{ (@project || @project_attrs).name } project should be visible
+
   }
 
   # Deleting row in the page is asynchronous. So script has to wait 5 seconds.
@@ -438,6 +493,22 @@ Then /^Arya Stark cannot view that project$/ do
     * The #{ @project_attrs.name } project should not be visible
   }
 end
+
+
+Then /^(?:She|He) can view the project$/ do
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @user.name }
+    * Fill in the password field with #{ @user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * The #{ (@project || @project_attrs).name } project should be visible
+  }
+end
+
 
 
 Then /^the project will be [Cc]reated$/ do

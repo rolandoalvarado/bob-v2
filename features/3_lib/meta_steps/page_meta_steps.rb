@@ -274,6 +274,12 @@ Then /^The (.+) button should be disabled$/ do |button_name|
   end
 end
 
+Then /^The (.+) link should be disabled$/ do |link_name|
+  link_name = link_name.split.join('_').downcase
+  unless @current_page.send("has_#{ link_name }_link?")
+    raise "Couldn't find '#{ link_name } link."
+  end
+end
 
 Then /^The (.+) user row should be visible$/ do |username|
   user = IdentityService.session.users.find_by_name(username)
