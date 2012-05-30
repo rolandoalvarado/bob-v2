@@ -349,7 +349,7 @@ Then /^I cannot grant project membership to (.+)$/i do |username|
     * The #{ (@project || @project_attrs).name  } project should be visible
     * Click the #{ (@project || @project_attrs).name } project
 
-    * The disabled collaborators tab link should be visible
+    * The collaborators tab link should be disabled
    }
 
 end
