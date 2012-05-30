@@ -364,7 +364,6 @@ Then /^The (.+) message should not be visible$/ do |span_name|
   end
 end
 
-
 Then /^The (.+) user should be visible$/ do |user_name|
   unless @current_page.has_user_name_element?( name: user_name )
     raise "The user '#{ user_name }' should be visible, but it's not."

@@ -36,18 +36,16 @@ Feature: Create a Security Group
   @jira-MCF-32-csg
   Scenario Outline: Create a Security Group
     Given I am authorized to create a security group in the project
-      And the project has no security groups
-     When I create a security group with attributes <Name>, <Description>
-     Then the security group will be <Created or Not>
+    Then the security group with attributes <Name>, <Description> will be <Created or Not Created>
 
       Scenarios: Valid Values
-        | Name             | Description              | Created or Not |
-        | Database Servers | Only port 443 is allowed | Created        |
-        | Database Servers | (None)                   | Created        |
+        | Name             | Description              | Created or Not Created  |
+        | Database Servers | Only port 443 is allowed | Created                 |
+        | Database Servers | (None)                   | Created                 |
 
       Scenarios: Invalid Values
-        | Name             | Description              | Created or Not | Reason              |
-        | (None)           | Only port 443 is allowed | Not Created    | Name can't be empty |
+        | Name             | Description              | Created or Not Created  | Reason              |
+        | (None)           | Only port 443 is allowed | Not Created             | Name can't be empty |
 
 
   Scenario Outline: Add a Rule During Creation
