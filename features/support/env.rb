@@ -33,3 +33,25 @@ AfterConfiguration do |configuration|
   }
 end
 #==================================================================
+
+# Aliases for 'Then' and 'steps'
+
+def TestCase(regex, &block)
+  Then regex, &block
+end
+
+def Step(regex, &block)
+  Then regex, &block
+end
+
+def Preconditions(str)
+  steps str
+end
+
+def Cleanup(str)
+  steps str
+end
+
+def Script(str)
+  steps str
+end
