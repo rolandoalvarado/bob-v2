@@ -13,6 +13,8 @@ default: --strict --tags ~@wip --require features --format 'Slowhandcuke::Format
 
 upcoming_only: --strict --tags ~@future --require features --format 'Slowhandcuke::Formatter' --format Cucumber::Formatter::Html --out output/report.html --format rerun --out rerun.txt
 
+simple: --strict --tags ~@wip --tags ~@future --require features --format progress --format html --out output/report_simple.html --format rerun --out rerun_simple.txt
+
 # Used by run/feature
 single_feature: --strict --tags ~@wip --require features --format 'Slowhandcuke::Formatter' --format Cucumber::Formatter::Html --out output/report.html --format rerun --out rerun.txt
 
