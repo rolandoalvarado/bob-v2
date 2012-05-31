@@ -31,8 +31,11 @@ class ProjectPage < WebClientPage
   # Security Group Elements
   #==========================
   button    'new security',            "#create-security-group"
+  button    'modify',                  "#security-item-<id> .security-rules"
   form      'new security',            "#security-group-form"
+  form      'security group rules',    "#security-group-rules-form"
   link      'access security tab',     '.nav-tabs .access-and-security a'
+  element   'security groups',         "#security-groups-list"
 
   #Elements in the New Security form
   field     'security group name',           "#new-security-name"

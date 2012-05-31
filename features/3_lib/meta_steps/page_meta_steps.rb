@@ -107,6 +107,10 @@ Then /^Click the (.+) button for volume (.+)$/ do |button_name, volume_id|
   @current_page.send("#{ button_name }_button", id: volume_id).click
 end
 
+Then /^Click the (.+) button for security group (.+)$/ do |button_name, security_group_id|
+  button_name = button_name.split.join('_').downcase
+  @current_page.send("#{ button_name }_button", id: security_group_id).click
+end
 
 Then /^Click the (.+) project$/ do |project_name|
   project_name.strip!
@@ -164,6 +168,12 @@ end
 Then /^Current page should show the instance's console output$/ do
   unless @current_page.has_console_output_element?
     raise "Current page doesn't show the instance's console output."
+  end
+end
+
+Then /^Current page should have the security groups$/ do
+  unless @current_page.has_security_groups_element?
+    raise "Current page doesn't have security groups."
   end
 end
 
@@ -241,6 +251,10 @@ Then /^Select Security Group (.+) item from the security group checklist$/ do |s
  else
    pending
  end
+end
+
+Then /^Choose the (.+) in the ip protocol dropdown$/ do |protocol|
+   step "IP Dropdown protocol will contain #{protocol}"
 end
 
 
