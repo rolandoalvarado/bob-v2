@@ -108,7 +108,7 @@ Then /^I [Cc]an [Cc]reate a snapshot of the volume$/ do
     * Fill in the volume snapshot description field with #{ snapshot.description }
     * Click the create volume snapshot button
 
-    * Click the snapshots tab link 
+    * Click the snapshots tab link
     * The volume snapshots table should include the text #{ snapshot.name }
   }
 end
