@@ -319,10 +319,19 @@ class ComputeService < BaseCloudService
 
    def create_security_group(project, attributes)
     service.set_tenant project
-    security_group = service.security_groups    
-    security_group = security_groups.new(attributes)
-    security_group.save
-    security_group
+    security_group = service.security_groups
+    new_security_group = security_group.find_by_name(attributes[:name])
+      if new_security_group
+         #raise "Security Group #{attributes[:name]} is already exists."
+         new_security_group.destroy
+         security_group = security_group.new(attributes)
+         security_group.save
+         security_group   
+      else
+         security_group = security_group.new(attributes)
+         security_group.save
+         security_group  
+      end
   end
 
   def delete_security_group(security_group)
@@ -346,7 +355,7 @@ class ComputeService < BaseCloudService
     service.set_tenant project
     security_groups = service.security_groups
     security_groups_count = security_groups.count
-    #raise "Desired Count is #{desired_count}; security_groups_count is #{security_groups_count}"
+    
     if desired_count < security_groups_count
       i = security_groups_count  
       while i > desired_count

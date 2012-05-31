@@ -28,6 +28,12 @@ Given /^the security group has an attributes of (.+), (.+)$/ do |name, descripti
   }
 end
 
+Given /^the project has only one security group named Web Servers$/ do
+  steps %{
+    * Ensure that a security group named Web Servers exist
+  }
+end
+
 #=================
 # WHENs
 #=================
@@ -55,6 +61,32 @@ When /^I create a security group with attributes (.+), (.+)$/ do |name, descript
     * Fill in the security group name field with #{security_group.name}
     * Fill in the security group description field with #{security_group.description}
     * Click the create security group button
+  }
+end
+
+When /^I add the following rule: (.+), (.+), (.+), (.+), (.+)$/ do |protocol, from_port, to_port, source_type, source|
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @user.name }
+    * Fill in the password field with #{ @user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * Click the #{ @project.name } project
+
+    * Click the access security tab link
+    * Current page should have the security groups
+
+    * Click the modify button for security group #{ @new_security_group.id }
+    * Current page should have the security group rules form
+    * Choose the #{protocol} in the ip protocol dropdown
+    * Fill in the from port field with #{from_port}
+    * Fill in the to port field with #{to_port}
+    * Ensure that a #{source_type} is Subnet
+    * Fill in the source field with #{source}
+    * Click the add link
   }
 end
 
@@ -202,5 +234,23 @@ Then /^the security group with attributes (.+), (.+) will be [Nn]ot [Cc]reated$/
     * Click the create security button    
     * The new security form should be visible
     * The new security form error message should be visible
+  }
+end
+
+#Then /^Choose the (.+) in the ip protocol dropdown$/ do |protocol|
+#  steps %{
+#    * The #{protocol} protocol should be selected
+#  }
+#end
+
+#Then /^The (.+) protocol should be selected$/ do |protocol|
+#  steps %{
+#    * The #{protocol} protocol is selected
+#  }
+#end
+
+Then /^the rules will be Added$/ do
+  steps %{
+    * Current page should have the new rules    
   }
 end
