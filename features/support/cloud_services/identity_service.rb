@@ -84,7 +84,7 @@ class IdentityService < BaseCloudService
 
   def ensure_tenant_exists(attributes)
     attributes        = CloudObjectBuilder.attributes_for(:tenant, attributes)
-    attributes[:name] = Unique.name(attributes[:name], 25)
+    attributes[:name] = Unique.project_name(attributes[:name])
 
     tenant = tenants.find_by_name(attributes[:name])
     if tenant
