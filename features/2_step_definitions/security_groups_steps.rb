@@ -201,6 +201,6 @@ Then /^the security group with attributes (.+), (.+) will be [Nn]ot [Cc]reated$/
     * Fill in the security group description field with #{security_group.description}
     * Click the create security button    
     * The new security form should be visible
-    * The new security form error message element should be visible
+    * The new security form error message should be visible
   }
 end

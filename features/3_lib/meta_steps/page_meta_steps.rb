@@ -348,7 +348,6 @@ Then /^The (.+) link should not be visible$/ do |link_name|
   end
 end
 
-
 Then /^The (.+) message should be visible$/ do |span_name|
   span_name = span_name.split.join('_').downcase
   unless @current_page.send("has_#{ span_name }_span?")
