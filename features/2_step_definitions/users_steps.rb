@@ -25,7 +25,7 @@ Given /^[Aa] user with a role of (.+) exists in the project$/ do |role_name|
   username = 'rstark'
 
   steps %{
-    * Ensure that a user with username #{ username } exists
+    * Ensure that a user with username #{ username } and password 123qwe exists
     * Ensure that the user has a role of #{ role_name }
     * Raise an error if the user does not have a role of #{ role_name }
   }
@@ -292,7 +292,7 @@ Then /^I can edit a user$/i do
     * Register the user named #{ existing_user.name } for deletion at exit
     * Register the user named #{ new_attrs.name } for deletion at exit
 
-    * Ensure that a user with username #{ existing_user.name } exists
+    * Ensure that a user with username #{ existing_user.name } and password 123qwe exists
     * Ensure that a test project is available for use
     * Ensure that I have a role of Project Manager in the test project
 
@@ -337,7 +337,7 @@ Then /^I can update a user with attributes (.+), (.+), (.+), (.+), and (.+)$/i d
     * Register the user named #{ existing_user.name } for deletion at exit
     * Register the user named #{ new_attrs.name } for deletion at exit
 
-    * Ensure that a user with username #{ existing_user.name } exists
+    * Ensure that a user with username #{ existing_user.name } and password 123qwe exists
     * Ensure that a user with username #{ new_attrs.name } does not exist
     * Ensure that a test project is available for use
     * Ensure that I have a role of Project Manager in the test project
@@ -401,7 +401,7 @@ Then /^I cannot update a user with attributes (.+), (.+), (.+), (.+), and (.+)$/
     * Register the user named #{ existing_user.name } for deletion at exit
     * Register the user named #{ new_attrs.name } for deletion at exit
 
-    * Ensure that a user with username #{ existing_user.name } exists
+    * Ensure that a user with username #{ existing_user.name } and password 123qwe exists
     * Ensure that a user with username #{ new_attrs.name } does not exist
     * Ensure that a test project is available for use
     * Ensure that I have a role of Project Manager in the test project
