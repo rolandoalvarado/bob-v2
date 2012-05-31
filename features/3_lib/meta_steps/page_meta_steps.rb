@@ -61,7 +61,7 @@ Then /^Click the (.+) link for user (.+)$/ do |link_name, username|
 end
 
 
-Then /^Click the [Ll]ogout button if currently logged in$/ do
+Then /^Click the Logout button if currently logged in$/i do
   @current_page ||= RootPage.new
   @current_page.visit                      # This removes any modal overlay
   unless @current_page.actual_url.empty?
@@ -121,7 +121,7 @@ Then /^Click the (.+) image$/ do |image_name|
 end
 
 
-Then /^Current page should be the (.+) page$/ do |page_name|
+Then /^Current page should be the (.+) page$/i do |page_name|
   @current_page = eval("#{ page_name.downcase.capitalize }Page").new
   unless @current_page.has_expected_path?
     raise "Expected #{ @current_page.expected_path } but another page was returned: #{ @current_page.actual_path }"
@@ -355,18 +355,34 @@ Then /^The (.+) link should not be visible$/ do |link_name|
 end
 
 
-Then /^The (.+) message should be visible$/ do |span_name|
-  span_name = span_name.split.join('_').downcase
-  unless @current_page.send("has_#{ span_name }_span?")
-    raise "The '#{ span_name.gsub('_',' ') }' message should be visible, but it's not."
+Then /^The (.+) message should be visible$/ do |message_name|
+  message_name = message_name.split.join('_').downcase
+  unless @current_page.send("has_#{ message_name }_message?")
+    raise "The '#{ message_name.gsub('_',' ') }' message should be visible, but it's not."
   end
 end
 
 
-Then /^The (.+) message should not be visible$/ do |span_name|
+Then /^The (.+) message should not be visible$/ do |message_name|
+  message_name = message_name.split.join('_').downcase
+  if @current_page.send("has_#{ message_name }_message?")
+    raise "The '#{ message_name.gsub('_',' ') }' message should not be visible, but it is."
+  end
+end
+
+
+Then /^The (.+) span should be visible$/ do |span_name|
+  span_name = span_name.split.join('_').downcase
+  unless @current_page.send("has_#{ span_name }_span?")
+    raise "The '#{ span_name.gsub('_',' ') }' span should be visible, but it's not."
+  end
+end
+
+
+Then /^The (.+) span should not be visible$/ do |span_name|
   span_name = span_name.split.join('_').downcase
   if @current_page.send("has_#{ span_name }_span?")
-    raise "The '#{ span_name.gsub('_',' ') }' message should not be visible, but it is."
+    raise "The '#{ span_name.gsub('_',' ') }' span should not be visible, but it is."
   end
 end
 
