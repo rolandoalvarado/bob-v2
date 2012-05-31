@@ -2,33 +2,35 @@
 Feature: Log In
   As a registered user, I want to log in so that I can use mCloud
 
-  Background:
-    * My username is rstark and my password is w1nt3rf3ll
-    * I am not logged in
-
-  Scenario Outline: Log in
-    When I login with the following credentials: <Username>, <Password>
-    Then I will be <Logged In or Not>
+  Scenario Outline:
+    * If my username is rstark and my password is w1nt3rf3ll, I <Can or Cannot Log In> with the following credentials <Username>, <Password>
 
     Scenarios: Valid credentials
-      | Username  | Password   | Logged In or Not |
-      | rstark    | w1nt3rf3ll | Logged In        |
+      | Username  | Password   | Can or Cannot Log In |
+      | rstark    | w1nt3rf3ll | Can Log In           |
 
     Scenarios: Invalid credentials
-      | Username  | Password   | Logged In or Not | Reason                                                       |
-      | RSTARK    | w1nt3rf3ll | Not Logged In    | Username is case sensitive (This is an OpenStack constraint) |
-      | (None)    | w1nt3rf3ll | Not Logged In    | Username can't be empty                                      |
-      | rstark    | w0nt3rf3ll | Not Logged In    | Invalid password                                             |
+      | Username  | Password   | Can or Cannot Log In | Reason                                                       |
+      | RSTARK    | w1nt3rf3ll | Cannot Log In        | Username is case sensitive (This is an OpenStack constraint) |
+      | (None)    | w1nt3rf3ll | Cannot Log In        | Username can't be empty                                      |
+      | rstark    | w0nt3rf3ll | Cannot Log In        | Invalid password                                             |
 
 
-  Scenario Outline: Access a secure section without logging in first
-     When I try to access the <Secure Section> section
-     Then I will be asked to log in first
-     When I login with the following credentials: rstark, w1nt3rf3ll
-     Then I will see the <Secure Section> section
+  Scenario Outline:
+    * I will be redirected to the Log In page when I anonymously access <Secure Page>
 
     Scenarios:
-      | Secure Section |
-      | Projects       |
-      | Users          |
-      | Usage          |
+      | Secure Page |
+      | Projects    |
+      | Users       |
+      | Usage       |
+
+
+  Scenario Outline:
+    * Logging in after anonymously accessing <Secure Page> redirects me back to it
+
+    Scenarios:
+      | Secure Page |
+      | Projects    |
+      | Users       |
+      | Usage       |
