@@ -83,6 +83,16 @@ end
 Then /^Click the (.+) link$/ do |link_name|
   link_name = link_name.split.join('_').downcase
   @current_page.send("#{ link_name }_link").click
+
+  page_name = link_name
+  page_class_name = "#{ page_name.downcase.capitalize }Page"
+  unless Object.const_defined?( page_class_name )
+    raise "The #{ page_name } page (#{ page_class_name }) is not defined " +
+          "anywhere in the pages directory. You may have misspelled " +
+          "the page's name, or you may need to define a #{ page_class_name } " +
+          "class somewhere in that directory."
+  end
+  @current_page = eval(page_class_name).new
 end
 
 
@@ -450,7 +460,7 @@ Then /^Visit the (.+) page$/ do |page_name|
   page_class_name = "#{ page_name.downcase.capitalize }Page"
   unless Object.const_defined?( page_class_name )
     raise "The #{ page_name } page (#{ page_class_name }) is not defined " +
-          "anywhere in the features/pages directory. You may have misspelled " +
+          "anywhere in the pages directory. You may have misspelled " +
           "the page's name, or you may need to define a #{ page_class_name } " +
           "class somewhere in that directory."
   end
