@@ -42,7 +42,13 @@ class ProjectPage < WebClientPage
   field     'security group description',    "#new-security-description"
   button    'create security',               "#create-security-group"
   span      'new security form error',       "span.error[for='new-security-name'], span.error[for='new-security-description']"
-  
+  option    'ip protocol', xpath:            '//select[@id="ip-protocol"]/option[text()="<name>"]'
+  field     'from port',                     '#from-port'
+  field     'to port',                       '#to-port'
+  field     'CIDR',                          '#cidr'
+  button    'add security group rule',       '#save-security-group-rule'
+  button    'close security group rule', xpath: '//*[@id="security-group-rules-modal"]/div[3]/a' 
+
   #==========================
   # Volume-related elements
   #==========================
@@ -93,6 +99,7 @@ class ProjectPage < WebClientPage
   form      'resize instance',               '#resize-instance-modal'
 
   element   'console output',                '#logsModal'
+
 
   # These buttons are accessible via 'Click the <name> button for instance <instance id>'
   button    'instance menu',                 "#instance-item-<id> .dropdown-toggle"

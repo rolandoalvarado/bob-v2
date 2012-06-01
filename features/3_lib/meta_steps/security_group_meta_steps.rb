@@ -24,3 +24,9 @@ Then /^Ensure that a security group named Web Servers exist$/i do
 
   @new_security_group = new_security_group
 end
+
+
+Then /^the rules will be Not Added$/i do
+  pending # express the regexp above with the code you wish you had
+end
+

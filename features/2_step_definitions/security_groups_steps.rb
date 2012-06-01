@@ -64,7 +64,7 @@ When /^I create a security group with attributes (.+), (.+)$/ do |name, descript
   }
 end
 
-When /^I add the following rule: (.+), (.+), (.+), (.+), (.+)$/ do |protocol, from_port, to_port, source_type, source|
+When /^I add the following rule: (.+), (.+), (.+), (.+)$/ do |protocol, from_port, to_port, cidr |
   steps %{
     * Click the logout button if currently logged in
 
@@ -82,11 +82,11 @@ When /^I add the following rule: (.+), (.+), (.+), (.+), (.+)$/ do |protocol, fr
     * Click the modify button for security group #{ @new_security_group.id }
     * Current page should have the security group rules form
     * Choose the #{protocol} in the ip protocol dropdown
-    * Fill in the from port field with #{from_port}
-    * Fill in the to port field with #{to_port}
-    * Ensure that a #{source_type} is Subnet
-    * Fill in the source field with #{source}
-    * Click the add link
+    * Set port to the from port field with #{from_port}
+    * Set port to the to port field with #{to_port}
+    * Fill in the CIDR field with #{cidr}
+    * Click the add security group rule button
+    * Click the close security group rule button
   }
 end
 
@@ -249,7 +249,7 @@ end
 #  }
 #end
 
-Then /^the rules will be Added$/ do
+Then /^the rules will be Added$/i do
   steps %{
     * Current page should have the new rules    
   }

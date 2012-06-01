@@ -215,7 +215,7 @@ end
 
 
 Then /^Select flavor (.+) item from the flavor slider$/ do |flavor|
- if flavor == "(Any)"
+ if flavor.downcase == "(any)"
    #nothing
  else
    pending
@@ -224,9 +224,9 @@ end
 
 
 Then /^Select keypair (.+) item from the keypair dropdown$/ do |keypair|
- if keypair == "(Any)"
+ if keypair.downcase == "(any)"
    #nothing
- elsif keypair  == "(None)"
+ elsif keypair.downcase  == "(none)"
    #nothing
  else
    pending
@@ -235,18 +235,26 @@ end
 
 
 Then /^Select instance count (.+)$/ do |count|
- if count == "(Any)"
+ if count.downcase == "(any)"
    #nothing
  else
    pending
  end
 end
 
+Then /^Set port to the (.+) field with (.+)$/ do |port_name,port_number| 
+  if port_number.downcase == "(none)"
+    port_number = ""
+  elsif port_number.downcase == "(random)"
+    port_number = rand(65534) + 1
+  end
+  step "Fill in the #{port_name} field with #{port_number}"
+end
 
 Then /^Select Security Group (.+) item from the security group checklist$/ do |security_group|
- if security_group == "(Any)"
+ if security_group.downcase == "(any)"
    #nothing
- elsif security_group == "(None)"
+ elsif security_groupy.downcase == "(none)"
    #nothing
  else
    pending
@@ -254,7 +262,11 @@ Then /^Select Security Group (.+) item from the security group checklist$/ do |s
 end
 
 Then /^Choose the (.+) in the ip protocol dropdown$/ do |protocol|
-   step "IP Dropdown protocol will contain #{protocol}"
+  if protocol.downcase == "(any)" || protocol.downcase == "(none)"
+    #nothing
+  else
+    @current_page.ip_protocol_option( name: protocol ).click
+  end
 end
 
 
