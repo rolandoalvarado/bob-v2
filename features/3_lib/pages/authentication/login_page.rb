@@ -3,8 +3,10 @@ require_relative '../web_client_page'
 class LoginPage < WebClientPage
   path '/'
 
-  field  'username', '#username'
-  field  'password', '#password'
+  field   'Username',    '#username'
+  field   'Password',    '#password'
 
-  button 'login',    '#submit'
+  button  'Login',       '#submit'
+
+  message 'Login Error', '.alert-error'
 end

@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/MorphGlobal/fog.git
-  revision: 654bcdec52643927697a346dc6a2ebcc0fae05c4
+  revision: 72ea201e804252bb99893dadc618450587c3ae7a
   branch: development
   specs:
     fog (1.3.1)
@@ -37,9 +37,6 @@ GEM
       rack-test (>= 0.5.4)
       selenium-webdriver (~> 2.0)
       xpath (~> 0.1.4)
-    capybara-webkit (0.12.0)
-      capybara (>= 1.0.0, < 1.2)
-      json
     childprocess (0.3.2)
       ffi (~> 1.0.6)
     coderay (1.0.6)
@@ -68,17 +65,15 @@ GEM
     headless (0.3.1)
     http_parser.rb (0.5.3)
     i18n (0.6.0)
-    jruby-pageant (1.0.2)
     json (1.7.3)
     libwebsocket (0.1.3)
       addressable
     method_source (0.7.1)
     mime-types (1.18)
-    multi_json (1.3.5)
+    multi_json (1.3.6)
     net-scp (1.0.4)
       net-ssh (>= 1.99.1)
-    net-ssh (2.4.0)
-      jruby-pageant (>= 1.0.2)
+    net-ssh (2.5.2)
     nokogiri (1.5.2)
     poltergeist (0.6.0)
       capybara (~> 1.0)
@@ -104,7 +99,7 @@ GEM
     rspec-mocks (2.10.1)
     ruby-hmac (0.4.0)
     rubyzip (0.9.8)
-    selenium-webdriver (2.21.2)
+    selenium-webdriver (2.22.0)
       childprocess (>= 0.2.5)
       ffi (~> 1.0)
       libwebsocket (~> 0.1.3)
@@ -125,7 +120,6 @@ DEPENDENCIES
   activesupport
   anticipate
   capybara
-  capybara-webkit
   cucumber
   diego_formatter!
   faker

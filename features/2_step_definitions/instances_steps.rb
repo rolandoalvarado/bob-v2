@@ -32,7 +32,7 @@ When /^I assign a floating IP to the instance$/ do
     * Visit the projects page
     * Click the #{ @project.name } project
 
-    * Click the access security tab link
+    * Click the access security tab
     * Click the new floating IP allocation button
     * Current page should have the new floating IP allocation form
     * Choose the 2nd item in the pool dropdown
@@ -272,7 +272,7 @@ Then /^I [Cc]an [Aa]ssign a floating IP to an instance in the project$/ do
     * Visit the projects page
     * Click the #{ @project.name } project
 
-    * Click the access security tab link
+    * Click the access security tab
     * Click the new floating IP allocation button
     * Current page should have the new floating IP allocation form
     * Choose the 2nd item in the pool dropdown
@@ -315,7 +315,7 @@ Then /^I can connect to that instance via (.+)/ do |remote_client|
 
     * Visit the projects page
     * Click the #{ @project.name } project
-    * Click the access security tab link
+    * Click the access security tab
     * Connect to #{ @image_name } instance with floating IP #{ floating_ip.id } via SSH
   }
 end
@@ -337,7 +337,7 @@ Then /^I cannot connect to that instance via (.+)/ do |remote_client|
 
     * Visit the projects page
     * Click the #{ @project.name } project
-    * Click the access security tab link
+    * Click the access security tab
     * Fail connecting to #{ @image_name } instance with floating IP #{ floating_ip.id } via SSH
   }
 end
