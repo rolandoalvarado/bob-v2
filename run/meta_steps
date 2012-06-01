@@ -9,8 +9,12 @@ end
 
 @meta_steps = []
 
-def Then(regex)
-  @meta_steps << "\033[0;32m#{ regex.inspect.gsub(/(\/\^|\$\/.?)/, '').ljust(70) }\t\033[0;33m#{ caller[0].to_s.match(/^.+\/(.+\.rb:\d+)/)[1] }\033[m"
+def Then(regex, the_caller = caller)
+  @meta_steps << "\033[0;32m#{ regex.inspect.gsub(/(\/\^|\$\/.?)/, '').ljust(70) }\t\033[0;33m#{ the_caller[0].to_s.match(/^.+\/(.+\.rb:\d+)/)[1] }\033[m"
+end
+
+def Step(regex)
+  Then(regex, caller)
 end
 
 path = '../../features/3_lib/meta_steps'

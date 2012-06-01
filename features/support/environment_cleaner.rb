@@ -103,12 +103,12 @@ class EnvironmentCleaner
           puts "      DELETED: #{ volume[:name] } (id: #{ volume[:id] })"
         end
 
-        puts "    Revoke users..."
-        project.users.each do |user|
+        puts "    Revoking memberships..."
+        project.users.reload.each do |user|
           next if user.name == "admin"
           @identity_service.revoke_all_user_roles(user, project)
-          puts "      Revoke: #{ user[:name] } (id: #{ user[:id] })" 
-        end         
+          puts "      Revoke: #{ user.name } (id: #{ user.id })"
+        end
 
         puts "    Deleting #{ project.name }..."
         @identity_service.delete_project(project)

@@ -30,7 +30,15 @@ module Unique
     self.string_without_whitespace(value, length)
   end
 
+  def self.user_name(value = '', length = 16)
+    self.username(value, length)
+  end
+
   def self.name(value = '', length = 16)
+    self.string_with_whitespace(value, length)
+  end
+
+  def self.project_name(value = '', length = 25)
     self.string_with_whitespace(value, length)
   end
 
