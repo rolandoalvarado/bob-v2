@@ -286,23 +286,23 @@ end
 
 Then /^The (.+) button should be disabled$/ do |button_name|
   button_name = button_name.split.join('_').downcase
-  unless @current_page.send("has_#{ button_name }_button?")
-    raise "Couldn't find '#{ button_name } button."
+  unless @current_page.send("has_disabled_#{ button_name }_button?")
+    raise "Couldn't find disabled #{ button_name } button."
   end
 end
 
 Then /^The (.+) link should be disabled$/ do |link_name|
   link_name = link_name.split.join('_').downcase
-  unless @current_page.send("has_#{ link_name }_link?")
-    raise "Couldn't find '#{ link_name } link."
+  unless @current_page.send("has_disabled_#{ link_name }_link?")
+    raise "Couldn't find disabled #{ link_name } link."
   end
 end
 
 
 Then /^The (.+) tab should be disabled$/ do |tab_name|
   tab_name = tab_name.split.join('_').downcase
-  unless @current_page.send("has_#{ tab_name }_tab?")
-    raise "Couldn't find '#{ tab_name } tab."
+  unless @current_page.send("has_disabled_#{ tab_name }_tab?")
+    raise "Couldn't find disabled #{ tab_name } tab."
   end
 end
 
