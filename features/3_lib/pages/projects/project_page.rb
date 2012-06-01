@@ -65,8 +65,12 @@ class ProjectPage < WebClientPage
   button    'create volume',       '#save-volume'
   table     'volumes',             '#volume-template tbody'
 
+  button    'delete volume',               '#volume-item-<id> a[data-action="delete-volume"]'
+  button    'volume delete confirmation',  'a.okay'
+
 # Type      Name                           Selector
   button    'volume menu',                 '#volume-item-<id> .dropdown-toggle'
+  button    'volume context menu',         '#volume-item-<id> .dropdown-toggle'
   button    'new volume snapshot',         '#volume-item-<id> #create-snapshot'
   form      'new volume snapshot',         '#create-snapshot-modal'
   field     'volume snapshot name',        '#create-snapshot-modal #name'
@@ -132,7 +136,7 @@ class ProjectPage < WebClientPage
   link      'collaborators email',           '.chzn-choices'
   tab       'collaborators',                 '.nav-tabs .collaborators a'
   tab       'disabled collaborators',        '.nav-tabs .collaborators.disabled'
-  button    'add collaborator',              '#add-collaborator:not(.disabled)'   
+  button    'add collaborator',              '#add-collaborator:not(.disabled)'
   option    'collaborator',           xpath: '//*[@class="chzn-drop"]//li[text()="<name>"]'
   button    'add collaborator action',       '#add-collaborator-modal .action-add'
   table     'collaborators',                 '#users-template tbody'

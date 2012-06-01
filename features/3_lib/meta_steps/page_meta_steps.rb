@@ -143,6 +143,23 @@ Then /^Click the row for user with id (.+)$/i do |user_id|
   @current_page.user_link(id: user_id).click
 end
 
+Step /^Click the context menu button of the volume named (.+)$/ do |volume_name|
+  VolumeService.session.reload_volumes
+  volume = VolumeService.session.volumes.find { |v| v['display_name'] == volume_name }
+
+  raise "Couldn't find a volume named '#{ volume_name }'" unless volume
+
+  @current_page.volume_context_menu_button(:id => volume['id']).click
+end
+
+Step /^Click the delete button of the volume named (.+)$/ do |volume_name|
+  volume = VolumeService.session.volumes.find { |v| v['display_name'] == volume_name }
+
+  raise "Couldn't find a volume named '#{ volume_name }'" unless volume
+
+  @current_page.delete_volume_button(:id => volume['id']).click
+end
+
 Then /^Click the link for user with username (.+)$/i do |username|
   user = IdentityService.session.find_user_by_name(username.strip)
   raise "ERROR: I couldn't find a user with username '#{ username }'." unless user
@@ -471,11 +488,11 @@ Then /^The (.+) project should not be visible$/ do |project_name|
 end
 
 
-Then /^The (.+) table should have (.+) rows$/ do |table_name, num_rows|
-  sleeping(1).seconds.between_tries.failing_after(5).tries do
+Then /^The (.+) table should have (\d+) (?:row|rows)$/ do |table_name, num_rows|
+  sleeping(1).seconds.between_tries.failing_after(30).tries do
     table_name      = table_name.split.join('_').downcase
     table           = @current_page.send("#{ table_name }_table")
-    actual_num_rows = table.has_content?('There are currently no') ? 0 : table.all('tbody tr').count
+    actual_num_rows = table.has_no_css_selector?('td.empty-table') ? table.all('tr').count : 0
     num_rows        = num_rows.to_i
 
     if actual_num_rows != num_rows

@@ -50,6 +50,21 @@ Then /^Ensure that I have a role of (.+) in the system$/i do |role_name|
 end
 
 
+Step /^Ensure that the user (.+) has a role of (.+) in the project (.+)$/ do |username, role_name, project_name|
+  user_attrs       = CloudObjectBuilder.attributes_for( :user, :name => Unique.username(username) )
+  identity_service = IdentityService.session
+  user             = identity_service.ensure_user_exists(user_attrs)
+
+  EnvironmentCleaner.register(:user, user.id)
+
+  project = identity_service.tenants.find { |t| t.name == project_name }
+  raise "The project named #{ project_name } couldn't be found!" if project.nil? or project.id.empty?
+
+  identity_service.revoke_all_user_roles(user, project)
+  identity_service.ensure_project_role(user, project, role_name)
+end
+
+
 Then /^Register the user named (.+) for deletion at exit$/i do |username|
   EnvironmentCleaner.register(:user, :name => username)
 end

@@ -21,6 +21,10 @@
 # can just re-use the objects each time it is executed.
 
 module Unique
+  def self.alpha
+    ConfigFile.unique_alpha
+  end
+
   def self.email(value)
     prefix = alpha[0, 4]
     "#{ prefix }_#{ value }"
@@ -50,7 +54,7 @@ module Unique
     "#{ value }_#{ self.alpha }"[0, length - 1]
   end
 
-  def self.alpha
-    ConfigFile.unique_alpha
+  def self.volume_name(value = '', length = 16)
+    self.string_with_whitespace(value, length)
   end
 end
