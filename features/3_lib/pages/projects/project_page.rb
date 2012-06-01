@@ -3,6 +3,8 @@ require_relative '../secure_page'
 class ProjectPage < WebClientPage
   path '/projects'
 
+  tab       'instances and volumes', '.nav-tabs .instances-and-volumes a'
+
   button    'new instance',          '#create-instance:not(.disabled)'
   button    'disabled new instance', '#create-instance.disabled'
   field     'project name',          '#project-name'
@@ -36,7 +38,7 @@ class ProjectPage < WebClientPage
   form      'security group rules',    "#security-group-rules-form"
   link      'delete security group',   '#security-item-<id> .delete-security-group'
   element   'security groups',         "#security-groups-list"
-  link      'access security',         '.nav-tabs .access-and-security a'
+  tab       'access security',         '.nav-tabs .access-and-security a'
 
   #Elements in the New Security form
   field     'security group name',           "#new-security-name"
@@ -70,16 +72,28 @@ class ProjectPage < WebClientPage
   field     'volume snapshot name',        '#create-snapshot-modal #name'
   field     'volume snapshot description', '#create-snapshot-modal #textarea'
   button    'create volume snapshot',      '#create-snapshot-modal .create-snapshot'
-  link      'snapshots tab',               '.nav-tabs .snapshots a'
-  table     'volume snapshots',            '#volume-snapshot-list'
+  tab       'snapshots',                   '.nav-tabs .snapshots a'
+
+# Type      Name                                Selector
+  button    'volume snapshot menu',      xpath: "//*[@id='volume-snapshot-list']//td[contains(@class, 'name') and normalize-space(text())=\"<name>\"]/..//*[@class='dropdown-toggle']"
+  button    'delete volume snapshot',    xpath: "//*[@id='volume-snapshot-list']//td[contains(@class, 'name') and normalize-space(text())=\"<name>\"]/..//*[@class='delete-snapshot']"
+  button    'confirm volume snapshot deletion', '#alert-template .okay'
+  table     'volume snapshots',                 '#volume-snapshot-list'
 
 # Type      Name                    Selector
   span      'new volume form error', 'span.error[for="name"], span.error[for="appendedInput"]'
 
+# Type      Name                         Selector
+  button    'attach volume',             '#volume-item-<id> #attach'
+  form      'attach volume',             '#attach-volume-modal'
+  dropdown  'attachable instance',       '#attach-volume-modal #instance'
+  button    'confirm volume attachment', '#attach-volume-modal .attach-volume'
+  row       'volume',                    '#volume-item-<id>'
+
   #==========================
   # Instance-related elements
   #==========================
-  link      'access security tab',           '.nav-tabs .access-and-security a'
+  tab       'access security',               '.nav-tabs .access-and-security a'
   button    'new floating IP allocation',    '#allocate-btn'
   form      'new floating IP allocation',    '#floating-ip-allocate-modal'
   dropdown  'pool',                          '#pool'
@@ -111,4 +125,16 @@ class ProjectPage < WebClientPage
   button    'confirm instance resize',       "#resize-instance-modal .action-resize-instance"
 
   element   'image', xpath: "//*[@id='instances-list']//label[text()='<name>']"
+
+  #==========================
+  # Collaborators
+  #==========================
+  link      'collaborators email',           '.chzn-choices'
+  tab       'collaborators',                 '.nav-tabs .collaborators a'
+  tab       'disabled collaborators',        '.nav-tabs .collaborators.disabled'
+  button    'add collaborator',              '#add-collaborator:not(.disabled)'   
+  option    'collaborator',           xpath: '//*[@class="chzn-drop"]//li[text()="<name>"]'
+  button    'add collaborator action',       '#add-collaborator-modal .action-add'
+  table     'collaborators',                 '#users-template tbody'
+
 end

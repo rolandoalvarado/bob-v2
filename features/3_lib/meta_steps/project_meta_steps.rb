@@ -1,3 +1,11 @@
+Then /^A project does not have collaborator/i do
+  identity_service = IdentityService.session
+  @project.users.each do |user|
+    next if user.name == "admin"
+    identity_service.revoke_all_user_roles(user, @project)
+  end         
+end
+
 Then /^Ensure that a test project is available for use$/i do
   identity_service = IdentityService.session
   project          = identity_service.ensure_project_exists(:name => 'project')
@@ -113,4 +121,10 @@ end
 Then /^Register project (.+) for deletion on exit$/i do |name|
   project = IdentityService.session.tenants.reload.find { |p| p.name == name }
   EnvironmentCleaner.register(:project, project.id) if project
+end
+
+Then /^Select Collaborator (.+)$/ do |username|
+  @current_page.collaborators_email_link.click
+  sleep(1)
+  @current_page.collaborator_option( name: @user.email ).click
 end

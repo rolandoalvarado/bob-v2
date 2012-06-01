@@ -2,7 +2,7 @@ require_relative 'base_cloud_service'
 
 class ComputeService < BaseCloudService
 
-  attr_reader :addresses, :flavors, :instances, :security_groups
+  attr_reader :addresses, :flavors, :instances, :security_groups, :current_project
 
   def initialize
     initialize_service Compute
@@ -39,6 +39,7 @@ class ComputeService < BaseCloudService
     service.set_tenant project
     instances.reload
     project_instances = instances.find_all{ |i| i.tenant_id == project.id }
+    attached_volumes  = service.volumes.select{ |v| !v.attachments.empty? && v.attachments.none?(&:empty?) }
 
     # There seems to be a bug in OpenStack. Sometimes this fails,
     # sometimes this works just fine.
@@ -49,6 +50,14 @@ class ComputeService < BaseCloudService
     if project_instances
       project_instances.each do |instance|
         deleted_instances << { name: instance.name, id: instance.id }
+
+        # Detach any attached volumes
+        attachments = attached_volumes.select{ |v| v.attachments.any?{ |a| a['serverId'] == instance.id } }
+        attachments.each do |attachment|
+          service.detach_volume(instance.id, attachment.id)
+          sleep(0.5)
+        end
+
         service.delete_server(instance.id)
       end
     end
@@ -75,10 +84,32 @@ class ComputeService < BaseCloudService
     released_addresses
   end
 
+  def ensure_instance_has_no_attached_volume(project, instance)
+    set_tenant project, false
+
+    sleeping(1).seconds.between_tries.failing_after(60).tries do
+      volumes          = service.volumes
+      attached_volumes = volumes.select{ |v| v.attachments.any?{ |a| a['serverId'] == instance.id } }
+      attached_volumes.each do |volume|
+        service.detach_volume(instance.id, volume.id)
+        sleep(0.5)
+      end
+
+      volumes.reload
+      attached_volumes = volumes.select{ |v| v.attachments.any?{ |a| a['serverId'] == instance.id } }
+      if attached_volumes.count > 0
+        raise "Couldn't ensure that instance #{ instance.name } has no volumes attached."
+      end
+
+      return instance
+    end
+  end
+
   def ensure_project_floating_ip_count(project, desired_count, instance=nil)
     service.set_tenant project
+
     keep_trying do
-      addresses.reload
+      addresses = service.addresses
       actual_count = addresses.count
 
       if desired_count > actual_count
@@ -90,14 +121,6 @@ class ComputeService < BaseCloudService
         end
         addresses.reload
 
-        # Floating IPs should usually be associated to an instance
-        if instance
-          how_many.times do |n|
-            service.associate_address(instance.id, addresses[n].id)
-            sleep(0.5)
-          end
-          addresses.reload
-        end
 
       elsif desired_count < addresses.length
 
@@ -108,6 +131,18 @@ class ComputeService < BaseCloudService
 
       end
 
+      # Floating IPs should usually be associated to an instance
+      if instance
+        desired_count.times do |n|
+          if addresses[n]
+            service.associate_address(instance.id, addresses[n].ip)
+            sleep(0.5)
+          end
+        end
+      end
+
+      addresses.reload
+      addresses = addresses.select { |a| a.instance_id == instance.id } if instance
       if addresses.length != desired_count
         raise "Couldn't ensure that #{ project.name } has #{ desired_count } " +
               "floating IPs. Current number of floating IPs is #{ addresses.length }."
@@ -247,7 +282,7 @@ class ComputeService < BaseCloudService
           instances.reload
           active_instances = instances.select{ |i| i.state =~ /^ACTIVE$/ }
         end
-        
+
         (desired_count - suspended_instances.count).times do |i|
           service.suspend_server(active_instances[i].id)
           sleep(0.5)      # Don't send too many requests at once
@@ -380,6 +415,18 @@ class ComputeService < BaseCloudService
     security_group = service.security_groups  
     security_group.find_by_name(name)
     security_group
+  end
+
+  def set_tenant(project, reload = true)
+    if @current_project != project
+      @current_project = project
+      service.set_tenant(project)
+    end
+    if reload
+      addresses.reload
+      flavors.reload
+      instances.reload
+    end
   end
 
   private

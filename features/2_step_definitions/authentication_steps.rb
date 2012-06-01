@@ -1,91 +1,100 @@
-#=================
-# GIVENs
-#=================
-
-Given /^I am logged in$/ do
-  username = 'rstark'
-  password = 'asdf123'
-
+Then /^If my username is (.+) and my password is (.+), I can log in with the following credentials (.+), (.+)$/i do |username, password, typed_username, typed_password|
   steps %{
-    * Click the logout button if currently logged in
     * Ensure that a user with username #{ username } and password #{ password } exists
-    * Visit the Login page
-    * Fill in the username field with #{ username }
-    * Fill in the password field with #{ password }
-    * Click the login button
-    * Current page should have the logout button
-  }
-end
+    * Register the user named #{ username } for deletion at exit
 
-Given /^I am not logged in$/ do
-  steps %{
-    * Click the logout button if currently logged in
-  }
-end
-
-#=================
-# WHENs
-#=================
-
-When /^I login with the following credentials: (.*), (.*)$/ do |username, password|
-  steps %{
+    * Click the Logout button if currently logged in
     * Visit the login page
-    * Current page should have the correct path
+    * Fill in the username field with #{ typed_username }
+    * Fill in the password field with #{ typed_password }
+    * Click the login button
 
+    * Current page should have the Logout button
+  }
+end
+
+
+Then /^If my username is (.+) and my password is (.+), I cannot log in with the following credentials (.+), (.+)$/i do |username, password, typed_username, typed_password|
+  steps %{
+    * Ensure that a user with username #{ username } and password #{ password } exists
+    * Register the user named #{ username } for deletion at exit
+
+    * Click the Logout button if currently logged in
+    * Visit the login page
+    * Fill in the username field with #{ typed_username }
+    * Fill in the password field with #{ typed_password }
+    * Click the login button
+
+    * Current page should be the Login page
+    * The Login Error message should be visible
+  }
+end
+
+
+Then /^I will be redirected to the Log In page when I anonymously access (.+)$/i do |page_name|
+  steps %{
+    * Click the Logout button if currently logged in
+    * Visit the #{ page_name } page
+    * Current page should be the Login page
+  }
+end
+
+
+Then /^Logging in after anonymously accessing (.+) redirects me back to it$/ do |page_name|
+  username = 'rstark'
+  password = '123qwe'
+
+  steps %{
+    * Ensure that a user with username #{ username } and password #{ password } exists
+    * Register the user named #{ username } for deletion at exit
+
+    * Click the Logout button if currently logged in
+    * Visit the #{ page_name } page
+    * Current page should be the Login page
     * Fill in the username field with #{ username }
     * Fill in the password field with #{ password }
-    * Click the login button
-  }
-end
-
-When /^I logout$/ do
-  steps %{
-    * Click the logout button
-  }
-end
-
-When /^I try to access the (.+) section$/ do |section_name|
-  steps %{
-    * Visit the #{ section_name } page
+    * Click the Login button
+    * Current page should be the #{ page_name } page
   }
 end
 
 
-#=================
-# THENs
-#=================
+Then /^Logging out redirects me to the Log In page$/ do
+  username = 'rstark'
+  password = '123qwe'
 
-Then /^I can log out$/ do
   steps %{
-    * Current page should have the logout button
-    * Click the logout button
-    * Current page should be the login page
+    * Ensure that a user with username #{ username } and password #{ password } exists
+    * Register the user named #{ username } for deletion at exit
+
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ username }
+    * Fill in the Password field with #{ password }
+    * Click the Login button
+    * Current page should be the Root page
+    * Click the Logout button
+    * Current page should be the Login page
   }
 end
 
-Then /^I will be asked to log in first$/ do
-  steps %{
-    * Current page should be the login page
-  }
-end
 
-Then /^I will be [Ll]ogged [Ii]n$/ do
-  steps %{
-    * Current page should have the logout button
-  }
-end
+Then /^Logging out clears my session$/ do
+  username = 'rstark'
+  password = '123qwe'
 
-Then /^I will be [Nn]ot [Ll]ogged [Ii]n$/ do
   steps %{
-    * Current page should be the login page
-    * Current page should have the username field
-    * Current page should have the password field
-    * Current page should have the login button
-  }
-end
+    * Ensure that a user with username #{ username } and password #{ password } exists
+    * Register the user named #{ username } for deletion at exit
 
-Then /^I will see the (.+) section$/ do |section_name|
-  steps %{
-    * Current page should be the #{ section_name } page
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ username }
+    * Fill in the Password field with #{ password }
+    * Click the Login button
+    * Current page should be the Root page
+    * Click the Logout button
+    * Visit the Projects page
+    * Current page should be the Login page
   }
 end

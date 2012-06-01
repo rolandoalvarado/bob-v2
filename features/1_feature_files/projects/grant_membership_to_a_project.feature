@@ -1,3 +1,4 @@
+@jira-MCF-28
 Feature: Grant Membership to a Project
   As a project owner, I want to grant project membership to other users so
   that they can help me manage the resources in it.
@@ -14,6 +15,7 @@ Feature: Grant Membership to a Project
 
   Background:
     * A project exists in the system
+    * A project does not have collaborator
     * A user named Arya Stark exists in the system
 
 
@@ -24,16 +26,14 @@ Feature: Grant Membership to a Project
 
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Grant |
-        | Admin           | Can Grant           |
+        | System Admin    | Can Grant           |
+        | Project Manager | Can Grant           |
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Grant |
         | Member          | Cannot Grant        |
-        | (None)          | Cannot Grant        |
 
-
-  Scenario Outline: Add a Member to A Project
+  Scenario: Add a Member to A Project
     Given I am authorized to grant project memberships
-      And Arya Stark is not a member of the project
      When I grant project membership to her
-     Then she can view the project
+     Then She can view the project

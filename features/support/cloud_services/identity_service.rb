@@ -44,7 +44,7 @@ class IdentityService < BaseCloudService
 
   def delete_tenant(tenant)
     users = tenant.users
-    users.each do |user|
+    users.reload.each do |user|
       revoke_all_user_roles(user, tenant)
     end
 
@@ -63,7 +63,7 @@ class IdentityService < BaseCloudService
   end
 
   def delete_user(user)
-    tenants.each do |tenant|
+    tenants.reload.each do |tenant|
       revoke_all_user_roles(user, tenant)
     end
 
@@ -71,6 +71,28 @@ class IdentityService < BaseCloudService
     # of all foreign key constraints. So we have to keep trying
     sleeping(1).seconds.between_tries.failing_after(15).tries do
       user.destroy
+    end
+  end
+
+  # System Admin    = 'admin' in admin tenant, 'Member' in all tenants
+  # Project Manager = 'admin' in admin tenant, 'Member' in the tenant
+  # Member          = 'Member' in the tenant
+  def ensure_tenant_role(user, tenant, role_name)
+    valid_roles = ['Project Manager', 'Member', '(None)']
+
+    unless valid_roles.include?(role_name)
+      raise "Unknown role '#{ role_name }'. Valid roles are #{ valid_roles.join(',') }"
+    end
+
+    if role_name == 'Project Manager'
+      admin_role   = roles.find_by_name('admin')
+      admin_tenant = tenants.find_by_name('admin')
+      admin_tenant.grant_user_role(user.id, admin_role.id)
+    end
+
+    if ['Project Manager', 'Member'].include?(role_name)
+      member_role = roles.find_by_name('Member')
+      tenant.grant_user_role(user.id, member_role.id)
     end
   end
 
@@ -84,7 +106,7 @@ class IdentityService < BaseCloudService
 
   def ensure_tenant_exists(attributes)
     attributes        = CloudObjectBuilder.attributes_for(:tenant, attributes)
-    attributes[:name] = Unique.name(attributes[:name], 25)
+    attributes[:name] = Unique.project_name(attributes[:name])
 
     tenant = tenants.find_by_name(attributes[:name])
     if tenant

@@ -56,8 +56,8 @@ class EnvironmentCleaner
 
   def delete_test_objects
     puts "Deleting test objects (Cancel with Ctrl-C)" if registry.count > 0
-    delete_test_users
     delete_test_projects
+    delete_test_users
   end
 
 
@@ -101,6 +101,13 @@ class EnvironmentCleaner
         deleted_volumes = @volume_service.delete_volumes_in_project(project)
         deleted_volumes.each do |volume|
           puts "      DELETED: #{ volume[:name] } (id: #{ volume[:id] })"
+        end
+
+        puts "    Revoking memberships..."
+        project.users.reload.each do |user|
+          next if user.name == "admin"
+          @identity_service.revoke_all_user_roles(user, project)
+          puts "      Revoke: #{ user.name } (id: #{ user.id })"
         end
 
         puts "    Deleting #{ project.name }..."

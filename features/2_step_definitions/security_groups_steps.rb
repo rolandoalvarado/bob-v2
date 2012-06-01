@@ -162,7 +162,7 @@ Then /^I [Cc]an Delete the Web Servers security group in the project$/ do
     * Visit the projects page
     * Click the #{ @project.name } project
 
-    * Click the access security link
+    * Click the access security tab
     * Click the context menu button for security group #{ @new_security_group.id }
     * Click the delete security group button for security group #{ @new_security_group.id }
     * Click the confirm security group deletion button

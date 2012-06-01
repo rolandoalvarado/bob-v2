@@ -61,7 +61,7 @@ Then /^Click the (.+) link for user (.+)$/ do |link_name, username|
 end
 
 
-Then /^Click the [Ll]ogout button if currently logged in$/ do
+Then /^Click the Logout button if currently logged in$/i do
   @current_page ||= RootPage.new
   @current_page.visit                      # This removes any modal overlay
   unless @current_page.actual_url.empty?
@@ -83,6 +83,16 @@ end
 Then /^Click the (.+) link$/ do |link_name|
   link_name = link_name.split.join('_').downcase
   @current_page.send("#{ link_name }_link").click
+
+  page_name = link_name
+  page_class_name = "#{ page_name.downcase.capitalize }Page"
+  unless Object.const_defined?( page_class_name )
+    raise "The #{ page_name } page (#{ page_class_name }) is not defined " +
+          "anywhere in the pages directory. You may have misspelled " +
+          "the page's name, or you may need to define a #{ page_class_name } " +
+          "class somewhere in that directory."
+  end
+  @current_page = eval(page_class_name).new
 end
 
 
@@ -92,7 +102,9 @@ Then /^Click the (.+) button for instance (.+)$/ do |button_name, instance_id|
 end
 
 
-Then /^Click the (.+) button for volume (.+)$/ do |button_name, volume_id|
+# Match "Click the <text1> button for volume <text2>",
+# but not when $text2 starts with the string "snapshot named"
+Then /^Click the (.+) button for volume (?:(?!snapshot named ))(.+)$/ do |button_name, volume_id|
   button_name = button_name.split.join('_').downcase
   @current_page.send("#{ button_name }_button", id: volume_id).click
 end
@@ -107,11 +119,24 @@ Then /^Click the (.+) button for security group (.+)$/ do |button_name, security
   @current_page.send("#{ button_name }_button", id: security_group_id).click
 end
 
+Then /^Click the (.+) button for volume snapshot named (.+)$/ do |button_name, snapshot_name|
+  button_name = button_name.split.join('_').downcase
+  @current_page.send("#{ button_name }_button", name: snapshot_name).click
+end
+
+
 Then /^Click the (.+) project$/ do |project_name|
   project_name.strip!
   @current_page.project_link( name: project_name ).click
   @current_page = ProjectPage.new
 end
+
+
+Then /^Click the (.+) tab$/ do |tab_name|
+  tab_name = tab_name.split.join('_').downcase
+  @current_page.send("#{ tab_name }_tab").click
+end
+
 
 Then /^Click the row for user with id (.+)$/i do |user_id|
   user_id.strip!
@@ -128,7 +153,7 @@ Then /^Click the (.+) image$/ do |image_name|
   @current_page.image_element( name: image_name.strip ).click
 end
 
-Then /^Current page should be the (.+) page$/ do |page_name|
+Then /^Current page should be the (.+) page$/i do |page_name|
   @current_page = eval("#{ page_name.downcase.capitalize }Page").new
   unless @current_page.has_expected_path?
     raise "Expected #{ @current_page.expected_path } but another page was returned: #{ @current_page.actual_path }"
@@ -277,6 +302,7 @@ end
 
 
 Then /^The (.+) table should not include the text (.+)$/ do |table_name, text|
+  table_name = table_name.split.join('_').downcase
   if @current_page.send("#{ table_name }_table").wait_for_content_to_disappear(text)
     raise "The text '#{ text }' should not be in the #{ table_name } table, but it is."
   end
@@ -285,8 +311,23 @@ end
 
 Then /^The (.+) button should be disabled$/ do |button_name|
   button_name = button_name.split.join('_').downcase
-  unless @current_page.send("has_#{ button_name }_button?")
-    raise "Couldn't find '#{ button_name } button."
+  unless @current_page.send("has_disabled_#{ button_name }_button?")
+    raise "Couldn't find disabled #{ button_name } button."
+  end
+end
+
+Then /^The (.+) link should be disabled$/ do |link_name|
+  link_name = link_name.split.join('_').downcase
+  unless @current_page.send("has_disabled_#{ link_name }_link?")
+    raise "Couldn't find disabled #{ link_name } link."
+  end
+end
+
+
+Then /^The (.+) tab should be disabled$/ do |tab_name|
+  tab_name = tab_name.split.join('_').downcase
+  unless @current_page.send("has_disabled_#{ tab_name }_tab?")
+    raise "Couldn't find disabled #{ tab_name } tab."
   end
 end
 
@@ -349,6 +390,20 @@ Then /^The instance (.+) should not have flavor (.+)$/ do |instance_id, flavor_n
 end
 
 
+Then /^The volume (.+) should be attached to instance (.+)$/ do |volume_id, instance_name|
+  sleeping(1).seconds.between_tries.failing_after(15).tries do
+    unless @current_page.has_volume_row?( id: volume_id )
+      raise "Could not find row for volume #{ volume_id }!"
+    end
+
+    attachment = @current_page.volume_row( id: volume_id ).find('.attachments a').text()
+    if attachment != instance_name
+      raise "Expected volume #{ volume_id } to be attached to instance #{ instance_name }, but it's not."
+    end
+  end
+end
+
+
 Then /^The (.+) link should be visible$/ do |link_name|
   link_name = link_name.split.join('_').downcase
   unless @current_page.send("has_#{ link_name }_link?")
@@ -364,18 +419,34 @@ Then /^The (.+) link should not be visible$/ do |link_name|
   end
 end
 
-Then /^The (.+) message should be visible$/ do |span_name|
-  span_name = span_name.split.join('_').downcase
-  unless @current_page.send("has_#{ span_name }_span?")
-    raise "The '#{ span_name.gsub('_',' ') }' message should be visible, but it's not."
+Then /^The (.+) message should be visible$/ do |message_name|
+  message_name = message_name.split.join('_').downcase
+  unless @current_page.send("has_#{ message_name }_message?")
+    raise "The '#{ message_name.gsub('_',' ') }' message should be visible, but it's not."
   end
 end
 
 
-Then /^The (.+) message should not be visible$/ do |span_name|
+Then /^The (.+) message should not be visible$/ do |message_name|
+  message_name = message_name.split.join('_').downcase
+  if @current_page.send("has_#{ message_name }_message?")
+    raise "The '#{ message_name.gsub('_',' ') }' message should not be visible, but it is."
+  end
+end
+
+
+Then /^The (.+) span should be visible$/ do |span_name|
+  span_name = span_name.split.join('_').downcase
+  unless @current_page.send("has_#{ span_name }_span?")
+    raise "The '#{ span_name.gsub('_',' ') }' span should be visible, but it's not."
+  end
+end
+
+
+Then /^The (.+) span should not be visible$/ do |span_name|
   span_name = span_name.split.join('_').downcase
   if @current_page.send("has_#{ span_name }_span?")
-    raise "The '#{ span_name.gsub('_',' ') }' message should not be visible, but it is."
+    raise "The '#{ span_name.gsub('_',' ') }' span should not be visible, but it is."
   end
 end
 
@@ -442,7 +513,7 @@ Then /^Visit the (.+) page$/ do |page_name|
   page_class_name = "#{ page_name.downcase.capitalize }Page"
   unless Object.const_defined?( page_class_name )
     raise "The #{ page_name } page (#{ page_class_name }) is not defined " +
-          "anywhere in the features/pages directory. You may have misspelled " +
+          "anywhere in the pages directory. You may have misspelled " +
           "the page's name, or you may need to define a #{ page_class_name } " +
           "class somewhere in that directory."
   end
