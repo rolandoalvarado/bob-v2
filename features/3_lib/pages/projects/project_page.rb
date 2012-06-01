@@ -43,11 +43,15 @@ class ProjectPage < WebClientPage
   button    'create security',               "#create-security-group"
   span      'new security form error',       "span.error[for='new-security-name'], span.error[for='new-security-description']"
   option    'ip protocol', xpath:            '//select[@id="ip-protocol"]/option[text()="<name>"]'
-  field     'from port',                     '#from-port'
-  field     'to port',                       '#to-port'
-  field     'CIDR',                          '#cidr'
+  field     'from port', xpath:              '//form[@id="security-group-rules-form"]//input[@id="from-port"]'
+  field     'to port', xpath:                '//form[@id="security-group-rules-form"]//input[@id="to-port"]'
+  field     'CIDR',    xpath:                '//form[@id="security-group-rules-form"]//input[@id="cidr"]'
   button    'add security group rule',       '#save-security-group-rule'
   button    'close security group rule', xpath: '//*[@id="security-group-rules-modal"]/div[3]/a' 
+  field     'list ip protocol',              '#security-group-rules-list div.ip-protocoll'  
+  field     'list from port',                '#security-group-rules-list div.from-port'   
+  field     'list to port',                  '#security-group-rules-list div.to-port'   
+  field     'list cidr',                     '#security-group-rules-list div.cidr'   
 
   #==========================
   # Volume-related elements

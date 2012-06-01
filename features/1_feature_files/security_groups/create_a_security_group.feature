@@ -53,7 +53,7 @@ Feature: Create a Security Group
     Given I am authorized to create a security group in the project
       And the project has only one security group named Web Servers
      When I add the following rule: <Protocol>, <From Port>, <To Port>, <CIDR>
-     Then the rules will be <Added or Not>
+     Then the security group rules will be <Added or Not>
 
       Scenarios: Valid Rules
         | Protocol | From Port | To Port  | CIDR        | Added or Not |

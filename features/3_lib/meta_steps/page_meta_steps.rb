@@ -38,6 +38,13 @@ Then /^Choose the (\d+)(?:st|nd|rd|th) item in the (.+) dropdown$/ do |item_numb
   @current_page.send("#{ dropdown_name }_dropdown_items")[item_number.to_i - 1].click
 end
 
+Then /^Choose the (.+) in the ip protocol dropdown$/ do |protocol|
+  if protocol.downcase == "(any)" || protocol.downcase == "(none)"
+    #nothing
+  else
+    @current_page.ip_protocol_option( name: protocol ).click
+  end
+end
 
 Then /^Choose the item with text (.+) in the (.+) dropdown$/ do |item_text, dropdown_name|
   dropdown_name = dropdown_name.split.join('_').downcase
@@ -242,15 +249,6 @@ Then /^Select instance count (.+)$/ do |count|
  end
 end
 
-Then /^Set port to the (.+) field with (.+)$/ do |port_name,port_number| 
-  if port_number.downcase == "(none)"
-    port_number = ""
-  elsif port_number.downcase == "(random)"
-    port_number = rand(65534) + 1
-  end
-  step "Fill in the #{port_name} field with #{port_number}"
-end
-
 Then /^Select Security Group (.+) item from the security group checklist$/ do |security_group|
  if security_group.downcase == "(any)"
    #nothing
@@ -261,15 +259,6 @@ Then /^Select Security Group (.+) item from the security group checklist$/ do |s
  end
 end
 
-Then /^Choose the (.+) in the ip protocol dropdown$/ do |protocol|
-  if protocol.downcase == "(any)" || protocol.downcase == "(none)"
-    #nothing
-  else
-    @current_page.ip_protocol_option( name: protocol ).click
-  end
-end
-
-
 Then /^Set instance name field with (.+)$/ do |instance_name|
   if instance_name.downcase == "(any)"
     step "Fill in the server name field with #{Unique.name('Instance')}"
@@ -278,6 +267,14 @@ Then /^Set instance name field with (.+)$/ do |instance_name|
   end
 end
 
+Then /^Set port to the (.+) field with (.+)$/ do |port_name,port_number| 
+  if port_number.downcase == "(none)"
+    port_number = ""
+  elsif port_number.downcase == "(random)"
+    port_number = rand(65534) + 1
+  end
+  step "Fill in the #{port_name} field with #{port_number}"
+end
 
 Then /^The (.+) form should be visible$/ do |form_name|
   form_name = form_name.split.join('_').downcase

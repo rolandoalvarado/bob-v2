@@ -364,7 +364,7 @@ class ComputeService < BaseCloudService
     end
   end
 
-   def create_security_group(project, attributes)
+  def create_security_group(project, attributes)
     service.set_tenant project
     security_group = service.security_groups
     new_security_group = security_group.find_by_name(attributes[:name])
@@ -427,6 +427,18 @@ class ComputeService < BaseCloudService
     security_group = service.security_groups  
     security_group.find_by_name(name)
     security_group
+  end
+
+  def set_tenant(project, reload = true)
+    if @current_project != project
+      @current_project = project
+      service.set_tenant(project)
+    end
+    if reload
+      addresses.reload
+      flavors.reload
+      instances.reload
+    end
   end
 
   private

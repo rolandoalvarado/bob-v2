@@ -65,6 +65,13 @@ When /^I create a security group with attributes (.+), (.+)$/ do |name, descript
 end
 
 When /^I add the following rule: (.+), (.+), (.+), (.+)$/ do |protocol, from_port, to_port, cidr |
+
+  @security_group_rule = { 
+    :protocol => protocol ,
+    :from_port => from_port, 
+    :to_port => to_port , 
+    :cidr => cidr }
+
   steps %{
     * Click the logout button if currently logged in
 
@@ -209,7 +216,7 @@ end
 
 Then /^the security group with attributes (.+), (.+) will be [Nn]ot [Cc]reated$/ do |name, description|
   
-  security_group = CloudObjectBuilder.attributes_for(
+  @security_group = CloudObjectBuilder.attributes_for(
                     :security_group,
                     :name     => Unique.name(name),
                     :description    => description
@@ -237,20 +244,3 @@ Then /^the security group with attributes (.+), (.+) will be [Nn]ot [Cc]reated$/
   }
 end
 
-#Then /^Choose the (.+) in the ip protocol dropdown$/ do |protocol|
-#  steps %{
-#    * The #{protocol} protocol should be selected
-#  }
-#end
-
-#Then /^The (.+) protocol should be selected$/ do |protocol|
-#  steps %{
-#    * The #{protocol} protocol is selected
-#  }
-#end
-
-Then /^the rules will be Added$/i do
-  steps %{
-    * Current page should have the new rules    
-  }
-end
