@@ -51,8 +51,8 @@ class ProjectPage < WebClientPage
   tab       'snapshots',                   '.nav-tabs .snapshots a'
 
 # Type      Name                                Selector
-  button    'volume snapshot menu',      xpath: "//*[@id=volume-snapshot-list]//td[@class='name' and text()='<name>']/..//*[@class='dropdown-toggle']"
-  button    'delete volume snapshot',    xpath: "//*[@id=volume-snapshot-list]//td[@class='name' and text()='<name>']/..//*[@class='delete-snapshot']"
+  button    'volume snapshot menu',      xpath: "//*[@id='volume-snapshot-list']//td[contains(@class, 'name') and normalize-space(text())=\"<name>\"]/..//*[@class='dropdown-toggle']"
+  button    'delete volume snapshot',    xpath: "//*[@id='volume-snapshot-list']//td[contains(@class, 'name') and normalize-space(text())=\"<name>\"]/..//*[@class='delete-snapshot']"
   button    'confirm volume snapshot deletion', '#alert-template .okay'
   table     'volume snapshots',                 '#volume-snapshot-list'
 
