@@ -20,6 +20,12 @@ Given /^the project has no security groups$/ do
   }
 end
 
+Given /^the project has a security group$/ do
+  steps %{
+    * Ensure that the project has a security group
+  }
+end
+
 Given /^the security group has an attributes of (.+), (.+)$/ do |name, description|
   steps %{
     * Ensure that a security group name #{ name } exists
@@ -34,8 +40,8 @@ Given /^the project has only one security group named Web Servers$/ do
   }
 end
 
-Given /^The project has (\d+) security groups named default, and Web Servers$/ do |security_group_count|
-  steps %{
+Given /^the project has (\d+) security groups named default, and Web Servers$/ do |arg1|
+   steps %{
     * Ensure that a security group named Web Servers exist
     * Ensure that a project has #{security_group_count} security groups
   }
@@ -45,6 +51,14 @@ Given /^The project has an instance that is a member of the (.+) security group$
   steps %{
     * Ensure that the a project has an instance
     * Ensure that the instance is a member of the #{security_group} security group
+  }
+end
+
+Given /^I am authorized to edit a security group in the project$/ do
+  role_name = 'Project Manager'
+
+  steps %{
+    * Ensure that I have a role of #{ role_name } in the project
   }
 end
 
@@ -104,7 +118,7 @@ When /^I add the following rule: (.+), (.+), (.+), (.+), (.+)$/ do |protocol, fr
     * Visit the projects page
     * Click the #{ @project.name } project
 
-    * Click the access security link
+    * Click the access security tab
     * Current page should have the security groups
 
     * Click the modify button for security group #{ @new_security_group.id }
@@ -116,6 +130,80 @@ When /^I add the following rule: (.+), (.+), (.+), (.+), (.+)$/ do |protocol, fr
     * Fill in the source field with #{source}
     * Click the add link
   }
+end
+
+When /^I edit the default security group with the following rule:  (.+), (.+), (.+), (.+), (.+)$/ do |protocol, from_port, to_port, source_type, source|
+
+  compute_service = ComputeService.session
+  attrs           = CloudObjectBuilder.attributes_for(
+                    :security_group, 
+                    :name => Unique.name('Web Servers'), 
+                    :description => 'Web Servers'
+                  )
+
+  security_group  = compute_service.ensure_security_group_exists(@project, attrs)
+
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * Click the #{ @project.name } project
+
+    * Click the access security tab
+    * Current page should have the security groups
+
+    * Click the modify button for security group #{ security_group.id }
+    * Current page should have the security group rules form
+    * Choose the #{protocol} in the ip protocol dropdown
+    * Fill in the from port field with #{from_port}
+    * Fill in the to port field with #{to_port}
+    * Ensure that a #{source_type} is Subnet
+    * Fill in the source field with #{source}
+    * Click the add link
+  }
+
+end
+
+When /^I edit the Web Servers security group with the following rule:  (.+), (.+), (.+), (.+), (.+)$/ do |protocol, from_port, to_port, source_type, source|
+
+  compute_service = ComputeService.session
+  attrs           = CloudObjectBuilder.attributes_for(
+                    :security_group, 
+                    :name => Unique.name('Web Servers'), 
+                    :description => 'Web Servers'
+                  )
+
+  security_group  = compute_service.ensure_security_group_exists(@project, attrs)
+
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * Click the #{ @project.name } project
+
+    * Click the access security tab
+    * Current page should have the security groups
+
+    * Click the modify button for security group #{ security_group.id }
+    * Current page should have the security group rules form
+    * Choose the #{protocol} in the ip protocol dropdown
+    * Fill in the from port field with #{from_port}
+    * Fill in the to port field with #{to_port}
+    * Ensure that a #{source_type} is Subnet
+    * Fill in the source field with #{source}
+    * Click the add link
+  }
+
 end
 
 #=================
@@ -139,13 +227,46 @@ Then /^I [Cc]an [Cc]reate a security group in the project$/ do
     * Visit the projects page
     * Click the #{ @project.name } project
 
-    * Click the access security link
+    * Click the access security tab
     * Click the new security button
     * Current page should have the new security form
     * Fill in the security group name field with #{security_group.name}
     * Fill in the security group description field with #{security_group.description}
     * Click the create security button    
     * Current page should have the new #{security_group.name} security group
+    * The #{security_group.name} security group row should be visible
+  }
+end
+
+Then /^I [Cc]an [Ee]dit a security group in the project$/ do
+  compute_service = ComputeService.session
+  attrs           = CloudObjectBuilder.attributes_for(
+                    :security_group, 
+                    :name => Unique.name('Web Servers'), 
+                    :description => 'Web Servers'
+                  )
+
+  security_group  = compute_service.ensure_security_group_exists(@project, attrs)
+  
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * Click the #{ @project.name } project
+
+    * Click the access security tab
+    * Current page should have the #{security_group.name} security group
+    * Click the row for security group with id #{ security_group.id }
+    * Current page should have the edit #{security_group.name} security group 
+    * Fill in the security group name field with #{security_group.name}
+    * Fill in the security group description field with #{security_group.description}
+    * Click the update security button    
+    * Current page should have the updated #{security_group.name} security group
     * The #{security_group.name} security group row should be visible
   }
 end
@@ -177,6 +298,20 @@ Then /^I [Cc]annot [Cc]reate a security group in the project$/ do
     * Visit the login page
     * Fill in the username field with #{ @user.name }
     * Fill in the password field with #{ @user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * The #{ @project.name } project should not be visible
+  }
+end
+
+Then /^I [Cc]annot [Ee]dit a security group in the project$/ do
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
     * Click the login button
 
     * Visit the projects page
@@ -239,12 +374,6 @@ Then /^The (.+) security group should be visible$/ do |security_group|
     * Click the #{ @project.name } project
     * Click the access security link
     * Current page should have the new #{security_group.name} security group
-  }
-end
-
-Then /^Current page should have the new (.+) security group$/ do |security_group|
-  steps %{
-    * The #{security_group} security group row should be visible
   }
 end
 
@@ -325,5 +454,11 @@ end
 Then /^the rules will be Added$/ do
   steps %{
     * Current page should have the new rules    
+  }
+end
+
+Then /^the rule will be [Uu]pdated$/ do
+  steps %{
+    * Current page should have the rule    
   }
 end

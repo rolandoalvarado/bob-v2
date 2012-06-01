@@ -108,6 +108,11 @@ Then /^Ensure that the project has no security groups$/i do
   compute_service.ensure_project_security_group_count(@project, 0)
 end
 
+Then /^Ensure that the project has a security group$/i do
+  compute_service = ComputeService.session
+  compute_service.ensure_project_security_group_count(@project, 1)
+end
+
 Then /^Ensure that the a project has an instance$/ do
   compute_service = ComputeService.session
   compute_service.ensure_active_instance_count(@project, 1)

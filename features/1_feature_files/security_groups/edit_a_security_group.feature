@@ -1,3 +1,4 @@
+@jira-MCF-34
 Feature: Edit a Security Group
   As an authorized user, I want to edit a security group so that I can
   control the incoming network traffic for one or more instances.
@@ -26,7 +27,7 @@ Feature: Edit a Security Group
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Edit |
         | Member          | Can Edit           |
-        | Admin           | Can Edit           |
+        | Project Manager | Can Edit           |
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Edit |
@@ -35,25 +36,9 @@ Feature: Edit a Security Group
 
   Scenario Outline: Edit a Security Group
     Given I am authorized to edit a security group in the project
-      And the project has a security group
-     When I edit a security group with attributes <Name>, <Description>
-     Then the security will be <Updated or Not>
-
-      Scenarios: Valid Values
-        | Name             | Description              | Updated or Not |
-        | Database Servers | Only port 443 is allowed | Updated        |
-        | Database Servers |                          | Updated        |
-
-      Scenarios: Invalid Values
-        | Name             | Description              | Updated or Not |
-        |                  | Only port 443 is allowed | Not Updated    |
-
-
-  Scenario Outline: Add a Rule During Edit
-    Given I am authorized to edit a security group in the project
-      And the project has 2 security groups named Web Servers, and Database Servers
-     When I edit the Database Servers security group with the following rule: <Protocol>, <From Port>, <To Port>, <Source Type>, <Source>
-     Then the security group will be <Updated or Not>
+      And the project has 2 security groups named default, and Web Servers
+     When I edit the Web Servers security group with the following rule: <Protocol>, <From Port>, <To Port>, <Source Type>, <Source>
+     Then the rule will be <Updated or Not>
 
      Scenarios: Valid Rules
        | Protocol | From Port | To Port  | Source Type    | Source      | Updated or Not |

@@ -131,7 +131,6 @@ Then /^Click the (.+) project$/ do |project_name|
   @current_page = ProjectPage.new
 end
 
-
 Then /^Click the (.+) tab$/ do |tab_name|
   tab_name = tab_name.split.join('_').downcase
   @current_page.send("#{ tab_name }_tab").click
@@ -141,6 +140,11 @@ end
 Then /^Click the row for user with id (.+)$/i do |user_id|
   user_id.strip!
   @current_page.user_link(id: user_id).click
+end
+
+Then /^Click the row for security group with id (.+)$/i do |security_group_id|
+  security_group_id.strip!
+  @current_page.security_group_link(id: security_group_id).click
 end
 
 Then /^Click the link for user with username (.+)$/i do |username|
@@ -186,6 +190,18 @@ Then /^Current page should have the security groups$/ do
   unless @current_page.has_security_groups_element?
     raise "Current page doesn't have security groups."
   end
+end
+
+Then /^Current page should have the new (.+) security group$/ do |security_group|
+  steps %{
+    * The #{security_group} security group row should be visible
+  }
+end
+
+Then /^Current page should have the (.+) security group$/ do |security_group|
+  steps %{
+    * The #{security_group} security group row should be visible
+  }
 end
 
 Then /^Drag the instance flavor slider to a different flavor$/ do
