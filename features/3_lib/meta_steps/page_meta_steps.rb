@@ -109,6 +109,15 @@ Then /^Click the (.+) button for volume (?:(?!snapshot named ))(.+)$/ do |button
   @current_page.send("#{ button_name }_button", id: volume_id).click
 end
 
+Then /^Click the (.+) link for security group (.+)$/ do |link_name, security_group_id|
+  link_name = link_name.split.join('_').downcase
+  @current_page.send("#{ link_name }_link", id: security_group_id).click
+end
+
+Then /^Click the (.+) button for security group (.+)$/ do |button_name, security_group_id|
+  button_name = button_name.split.join('_').downcase
+  @current_page.send("#{ button_name }_button", id: security_group_id).click
+end
 
 Then /^Click the (.+) button for volume snapshot named (.+)$/ do |button_name, snapshot_name|
   button_name = button_name.split.join('_').downcase
@@ -140,11 +149,9 @@ Then /^Click the link for user with username (.+)$/i do |username|
   @current_page.user_link(user_id: user.id).click
 end
 
-
 Then /^Click the (.+) image$/ do |image_name|
   @current_page.image_element( name: image_name.strip ).click
 end
-
 
 Then /^Current page should be the (.+) page$/i do |page_name|
   @current_page = eval("#{ page_name.downcase.capitalize }Page").new
@@ -175,6 +182,11 @@ Then /^Current page should show the instance's console output$/ do
   end
 end
 
+Then /^Current page should have the security groups$/ do
+  unless @current_page.has_security_groups_element?
+    raise "Current page doesn't have security groups."
+  end
+end
 
 Then /^Drag the instance flavor slider to a different flavor$/ do
   @current_page.execute_script %{
@@ -249,6 +261,10 @@ Then /^Select Security Group (.+) item from the security group checklist$/ do |s
  else
    pending
  end
+end
+
+Then /^Choose the (.+) in the ip protocol dropdown$/ do |protocol|
+   step "IP Dropdown protocol will contain #{protocol}"
 end
 
 
@@ -403,7 +419,6 @@ Then /^The (.+) link should not be visible$/ do |link_name|
   end
 end
 
-
 Then /^The (.+) message should be visible$/ do |message_name|
   message_name = message_name.split.join('_').downcase
   unless @current_page.send("has_#{ message_name }_message?")
@@ -434,7 +449,6 @@ Then /^The (.+) span should not be visible$/ do |span_name|
     raise "The '#{ span_name.gsub('_',' ') }' span should not be visible, but it is."
   end
 end
-
 
 Then /^The (.+) user should be visible$/ do |user_name|
   unless @current_page.has_user_name_element?( name: user_name )

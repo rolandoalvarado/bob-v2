@@ -19,7 +19,7 @@ Feature: Create a Security Group
     * A project exists in the system
 
 
-  @permissions @jira-MCF-32-scenario
+  @permissions @jira-MCF-32-cup
   Scenario Outline: Check User Permissions
     Given I have a role of <Role> in the project
      Then I <Can or Cannot Create> a security group in the project
@@ -27,51 +27,49 @@ Feature: Create a Security Group
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Create |
         | Member          | Can Create           |
-        | Admin           | Can Create           |
+        | Project Manager | Can Create           |
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Create |
         | (None)          | Cannot Create        |
 
-
+  @jira-MCF-32-csg
   Scenario Outline: Create a Security Group
     Given I am authorized to create a security group in the project
-      And the project has no security groups
-     When I create a security group with attributes <Name>, <Description>
-     Then the security group will be <Created or Not>
+    Then the security group with attributes <Name>, <Description> will be <Created or Not Created>
 
       Scenarios: Valid Values
-        | Name             | Description              | Created or Not |
-        | Database Servers | Only port 443 is allowed | Created        |
-        | Database Servers | (None)                   | Created        |
+        | Name             | Description              | Created or Not Created  |
+        | Database Servers | Only port 443 is allowed | Created                 |
+        | Database Servers | (None)                   | Created                 |
 
       Scenarios: Invalid Values
-        | Name             | Description              | Created or Not | Reason              |
-        | (None)           | Only port 443 is allowed | Not Created    | Name can't be empty |
+        | Name             | Description              | Created or Not Created  | Reason              |
+        | (None)           | Only port 443 is allowed | Not Created             | Name can't be empty |
 
-
-  Scenario Outline: Add a Rule During Creation
+  @jira-MCF-32-ardc
+  Scenario Outline: Add a Rule
     Given I am authorized to create a security group in the project
       And the project has only one security group named Web Servers
-     When I create a security group with the following rule: <Protocol>, <From Port>, <To Port>, <Source Type>, <Source>
-     Then the security group will be <Created or Not>
+     When I add the following rule: <Protocol>, <From Port>, <To Port>, <Source Type>, <Source>
+     Then the rules will be <Added or Not>
 
       Scenarios: Valid Rules
-        | Protocol | From Port | To Port  | Source Type    | Source      | Created or Not |
-        | TCP      | (Random)  | (Random) | Subnet         | 0.0.0.0/25  | Created        |
-        | TCP      | (Random)  | (Random) | Security Group | Web Servers | Created        |
-        | UDP      | (Random)  | (Random) | Subnet         | 0.0.0.0/25  | Created        |
-        | UDP      | (Random)  | (Random) | Security Group | Web Servers | Created        |
-        | ICMP     | (Random)  | (Random) | Subnet         | 0.0.0.0/25  | Created        |
-        | ICMP     | (Random)  | (Random) | Security Group | Web Servers | Created        |
+        | Protocol | From Port | To Port  | Source Type    | Source      | Added or Not |
+        | TCP      | (Random)  | (Random) | Subnet         | 0.0.0.0/25  | Added        |
+        | TCP      | (Random)  | (Random) | Security Group | Web Servers | Added        |
+        | UDP      | (Random)  | (Random) | Subnet         | 0.0.0.0/25  | Added        |
+        | UDP      | (Random)  | (Random) | Security Group | Web Servers | Added        |
+        | ICMP     | (Random)  | (Random) | Subnet         | 0.0.0.0/25  | Added        |
+        | ICMP     | (Random)  | (Random) | Security Group | Web Servers | Added        |
 
       Scenarios: Invalid Rules
-        | Protocol | From Port | To Port  | Source Type    | Source      | Created or Not | Reason                                     |
-        | (Any)    | (None)    | (Random) | Subnet         | 0.0.0.0/25  | Not Created    | 'From Port' must be specified              |
-        | (Any)    | (Random)  | (None)   | Subnet         | 0.0.0.0/25  | Not Created    | 'To Port' must be specified                |
-        | (Any)    | (Random)  | (None)   | Subnet         | 1.2.9.12    | Not Created    | Source must be in CIDR notation            |
-        | (Any)    | (Random)  | (Random) | Subnet         | (None)      | Not Created    | 'Source' can't be empty                    |
-        | (Any)    | (None)    | (Random) | Security Group | Web Servers | Not Created    | 'From Port' must be specified              |
-        | (Any)    | (Random)  | (None)   | Security Group | Web Servers | Not Created    | 'To Port' must be specified                |
-        | (Any)    | (Random)  | (Random) | Security Group | (None)      | Not Created    | 'Source' can't be empty                    |
-        | (Any)    | (Random)  | (Random) | Security Group | App Servers | Not Created    | Security group 'App Servers' doesn't exist |
+        | Protocol | From Port | To Port  | Source Type    | Source      | Added or Not | Reason                                     |
+        | (Any)    | (None)    | (Random) | Subnet         | 0.0.0.0/25  | Not Added    | 'From Port' must be specified              |
+        | (Any)    | (Random)  | (None)   | Subnet         | 0.0.0.0/25  | Not Added    | 'To Port' must be specified                |
+        | (Any)    | (Random)  | (None)   | Subnet         | 1.2.9.12    | Not Added    | Source must be in CIDR notation            |
+        | (Any)    | (Random)  | (Random) | Subnet         | (None)      | Not Added    | 'Source' can't be empty                    |
+        | (Any)    | (None)    | (Random) | Security Group | Web Servers | Not Added    | 'From Port' must be specified              |
+        | (Any)    | (Random)  | (None)   | Security Group | Web Servers | Not Added    | 'To Port' must be specified                |
+        | (Any)    | (Random)  | (Random) | Security Group | (None)      | Not Added    | 'Source' can't be empty                    |
+        | (Any)    | (Random)  | (Random) | Security Group | App Servers | Not Added    | Security group 'App Servers' doesn't exist |

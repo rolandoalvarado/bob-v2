@@ -1,6 +1,5 @@
 # This is similar to FactoryGirl, but exclusively designed for mCloud Features
 module CloudObjectBuilder
-
   def self.attributes_for(object_type, hash = {})
     method_name = "attributes_for_#{ object_type.to_s }"
     if self.respond_to? method_name
@@ -40,11 +39,18 @@ module CloudObjectBuilder
     BetterHash.new.merge(attributes)
   end
 
+  def self.attributes_for_security_group(attributes)
+    attributes[:description] ||= attributes.delete('description') || Faker::Lorem.paragraph
+    attributes[:name]        ||= attributes.delete('name') || Faker::Company.name
+    BetterHash.new.merge(attributes)
+  end
+
   def self.attributes_for_snapshot(attributes)
     attributes[:name]        ||= attributes.delete('name') || Faker::Company.name
     attributes[:description] ||= attributes.delete('description') || Faker::Lorem.paragraph
     BetterHash.new.merge(attributes)
   end
+
 end
 
 class BetterHash < Hash
