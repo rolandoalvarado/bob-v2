@@ -91,16 +91,16 @@ Then /^an attached volume will be accessible from the instance$/ do
     * Visit the projects page
     * Click the #{ @project.name } project
 
-    * Click the access security tab link
+    * Click the access security tab
     * Fetch a list of device files on the instance with floating IP #{ floating_ip.id }
 
-    * Click the instances and volumes tab link
+    * Click the instances and volumes tab
     * Click the attach volume button for volume #{ volume['id'] }
     * Current page should have the attach volume form
     * Choose the 2nd item in the attachable instance dropdown
     * Click the confirm volume attachment button
 
-    * Click the access security tab link
+    * Click the access security tab
     * A new device file should have been created on the instance with floating IP #{ floating_ip.id }
   }
 end
@@ -189,7 +189,7 @@ Then /^I [Cc]an [Cc]reate a snapshot of the volume$/ do
     * Fill in the volume snapshot description field with #{ snapshot.description }
     * Click the create volume snapshot button
 
-    * Click the snapshots tab link
+    * Click the snapshots tab
     * The volume snapshots table should include the text #{ snapshot.name }
   }
 end

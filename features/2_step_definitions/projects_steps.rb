@@ -329,9 +329,9 @@ Then /^I can grant project membership to (.+)$/i do |username|
     * The #{ (@project || @project_attrs).name  } project should be visible
     * Click the #{ (@project || @project_attrs).name } project
 
-    * Click the collaborators tab link
+    * Click the collaborators tab
     * Click the add collaborator button
-    * Click the collaborators tab link
+    * Click the collaborators tab
     * Click the add collaborator button
     * Select Collaborator #{username}
     * Click the add collaborator action button
@@ -355,7 +355,7 @@ Then /^I cannot grant project membership to (.+)$/i do |username|
     * The #{ (@project || @project_attrs).name  } project should be visible
     * Click the #{ (@project || @project_attrs).name } project
 
-    * The collaborators tab link should be disabled
+    * The collaborators tab should be disabled
    }
 
 end

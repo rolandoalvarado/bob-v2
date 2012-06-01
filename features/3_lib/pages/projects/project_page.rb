@@ -3,7 +3,7 @@ require_relative '../secure_page'
 class ProjectPage < WebClientPage
   path '/projects'
 
-  link      'instances and volumes tab', '.nav-tabs .instances-and-volumes a'
+  tab       'instances and volumes', '.nav-tabs .instances-and-volumes a'
 
   button    'new instance',          '#create-instance:not(.disabled)'
   button    'disabled new instance', '#create-instance.disabled'
@@ -48,7 +48,7 @@ class ProjectPage < WebClientPage
   field     'volume snapshot name',        '#create-snapshot-modal #name'
   field     'volume snapshot description', '#create-snapshot-modal #textarea'
   button    'create volume snapshot',      '#create-snapshot-modal .create-snapshot'
-  link      'snapshots tab',               '.nav-tabs .snapshots a'
+  tab       'snapshots',                   '.nav-tabs .snapshots a'
   table     'volume snapshots',            '#volume-snapshot-list'
 
 # Type      Name                    Selector
@@ -64,7 +64,7 @@ class ProjectPage < WebClientPage
   #==========================
   # Instance-related elements
   #==========================
-  link      'access security tab',           '.nav-tabs .access-and-security a'
+  tab       'access security',               '.nav-tabs .access-and-security a'
   button    'new floating IP allocation',    '#allocate-btn'
   form      'new floating IP allocation',    '#floating-ip-allocate-modal'
   dropdown  'pool',                          '#pool'
@@ -101,8 +101,8 @@ class ProjectPage < WebClientPage
   # Collaborators
   #==========================
   link      'collaborators email',           '.chzn-choices'
-  link      'collaborators tab',             '.nav-tabs .collaborators a'
-  link      'disabled collaborators tab',    '.nav-tabs .collaborators.disabled'
+  tab       'collaborators',                 '.nav-tabs .collaborators a'
+  tab       'disabled collaborators',        '.nav-tabs .collaborators.disabled'
   button    'add collaborator',              '#add-collaborator:not(.disabled)'   
   option    'collaborator',           xpath: '//*[@class="chzn-drop"]//li[text()="<name>"]'
   button    'add collaborator action',       '#add-collaborator-modal .action-add'
