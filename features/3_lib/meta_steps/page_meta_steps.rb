@@ -97,6 +97,11 @@ Then /^Click the (.+) button for volume (.+)$/ do |button_name, volume_id|
   @current_page.send("#{ button_name }_button", id: volume_id).click
 end
 
+Then /^Click the (.+) link for security group (.+)$/ do |link_name, security_group_id|
+  link_name = link_name.split.join('_').downcase
+  @current_page.send("#{ link_name }_link", id: security_group_id).click
+end
+
 Then /^Click the (.+) button for security group (.+)$/ do |button_name, security_group_id|
   button_name = button_name.split.join('_').downcase
   @current_page.send("#{ button_name }_button", id: security_group_id).click
@@ -119,11 +124,9 @@ Then /^Click the link for user with username (.+)$/i do |username|
   @current_page.user_link(user_id: user.id).click
 end
 
-
 Then /^Click the (.+) image$/ do |image_name|
   @current_page.image_element( name: image_name.strip ).click
 end
-
 
 Then /^Current page should be the (.+) page$/ do |page_name|
   @current_page = eval("#{ page_name.downcase.capitalize }Page").new
@@ -159,7 +162,6 @@ Then /^Current page should have the security groups$/ do
     raise "Current page doesn't have security groups."
   end
 end
-
 
 Then /^Drag the instance flavor slider to a different flavor$/ do
   @current_page.execute_script %{

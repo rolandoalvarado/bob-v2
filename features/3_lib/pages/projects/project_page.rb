@@ -30,16 +30,24 @@ class ProjectPage < WebClientPage
   #==========================
   button    'new security',            "#create-security-group"
   button    'modify',                  "#security-item-<id> .security-rules"
+  button    'delete security group',   "#security-item-<id> .delete-security-group"  
+  button    'Context Menu',            xpath: "//tr[@id='security-item-<id>']/..//a[@class='dropdown-toggle']"
   form      'new security',            "#security-group-form"
   form      'security group rules',    "#security-group-rules-form"
-  link      'access security tab',     '.nav-tabs .access-and-security a'
+  link      'delete security group',   '#security-item-<id> .delete-security-group'
   element   'security groups',         "#security-groups-list"
+  link      'access security',         '.nav-tabs .access-and-security a'
 
   #Elements in the New Security form
   field     'security group name',           "#new-security-name"
   field     'security group description',    "#new-security-description"
   button    'create security',               "#create-security-group"
   span      'new security form error',       "span.error[for='new-security-name'], span.error[for='new-security-description']"
+
+  # The following buttons appear with the confirmation dialog that appears
+  # when you click the delete security group.
+  button  'confirm security  group deletion', "a.okay"
+  button  'cancel security group deletion',  "a.cancel"
   
   #==========================
   # Volume-related elements

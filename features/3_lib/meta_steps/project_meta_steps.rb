@@ -100,6 +100,16 @@ Then /^Ensure that the project has no security groups$/i do
   compute_service.ensure_project_security_group_count(@project, 0)
 end
 
+Then /^Ensure that the a project has an instance$/ do
+  compute_service = ComputeService.session
+  compute_service.ensure_active_instance_count(@project, 1)
+end
+
+Then /^Ensure that a project has (\d+) security groups$/ do |security_group_count|
+  compute_service = ComputeService.session
+  compute_service.ensure_project_security_group_count(@project, security_group_count.to_i)  
+end
+
 Then /^Register project (.+) for deletion on exit$/i do |name|
   project = IdentityService.session.tenants.reload.find { |p| p.name == name }
   EnvironmentCleaner.register(:project, project.id) if project
