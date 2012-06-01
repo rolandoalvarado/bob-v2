@@ -457,11 +457,11 @@ Then /^The (.+) project should not be visible$/ do |project_name|
 end
 
 
-Then /^The (.+) table should have (.+) rows$/ do |table_name, num_rows|
-  sleeping(1).seconds.between_tries.failing_after(5).tries do
+Then /^The (.+) table should have (\d+) (?:row|rows)$/ do |table_name, num_rows|
+  sleeping(1).seconds.between_tries.failing_after(30).tries do
     table_name      = table_name.split.join('_').downcase
     table           = @current_page.send("#{ table_name }_table")
-    actual_num_rows = table.has_content?('There are currently no') ? 0 : table.all('tbody tr').count
+    actual_num_rows = table.has_no_css_selector?('td.empty-table') ? table.all('tr').count : 0
     num_rows        = num_rows.to_i
 
     if actual_num_rows != num_rows
