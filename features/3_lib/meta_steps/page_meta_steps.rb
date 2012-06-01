@@ -102,9 +102,17 @@ Then /^Click the (.+) button for instance (.+)$/ do |button_name, instance_id|
 end
 
 
-Then /^Click the (.+) button for volume (.+)$/ do |button_name, volume_id|
+# Match "Click the <text1> button for volume <text2>",
+# but not when $text2 starts with the string "snapshot named"
+Then /^Click the (.+) button for volume (?:(?!snapshot named ))(.+)$/ do |button_name, volume_id|
   button_name = button_name.split.join('_').downcase
   @current_page.send("#{ button_name }_button", id: volume_id).click
+end
+
+
+Then /^Click the (.+) button for volume snapshot named (.+)$/ do |button_name, snapshot_name|
+  button_name = button_name.split.join('_').downcase
+  @current_page.send("#{ button_name }_button", name: snapshot_name).click
 end
 
 
@@ -278,6 +286,7 @@ end
 
 
 Then /^The (.+) table should not include the text (.+)$/ do |table_name, text|
+  table_name = table_name.split.join('_').downcase
   if @current_page.send("#{ table_name }_table").wait_for_content_to_disappear(text)
     raise "The text '#{ text }' should not be in the #{ table_name } table, but it is."
   end

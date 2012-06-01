@@ -49,7 +49,12 @@ class ProjectPage < WebClientPage
   field     'volume snapshot description', '#create-snapshot-modal #textarea'
   button    'create volume snapshot',      '#create-snapshot-modal .create-snapshot'
   tab       'snapshots',                   '.nav-tabs .snapshots a'
-  table     'volume snapshots',            '#volume-snapshot-list'
+
+# Type      Name                                Selector
+  button    'volume snapshot menu',      xpath: "//*[@id='volume-snapshot-list']//td[contains(@class, 'name') and normalize-space(text())=\"<name>\"]/..//*[@class='dropdown-toggle']"
+  button    'delete volume snapshot',    xpath: "//*[@id='volume-snapshot-list']//td[contains(@class, 'name') and normalize-space(text())=\"<name>\"]/..//*[@class='delete-snapshot']"
+  button    'confirm volume snapshot deletion', '#alert-template .okay'
+  table     'volume snapshots',                 '#volume-snapshot-list'
 
 # Type      Name                    Selector
   span      'new volume form error', 'span.error[for="name"], span.error[for="appendedInput"]'

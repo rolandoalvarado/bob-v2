@@ -1,11 +1,12 @@
+@jira-MCF-39
 Feature: Delete a Volume Snapshot
   As an authorized user, I want to delete a volume snapshot so that I can free
   up resources in my storage node.
 
   Background:
     * A project exists in the system
-    * The project has an available volume
-    * The volume has a saved snapshot
+    * The project has 1 available volume
+    * The volume has 1 saved snapshot
 
 
   @permissions
@@ -16,8 +17,4 @@ Feature: Delete a Volume Snapshot
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Delete |
         | Member          | Can Delete           |
-        | Admin           | Can Delete           |
-
-      Scenarios: Unauthorized Roles
-        | Role            | Can or Cannot Delete |
-        | (None)          | Cannot Delete        |
+        | Project Manager | Can Delete           |
