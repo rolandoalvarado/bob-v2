@@ -1,3 +1,4 @@
+@jira-MCF-35
 Feature: Attach a Volume
   As a user, I want to attach a volume to my instance so that the instance will
   have a scalable, persistent storage.
@@ -20,8 +21,8 @@ Feature: Attach a Volume
 
   Background:
     * A project exists in the system
-    * The project has a running instance
-    * The project has an available volume
+    * The project has 1 active instance
+    * The project has 1 available volume
 
 
   @permissions
@@ -30,26 +31,11 @@ Feature: Attach a Volume
      Then I <Can or Cannot Attach> the volume to the instance
 
       Scenarios: Authorized Roles
-        | Role            | Can or Cannot Create |
-        | Member          | Can Create           |
-        | Admin           | Can Create           |
-
-      Scenarios: Unauthorized Roles
-        | Role            | Can or Cannot Create |
-        | (None)          | Cannot Create        |
+        | Role            | Can or Cannot Attach |
+        | Member          | Can Attach           |
+        | Project Manager | Can Attach           |
 
 
-  Scenario Outline: Attach a Volume Given A Mount Point
-    NOTE: The Mount Point can have a value of /dev/vda, /dev/vdb, ... /dev/vdz
-
+  Scenario: Attach a Volume
     Given I am authorized to attach volumes to the instance
-     When I attach the volume to the instance with mount point <Mount Point>
-     Then the volume will be <Attached or Not> to the instance
-
-      Scenarios: Valid Attributes
-        | Mount Point | Attached or Not |
-        | (Any)       | Attached        |
-
-      Scenarios: Invalid Attributes
-        | Mount Point | Attached or Not | Reason                        |
-        | (None)      | Not Attached    | Mount point must be indicated |
+     Then an attached volume will be accessible from the instance
