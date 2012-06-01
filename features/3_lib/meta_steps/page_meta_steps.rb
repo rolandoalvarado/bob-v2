@@ -349,6 +349,20 @@ Then /^The instance (.+) should not have flavor (.+)$/ do |instance_id, flavor_n
 end
 
 
+Then /^The volume (.+) should be attached to instance (.+)$/ do |volume_id, instance_name|
+  sleeping(1).seconds.between_tries.failing_after(15).tries do
+    unless @current_page.has_volume_row?( id: volume_id )
+      raise "Could not find row for volume #{ volume_id }!"
+    end
+
+    attachment = @current_page.volume_row( id: volume_id ).find('.attachments a').text()
+    if attachment != instance_name
+      raise "Expected volume #{ volume_id } to be attached to instance #{ instance_name }, but it's not."
+    end
+  end
+end
+
+
 Then /^The (.+) link should be visible$/ do |link_name|
   link_name = link_name.split.join('_').downcase
   unless @current_page.send("has_#{ link_name }_link?")

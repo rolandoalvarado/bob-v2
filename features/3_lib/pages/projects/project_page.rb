@@ -3,6 +3,8 @@ require_relative '../secure_page'
 class ProjectPage < WebClientPage
   path '/projects'
 
+  link      'instances and volumes tab', '.nav-tabs .instances-and-volumes a'
+
   button    'new instance',          '#create-instance:not(.disabled)'
   button    'disabled new instance', '#create-instance.disabled'
   field     'project name',          '#project-name'
@@ -51,6 +53,13 @@ class ProjectPage < WebClientPage
 
 # Type      Name                    Selector
   span      'new volume form error', 'span.error[for="name"], span.error[for="appendedInput"]'
+
+# Type      Name                         Selector
+  button    'attach volume',             '#volume-item-<id> #attach'
+  form      'attach volume',             '#attach-volume-modal'
+  dropdown  'attachable instance',       '#attach-volume-modal #instance'
+  button    'confirm volume attachment', '#attach-volume-modal .attach-volume'
+  row       'volume',                    '#volume-item-<id>'
 
   #==========================
   # Instance-related elements
