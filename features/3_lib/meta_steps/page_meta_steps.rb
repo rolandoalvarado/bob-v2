@@ -134,6 +134,23 @@ Then /^Click the row for user with id (.+)$/i do |user_id|
   @current_page.user_link(id: user_id).click
 end
 
+Step /^Click the context menu button of the volume named (.+)$/ do |volume_name|
+  VolumeService.session.reload_volumes
+  volume = VolumeService.session.volumes.find { |v| v['display_name'] == volume_name }
+
+  raise "Couldn't find a volume named '#{ volume_name }'" unless volume
+
+  @current_page.volume_context_menu_button(:id => volume['id']).click
+end
+
+Step /^Click the delete button of the volume named (.+)$/ do |volume_name|
+  volume = VolumeService.session.volumes.find { |v| v['display_name'] == volume_name }
+
+  raise "Couldn't find a volume named '#{ volume_name }'" unless volume
+
+  @current_page.delete_volume_button(:id => volume['id']).click
+end
+
 Then /^Click the link for user with username (.+)$/i do |username|
   user = IdentityService.session.find_user_by_name(username.strip)
   raise "ERROR: I couldn't find a user with username '#{ username }'." unless user

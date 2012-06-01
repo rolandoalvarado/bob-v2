@@ -3,7 +3,20 @@ Then /^A project does not have collaborator/i do
   @project.users.each do |user|
     next if user.name == "admin"
     identity_service.revoke_all_user_roles(user, @project)
-  end         
+  end
+end
+
+Step /^Ensure that a project named (.+) exists$/i do |project_name|
+  identity_service = IdentityService.session
+  project          = identity_service.ensure_project_exists(:name => project_name)
+
+  EnvironmentCleaner.register(:project, project.id)
+
+  if project.nil? or project.id.empty?
+    raise "Test project couldn't be initialized!"
+  end
+
+  @test_project = project
 end
 
 Then /^Ensure that a test project is available for use$/i do
@@ -52,7 +65,7 @@ Then /^Ensure that I have a role of (.+) in the test project$/i do |role_name|
 end
 
 
-Then /^Register project (.+) for deletion on exit$/i do |name|
+Then /^Register the project named (.+) for deletion at exit$/i do |name|
   project = IdentityService.session.tenants.reload.find { |p| p.name == name }
   EnvironmentCleaner.register(:project, project.id) if project
 end
