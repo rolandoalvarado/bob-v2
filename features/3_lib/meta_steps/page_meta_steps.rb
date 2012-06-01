@@ -114,6 +114,13 @@ Then /^Click the (.+) project$/ do |project_name|
   @current_page = ProjectPage.new
 end
 
+
+Then /^Click the (.+) tab$/ do |tab_name|
+  tab_name = tab_name.split.join('_').downcase
+  @current_page.send("#{ tab_name }_tab").click
+end
+
+
 Then /^Click the row for user with id (.+)$/i do |user_id|
   user_id.strip!
   @current_page.user_link(id: user_id).click
@@ -290,6 +297,15 @@ Then /^The (.+) link should be disabled$/ do |link_name|
     raise "Couldn't find '#{ link_name } link."
   end
 end
+
+
+Then /^The (.+) tab should be disabled$/ do |tab_name|
+  tab_name = tab_name.split.join('_').downcase
+  unless @current_page.send("has_#{ tab_name }_tab?")
+    raise "Couldn't find '#{ tab_name } tab."
+  end
+end
+
 
 Then /^The (.+) user row should be visible$/ do |username|
   user = IdentityService.session.users.find_by_name(username)

@@ -6,7 +6,7 @@ Given /^[Tt]he project has no security groups$/ do
   identity_service = IdentityService.session
   project          = identity_service.ensure_project_exists(:name => ('project'))
   EnvironmentCleaner.register(:project, project.id)
-  
+
   if project.nil? or project.id.empty?
     raise "Project couldn't be initialized!"
   end
@@ -72,7 +72,7 @@ Then /^I [Cc]an [Cc]reate a security group in the project$/ do
     * Visit the projects page
     * Click the #{ @project.name } project
 
-    * Click the access security tab link
+    * Click the access security tab
     * Click the new security group button
     * Current page should have the new security group form
     * Fill in the name field with #{attrs.name}
@@ -101,7 +101,7 @@ end
 Then /^the security group will be [Cc]reated$/ do
   steps %{
     * Visit the projects page
-    * Click the access security tab link
+    * Click the access security tab
     * Current page should have the new security group
   }
 end
@@ -109,14 +109,7 @@ end
 Then /^the security group will be [Nn]ot [Cc]reated$/ do
   steps %{
     * Visit the projects page
-    * Click the access security tab link
+    * Click the access security tab
     * Current page should not have the new security group
   }
 end
-
-
-
-
-
-
-
