@@ -33,6 +33,12 @@ class VolumeService < BaseCloudService
     attrs.merge!(attributes)
 
     service.create_volume_snapshot(volume['id'], attrs.name, attrs.description)
+
+  def create_volume_in_project(project, attributes)
+    attrs = CloudObjectBuilder.attributes_for(:volume, attributes)
+    set_tenant project
+    service.create_volume(attrs.name, attrs.description, attrs.size)
+    set_tenant 'admin'
   end
 
   def delete_volumes_in_project(project)
