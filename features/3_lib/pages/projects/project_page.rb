@@ -32,16 +32,20 @@ class ProjectPage < WebClientPage
   #==========================
   button    'new security',            "#create-security-group"
   button    'modify',                  "#security-item-<id> .security-rules"
+  button    'delete security group',   "#security-item-<id> .delete-security-group"  
+  button    'Context Menu',            xpath: "//tr[@id='security-item-<id>']/..//a[@class='dropdown-toggle']"
   form      'new security',            "#security-group-form"
   form      'security group rules',    "#security-group-rules-form"
-  link      'access security tab',     '.nav-tabs .access-and-security a'
+  link      'delete security group',   '#security-item-<id> .delete-security-group'
   element   'security groups',         "#security-groups-list"
+  tab       'access security',         '.nav-tabs .access-and-security a'
 
   #Elements in the New Security form
   field     'security group name',           "#new-security-name"
   field     'security group description',    "#new-security-description"
   button    'create security',               "#create-security-group"
   span      'new security form error',       "span.error[for='new-security-name'], span.error[for='new-security-description']"
+
   option    'ip protocol', xpath:            '//select[@id="ip-protocol"]/option[text()="<name>"]'
   field     'from port', xpath:              '//form[@id="security-group-rules-form"]//input[@id="from-port"]'
   field     'to port', xpath:                '//form[@id="security-group-rules-form"]//input[@id="to-port"]'
@@ -53,6 +57,11 @@ class ProjectPage < WebClientPage
   field     'list to port',                  '#security-group-rules-list div.to-port'   
   field     'list cidr',                     '#security-group-rules-list div.cidr'   
 
+  # The following buttons appear with the confirmation dialog that appears
+  # when you click the delete security group.
+  button  'confirm security  group deletion', "a.okay"
+  button  'cancel security group deletion',  "a.cancel"
+  
   #==========================
   # Volume-related elements
   #==========================
@@ -67,15 +76,24 @@ class ProjectPage < WebClientPage
   button    'create volume',       '#save-volume'
   table     'volumes',             '#volume-template tbody'
 
+  button    'delete volume',               '#volume-item-<id> a[data-action="delete-volume"]'
+  button    'volume delete confirmation',  'a.okay'
+
 # Type      Name                           Selector
   button    'volume menu',                 '#volume-item-<id> .dropdown-toggle'
+  button    'volume context menu',         '#volume-item-<id> .dropdown-toggle'
   button    'new volume snapshot',         '#volume-item-<id> #create-snapshot'
   form      'new volume snapshot',         '#create-snapshot-modal'
   field     'volume snapshot name',        '#create-snapshot-modal #name'
   field     'volume snapshot description', '#create-snapshot-modal #textarea'
   button    'create volume snapshot',      '#create-snapshot-modal .create-snapshot'
   tab       'snapshots',                   '.nav-tabs .snapshots a'
-  table     'volume snapshots',            '#volume-snapshot-list'
+
+# Type      Name                                Selector
+  button    'volume snapshot menu',      xpath: "//*[@id='volume-snapshot-list']//td[contains(@class, 'name') and normalize-space(text())=\"<name>\"]/..//*[@class='dropdown-toggle']"
+  button    'delete volume snapshot',    xpath: "//*[@id='volume-snapshot-list']//td[contains(@class, 'name') and normalize-space(text())=\"<name>\"]/..//*[@class='delete-snapshot']"
+  button    'confirm volume snapshot deletion', '#alert-template .okay'
+  table     'volume snapshots',                 '#volume-snapshot-list'
 
 # Type      Name                    Selector
   span      'new volume form error', 'span.error[for="name"], span.error[for="appendedInput"]'
@@ -130,7 +148,7 @@ class ProjectPage < WebClientPage
   link      'collaborators email',           '.chzn-choices'
   tab       'collaborators',                 '.nav-tabs .collaborators a'
   tab       'disabled collaborators',        '.nav-tabs .collaborators.disabled'
-  button    'add collaborator',              '#add-collaborator:not(.disabled)'   
+  button    'add collaborator',              '#add-collaborator:not(.disabled)'
   option    'collaborator',           xpath: '//*[@class="chzn-drop"]//li[text()="<name>"]'
   button    'add collaborator action',       '#add-collaborator-modal .action-add'
   table     'collaborators',                 '#users-template tbody'

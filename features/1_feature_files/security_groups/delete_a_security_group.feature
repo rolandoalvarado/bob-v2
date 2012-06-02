@@ -23,7 +23,7 @@ Feature: Delete a Security Group
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Delete |
         | Member          | Can Delete           |
-        | Admin           | Can Delete           |
+        | Project Manager | Can Delete           |
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Delete |
@@ -32,5 +32,5 @@ Feature: Delete a Security Group
 
   Scenario: Delete a Security Group That's in Use
     Given I am authorized to delete security groups in the project
-      And the instance is a member the Web Servers security group
-     Then I cannot delete the Web Servers security group
+      And the instance is a member of the Web Servers security group
+     Then I Cannot Delete the Web Servers security group

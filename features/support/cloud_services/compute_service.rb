@@ -2,7 +2,7 @@ require_relative 'base_cloud_service'
 
 class ComputeService < BaseCloudService
 
-  attr_reader :addresses, :flavors, :instances, :security_groups ,:current_project
+  attr_reader :addresses, :flavors, :instances, :security_groups, :current_project
 
   def initialize
     initialize_service Compute
@@ -350,6 +350,71 @@ class ComputeService < BaseCloudService
 
   rescue => e
     raise "#{ JSON.parse(e.response.body)['badRequest']['message'] }"
+  end
+
+   def create_security_group(project, attributes)
+    service.set_tenant project
+    security_group = service.security_groups
+    new_security_group = security_group.find_by_name(attributes[:name])
+      if new_security_group
+         #raise "Security Group #{attributes[:name]} is already exists."
+         new_security_group.destroy
+         security_group = security_group.new(attributes)
+         security_group.save
+         security_group   
+      else
+         security_group = security_group.new(attributes)
+         security_group.save
+         security_group  
+      end
+  end
+
+  def delete_security_group(security_group)
+    security_group.destroy
+  end
+
+  def ensure_security_group_exists(project, attributes)
+    service.set_tenant project
+    security_group = service.security_groups
+    security_group_attrs = security_groups.find_by_name(attributes[:name]) rescue nil
+    if security_group_attrs
+      security_group_attrs.update(attributes)
+    else
+      security_group_attrs = create_security_group(project, attributes)
+    end
+    security_group_attrs.description = attributes[:description]
+    security_group_attrs
+  end
+
+  def ensure_project_security_group_count(project, desired_count)
+    service.set_tenant project
+    security_groups = service.security_groups
+    security_groups_count = security_groups.count
+    
+    if desired_count < security_groups_count
+      i = security_groups_count  
+      while i > desired_count
+        security_groups.reload
+        security_groups[i].destroy rescue nil
+        i = i - 1
+      end
+    end
+    security_groups
+  end
+
+  def ensure_security_group_does_not_exist(project, attributes)
+    service.set_tenant project
+    security_group = service.security_groups
+    if security_group = security_groups.find_by_name(attributes[:name])
+      delete_security_group(security_group)
+    end
+  end
+
+  def find_security_group_by_name(project, name)
+    service.set_tenant project
+    security_group = service.security_groups  
+    security_group.find_by_name(name)
+    security_group
   end
 
   def set_tenant(project, reload = true)

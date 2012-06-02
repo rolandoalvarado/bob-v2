@@ -15,7 +15,7 @@ class VolumeService < BaseCloudService
 
     if volumes.count != desired_count
       raise "Couldn't ensure that #{ project.name } has #{ desired_count } " +
-            "volumes. Current number of volumes is #{ volumes.length }."
+        "volumes. Current number of volumes is #{ volumes.length }."
     end
   end
 
@@ -24,6 +24,22 @@ class VolumeService < BaseCloudService
     attrs.merge!(attributes)
 
     service.create_volume(attrs.name, attrs.description, attrs.size)
+  end
+
+  def create_volume_snapshot(volume, attributes = {})
+    raise "Volume couldn't be found!" unless volume
+
+    attrs = CloudObjectBuilder.attributes_for(:snapshot)
+    attrs.merge!(attributes)
+
+    service.create_volume_snapshot(volume['id'], attrs.name, attrs.description)
+  end
+
+  def create_volume_in_project(project, attributes)
+    attrs = CloudObjectBuilder.attributes_for(:volume, attributes)
+    set_tenant project
+    service.create_volume(attrs.name, attrs.description, attrs.size)
+    set_tenant 'admin'
   end
 
   def delete_volumes_in_project(project)
@@ -81,7 +97,7 @@ class VolumeService < BaseCloudService
       reload_snapshots
       if snapshots.count != desired_count
         raise "Couldn't ensure that #{ project.name } has #{ desired_count } " +
-              "volume snapshots. Current number of volume snapshots is #{ @snapshots.count }."
+          "volume snapshots. Current number of volume snapshots is #{ snapshots.count }."
       end
 
       return snapshots.count
@@ -107,7 +123,7 @@ class VolumeService < BaseCloudService
     end
   end
 
-private
+  private
 
   def try_fixing_volume_count(project, desired_count)
     sleeping(2).seconds.between_tries.failing_after(10).tries do
@@ -126,5 +142,4 @@ private
       assert_volume_count(project, desired_count)
     end
   end
-
 end

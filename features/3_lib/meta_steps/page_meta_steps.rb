@@ -109,14 +109,26 @@ Then /^Click the (.+) button for instance (.+)$/ do |button_name, instance_id|
 end
 
 
-Then /^Click the (.+) button for volume (.+)$/ do |button_name, volume_id|
+# Match "Click the <text1> button for volume <text2>",
+# but not when $text2 starts with the string "snapshot named"
+Then /^Click the (.+) button for volume (?:(?!snapshot named ))(.+)$/ do |button_name, volume_id|
   button_name = button_name.split.join('_').downcase
   @current_page.send("#{ button_name }_button", id: volume_id).click
+end
+
+Then /^Click the (.+) link for security group (.+)$/ do |link_name, security_group_id|
+  link_name = link_name.split.join('_').downcase
+  @current_page.send("#{ link_name }_link", id: security_group_id).click
 end
 
 Then /^Click the (.+) button for security group (.+)$/ do |button_name, security_group_id|
   button_name = button_name.split.join('_').downcase
   @current_page.send("#{ button_name }_button", id: security_group_id).click
+end
+
+Then /^Click the (.+) button for volume snapshot named (.+)$/ do |button_name, snapshot_name|
+  button_name = button_name.split.join('_').downcase
+  @current_page.send("#{ button_name }_button", name: snapshot_name).click
 end
 
 Then /^Click the (.+) project$/ do |project_name|
@@ -137,17 +149,32 @@ Then /^Click the row for user with id (.+)$/i do |user_id|
   @current_page.user_link(id: user_id).click
 end
 
+Step /^Click the context menu button of the volume named (.+)$/ do |volume_name|
+  VolumeService.session.reload_volumes
+  volume = VolumeService.session.volumes.find { |v| v['display_name'] == volume_name }
+
+  raise "Couldn't find a volume named '#{ volume_name }'" unless volume
+
+  @current_page.volume_context_menu_button(:id => volume['id']).click
+end
+
+Step /^Click the delete button of the volume named (.+)$/ do |volume_name|
+  volume = VolumeService.session.volumes.find { |v| v['display_name'] == volume_name }
+
+  raise "Couldn't find a volume named '#{ volume_name }'" unless volume
+
+  @current_page.delete_volume_button(:id => volume['id']).click
+end
+
 Then /^Click the link for user with username (.+)$/i do |username|
   user = IdentityService.session.find_user_by_name(username.strip)
   raise "ERROR: I couldn't find a user with username '#{ username }'." unless user
   @current_page.user_link(user_id: user.id).click
 end
 
-
 Then /^Click the (.+) image$/ do |image_name|
   @current_page.image_element( name: image_name.strip ).click
 end
-
 
 Then /^Current page should be the (.+) page$/i do |page_name|
   @current_page = eval("#{ page_name.downcase.capitalize }Page").new
@@ -177,6 +204,7 @@ Then /^Current page should show the instance's console output$/ do
     raise "Current page doesn't show the instance's console output."
   end
 end
+
 
 Then /^Current page should have the security groups$/ do
   unless @current_page.has_security_groups_element?
@@ -259,6 +287,12 @@ Then /^Select Security Group (.+) item from the security group checklist$/ do |s
  end
 end
 
+
+Then /^Choose the (.+) in the ip protocol dropdown$/ do |protocol|
+   step "IP Dropdown protocol will contain #{protocol}"
+end
+
+
 Then /^Set instance name field with (.+)$/ do |instance_name|
   if instance_name.downcase == "(any)"
     step "Fill in the server name field with #{Unique.name('Instance')}"
@@ -266,6 +300,7 @@ Then /^Set instance name field with (.+)$/ do |instance_name|
     step "Fill in the server name field with #{instance_name}"
   end
 end
+
 
 Then /^Set port to the (.+) field with (.+)$/ do |port_name,port_number| 
   if port_number.downcase == "(none)"
@@ -301,6 +336,7 @@ end
 
 
 Then /^The (.+) table should not include the text (.+)$/ do |table_name, text|
+  table_name = table_name.split.join('_').downcase
   if @current_page.send("#{ table_name }_table").wait_for_content_to_disappear(text)
     raise "The text '#{ text }' should not be in the #{ table_name } table, but it is."
   end
@@ -309,23 +345,23 @@ end
 
 Then /^The (.+) button should be disabled$/ do |button_name|
   button_name = button_name.split.join('_').downcase
-  unless @current_page.send("has_#{ button_name }_button?")
-    raise "Couldn't find '#{ button_name } button."
+  unless @current_page.send("has_disabled_#{ button_name }_button?")
+    raise "Couldn't find disabled #{ button_name } button."
   end
 end
 
 Then /^The (.+) link should be disabled$/ do |link_name|
   link_name = link_name.split.join('_').downcase
-  unless @current_page.send("has_#{ link_name }_link?")
-    raise "Couldn't find '#{ link_name } link."
+  unless @current_page.send("has_disabled_#{ link_name }_link?")
+    raise "Couldn't find disabled #{ link_name } link."
   end
 end
 
 
 Then /^The (.+) tab should be disabled$/ do |tab_name|
   tab_name = tab_name.split.join('_').downcase
-  unless @current_page.send("has_#{ tab_name }_tab?")
-    raise "Couldn't find '#{ tab_name } tab."
+  unless @current_page.send("has_disabled_#{ tab_name }_tab?")
+    raise "Couldn't find disabled #{ tab_name } tab."
   end
 end
 
@@ -417,7 +453,6 @@ Then /^The (.+) link should not be visible$/ do |link_name|
   end
 end
 
-
 Then /^The (.+) message should be visible$/ do |message_name|
   message_name = message_name.split.join('_').downcase
   unless @current_page.send("has_#{ message_name }_message?")
@@ -470,11 +505,11 @@ Then /^The (.+) project should not be visible$/ do |project_name|
 end
 
 
-Then /^The (.+) table should have (.+) rows$/ do |table_name, num_rows|
-  sleeping(1).seconds.between_tries.failing_after(5).tries do
+Then /^The (.+) table should have (\d+) (?:row|rows)$/ do |table_name, num_rows|
+  sleeping(1).seconds.between_tries.failing_after(30).tries do
     table_name      = table_name.split.join('_').downcase
     table           = @current_page.send("#{ table_name }_table")
-    actual_num_rows = table.has_content?('There are currently no') ? 0 : table.all('tbody tr').count
+    actual_num_rows = table.has_no_css_selector?('td.empty-table') ? table.all('tr').count : 0
     num_rows        = num_rows.to_i
 
     if actual_num_rows != num_rows
