@@ -100,6 +100,7 @@ When /^I add the following rule: (.+), (.+), (.+), (.+)$/ do |protocol, from_por
     :to_port => to_port , 
     :cidr => cidr }
 
+ steps %{
     * Click the access security tab
     * Current page should have the security groups
 
