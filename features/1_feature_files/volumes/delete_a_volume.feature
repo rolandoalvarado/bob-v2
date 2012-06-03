@@ -25,4 +25,4 @@ Feature: Delete a volume
 
 
   Scenario:
-    * Attached volumes cannot be deleted
+    * Volumes that are attached to an instance cannot be deleted
