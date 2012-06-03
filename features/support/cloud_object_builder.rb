@@ -51,6 +51,12 @@ module CloudObjectBuilder
     BetterHash.new.merge(attributes)
   end
 
+  def self.attributes_for_security_group(attributes)
+    attributes[:description] ||= attributes.delete('description') || Faker::Lorem.paragraph
+    attributes[:name]        ||= attributes.delete('name') || Faker::Company.name
+    BetterHash.new.merge(attributes)
+  end
+
 end
 
 class BetterHash < Hash

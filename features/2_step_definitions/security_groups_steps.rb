@@ -92,8 +92,15 @@ When /^I create a security group with attributes (.+), (.+)$/ do |name, descript
   }
 end
 
-When /^I add the following rule: (.+), (.+), (.+), (.+), (.+)$/ do |protocol, from_port, to_port, source_type, source|
-  steps %{
+When /^I add the following rule: (.+), (.+), (.+), (.+)$/i do |protocol, from_port, to_port, cidr |
+
+  @security_group_rule = { 
+    :protocol => protocol ,
+    :from_port => from_port, 
+    :to_port => to_port , 
+    :cidr => cidr }
+
+ steps %{
     * Click the logout button if currently logged in
 
     * Visit the login page
@@ -104,17 +111,17 @@ When /^I add the following rule: (.+), (.+), (.+), (.+), (.+)$/ do |protocol, fr
     * Visit the projects page
     * Click the #{ @project.name } project
 
-    * Click the access security link
+    * Click the access security tab
     * Current page should have the security groups
 
-    * Click the modify button for security group #{ @new_security_group.id }
+    * Click the modify security group button for security group #{ @new_security_group.id }
     * Current page should have the security group rules form
     * Choose the #{protocol} in the ip protocol dropdown
-    * Fill in the from port field with #{from_port}
-    * Fill in the to port field with #{to_port}
-    * Ensure that a #{source_type} is Subnet
-    * Fill in the source field with #{source}
-    * Click the add link
+    * Set port to the from port field with #{from_port}
+    * Set port to the to port field with #{to_port}
+    * Fill in the CIDR field with #{cidr}
+    * Click the add security group rule button
+    * Click the close security group rule button
   }
 end
 
@@ -132,14 +139,14 @@ Then /^I [Cc]an [Cc]reate a security group in the project$/ do
     * Click the logout button if currently logged in
 
     * Visit the login page
-    * Fill in the username field with #{ @user.name }
-    * Fill in the password field with #{ @user.password }
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
     * Click the login button
 
     * Visit the projects page
     * Click the #{ @project.name } project
 
-    * Click the access security link
+    * Click the access security tab
     * Click the new security button
     * Current page should have the new security form
     * Fill in the security group name field with #{security_group.name}
@@ -175,8 +182,8 @@ Then /^I [Cc]annot [Cc]reate a security group in the project$/ do
     * Click the logout button if currently logged in
 
     * Visit the login page
-    * Fill in the username field with #{ @user.name }
-    * Fill in the password field with #{ @user.password }
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
     * Click the login button
 
     * Visit the projects page
@@ -219,7 +226,7 @@ Then /^the security group will be [Cc]reated$/ do
   steps %{
     * Visit the projects page
     * Click the #{ @project.name } project
-    * Click the access security link
+    * Click the access security tab
     * Current page should have the new security group
   }
 end
@@ -228,7 +235,7 @@ Then /^the security group will be [Nn]ot [Cc]reated$/ do
   steps %{
     * Visit the projects page
     * Click the #{ @project.name } project
-    * Click the access security link
+    * Click the access security tab
     * Current page should not have the new security group
   }
 end
@@ -237,7 +244,7 @@ Then /^The (.+) security group should be visible$/ do |security_group|
   steps %{
     * Visit the projects page
     * Click the #{ @project.name } project
-    * Click the access security link
+    * Click the access security tab
     * Current page should have the new #{security_group.name} security group
   }
 end
@@ -281,7 +288,7 @@ Then /^the security group with attributes (.+), (.+) will be [Cc]reated$/ do |na
     * Visit the projects page
     * Click the #{ @project.name } project
 
-    * Click the access security link
+    * Click the access security tab
     * Click the new security button
     * Current page should have the new security form
     * Fill in the security group name field with #{security_group.name}
@@ -294,7 +301,7 @@ end
 
 Then /^the security group with attributes (.+), (.+) will be [Nn]ot [Cc]reated$/ do |name, description|
   
-  security_group = CloudObjectBuilder.attributes_for(
+  @security_group = CloudObjectBuilder.attributes_for(
                     :security_group,
                     :name     => Unique.name(name),
                     :description    => description
@@ -311,19 +318,13 @@ Then /^the security group with attributes (.+), (.+) will be [Nn]ot [Cc]reated$/
     * Visit the projects page
     * Click the #{ @project.name } project
 
-    * Click the access security link
+    * Click the access security tab
     * Click the new security button
     * Current page should have the new security form
-    * Fill in the security group name field with #{security_group.name}
-    * Fill in the security group description field with #{security_group.description}
+    * Fill in the security group name field with #{@security_group.name}
+    * Fill in the security group description field with #{@security_group.description}
     * Click the create security button    
     * The new security form should be visible
     * The new security form error message should be visible
-  }
-end
-
-Then /^the rules will be Added$/ do
-  steps %{
-    * Current page should have the new rules    
   }
 end

@@ -30,11 +30,11 @@ class ProjectPage < WebClientPage
   #==========================
   # Security Group Elements
   #==========================
-  button    'new security',            "#create-security-group"
-  button    'modify',                  "#security-item-<id> .security-rules"
+  button    'new security',            "#new-security-group"
+  button    'modify security group',   "#security-item-<id> .edit-security-rules"
   button    'delete security group',   "#security-item-<id> .delete-security-group"  
   button    'Context Menu',            xpath: "//tr[@id='security-item-<id>']/..//a[@class='dropdown-toggle']"
-  form      'new security',            "#security-group-form"
+  form      'new security',            "#new-security-group-form"
   form      'security group rules',    "#security-group-rules-form"
   link      'delete security group',   '#security-item-<id> .delete-security-group'
   element   'security groups',         "#security-groups-list"
@@ -45,6 +45,17 @@ class ProjectPage < WebClientPage
   field     'security group description',    "#new-security-description"
   button    'create security',               "#create-security-group"
   span      'new security form error',       "span.error[for='new-security-name'], span.error[for='new-security-description']"
+
+  option    'ip protocol', xpath:            '//select[@id="ip-protocol"]/option[text()="<name>"]'
+  field     'from port', xpath:              '//form[@id="security-group-rules-form"]//input[@id="from-port"]'
+  field     'to port', xpath:                '//form[@id="security-group-rules-form"]//input[@id="to-port"]'
+  field     'CIDR',    xpath:                '//form[@id="security-group-rules-form"]//input[@id="cidr"]'
+  button    'add security group rule',       '#save-security-group-rule'
+  button    'close security group rule', xpath: '//*[@id="security-group-rules-modal"]/div[3]/a' 
+  field     'list ip protocol',              '#security-group-rules-list div.ip-protocoll'  
+  field     'list from port',                '#security-group-rules-list div.from-port'   
+  field     'list to port',                  '#security-group-rules-list div.to-port'   
+  field     'list cidr',                     '#security-group-rules-list div.cidr'   
 
   # The following buttons appear with the confirmation dialog that appears
   # when you click the delete security group.
@@ -97,7 +108,6 @@ class ProjectPage < WebClientPage
   #==========================
   # Instance-related elements
   #==========================
-  tab       'access security',               '.nav-tabs .access-and-security a'
   button    'new floating IP allocation',    '#allocate-btn'
   form      'new floating IP allocation',    '#floating-ip-allocate-modal'
   dropdown  'pool',                          '#pool'
@@ -110,6 +120,7 @@ class ProjectPage < WebClientPage
   form      'resize instance',               '#resize-instance-modal'
 
   element   'console output',                '#logsModal'
+
 
   # These buttons are accessible via 'Click the <name> button for instance <instance id>'
   button    'instance menu',                 "#instance-item-<id> .dropdown-toggle"

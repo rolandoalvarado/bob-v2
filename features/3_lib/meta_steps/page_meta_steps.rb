@@ -38,6 +38,13 @@ Then /^Choose the (\d+)(?:st|nd|rd|th) item in the (.+) dropdown$/ do |item_numb
   @current_page.send("#{ dropdown_name }_dropdown_items")[item_number.to_i - 1].click
 end
 
+Then /^Choose the (.+) in the ip protocol dropdown$/ do |protocol|
+  if protocol.downcase == "(any)" || protocol.downcase == "(none)"
+    #nothing
+  else
+    @current_page.ip_protocol_option( name: protocol ).click
+  end
+end
 
 Then /^Choose the item with text (.+) in the (.+) dropdown$/ do |item_text, dropdown_name|
   dropdown_name = dropdown_name.split.join('_').downcase
@@ -124,7 +131,6 @@ Then /^Click the (.+) button for volume snapshot named (.+)$/ do |button_name, s
   @current_page.send("#{ button_name }_button", name: snapshot_name).click
 end
 
-
 Then /^Click the (.+) project$/ do |project_name|
   project_name.strip!
   @current_page.project_link( name: project_name ).click
@@ -199,11 +205,13 @@ Then /^Current page should show the instance's console output$/ do
   end
 end
 
+
 Then /^Current page should have the security groups$/ do
   unless @current_page.has_security_groups_element?
     raise "Current page doesn't have security groups."
   end
 end
+
 
 Then /^Drag the instance flavor slider to a different flavor$/ do
   @current_page.execute_script %{
@@ -242,7 +250,7 @@ end
 
 
 Then /^Select flavor (.+) item from the flavor slider$/ do |flavor|
- if flavor == "(Any)"
+ if flavor.downcase == "(any)"
    #nothing
  else
    pending
@@ -251,9 +259,9 @@ end
 
 
 Then /^Select keypair (.+) item from the keypair dropdown$/ do |keypair|
- if keypair == "(Any)"
+ if keypair.downcase == "(any)"
    #nothing
- elsif keypair  == "(None)"
+ elsif keypair.downcase  == "(none)"
    #nothing
  else
    pending
@@ -262,26 +270,21 @@ end
 
 
 Then /^Select instance count (.+)$/ do |count|
- if count == "(Any)"
+ if count.downcase == "(any)"
    #nothing
  else
    pending
  end
 end
-
 
 Then /^Select Security Group (.+) item from the security group checklist$/ do |security_group|
- if security_group == "(Any)"
+ if security_group.downcase == "(any)"
    #nothing
- elsif security_group == "(None)"
+ elsif security_groupy.downcase == "(none)"
    #nothing
  else
    pending
  end
-end
-
-Then /^Choose the (.+) in the ip protocol dropdown$/ do |protocol|
-   step "IP Dropdown protocol will contain #{protocol}"
 end
 
 
@@ -293,6 +296,16 @@ Then /^Set instance name field with (.+)$/ do |instance_name|
   end
 end
 
+
+Then /^Set port to the (.+) field with (.+)$/ do |port_name,port_number| 
+
+  if port_number.downcase == "(random)"
+    port_number = (rand(65534) + 1).to_s
+  end
+  if port_number.downcase != "(none)"
+    step "Fill in the #{port_name} field with #{port_number}"
+  end
+end
 
 Then /^The (.+) form should be visible$/ do |form_name|
   form_name = form_name.split.join('_').downcase
