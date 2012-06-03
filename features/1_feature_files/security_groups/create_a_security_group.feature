@@ -61,6 +61,7 @@ Feature: Create a Security Group
         | UDP      | (Random)  | (Random) | 0.0.0.0/25  | Added        |
         | ICMP     | (Random)  | (Random) | 0.0.0.0/25  | Added        |
 
+      @take
       Scenarios: Invalid Rules
         | Protocol | From Port | To Port  | CIDR        | Added or Not | Reason                            |
         | (Any)    | (None)    | (Random) | 0.0.0.0/25  | Not Added    | 'From Port' must be specified     |

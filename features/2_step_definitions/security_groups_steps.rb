@@ -92,7 +92,7 @@ When /^I create a security group with attributes (.+), (.+)$/ do |name, descript
   }
 end
 
-When /^I add the following rule: (.+), (.+), (.+), (.+)$/ do |protocol, from_port, to_port, cidr |
+When /^I add the following rule: (.+), (.+), (.+), (.+)$/i do |protocol, from_port, to_port, cidr |
 
   @security_group_rule = { 
     :protocol => protocol ,
@@ -101,10 +101,20 @@ When /^I add the following rule: (.+), (.+), (.+), (.+)$/ do |protocol, from_por
     :cidr => cidr }
 
  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @user.name }
+    * Fill in the password field with #{ @user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * Click the #{ @project.name } project
+
     * Click the access security tab
     * Current page should have the security groups
 
-    * Click the modify button for security group #{ @new_security_group.id }
+    * Click the modify security group button for security group #{ @new_security_group.id }
     * Current page should have the security group rules form
     * Choose the #{protocol} in the ip protocol dropdown
     * Set port to the from port field with #{from_port}
@@ -172,8 +182,8 @@ Then /^I [Cc]annot [Cc]reate a security group in the project$/ do
     * Click the logout button if currently logged in
 
     * Visit the login page
-    * Fill in the username field with #{ @user.name }
-    * Fill in the password field with #{ @user.password }
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
     * Click the login button
 
     * Visit the projects page

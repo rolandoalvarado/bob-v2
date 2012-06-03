@@ -288,11 +288,6 @@ Then /^Select Security Group (.+) item from the security group checklist$/ do |s
 end
 
 
-Then /^Choose the (.+) in the ip protocol dropdown$/ do |protocol|
-   step "IP Dropdown protocol will contain #{protocol}"
-end
-
-
 Then /^Set instance name field with (.+)$/ do |instance_name|
   if instance_name.downcase == "(any)"
     step "Fill in the server name field with #{Unique.name('Instance')}"
@@ -303,12 +298,13 @@ end
 
 
 Then /^Set port to the (.+) field with (.+)$/ do |port_name,port_number| 
-  if port_number.downcase == "(none)"
-    port_number = ""
-  elsif port_number.downcase == "(random)"
-    port_number = rand(65534) + 1
+
+  if port_number.downcase == "(random)"
+    port_number = (rand(65534) + 1).to_s
   end
-  step "Fill in the #{port_name} field with #{port_number}"
+  if port_number.downcase != "(none)"
+    step "Fill in the #{port_name} field with #{port_number}"
+  end
 end
 
 Then /^The (.+) form should be visible$/ do |form_name|

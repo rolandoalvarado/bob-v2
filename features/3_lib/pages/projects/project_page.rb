@@ -30,11 +30,11 @@ class ProjectPage < WebClientPage
   #==========================
   # Security Group Elements
   #==========================
-  button    'new security',            "#create-security-group"
-  button    'modify',                  "#security-item-<id> .security-rules"
+  button    'new security',            "#new-security-group"
+  button    'modify security group',   "#security-item-<id> .edit-security-rules"
   button    'delete security group',   "#security-item-<id> .delete-security-group"  
   button    'Context Menu',            xpath: "//tr[@id='security-item-<id>']/..//a[@class='dropdown-toggle']"
-  form      'new security',            "#security-group-form"
+  form      'new security',            "#new-security-group-form"
   form      'security group rules',    "#security-group-rules-form"
   link      'delete security group',   '#security-item-<id> .delete-security-group'
   element   'security groups',         "#security-groups-list"
@@ -108,7 +108,6 @@ class ProjectPage < WebClientPage
   #==========================
   # Instance-related elements
   #==========================
-  tab       'access security',               '.nav-tabs .access-and-security a'
   button    'new floating IP allocation',    '#allocate-btn'
   form      'new floating IP allocation',    '#floating-ip-allocate-modal'
   dropdown  'pool',                          '#pool'
