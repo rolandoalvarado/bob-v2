@@ -320,7 +320,6 @@ TestCase /^A user with a role of (.+) in a project cannot delete any of its volu
 
     * Click the Projects link
     * The #{ project_name } project should not be visible
-
   }
 
 end
