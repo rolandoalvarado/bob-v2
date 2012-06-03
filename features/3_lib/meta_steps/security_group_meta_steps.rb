@@ -78,7 +78,11 @@ Then /^the security group rules will be Added$/i do
 end
 
 Then /^the security group rules will be Not Added$/i do
-  value = @current_page.send("list_ip_protocol_field").get
+  begin
+    value = @current_page.send("list_ip_protocol_field").get
+  rescue
+    #If exception occured, it's right 
+  end
   if value != nil
     raise "The security group should not be added. but it's #{value}"
   end
