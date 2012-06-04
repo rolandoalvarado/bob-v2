@@ -591,3 +591,7 @@ Then /^Visit the (.+) page$/ do |page_name|
   @current_page = eval(page_class_name).new
   @current_page.visit
 end
+
+Then /Wait (.+) second(?:s|)/i  do |wait_secs|
+  sleep(wait_secs.to_i)  
+end

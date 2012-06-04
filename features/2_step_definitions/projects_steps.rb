@@ -544,3 +544,79 @@ end
 Then /^the project and all its resources will be deleted$/ do
   pending # express the regexp above with the code you wish you had
 end
+
+# Testcases
+#=================
+
+TestCase /^A user with a role of (.+) in a project can edit the instance quota of the project$/i do |role_name|
+  
+  username      = Unique.username('bob')
+  password      = '123qwe'
+  project_name  = Unique.project_name('test')
+  instance_name = Unique.instance_name('test')
+  volume_name   = Unique.volume_name('test')
+
+  Preconditions %{
+    * Ensure that a user with username #{ username } and password #{ password } exists
+    * Ensure that a project named #{ project_name } exists
+    * Ensure that the user #{ username } has a role of #{ role_name } in the project #{ project_name }
+  }
+
+  Cleanup %{
+    * Register the project named #{ project_name } for deletion at exit
+    * Register the user named #{ username } for deletion at exit
+  }
+
+  Script %{
+
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ username }
+    * Fill in the Password field with #{ password }
+    * Click the Login button
+
+    * Click the Projects link
+    * Click the #{ project_name } project
+    * Wait 5 seconds
+    * Click the quota modify button
+    * The Modify Quota message should be visible
+  }
+
+
+end
+
+TestCase /^A user with a role of (.+) in a project cannot edit the instance quota of the project$/i do |role_name|
+  
+  username      = Unique.username('bob')
+  password      = '123qwe'
+  project_name  = Unique.project_name('test')
+  instance_name = Unique.instance_name('test')
+  volume_name   = Unique.volume_name('test')
+
+  Preconditions %{
+    * Ensure that a user with username #{ username } and password #{ password } exists
+    * Ensure that a project named #{ project_name } exists
+    * Ensure that the user #{ username } has a role of #{ role_name } in the project #{ project_name }
+  }
+
+  Cleanup %{
+    * Register the project named #{ project_name } for deletion at exit
+    * Register the user named #{ username } for deletion at exit
+  }
+
+  Script %{
+
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ username }
+    * Fill in the Password field with #{ password }
+    * Click the Login button
+
+    * Click the Projects link
+    * Click the #{ project_name } project
+
+    * The quota modify link should not be visible
+
+  }
+
+end

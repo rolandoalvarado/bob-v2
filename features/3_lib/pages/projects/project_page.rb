@@ -22,6 +22,12 @@ class ProjectPage < WebClientPage
   option    'keypair',                xpath: '//select[@id="keypair"]/option[@value="<name>"]'
   row       'instance',               '#instances-template .table-list #instance-item-<id>'
   form      'resize instance',        '#resize-instance-modal'
+  button    'quota modify',           '.show-quota-form'
+
+  #==========================
+  # Edit Quota Elements
+  #==========================
+
 
 # Type      Name                         Selector
   span      'project name error',        "span.error[for='project-name']"

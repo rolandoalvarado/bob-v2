@@ -1,4 +1,4 @@
-@jira-DPBLOG-10
+@jira-DPBLOG-10 @jira-MCF-27 @format_v2
 Feature: Edit a Project's Instance Quota
   As a project manager, I want to set the instance quota (aka maximum
   number of instances) in my project, so that I can control my project's
@@ -9,24 +9,19 @@ Feature: Edit a Project's Instance Quota
   the instance so that the user won't have to wait for a few minutes to find
   out that he's over the quota after all.
 
-  Background:
-    * A project exists in the system
-
-  @permissions
+  @permissions @jira-MCF-27-CUP
   Scenario Outline: Check User Permissions
-    Given I have a role of <Role> in the project
-     Then I <Can or Cannot Edit> the instance quota of the project
+    * A user with a role of <Role> in a project <Can or Cannot Edit> the instance quota of the project
 
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Edit |
-        | Admin           | Can Edit           |
+        | Project Manager | Can Edit           |
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Edit |
         | Member          | Cannot Edit        |
-        | (None)          | Cannot Edit        |
 
-
+  @jira-MCF-27-EPIQ
   Scenario Outline: Edit the Project's Instance Quota
     Given I am authorized to set instance quota of the project
       And the project has <Running Instances> instances
