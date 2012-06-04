@@ -41,7 +41,7 @@ end
 
 
 Then /^Logging in after anonymously accessing (.+) redirects me back to it$/ do |page_name|
-  username = 'rstark'
+  username = Unique.username('rstark')
   password = '123qwe'
 
   steps %{
@@ -60,7 +60,7 @@ end
 
 
 Then /^Logging out redirects me to the Log In page$/ do
-  username = 'rstark'
+  username = Unique.username('rstark')
   password = '123qwe'
 
   steps %{
@@ -80,7 +80,7 @@ end
 
 
 Then /^Logging out clears my session$/ do
-  username = 'rstark'
+  username = Unique.username('rstark')
   password = '123qwe'
 
   steps %{
