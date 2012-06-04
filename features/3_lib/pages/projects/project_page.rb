@@ -31,7 +31,7 @@ class ProjectPage < WebClientPage
   # Security Group Elements
   #==========================
   button    'new security group',             "#create-security-group"
-  button    'modify security group',          "#security-item-<id> .edit-security-rules"
+  button    'modify security group',          "#security-item-<id> .security-rules"
   button    'delete security group',          "#security-item-<id> .delete-security-group"  
   button    'Context Menu',                   xpath: "//tr[@id='security-item-<id>']/..//a[@class='dropdown-toggle']"
   form      'new security',                   "#new-security-group-form"
@@ -48,8 +48,10 @@ class ProjectPage < WebClientPage
   field     'security group description',     "#new-security-description"
   button    'create security',                "#create-security-group"
   span      'new security form error',        "span.error[for='new-security-name'], span.error[for='new-security-description']"
+  span      'security group form error',      'span.error[for="from-port"], span.error[for="to-port"]'
 
-  option    'ip protocol', xpath:             '//select[@id="ip-protocol"]/option[text()="<name>"]'
+  #dropdown   'ip protocol',                   xpath: '//select[@id="ip-protocol"]/option[text()="<name>"]'
+  dropdown  'ip protocol',                    "#ip-protocol"
   field     'from port', xpath:               '//form[@id="security-group-rules-form"]//input[@id="from-port"]'
   field     'to port', xpath:                 '//form[@id="security-group-rules-form"]//input[@id="to-port"]'
   field     'CIDR',    xpath:                 '//form[@id="security-group-rules-form"]//input[@id="cidr"]'
@@ -99,7 +101,7 @@ class ProjectPage < WebClientPage
   table     'volume snapshots',                 '#volume-snapshot-list'
 
 # Type      Name                    Selector
-  span      'new volume form error', 'span.error[for="name"], span.error[for="appendedInput"]'
+  span      'new volume form error',        'span.error[for="name"], span.error[for="appendedInput"]'
 
 # Type      Name                         Selector
   button    'attach volume',             '#volume-item-<id> #attach'

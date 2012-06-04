@@ -38,15 +38,6 @@ Then /^Choose the (\d+)(?:st|nd|rd|th) item in the (.+) dropdown$/ do |item_numb
   @current_page.send("#{ dropdown_name }_dropdown_items")[item_number.to_i - 1].click
 end
 
-Then /^Choose the (.+) in the ip protocol dropdown$/ do |protocol|
-  if protocol.downcase == "(any)" || protocol.downcase == "(none)"
-    #nothing
-  else
-    @current_page.ip_protocol_option( name: protocol ).click
-  end
-end
-
-
 Then /^Choose the item with text (.+) in the (.+) dropdown$/ do |item_text, dropdown_name|
   dropdown_name = dropdown_name.split.join('_').downcase
   if item = @current_page.send("#{ dropdown_name }_dropdown_items").find { |d| d.text == item_text }
@@ -212,6 +203,12 @@ end
 
 
 Then /^Current page should have the security groups$/ do
+  unless @current_page.has_security_groups_element?
+    raise "Current page doesn't have security groups."
+  end
+end
+
+Then /^Current page should have the updated security group rule$/ do
   unless @current_page.has_security_groups_element?
     raise "Current page doesn't have security groups."
   end
