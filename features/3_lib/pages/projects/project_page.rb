@@ -44,11 +44,11 @@ class ProjectPage < WebClientPage
   
 
   #Elements in the New Security form
-  field     'security group name',            "#new-security-name"
-  field     'security group description',     "#new-security-description"
-  button    'create security',                "#create-security-group"
-  span      'new security form error',        "span.error[for='new-security-name'], span.error[for='new-security-description']"
-  span      'security group form error',      'span.error[for="from-port"], span.error[for="to-port"]'
+  field     'security group name',                "#new-security-name"
+  field     'security group description',         "#new-security-description"
+  button    'create security',                    "#create-security-group"
+  span      'new security form error',            "span.error[for='new-security-name'], span.error[for='new-security-description']"
+  element   'security group form error message',  "#security-group-rules-form .error"
 
   #dropdown   'ip protocol',                   xpath: '//select[@id="ip-protocol"]/option[text()="<name>"]'
   dropdown  'ip protocol',                    "#ip-protocol"

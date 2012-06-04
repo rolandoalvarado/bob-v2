@@ -42,20 +42,13 @@ Feature: Edit a Security Group
 
      Scenarios: Valid Rules
        | Protocol | From Port | To Port  | CIDR        | Updated or Not |
-       | TCP      | (Random)  | (Random) | 0.0.0.0/25  | Updated        |
-       | TCP      | (Random)  | (Random) | 0.0.0.0/25  | Updated        |
-       | UDP      | (Random)  | (Random) | 0.0.0.0/25  | Updated        |
-       | UDP      | (Random)  | (Random) | 0.0.0.0/25  | Updated        |
-       | ICMP     | (Random)  | (Random) | 0.0.0.0/25  | Updated        |
-       | ICMP     | (Random)  | (Random) | 0.0.0.0/25  | Updated        |
+       | TCP      | (Random)  | (Random) | 0.0.0.0/25  | Added          |
+       | UDP      | (Random)  | (Random) | 0.0.0.0/25  | Added          |
+       | ICMP     | (Random)  | (Random) | 0.0.0.0/25  | Added          |
 
      Scenarios: Invalid Rules
        | Protocol | From Port | To Port  | CIDR        | Updated or Not | Reason                                     |
-       | (Any)    | (None)    | (Random) | 0.0.0.0/25  | Not Updated    | 'From Port' must be specified              |
-       | (Any)    | (Random)  | (None)   | 0.0.0.0/25  | Not Updated    | 'To Port' must be specified                |
-       | (Any)    | (Random)  | (None)   | 1.2.9.12    | Not Updated    | Cidr must be in CIDR notation              |
-       | (Any)    | (Random)  | (Random) | (None)      | Not Updated    | 'Cidr' can't be empty                      |
-       | (Any)    | (None)    | (Random) | Web Servers | Not Updated    | 'From Port' must be specified              |
-       | (Any)    | (Random)  | (None)   | Web Servers | Not Updated    | 'To Port' must be specified                |
-       | (Any)    | (Random)  | (Random) | (None)      | Not Updated    | 'Cidr' can't be empty                      |
-       | (Any)    | (Random)  | (Random) | App Servers | Not Updated    | Security group 'App Servers' doesn't exist |
+       | (Any)    | (None)    | (Random) | 0.0.0.0/25  | Not Updated    | 'From Port' must be specified     |
+       | (Any)    | (Random)  | (None)   | 0.0.0.0/25  | Not Updated    | 'To Port' must be specified       |
+       | (Any)    | (Random)  | (None)   | 1.2.9.12    | Not Updated    | CIDR must be in CIDR notation     |
+       | (Any)    | (Random)  | (Random) | (None)      | Not Updated    | 'CIDR' can't be empty             |

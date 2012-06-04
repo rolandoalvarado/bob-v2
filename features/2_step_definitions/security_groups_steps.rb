@@ -502,6 +502,6 @@ end
 
 Then /^the rule will be [Nn]ot [Uu]pdated$/ do
   steps %{
-    * The security group form error message should be visible
+    * A security group form error message element should be visible
   }
 end
