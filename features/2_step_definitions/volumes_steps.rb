@@ -366,3 +366,36 @@ TestCase /^A user with a role of (.+) in a project cannot (?:delete|detach) any 
   }
 
 end
+
+
+TestCase /^Volumes that are attached to an instance cannot be deleted$/i do
+
+  Preconditions %{
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that the project named #{ test_project_name } has 1 instance
+    * Ensure that the project named #{ test_project_name } has a volume named #{ test_volume_name }
+    * Ensure that the volume named #{ test_volume_name } is attached to the 1st instace of the project named #{ test_project_name }
+    * Ensure that the user #{ bob_username } has a role of Project Manager in the project #{ test_project_name }
+  }
+
+  Cleanup %{
+    * Register the project named #{ test_project_name } for deletion at exit
+    * Register the user named #{ bob_username } for deletion at exit
+  }
+
+  Script %{
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ bob_username }
+    * Fill in the Password field with #{ bob_password }
+    * Click the Login button
+
+    * Click the Projects link
+    * Click the #{ test_project_name } project
+
+    * Click the context menu button of the volume named #{ test_volume_name }
+    * The delete button of the volume named #{ test_volume_name } should not be visible
+  }
+
+end

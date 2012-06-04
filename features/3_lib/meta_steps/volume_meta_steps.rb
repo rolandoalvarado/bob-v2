@@ -28,3 +28,16 @@ Step /^Ensure that the project named (.+) has a volume named (.+)$/ do |project_
 
   VolumeService.session.create_volume_in_project(project, :name => volume_name)
 end
+
+Step /^Ensure that the volume named (.+) is attached to the (\d+)(?:st|nd|rd|th) instace of the project named (.+)$/ do |volume_name, nth_instance, project_name|
+  index = nth_instance.to_i - 1
+  project = IdentityService.session.find_project_by_name(project_name)
+  raise "Project #{ project_name } couldn't be found!" unless project
+
+  instance = ComputeService.session.get_project_instances(project)[index]
+
+  volume = VolumeService.session.find_volume_by_name(project, volume_name)
+  rase "Volume #{ volume_name } couldn't be found!" if volume.nil?
+
+  ComputeService.session.attach_volume_to_instance_in_project project, instance, volume
+end

@@ -311,7 +311,7 @@ Then /^Set instance name field with (.+)$/ do |instance_name|
 end
 
 
-Then /^Set port to the (.+) field with (.+)$/ do |port_name,port_number| 
+Then /^Set port to the (.+) field with (.+)$/ do |port_name,port_number|
 
   if port_number.downcase == "(random)"
     port_number = (rand(65534) + 1).to_s
@@ -352,6 +352,14 @@ Then /^The (.+) table should not include the text (.+)$/ do |table_name, text|
   end
 end
 
+Step /^The delete button of the volume named (.+) should not be visible$/ do |volume_name|
+  volume = VolumeService.session.volumes.find { |v| v['display_name'] == volume_name }
+  raise "Couldn't find a volume named '#{ volume_name }'" unless volume
+  binding.pry
+  unless @current_page.send("has_no_delete_volume_button?", id: volume['id'])
+    raise "The delete button of the volume #{ volume_name } should not be visible, but it is!"
+  end
+end
 
 Then /^The (.+) button should be disabled$/ do |button_name|
   button_name = button_name.split.join('_').downcase

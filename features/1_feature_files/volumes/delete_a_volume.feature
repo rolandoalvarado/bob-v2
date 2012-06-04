@@ -23,6 +23,6 @@ Feature: Delete a volume
         | Role            | Can or Cannot Delete |
         | (None)          | Cannot Delete        |
 
-
+  @wip
   Scenario:
     * Volumes that are attached to an instance cannot be deleted

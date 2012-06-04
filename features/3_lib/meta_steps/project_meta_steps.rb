@@ -19,6 +19,16 @@ Step /^Ensure that a project named (.+) exists$/i do |project_name|
   @test_project = project
 end
 
+Step /^Ensure that the project named (.+) has (\d+) instances?$/i do |project_name, instance_count|
+  instance_count   = instance_count.to_i
+  project          = IdentityService.session.ensure_project_exists(:name => project_name)
+
+  raise "Project named #{ project_name } couldn't be found!" if project.nil? or project.id.empty?
+
+  EnvironmentCleaner.register(:project, project.id)
+  ComputeService.session.ensure_active_instance_count(project, instance_count)
+end
+
 Then /^Ensure that a test project is available for use$/i do
   identity_service = IdentityService.session
   project          = identity_service.ensure_project_exists(:name => 'project')
@@ -78,7 +88,7 @@ Then /^Ensure that a project is available for use$/i do
 end
 
 Then /^Ensure that I have a role of (.+) in the project$/i do |role_name|
-  
+
   if @project.nil?
     raise "No Project is available. You need to call " +
           "'* Ensure that a project is available for use' " +
@@ -89,9 +99,9 @@ Then /^Ensure that I have a role of (.+) in the project$/i do |role_name|
                        :user,
                        :name => Unique.username('rstark')
                      )
-  
-  identity_service = IdentityService.session 
-  user             = identity_service.ensure_user_exists(user_attrs) 
+
+  identity_service = IdentityService.session
+  user             = identity_service.ensure_user_exists(user_attrs)
   EnvironmentCleaner.register(:user, user.id)
 
   identity_service.revoke_all_user_roles(user, @project)
@@ -133,7 +143,7 @@ end
 
 Then /^Ensure that a project has (\d+) security groups$/ do |security_group_count|
   compute_service = ComputeService.session
-  compute_service.ensure_project_security_group_count(@project, security_group_count.to_i)  
+  compute_service.ensure_project_security_group_count(@project, security_group_count.to_i)
 end
 
 Then /^Register the project named (.+) for deletion at exit$/i do |name|
