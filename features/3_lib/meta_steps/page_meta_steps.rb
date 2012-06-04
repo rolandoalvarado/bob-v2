@@ -158,12 +158,13 @@ Step /^Click the context menu button of the volume named (.+)$/ do |volume_name|
   @current_page.volume_context_menu_button(:id => volume['id']).click
 end
 
-Step /^Click the delete button of the volume named (.+)$/ do |volume_name|
+Step /^Click the (delete|detach) button of the volume named (.+)$/ do |button_name, volume_name|
   volume = VolumeService.session.volumes.find { |v| v['display_name'] == volume_name }
 
   raise "Couldn't find a volume named '#{ volume_name }'" unless volume
 
-  @current_page.delete_volume_button(:id => volume['id']).click
+  button_name = button_name.split.join('_')
+  @current_page.send("#{ button_name }_volume_button", id: volume['id']).click
 end
 
 Then /^Click the link for user with username (.+)$/i do |username|
@@ -434,15 +435,20 @@ Then /^The volume (.+) should be attached to instance (.+)$/ do |volume_id, inst
 end
 
 
-Then /^The volume (.+) should not be attached to instance (.+)$/ do |volume_id, instance_name|
+Then /^The volume named (.+) should not be attached to the instance named (.+)$/ do |volume_name, instance_name|
+  VolumeService.session.reload_volumes
+  volume = VolumeService.session.volumes.find { |v| v['display_name'] == volume_name }
+
+  raise "Couldn't find a volume named '#{ volume_name }'" unless volume
+
   sleeping(1).seconds.between_tries.failing_after(15).tries do
-    unless @current_page.has_volume_row?( id: volume_id )
-      raise "Could not find row for volume #{ volume_id }!"
+    unless @current_page.has_volume_row?(id: volume['id'])
+      raise "Could not find row for the volume named #{ volume_name }!"
     end
 
-    attachment = @current_page.volume_row( id: volume_id ).find('.attachments a').text()
+    attachment = @current_page.volume_row(id: volume['id']).find('.attachments a').text()
     if attachment == instance_name
-      raise "Expected volume #{ volume_id } to not be attached to instance #{ instance_name }, but it is."
+      raise "Expected volume #{ volume_name } to not be attached to instance #{ instance_name }, but it is."
     end
   end
 end

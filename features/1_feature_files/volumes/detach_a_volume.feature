@@ -10,18 +10,15 @@ Feature: Detach a Volume
   instances, you will have to use an NFS or SAMBA share from an existing
   instance.
 
-  Background:
-    * A project exists in the system
-    * The project has 1 active instance
-    * The instance has 1 attached volume
-
-
   @permissions
   Scenario Outline: Check User Permissions
-    Given I have a role of <Role> in the project
-     Then I <Can or Cannot Detach> the volume from the instance
+    * A user with a role of <Role> in a project <Can or Cannot Detach> any of its volumes
 
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Detach |
         | Member          | Can Detach           |
         | Project Manager | Can Detach           |
+
+      Scenarios: Unauthorized Roles
+        | Role            | Can or Cannot Detach |
+        | (None)          | Cannot Detach        |

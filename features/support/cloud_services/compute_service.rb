@@ -12,22 +12,33 @@ class ComputeService < BaseCloudService
     @security_groups = service.security_groups
   end
 
+  def attach_volume_to_instance_in_project(project, instance, volume)
+    set_tenant project, false
+    service.attach_volume(volume['id'], instance.id, '/dev/vdz')
+    set_tenant 'admin'
+  rescue
+    raise "Couldn't attach volume #{ volume['display_name'] } to instance #{ instance.name }!"
+  end
+
   def create_instance_in_project(project, attributes={})
+    set_tenant project
     attributes[:name]   ||= Faker::Name.name
     attributes[:image]  ||= service.images[0].id
     attributes[:flavor] ||= service.flavors[0].id
 
-    service.create_server(
-      attributes[:name],
-      attributes[:image],
-      attributes[:flavor],
-      {
-        'tenant_id'      => project.id,
-        'key_name'       => service.key_pairs[0].name,
-        'security_group' => service.security_groups[0].id,
-        'user_id'        => service.current_user['id']
-      }
-    )
+    if service.list_servers.body['servers'].none? { |s| s['name'] == attributes[:name] }
+      service.create_server(
+        attributes[:name],
+        attributes[:image],
+        attributes[:flavor],
+        {
+          'tenant_id'      => project.id,
+          'key_name'       => service.key_pairs[0].name,
+          'security_group' => service.security_groups[0].id,
+          'user_id'        => service.current_user['id']
+        }
+      )
+    end
 
     service.servers.find { |s| s.name == attributes[:name] }
   rescue
@@ -523,6 +534,13 @@ class ComputeService < BaseCloudService
     if security_group = security_groups.find_by_name(attributes[:name])
       delete_security_group(security_group)
     end
+  end
+
+  def find_instance_by_name(project, name)
+    service.set_tenant project
+    instance = service.servers.find_by_name(name)
+    service.set_tenant 'admin'
+    instance
   end
 
   def find_security_group_by_name(project, name)
