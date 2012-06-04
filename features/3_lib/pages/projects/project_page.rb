@@ -30,8 +30,7 @@ class ProjectPage < WebClientPage
   #==========================
   # Security Group Elements
   #==========================
-  #button    'new security group',            "#create-security-group"
-  button    'new security group',             "#new-security-group"
+  button    'new security group',             "#create-security-group"
   button    'modify security group',          "#security-item-<id> .edit-security-rules"
   button    'delete security group',          "#security-item-<id> .delete-security-group"  
   button    'Context Menu',                   xpath: "//tr[@id='security-item-<id>']/..//a[@class='dropdown-toggle']"
@@ -39,6 +38,7 @@ class ProjectPage < WebClientPage
   form      'security group rules',           "#security-group-rules-form"
   link      'delete security group',          "#security-item-<id> .delete-security-group"
   link      'modify security group',          "#security-item-<id> .security-rules"
+  link      'security group',                 "#security-item-<id> .security-rules"
   element   'security groups',                "#security-groups-list"
   tab       'access security',                ".nav-tabs .access-and-security a"
   

@@ -28,7 +28,7 @@ end
 
 Given /^the security group has an attributes of (.+), (.+)$/ do |name, description|
   steps %{
-    * Ensure that a security group name #{ name } exists
+    * Ensure that a security group named #{ name } exists
     * And a security group description #{ description }
     * Raise an error if a security group does not have a name of #{ name }
   }
@@ -40,8 +40,9 @@ Given /^the project has only one security group named Web Servers$/ do
   }
 end
 
-Given /^the project has (\d+) security groups named default, and Web Servers$/ do |arg1|
+Given /^The project has (\d+) security groups named default, and Web Servers$/ do |security_group_count|
    steps %{
+    * Ensure that a security group named default exist
     * Ensure that a security group named Web Servers exist
     * Ensure that a project has #{security_group_count} security groups
   }
@@ -90,8 +91,8 @@ When /^I create a security group with attributes (.+), (.+)$/ do |name, descript
     * Click the logout button if currently logged in
 
     * Visit the login page
-    * Fill in the username field with #{ @user.name }
-    * Fill in the password field with #{ @user.password }
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
     * Click the login button
 
     * Visit the projects page
@@ -118,8 +119,8 @@ When /^I add the following rule: (.+), (.+), (.+), (.+)$/i do |protocol, from_po
     * Click the logout button if currently logged in
 
     * Visit the login page
-    * Fill in the username field with #{ @user.name }
-    * Fill in the password field with #{ @user.password }
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
     * Click the login button
 
     * Visit the projects page
@@ -145,7 +146,7 @@ When /^I edit the default security group with the following rule:  (.+), (.+), (
   attrs           = CloudObjectBuilder.attributes_for(
                     :security_group, 
                     :name => Unique.name('Web Servers'), 
-                    :description => 'Web Servers'
+                    :description => 'Web Servers Security Group'
                   )
 
   security_group  = compute_service.ensure_security_group_exists(@project, attrs)
@@ -164,25 +165,24 @@ When /^I edit the default security group with the following rule:  (.+), (.+), (
     * Click the access security tab
     * Current page should have the security groups
 
-    * Click the modify button for security group #{ security_group.id }
+    * Click the modify security group button for security group #{ security_group.id }
     * Current page should have the security group rules form
     * Choose the #{protocol} in the ip protocol dropdown
     * Fill in the from port field with #{from_port}
     * Fill in the to port field with #{to_port}
-    * Ensure that a #{source_type} is Subnet
     * Fill in the cidr field with #{cidr}
     * Click the add link
   }
 
 end
 
-When /^I edit the Web Servers security group with the following rule:  (.+), (.+), (.+), (.+), (.+)$/ do |protocol, from_port, to_port, source_type, cidr|
+When /^I edit the Web Servers security group with the following rule:  (.+), (.+), (.+), (.+), (.+)$/ do |protocol, from_port, to_port, cidr|
 
   compute_service = ComputeService.session
   attrs           = CloudObjectBuilder.attributes_for(
                     :security_group, 
                     :name => Unique.name('Web Servers'), 
-                    :description => 'Web Servers'
+                    :description => 'Web Servers Security Group'
                   )
 
   security_group  = compute_service.ensure_security_group_exists(@project, attrs)
@@ -201,12 +201,11 @@ When /^I edit the Web Servers security group with the following rule:  (.+), (.+
     * Click the access security tab
     * Current page should have the security groups
 
-    * Click the modify button for security group #{ security_group.id }
+    * Click the modify security group button for security group #{ security_group.id }
     * Current page should have the security group rules form
-    * Choose the #{protocol} in the ip protocol dropdown
+    * Choose the item with text #{protocol} in the ip protocol dropdown
     * Fill in the from port field with #{from_port}
     * Fill in the to port field with #{to_port}
-    * Ensure that a #{source_type} is Subnet
     * Fill in the cidr field with #{cidr}
     * Click the add link
   }
@@ -250,7 +249,7 @@ Then /^I [Cc]an [Ee]dit a security group in the project$/ do
   attrs           = CloudObjectBuilder.attributes_for(
                     :security_group, 
                     :name => Unique.name('Web Servers'), 
-                    :description => 'Web Servers'
+                    :description => 'Web Servers Security Group'
                   )
 
   security_group  = compute_service.ensure_security_group_exists(@project, attrs)
@@ -267,14 +266,17 @@ Then /^I [Cc]an [Ee]dit a security group in the project$/ do
     * Click the #{ @project.name } project
 
     * Click the access security tab
+    * Current page should have the security groups
+
+    * Click the modify security group button for security group #{ security_group.id }
+    * Current page should have the security group rules form
+    * Choose the item with text #{protocol} in the ip protocol dropdown
+    * Fill in the from port field with #{from_port}
+    * Fill in the to port field with #{to_port}
+    * Fill in the cidr field with #{cidr}
+    * Click the add link
+
     * Current page should have the #{security_group.name} security group
-    * Click the row for security group with id #{ security_group.id }
-    * Current page should have the edit #{security_group.name} security group 
-    * Fill in the security group name field with #{security_group.name}
-    * Fill in the security group description field with #{security_group.description}
-    * Click the update security button    
-    * Current page should have the updated #{security_group.name} security group
-    * The #{security_group.name} security group row should be visible
   }
 end
 
@@ -348,8 +350,8 @@ Then /^I Cannot Delete the Web Servers security group$/ do
     * Click the logout button if currently logged in
 
     * Visit the login page
-    * Fill in the username field with #{ @user.name }
-    * Fill in the password field with #{ @user.password }
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
     * Click the login button
 
     * Visit the projects page
@@ -410,15 +412,15 @@ Then /^the security group with attributes (.+), (.+) will be [Cc]reated$/ do |na
     * Click the logout button if currently logged in
 
     * Visit the login page
-    * Fill in the username field with #{ @user.name }
-    * Fill in the password field with #{ @user.password }
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
     * Click the login button
 
     * Visit the projects page
     * Click the #{ @project.name } project
 
     * Click the access security tab
-    * Click the new security button
+    * Click the new security group button
     * Current page should have the new security form
     * Fill in the security group name field with #{security_group.name}
     * Fill in the security group description field with #{security_group.description}
@@ -440,15 +442,15 @@ Then /^the security group with attributes (.+), (.+) will be [Nn]ot [Cc]reated$/
     * Click the logout button if currently logged in
 
     * Visit the login page
-    * Fill in the username field with #{ @user.name }
-    * Fill in the password field with #{ @user.password }
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
     * Click the login button
 
     * Visit the projects page
     * Click the #{ @project.name } project
 
     * Click the access security tab
-    * Click the new security button
+    * Click the new security group button
     * Current page should have the new security form
     * Fill in the security group name field with #{@security_group.name}
     * Fill in the security group description field with #{@security_group.description}

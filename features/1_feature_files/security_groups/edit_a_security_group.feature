@@ -1,4 +1,4 @@
-@jira-MCF-34 @format-v1
+@jira-MCF-34
 Feature: Edit a Security Group
   As an authorized user, I want to edit a security group so that I can
   control the incoming network traffic for one or more instances.
@@ -19,7 +19,7 @@ Feature: Edit a Security Group
     * A project exists in the system
 
 
-  @permissions
+  @permissions @jira-MCF-34-cup
   Scenario Outline: Check User Permissions
     Given I have a role of <Role> in the project
      Then I <Can or Cannot Edit> a security group in the project
@@ -36,8 +36,8 @@ Feature: Edit a Security Group
 
   Scenario Outline: Edit a Security Group
     Given I am authorized to edit a security group in the project
-      And the project has 2 security groups named default, and Web Servers
-     When I edit the Web Servers security group with the following rule: <Protocol>, <From Port>, <To Port>, <Source Type>, <Source>
+      And The project has 2 security groups named default, and Web Servers
+     When I edit the Web Servers security group with the following rule: <Protocol>, <From Port>, <To Port>, <CIDR>
      Then the rule will be <Updated or Not>
 
      Scenarios: Valid Rules

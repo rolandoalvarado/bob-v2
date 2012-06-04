@@ -46,6 +46,7 @@ Then /^Choose the (.+) in the ip protocol dropdown$/ do |protocol|
   end
 end
 
+
 Then /^Choose the item with text (.+) in the (.+) dropdown$/ do |item_text, dropdown_name|
   dropdown_name = dropdown_name.split.join('_').downcase
   if item = @current_page.send("#{ dropdown_name }_dropdown_items").find { |d| d.text == item_text }
@@ -225,7 +226,7 @@ end
 Then /^Current page should have the (.+) security group$/ do |security_group|
   unless @current_page.has_security_groups_element?
     raise "Current page doesn't have the #{security_group} security group."
-  en
+  end
 end
 
 Then /^Drag the instance flavor slider to a different flavor$/ do

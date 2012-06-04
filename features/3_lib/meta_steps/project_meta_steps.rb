@@ -113,7 +113,7 @@ Then /^Ensure that I have a role of (.+) in the project$/i do |role_name|
     end
   end
 
-  @user = user
+  @current_user = user
 end
 
 Then /^Ensure that the project has no security groups$/i do
