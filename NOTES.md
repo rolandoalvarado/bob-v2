@@ -68,3 +68,32 @@ The above will return a value of 1.
 The above will return `Here is my label`
 
 More info about the Nokogiri gem and its methods at [http://nokogiri.org/](http://nokogiri.org/).
+
+# Reset instances when ecnounter failed to start instance.
+
+There are two steps. Reset db records and reset vms.
+
+Reset db (in mc)
+
+    root@mc.cb-1-1:~# psql nova nova -W -h 172.16.1.1
+	Password for user nova: nova <- not displayed.
+	psql (9.1.3)
+	SSL connection (cipher: DHE-RSA-AES256-SHA, bits: 256)
+	Type "help" for help.
+	
+	nova=> update instances set deleted ='t' , deleted_at = now() where deleted ='f';
+	UPDATE XXX
+	nova=> <ctrl+D>
+
+Reset vms (in cn)
+
+	root@mc.cb-1-1:~# ssh cn25
+	Warning: Permanently added 'cn25' (ECDSA) to the list of known hosts.
+	root@cn25's password: <<please enter root password>>
+	
+	root@cn25.cb-1-1:~# list=`virsh list --all|grep running | awk '{print $2}'`
+	root@cn25.cb-1-1:~# for i in $list; do virsh destroy $i; done
+	root@cn25.cb-1-1:~# list=`virsh list --all|grep shut| awk '{print $2}'`
+	root@cn25.cb-1-1:~# for i in $list; do virsh undefine $i; done
+
+

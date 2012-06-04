@@ -1,3 +1,17 @@
+Step /^Ensure that the instance named (.+) has an attached volume named (.+) in the project (.+)$/ do |instance_name, volume_name, project_name|
+  project = IdentityService.session.find_project_by_name(project_name)
+  raise "#{ project_name } couldn't be found!" unless project
+
+  instance = ComputeService.session.find_instance_by_name(project, instance_name)
+  raise "Instance #{ instance_name } couldn't be found!" unless instance
+
+  volume = VolumeService.session.find_volume_by_name(project, volume_name)
+  raise "Volume #{ volume_name } couldn't be found!" unless volume
+
+  ComputeService.session.attach_volume_to_instance_in_project(project, instance, volume)
+end
+
+
 Step /^Ensure that the project named (.+) has (\d+) (?:volume|volumes)$/ do |project_name, desired_count|
   desired_count = desired_count.to_i
 
