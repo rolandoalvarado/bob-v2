@@ -38,7 +38,9 @@ class VolumeService < BaseCloudService
   def create_volume_in_project(project, attributes)
     attrs = CloudObjectBuilder.attributes_for(:volume, attributes)
     set_tenant project
-    service.create_volume(attrs.name, attrs.description, attrs.size)
+    if service.list_volumes.body['volumes'].none? { |v| v['id'] == attrs.name }
+      service.create_volume(attrs.name, attrs.description, attrs.size)
+    end
     set_tenant 'admin'
   end
 
@@ -102,6 +104,13 @@ class VolumeService < BaseCloudService
 
       return snapshots.count
     end
+  end
+
+  def find_volume_by_name(project, name)
+    service.set_tenant project
+    volume = service.list_volumes.body['volumes'].find { |v| v['display_name'] == name }
+    service.set_tenant 'admin'
+    volume
   end
 
   def reload_snapshots
