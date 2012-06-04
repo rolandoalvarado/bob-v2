@@ -201,10 +201,6 @@ When /^I edit the Web Servers security group with the following rule: (.+), (.+)
   security_group_rule  = compute_service.ensure_security_group_rule(@project)
 
   # Assign response values to local variables.
-  ip_protocol = security_group_rule.body['security_group_rule']['ip_protocol']
-  from_port = security_group_rule.body['security_group_rule']['from_port']
-  to_port = security_group_rule.body['security_group_rule']['to_port']
-  cidr = security_group_rule.body['security_group_rule']['ip_range']['cidr']    
 
   steps %{
     * Click the logout button if currently logged in
@@ -227,7 +223,6 @@ When /^I edit the Web Servers security group with the following rule: (.+), (.+)
     * Set port to the to port field with #{to_port}
     * Fill in the CIDR field with #{cidr}
     * Click the add security group rule button
-    * Click the close security group rule button
   }
 
 end
