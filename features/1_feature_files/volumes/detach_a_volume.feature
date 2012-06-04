@@ -1,3 +1,4 @@
+@jira-MCF-41
 Feature: Detach a Volume
   As a user, I want to detach a volume from my instance so that I can re-use
   the volume for other purposes or delete it altogether.
@@ -11,8 +12,8 @@ Feature: Detach a Volume
 
   Background:
     * A project exists in the system
-    * The project has a running instance
-    * The instance has an attached volume
+    * The project has 1 active instance
+    * The instance has 1 attached volume
 
 
   @permissions
@@ -21,10 +22,6 @@ Feature: Detach a Volume
      Then I <Can or Cannot Detach> the volume from the instance
 
       Scenarios: Authorized Roles
-        | Role            | Can or Cannot Create |
-        | Member          | Can Create           |
-        | Admin           | Can Create           |
-
-      Scenarios: Unauthorized Roles
-        | Role            | Can or Cannot Create |
-        | (None)          | Cannot Create        |
+        | Role            | Can or Cannot Detach |
+        | Member          | Can Detach           |
+        | Project Manager | Can Detach           |

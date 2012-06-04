@@ -103,6 +103,8 @@ class ProjectPage < WebClientPage
   form      'attach volume',             '#attach-volume-modal'
   dropdown  'attachable instance',       '#attach-volume-modal #instance'
   button    'confirm volume attachment', '#attach-volume-modal .attach-volume'
+  button    'detach volume',             '#volume-item-<id> #detach'
+  button    'confirm volume detachment', '#alert-template .okay'
   row       'volume',                    '#volume-item-<id>'
 
   #==========================

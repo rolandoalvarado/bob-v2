@@ -34,6 +34,13 @@ class ComputeService < BaseCloudService
     raise "Couldn't initialize instance in #{ project.name }"
   end
 
+  def create_volume(attributes = {})
+    attrs = CloudObjectBuilder.attributes_for(:volume)
+    attrs.merge!(attributes)
+
+    service.create_volume(attrs.name, attrs.description, attrs.size)
+  end
+
   def delete_instances_in_project(project)
     deleted_instances = []
     service.set_tenant project
@@ -84,24 +91,45 @@ class ComputeService < BaseCloudService
     released_addresses
   end
 
-  def ensure_instance_has_no_attached_volume(project, instance)
+  def ensure_instance_attached_volume_count(project, instance, desired_count, strict = true)
     set_tenant project, false
 
     sleeping(1).seconds.between_tries.failing_after(60).tries do
-      volumes          = service.volumes
-      attached_volumes = volumes.select{ |v| v.attachments.any?{ |a| a['serverId'] == instance.id } }
-      attached_volumes.each do |volume|
-        service.detach_volume(instance.id, volume.id)
-        sleep(0.5)
+      volumes = service.volumes
+      if desired_count > volumes.count
+        (desired_count - volumes.count).times do
+          create_volume
+          sleep(0.5)
+        end
       end
 
-      volumes.reload
-      attached_volumes = volumes.select{ |v| v.attachments.any?{ |a| a['serverId'] == instance.id } }
-      if attached_volumes.count > 0
-        raise "Couldn't ensure that instance #{ instance.name } has no volumes attached."
+      attached_volumes     = volumes.select{ |v| v.attachments.any?{ |a| a['serverId'] == instance.id } }
+      non_attached_volumes = volumes.select{ |v| v.attachments.first.empty? }
+      if desired_count > attached_volumes.count
+        (desired_count - attached_volumes.count).times do |i|
+          service.attach_volume(non_attached_volumes[i].id, instance.id, '/dev/vdz')
+          sleep(0.5)
+        end
+      elsif strict && desired_count < attached_volumes.count
+        (attached_volumes.count - desired_count).times do |i|
+          service.detach_volume(instance.id, attached_volumes[i].id)
+          sleep(0.5)
+        end
       end
 
-      return instance
+      volumes = service.volumes
+      attached_volumes = volumes.select{ |v| v.attachments.any?{ |a| a['serverId'] == instance.id } }
+      if strict && attached_volumes.count != desired_count
+        raise "Couldn't ensure that instance #{ instance.name } has #{ desired_count } attached volumes."
+      elsif !strict && attached_volumes.count < desired_count
+        raise "Couldn't ensure that instance #{ instance.name } has at least #{ desired_count } attached volumes."
+      end
+
+      if attached_volumes.count == 1
+        attached_volumes.first
+      elsif attached_volumes.count > 1
+        attached_volumes
+      end
     end
   end
 
@@ -148,7 +176,11 @@ class ComputeService < BaseCloudService
               "floating IPs. Current number of floating IPs is #{ addresses.length }."
       end
 
-      addresses.length
+      if addresses.count == 1
+        addresses.first
+      elsif addresses.count > 1
+        addresses
+      end
     end
   end
 
@@ -161,7 +193,7 @@ class ComputeService < BaseCloudService
     # This block will keep running until it stops raising an error, or until
     # the max number of tries is reached. In the last try, whatever error is
     # raised by the block is thrown.
-    sleeping(1).seconds.between_tries.failing_after(60).tries do
+    sleeping(1).seconds.between_tries.failing_after(30).tries do
       instances.reload
 
       non_active_instances  = instances.select{ |i| i.state !~ /^ACTIVE|ERROR$/}
@@ -211,7 +243,13 @@ class ComputeService < BaseCloudService
       end
     end # sleeping(x).seconds.between_tries.failing_after(y).tries
 
-    instances.length
+    instances.reload
+    active_instances = instances.select { |i| i.state == 'ACTIVE' }
+    if active_instances.count == 1
+      active_instances.first
+    elsif active_instances.count > 1
+      active_instances
+    end
   end
 
   # Ensures that there are `desired_count` number of instances in the project

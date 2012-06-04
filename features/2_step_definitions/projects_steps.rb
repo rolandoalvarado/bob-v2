@@ -28,7 +28,7 @@ end
 Given /^The project has (\d+) active instances?$/ do |number_of_instances|
   number_of_instances = number_of_instances.to_i
   compute_service     = ComputeService.session
-  total_instances     = compute_service.ensure_active_instance_count(@project, number_of_instances)
+  @instance           = compute_service.ensure_active_instance_count(@project, number_of_instances)
 end
 
 Given /^The project has (\d+) available volumes?$/ do |number_of_volumes|

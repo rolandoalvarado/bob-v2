@@ -10,6 +10,12 @@ Given /^I am authorized to (?:assign floating IPs to|create|pause|reboot|resize|
   }
 end
 
+Given /^The instance has (\d+) attached volumes?$/ do |number_of_volumes|
+  number_of_volumes = number_of_volumes.to_i
+  compute_service   = ComputeService.session
+  @volume           = compute_service.ensure_instance_attached_volume_count(@project, @instance, number_of_volumes)
+end
+
 #=================
 # WHENs
 #=================

@@ -72,19 +72,11 @@ end
 #=================
 
 Then /^an attached volume will be accessible from the instance$/ do
-  volume_service  = VolumeService.session
-  volume_service.set_tenant @project
-  volume          = volume_service.volumes.first
-
   compute_service = ComputeService.session
   compute_service.set_tenant @project
-  instance        = compute_service.instances.find{ |i| i.state == 'ACTIVE' }
-  addresses       = compute_service.addresses
 
   # We need to ensure that there is a floating IP so we can connect to it via SSH later
-  compute_service.ensure_project_floating_ip_count(@project, 1, instance)
-  addresses.reload
-  floating_ip     = addresses.find{ |a| a.instance_id == instance.id }
+  floating_ip = compute_service.ensure_project_floating_ip_count(@project, 1, instance)
   raise "No floating IP associated to instance #{ instance.name }!" unless floating_ip
   compute_service.ensure_security_group_rule @project
 
@@ -103,7 +95,7 @@ Then /^an attached volume will be accessible from the instance$/ do
     * Fetch a list of device files on the instance with floating IP #{ floating_ip.id }
 
     * Click the instances and volumes tab
-    * Click the attach volume button for volume #{ volume['id'] }
+    * Click the attach volume button for volume #{ @volume['id'] }
     * Current page should have the attach volume form
     * Choose the 2nd item in the attachable instance dropdown
     * Click the confirm volume attachment button
@@ -114,15 +106,7 @@ Then /^an attached volume will be accessible from the instance$/ do
 end
 
 Then /^I can attach the volume to the instance$/i do
-  compute_service = ComputeService.session
-  compute_service.set_tenant @project
-  instance        = compute_service.instances.find { |i| i.state == 'ACTIVE' }
-
-  volume_service  = VolumeService.session
-  volume_service.set_tenant @project
-  volume          = volume_service.volumes.first
-
-  compute_service.ensure_instance_has_no_attached_volume(@project, instance)
+  compute_service.ensure_instance_attached_volume_count(@project, @instance, 0)
 
   steps %{
     * Click the logout button if currently logged in
@@ -135,12 +119,12 @@ Then /^I can attach the volume to the instance$/i do
     * Visit the projects page
     * Click the #{ @project.name } project
 
-    * Click the attach volume button for volume #{ volume['id'] }
+    * Click the attach volume button for volume #{ @volume['id'] }
     * Current page should have the attach volume form
     * Choose the 2nd item in the attachable instance dropdown
     * Click the confirm volume attachment button
 
-    * The volume #{ volume['id'] } should be attached to instance #{ instance.name }
+    * The volume #{ @volume['id'] } should be attached to instance #{ @instance.name }
   }
 end
 
@@ -223,6 +207,25 @@ Then /^I [Cc]an [Dd]elete a snapshot of the volume$/ do
     * Click the delete volume snapshot button for volume snapshot named #{ snapshot['display_name'] }
     * Click the confirm volume snapshot deletion button
     * The volume snapshots table should not include the text #{ snapshot['display_name'] }
+  }
+end
+
+Then /^I can detach the volume from the instance$/i do
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * Click the #{ @project.name } project
+
+    * Click the detach volume button for volume #{ @volume['id'] }
+    * Click the confirm volume detachment button
+
+    * The volume #{ @volume['id'] } should not be attached to instance #{ @instance.name }
   }
 end
 
