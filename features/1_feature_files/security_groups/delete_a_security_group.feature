@@ -15,7 +15,7 @@ Feature: Delete a Security Group
     * The project has an instance that is a member of the default security group
 
 
-  @permissions
+  @permissions @jira-MCF-33-cup
   Scenario Outline: Check User Permissions
     Given I have a role of <Role> in the project
      Then I <Can or Cannot Delete> the Web Servers security group in the project

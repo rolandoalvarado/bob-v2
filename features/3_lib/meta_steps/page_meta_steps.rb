@@ -38,6 +38,13 @@ Then /^Choose the (\d+)(?:st|nd|rd|th) item in the (.+) dropdown$/ do |item_numb
   @current_page.send("#{ dropdown_name }_dropdown_items")[item_number.to_i - 1].click
 end
 
+Then /^Choose the (.+) in the ip protocol dropdown$/ do |protocol|
+  if protocol.downcase == "(any)" || protocol.downcase == "(none)"
+    #nothing
+  else
+    @current_page.ip_protocol_option( name: protocol ).click
+  end
+end
 
 Then /^Choose the item with text (.+) in the (.+) dropdown$/ do |item_text, dropdown_name|
   dropdown_name = dropdown_name.split.join('_').downcase
@@ -124,7 +131,6 @@ Then /^Click the (.+) button for volume snapshot named (.+)$/ do |button_name, s
   @current_page.send("#{ button_name }_button", name: snapshot_name).click
 end
 
-
 Then /^Click the (.+) project$/ do |project_name|
   project_name.strip!
   @current_page.project_link( name: project_name ).click
@@ -145,6 +151,23 @@ end
 Then /^Click the row for security group with id (.+)$/i do |security_group_id|
   security_group_id.strip!
   @current_page.security_group_link(id: security_group_id).click
+end
+
+Step /^Click the context menu button of the volume named (.+)$/ do |volume_name|
+  VolumeService.session.reload_volumes
+  volume = VolumeService.session.volumes.find { |v| v['display_name'] == volume_name }
+
+  raise "Couldn't find a volume named '#{ volume_name }'" unless volume
+
+  @current_page.volume_context_menu_button(:id => volume['id']).click
+end
+
+Step /^Click the delete button of the volume named (.+)$/ do |volume_name|
+  volume = VolumeService.session.volumes.find { |v| v['display_name'] == volume_name }
+
+  raise "Couldn't find a volume named '#{ volume_name }'" unless volume
+
+  @current_page.delete_volume_button(:id => volume['id']).click
 end
 
 Then /^Click the link for user with username (.+)$/i do |username|
@@ -186,6 +209,7 @@ Then /^Current page should show the instance's console output$/ do
   end
 end
 
+
 Then /^Current page should have the security groups$/ do
   unless @current_page.has_security_groups_element?
     raise "Current page doesn't have security groups."
@@ -193,15 +217,15 @@ Then /^Current page should have the security groups$/ do
 end
 
 Then /^Current page should have the new (.+) security group$/ do |security_group|
-  steps %{
-    * The #{security_group} security group row should be visible
-  }
+  unless @current_page.has_security_groups_element?
+    raise "Current page doesn't have the new #{security_group} security group."
+  end
 end
 
 Then /^Current page should have the (.+) security group$/ do |security_group|
-  steps %{
-    * The #{security_group} security group row should be visible
-  }
+  unless @current_page.has_security_groups_element?
+    raise "Current page doesn't have the #{security_group} security group."
+  en
 end
 
 Then /^Drag the instance flavor slider to a different flavor$/ do
@@ -241,7 +265,7 @@ end
 
 
 Then /^Select flavor (.+) item from the flavor slider$/ do |flavor|
- if flavor == "(Any)"
+ if flavor.downcase == "(any)"
    #nothing
  else
    pending
@@ -250,9 +274,9 @@ end
 
 
 Then /^Select keypair (.+) item from the keypair dropdown$/ do |keypair|
- if keypair == "(Any)"
+ if keypair.downcase == "(any)"
    #nothing
- elsif keypair  == "(None)"
+ elsif keypair.downcase  == "(none)"
    #nothing
  else
    pending
@@ -261,26 +285,21 @@ end
 
 
 Then /^Select instance count (.+)$/ do |count|
- if count == "(Any)"
+ if count.downcase == "(any)"
    #nothing
  else
    pending
  end
 end
-
 
 Then /^Select Security Group (.+) item from the security group checklist$/ do |security_group|
- if security_group == "(Any)"
+ if security_group.downcase == "(any)"
    #nothing
- elsif security_group == "(None)"
+ elsif security_groupy.downcase == "(none)"
    #nothing
  else
    pending
  end
-end
-
-Then /^Choose the (.+) in the ip protocol dropdown$/ do |protocol|
-   step "IP Dropdown protocol will contain #{protocol}"
 end
 
 
@@ -292,6 +311,16 @@ Then /^Set instance name field with (.+)$/ do |instance_name|
   end
 end
 
+
+Then /^Set port to the (.+) field with (.+)$/ do |port_name,port_number| 
+
+  if port_number.downcase == "(random)"
+    port_number = (rand(65534) + 1).to_s
+  end
+  if port_number.downcase != "(none)"
+    step "Fill in the #{port_name} field with #{port_number}"
+  end
+end
 
 Then /^The (.+) form should be visible$/ do |form_name|
   form_name = form_name.split.join('_').downcase
@@ -487,11 +516,11 @@ Then /^The (.+) project should not be visible$/ do |project_name|
 end
 
 
-Then /^The (.+) table should have (.+) rows$/ do |table_name, num_rows|
-  sleeping(1).seconds.between_tries.failing_after(5).tries do
+Then /^The (.+) table should have (\d+) (?:row|rows)$/ do |table_name, num_rows|
+  sleeping(1).seconds.between_tries.failing_after(30).tries do
     table_name      = table_name.split.join('_').downcase
     table           = @current_page.send("#{ table_name }_table")
-    actual_num_rows = table.has_content?('There are currently no') ? 0 : table.all('tbody tr').count
+    actual_num_rows = table.has_no_css_selector?('td.empty-table') ? table.all('tr').count : 0
     num_rows        = num_rows.to_i
 
     if actual_num_rows != num_rows

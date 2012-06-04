@@ -109,6 +109,7 @@ class IdentityService < BaseCloudService
     attributes[:name] = Unique.project_name(attributes[:name])
 
     tenant = tenants.find_by_name(attributes[:name])
+
     if tenant
       tenant.update(attributes)
     else

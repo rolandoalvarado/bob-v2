@@ -34,7 +34,6 @@ Given /^The volume has (\d+) saved snapshots?$/ do |number_of_snapshots|
   total_snapshots     = volume_service.ensure_volume_snapshot_count(@project, volume, number_of_snapshots)
 end
 
-
 #=================
 # WHENs
 #=================
@@ -65,7 +64,6 @@ When /^I create a volume with attributes (\(None\)|[^,]*), (\d+|\(None\))(?:|GB)
 
   @volume_attrs = attrs
 end
-
 
 #=================
 # THENs
@@ -250,4 +248,76 @@ Then /^the volume will be [Nn]ot [Cc]reated$/ do
   steps %{
     * The new volume form error message should be visible
   }
+end
+
+
+TestCase /^A user with a role of (.+) in a project can delete any of its volumes$/i do |role_name|
+
+  username     = Unique.username('bob')
+  password     = '123qwe'
+  project_name = Unique.project_name('test')
+  volume_name  = Unique.volume_name('test')
+
+  Preconditions %{
+    * Ensure that a user with username #{ username } and password #{ password } exists
+    * Ensure that a project named #{ project_name } exists
+    * Ensure that the project named #{ project_name } has a volume named #{ volume_name }
+    * Ensure that the user #{ username } has a role of #{ role_name } in the project #{ project_name }
+  }
+
+  Cleanup %{
+    * Register the project named #{ project_name } for deletion at exit
+    * Register the user named #{ username } for deletion at exit
+  }
+
+  Script %{
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ username }
+    * Fill in the Password field with #{ password }
+    * Click the Login button
+
+    * Click the Projects link
+    * Click the #{ project_name } project
+
+    * Click the context menu button of the volume named #{ volume_name }
+    * Click the delete button of the volume named #{ volume_name }
+    * Click the volume delete confirmation button
+
+    * The volumes table should have 0 rows
+  }
+
+end
+
+
+TestCase /^A user with a role of (.+) in a project cannot delete any of its volumes$/i do |role_name|
+
+  username     = Unique.username('bob')
+  password     = '123qwe'
+  project_name = Unique.project_name('test')
+  volume_name  = Unique.volume_name('test')
+
+  Preconditions %{
+    * Ensure that a user with username #{ username } and password #{ password } exists
+    * Ensure that a project named #{ project_name } exists
+    * Ensure that the project named #{ project_name } has a volume named #{ volume_name }
+    * Ensure that the user #{ username } has a role of #{ role_name } in the project #{ project_name }
+  }
+
+  Cleanup %{
+    * Register the project named #{ project_name } for deletion at exit
+    * Register the user named #{ username } for deletion at exit
+  }
+
+  Script %{
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ username }
+    * Fill in the Password field with #{ password }
+    * Click the Login button
+
+    * Click the Projects link
+    * The #{ project_name } project should not be visible
+  }
+
 end

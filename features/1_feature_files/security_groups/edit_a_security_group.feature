@@ -1,4 +1,4 @@
-@jira-MCF-34
+@jira-MCF-34 @format-v1
 Feature: Edit a Security Group
   As an authorized user, I want to edit a security group so that I can
   control the incoming network traffic for one or more instances.
@@ -41,21 +41,21 @@ Feature: Edit a Security Group
      Then the rule will be <Updated or Not>
 
      Scenarios: Valid Rules
-       | Protocol | From Port | To Port  | Source Type    | Source      | Updated or Not |
-       | TCP      | (Random)  | (Random) | Subnet         | 0.0.0.0/25  | Updated        |
-       | TCP      | (Random)  | (Random) | Security Group | Web Servers | Updated        |
-       | UDP      | (Random)  | (Random) | Subnet         | 0.0.0.0/25  | Updated        |
-       | UDP      | (Random)  | (Random) | Security Group | Web Servers | Updated        |
-       | ICMP     | (Random)  | (Random) | Subnet         | 0.0.0.0/25  | Updated        |
-       | ICMP     | (Random)  | (Random) | Security Group | Web Servers | Updated        |
+       | Protocol | From Port | To Port  | CIDR        | Updated or Not |
+       | TCP      | (Random)  | (Random) | 0.0.0.0/25  | Updated        |
+       | TCP      | (Random)  | (Random) | 0.0.0.0/25  | Updated        |
+       | UDP      | (Random)  | (Random) | 0.0.0.0/25  | Updated        |
+       | UDP      | (Random)  | (Random) | 0.0.0.0/25  | Updated        |
+       | ICMP     | (Random)  | (Random) | 0.0.0.0/25  | Updated        |
+       | ICMP     | (Random)  | (Random) | 0.0.0.0/25  | Updated        |
 
      Scenarios: Invalid Rules
-       | Protocol | From Port | To Port  | Source Type    | Source      | Updated or Not | Reason                                     |
-       | (Any)    | (None)    | (Random) | Subnet         | 0.0.0.0/25  | Not Updated    | 'From Port' must be specified              |
-       | (Any)    | (Random)  | (None)   | Subnet         | 0.0.0.0/25  | Not Updated    | 'To Port' must be specified                |
-       | (Any)    | (Random)  | (None)   | Subnet         | 1.2.9.12    | Not Updated    | Source must be in CIDR notation            |
-       | (Any)    | (Random)  | (Random) | Subnet         | (None)      | Not Updated    | 'Source' can't be empty                    |
-       | (Any)    | (None)    | (Random) | Security Group | Web Servers | Not Updated    | 'From Port' must be specified              |
-       | (Any)    | (Random)  | (None)   | Security Group | Web Servers | Not Updated    | 'To Port' must be specified                |
-       | (Any)    | (Random)  | (Random) | Security Group | (None)      | Not Updated    | 'Source' can't be empty                    |
-       | (Any)    | (Random)  | (Random) | Security Group | App Servers | Not Updated    | Security group 'App Servers' doesn't exist |
+       | Protocol | From Port | To Port  | CIDR        | Updated or Not | Reason                                     |
+       | (Any)    | (None)    | (Random) | 0.0.0.0/25  | Not Updated    | 'From Port' must be specified              |
+       | (Any)    | (Random)  | (None)   | 0.0.0.0/25  | Not Updated    | 'To Port' must be specified                |
+       | (Any)    | (Random)  | (None)   | 1.2.9.12    | Not Updated    | Cidr must be in CIDR notation              |
+       | (Any)    | (Random)  | (Random) | (None)      | Not Updated    | 'Cidr' can't be empty                      |
+       | (Any)    | (None)    | (Random) | Web Servers | Not Updated    | 'From Port' must be specified              |
+       | (Any)    | (Random)  | (None)   | Web Servers | Not Updated    | 'To Port' must be specified                |
+       | (Any)    | (Random)  | (Random) | (None)      | Not Updated    | 'Cidr' can't be empty                      |
+       | (Any)    | (Random)  | (Random) | App Servers | Not Updated    | Security group 'App Servers' doesn't exist |
