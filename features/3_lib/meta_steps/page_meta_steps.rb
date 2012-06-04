@@ -38,14 +38,6 @@ Then /^Choose the (\d+)(?:st|nd|rd|th) item in the (.+) dropdown$/ do |item_numb
   @current_page.send("#{ dropdown_name }_dropdown_items")[item_number.to_i - 1].click
 end
 
-Then /^Choose the (.+) in the ip protocol dropdown$/ do |protocol|
-  if protocol.downcase == "(any)" || protocol.downcase == "(none)"
-    #nothing
-  else
-    @current_page.ip_protocol_option( name: protocol ).click
-  end
-end
-
 Then /^Choose the item with text (.+) in the (.+) dropdown$/ do |item_text, dropdown_name|
   dropdown_name = dropdown_name.split.join('_').downcase
   if item = @current_page.send("#{ dropdown_name }_dropdown_items").find { |d| d.text == item_text }
@@ -137,7 +129,6 @@ Then /^Click the (.+) project$/ do |project_name|
   @current_page = ProjectPage.new
 end
 
-
 Then /^Click the (.+) tab$/ do |tab_name|
   tab_name = tab_name.split.join('_').downcase
   @current_page.send("#{ tab_name }_tab").click
@@ -147,6 +138,11 @@ end
 Then /^Click the row for user with id (.+)$/i do |user_id|
   user_id.strip!
   @current_page.user_link(id: user_id).click
+end
+
+Then /^Click the row for security group with id (.+)$/i do |security_group_id|
+  security_group_id.strip!
+  @current_page.security_group_link(id: security_group_id).click
 end
 
 Step /^Click the context menu button of the volume named (.+)$/ do |volume_name|
@@ -213,6 +209,23 @@ Then /^Current page should have the security groups$/ do
   end
 end
 
+Then /^Current page should have the updated security group rule$/ do
+  unless @current_page.has_security_groups_element?
+    raise "Current page doesn't have security groups."
+  end
+end
+
+Then /^Current page should have the new (.+) security group$/ do |security_group|
+  unless @current_page.has_security_groups_element?
+    raise "Current page doesn't have the new #{security_group} security group."
+  end
+end
+
+Then /^Current page should have the (.+) security group$/ do |security_group|
+  unless @current_page.has_security_groups_element?
+    raise "Current page doesn't have the #{security_group} security group."
+  end
+end
 
 Then /^Drag the instance flavor slider to a different flavor$/ do
   @current_page.execute_script %{

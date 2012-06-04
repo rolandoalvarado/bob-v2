@@ -34,7 +34,6 @@ Given /^The volume has (\d+) saved snapshots?$/ do |number_of_snapshots|
   total_snapshots     = volume_service.ensure_volume_snapshot_count(@project, volume, number_of_snapshots)
 end
 
-
 #=================
 # WHENs
 #=================
@@ -65,7 +64,6 @@ When /^I create a volume with attributes (\(None\)|[^,]*), (\d+|\(None\))(?:|GB)
 
   @volume_attrs = attrs
 end
-
 
 #=================
 # THENs

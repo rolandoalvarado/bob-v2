@@ -30,37 +30,42 @@ class ProjectPage < WebClientPage
   #==========================
   # Security Group Elements
   #==========================
-  button    'new security',            "#new-security-group"
-  button    'modify security group',   "#security-item-<id> .edit-security-rules"
-  button    'delete security group',   "#security-item-<id> .delete-security-group"  
-  button    'Context Menu',            xpath: "//tr[@id='security-item-<id>']/..//a[@class='dropdown-toggle']"
-  form      'new security',            "#new-security-group-form"
-  form      'security group rules',    "#security-group-rules-form"
-  link      'delete security group',   '#security-item-<id> .delete-security-group'
-  element   'security groups',         "#security-groups-list"
-  tab       'access security',         '.nav-tabs .access-and-security a'
+  button    'new security group',             "#create-security-group"
+  button    'modify security group',          "#security-item-<id> .security-rules"
+  button    'delete security group',          "#security-item-<id> .delete-security-group"  
+  button    'Context Menu',                   xpath: "//tr[@id='security-item-<id>']/..//a[@class='dropdown-toggle']"
+  form      'new security',                   "#new-security-group-form"
+  form      'security group rules',           "#security-group-rules-form"
+  link      'delete security group',          "#security-item-<id> .delete-security-group"
+  link      'modify security group',          "#security-item-<id> .security-rules"
+  link      'security group',                 "#security-item-<id> .security-rules"
+  element   'security groups',                "#security-groups-list"
+  tab       'access security',                ".nav-tabs .access-and-security a"
+  
 
   #Elements in the New Security form
-  field     'security group name',           "#new-security-name"
-  field     'security group description',    "#new-security-description"
-  button    'create security',               "#create-security-group"
-  span      'new security form error',       "span.error[for='new-security-name'], span.error[for='new-security-description']"
+  field     'security group name',                "#new-security-name"
+  field     'security group description',         "#new-security-description"
+  button    'create security',                    "#create-security-group"
+  span      'new security form error',            "span.error[for='new-security-name'], span.error[for='new-security-description']"
+  element   'security group form error message',  "#security-group-rules-form .error"
 
-  option    'ip protocol', xpath:            '//select[@id="ip-protocol"]/option[text()="<name>"]'
-  field     'from port', xpath:              '//form[@id="security-group-rules-form"]//input[@id="from-port"]'
-  field     'to port', xpath:                '//form[@id="security-group-rules-form"]//input[@id="to-port"]'
-  field     'CIDR',    xpath:                '//form[@id="security-group-rules-form"]//input[@id="cidr"]'
-  button    'add security group rule',       '#save-security-group-rule'
-  button    'close security group rule', xpath: '//*[@id="security-group-rules-modal"]/div[3]/a' 
-  field     'list ip protocol',              '#security-group-rules-list div.ip-protocoll'  
-  field     'list from port',                '#security-group-rules-list div.from-port'   
-  field     'list to port',                  '#security-group-rules-list div.to-port'   
-  field     'list cidr',                     '#security-group-rules-list div.cidr'   
+  #dropdown   'ip protocol',                   xpath: '//select[@id="ip-protocol"]/option[text()="<name>"]'
+  dropdown  'ip protocol',                    "#ip-protocol"
+  field     'from port', xpath:               '//form[@id="security-group-rules-form"]//input[@id="from-port"]'
+  field     'to port', xpath:                 '//form[@id="security-group-rules-form"]//input[@id="to-port"]'
+  field     'CIDR',    xpath:                 '//form[@id="security-group-rules-form"]//input[@id="cidr"]'
+  button    'add security group rule',        '#save-security-group-rule'
+  button    'close security group rule',      xpath: '//*[@id="security-group-rules-modal"]/div[3]/a' 
+  field     'list ip protocol',               '#security-group-rules-list div.ip-protocoll'  
+  field     'list from port',                 '#security-group-rules-list div.from-port'   
+  field     'list to port',                   '#security-group-rules-list div.to-port'   
+  field     'list cidr',                      '#security-group-rules-list div.cidr'   
 
   # The following buttons appear with the confirmation dialog that appears
   # when you click the delete security group.
   button  'confirm security  group deletion', "a.okay"
-  button  'cancel security group deletion',  "a.cancel"
+  button  'cancel security group deletion',   "a.cancel"
   
   #==========================
   # Volume-related elements
@@ -96,7 +101,7 @@ class ProjectPage < WebClientPage
   table     'volume snapshots',                 '#volume-snapshot-list'
 
 # Type      Name                    Selector
-  span      'new volume form error', 'span.error[for="name"], span.error[for="appendedInput"]'
+  span      'new volume form error',        'span.error[for="name"], span.error[for="appendedInput"]'
 
 # Type      Name                          Selector
   button    'attach volume',              '#volume-item-<id> #attach'

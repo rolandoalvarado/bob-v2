@@ -71,7 +71,7 @@ Then /^Ensure that a project is available for use$/i do
   EnvironmentCleaner.register(:project, project.id)
 
   if project.nil? or project.id.empty?
-    raise "Test project couldn't be initialized!"
+    raise "Project couldn't be initialized!"
   end
 
   @project = project
@@ -80,7 +80,7 @@ end
 Then /^Ensure that I have a role of (.+) in the project$/i do |role_name|
   
   if @project.nil?
-    raise "No project is available. You need to call " +
+    raise "No Project is available. You need to call " +
           "'* Ensure that a project is available for use' " +
           "before this step."
   end
@@ -113,12 +113,17 @@ Then /^Ensure that I have a role of (.+) in the project$/i do |role_name|
     end
   end
 
-  @user = user
+  @current_user = user
 end
 
 Then /^Ensure that the project has no security groups$/i do
   compute_service = ComputeService.session
   compute_service.ensure_project_security_group_count(@project, 0)
+end
+
+Then /^Ensure that the project has a security group$/i do
+  compute_service = ComputeService.session
+  compute_service.ensure_project_security_group_count(@project, 1)
 end
 
 Then /^Ensure that the a project has an instance$/ do

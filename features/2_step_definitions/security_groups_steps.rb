@@ -20,9 +20,15 @@ Given /^the project has no security groups$/ do
   }
 end
 
+Given /^the project has a security group$/ do
+  steps %{
+    * Ensure that the project has a security group
+  }
+end
+
 Given /^the security group has an attributes of (.+), (.+)$/ do |name, description|
   steps %{
-    * Ensure that a security group name #{ name } exists
+    * Ensure that a security group named #{ name } exists
     * And a security group description #{ description }
     * Raise an error if a security group does not have a name of #{ name }
   }
@@ -35,7 +41,8 @@ Given /^the project has only one security group named Web Servers$/ do
 end
 
 Given /^The project has (\d+) security groups named default, and Web Servers$/ do |security_group_count|
-  steps %{
+   steps %{
+    * Ensure that a security group named default exist
     * Ensure that a security group named Web Servers exist
     * Ensure that a project has #{security_group_count} security groups
   }
@@ -45,6 +52,14 @@ Given /^The project has an instance that is a member of the (.+) security group$
   steps %{
     * Ensure that the a project has an instance
     * Ensure that the instance is a member of the #{security_group} security group
+  }
+end
+
+Given /^I am authorized to edit a security group in the project$/ do
+  role_name = 'Project Manager'
+
+  steps %{
+    * Ensure that I have a role of #{ role_name } in the project
   }
 end
 
@@ -76,8 +91,8 @@ When /^I create a security group with attributes (.+), (.+)$/ do |name, descript
     * Click the logout button if currently logged in
 
     * Visit the login page
-    * Fill in the username field with #{ @user.name }
-    * Fill in the password field with #{ @user.password }
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
     * Click the login button
 
     * Visit the projects page
@@ -104,8 +119,8 @@ When /^I add the following rule: (.+), (.+), (.+), (.+)$/i do |protocol, from_po
     * Click the logout button if currently logged in
 
     * Visit the login page
-    * Fill in the username field with #{ @user.name }
-    * Fill in the password field with #{ @user.password }
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
     * Click the login button
 
     * Visit the projects page
@@ -123,6 +138,98 @@ When /^I add the following rule: (.+), (.+), (.+), (.+)$/i do |protocol, from_po
     * Click the add security group rule button
     * Click the close security group rule button
   }
+end
+
+When /^I edit the default security group with the following rule:  (.+), (.+), (.+), (.+), (.+)$/ do |protocol, from_port, to_port, cidr|
+
+  compute_service = ComputeService.session
+  attrs           = CloudObjectBuilder.attributes_for(
+                    :security_group, 
+                    :name => Unique.name('default'), 
+                    :description => 'Default Security Group'
+                  )
+
+  security_group  = compute_service.ensure_security_group_exists(@project, attrs)
+  
+  security_group_rule  = compute_service.ensure_security_group_rule(@project)
+
+  # Assign response values to local variables.
+  ip_protocol = security_group_rule.body['security_group_rule']['ip_protocol']
+  from_port = security_group_rule.body['security_group_rule']['from_port']
+  to_port = security_group_rule.body['security_group_rule']['to_port']
+  cidr = security_group_rule.body['security_group_rule']['ip_range']['cidr']    
+
+
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * Click the #{ @project.name } project
+
+    * Click the access security tab
+    * Current page should have the security groups
+
+    * Click the modify security group button for security group #{ security_group.id }
+    * Current page should have the security group rules form
+    * Choose the 1st item in the ip protocol dropdown
+    * Set port to the from port field with #{from_port}
+    * Set port to the to port field with #{to_port}
+    * Fill in the CIDR field with #{cidr}
+    * Click the add security group rule button
+    * Click the close security group rule button
+  }
+
+end
+
+When /^I edit the Web Servers security group with the following rule: (.+), (.+), (.+), (\d+\.\d+\.\d+\.\d+(?:|\/\d+))$/ do |protocol, from_port, to_port, cidr|
+
+  compute_service = ComputeService.session
+ 
+  attrs           = CloudObjectBuilder.attributes_for(
+                    :security_group, 
+                    :name => Unique.name('Web Servers'), 
+                    :description => 'Web Servers Security Group'
+                  )
+
+  security_group  = compute_service.ensure_security_group_exists(@project, attrs)
+  
+  security_group_rule  = compute_service.ensure_security_group_rule(@project)
+
+  # Assign response values to local variables.
+  ip_protocol = security_group_rule.body['security_group_rule']['ip_protocol']
+  from_port = security_group_rule.body['security_group_rule']['from_port']
+  to_port = security_group_rule.body['security_group_rule']['to_port']
+  cidr = security_group_rule.body['security_group_rule']['ip_range']['cidr']    
+
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * Click the #{ @project.name } project
+
+    * Click the access security tab
+    * Current page should have the security groups
+
+    * Click the modify security group button for security group #{ security_group.id }
+    * Current page should have the security group rules form
+    * Choose the 1st item in the ip protocol dropdown
+    * Set port to the from port field with #{from_port}
+    * Set port to the to port field with #{to_port}
+    * Fill in the CIDR field with #{cidr}
+    * Click the add security group rule button
+    * Click the close security group rule button
+  }
+
 end
 
 #=================
@@ -147,13 +254,57 @@ Then /^I [Cc]an [Cc]reate a security group in the project$/ do
     * Click the #{ @project.name } project
 
     * Click the access security tab
-    * Click the new security button
+    * Click the new security group button
     * Current page should have the new security form
     * Fill in the security group name field with #{security_group.name}
     * Fill in the security group description field with #{security_group.description}
     * Click the create security button    
     * Current page should have the new #{security_group.name} security group
     * The #{security_group.name} security group row should be visible
+  }
+end
+
+Then /^I [Cc]an [Ee]dit a security group in the project$/ do
+  compute_service = ComputeService.session
+
+  attrs           = CloudObjectBuilder.attributes_for(
+                    :security_group, 
+                    :name => Unique.name('Web Servers'), 
+                    :description => 'Web Servers Security Group'
+                  )
+
+  security_group  = compute_service.ensure_security_group_exists(@project, attrs)
+  
+  security_group_rule  = compute_service.ensure_security_group_rule(@project)
+
+  # Assign response values to local variables.
+  ip_protocol = security_group_rule.body['security_group_rule']['ip_protocol']
+  from_port = security_group_rule.body['security_group_rule']['from_port']
+  to_port = security_group_rule.body['security_group_rule']['to_port']
+  cidr = security_group_rule.body['security_group_rule']['ip_range']['cidr']
+
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * Click the #{ @project.name } project
+
+    * Click the access security tab
+    * Current page should have the security groups
+
+    * Click the modify security group button for security group #{ security_group.id }
+    * Current page should have the security group rules form
+    * Choose the 1st item in the ip protocol dropdown
+    * Set port to the from port field with #{from_port}
+    * Set port to the to port field with #{to_port}
+    * Fill in the CIDR field with #{cidr}
+    * Click the add security group rule button
+    * Click the close security group rule button
   }
 end
 
@@ -191,6 +342,20 @@ Then /^I [Cc]annot [Cc]reate a security group in the project$/ do
   }
 end
 
+Then /^I [Cc]annot [Ee]dit a security group in the project$/ do
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * The #{ @project.name } project should not be visible
+  }
+end
+
 Then /^I Cannot Delete the Web Servers security group in the project$/ do
   steps %{
     * Click the logout button if currently logged in
@@ -213,8 +378,8 @@ Then /^I Cannot Delete the Web Servers security group$/ do
     * Click the logout button if currently logged in
 
     * Visit the login page
-    * Fill in the username field with #{ @user.name }
-    * Fill in the password field with #{ @user.password }
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
     * Click the login button
 
     * Visit the projects page
@@ -249,12 +414,6 @@ Then /^The (.+) security group should be visible$/ do |security_group|
   }
 end
 
-Then /^Current page should have the new (.+) security group$/ do |security_group|
-  steps %{
-    * The #{security_group} security group row should be visible
-  }
-end
-
 Then /^The (.+) security group row should be visible$/ do |security_group|
   steps %{
     * Ensure that #{security_group} security group exist
@@ -281,15 +440,15 @@ Then /^the security group with attributes (.+), (.+) will be [Cc]reated$/ do |na
     * Click the logout button if currently logged in
 
     * Visit the login page
-    * Fill in the username field with #{ @user.name }
-    * Fill in the password field with #{ @user.password }
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
     * Click the login button
 
     * Visit the projects page
     * Click the #{ @project.name } project
 
     * Click the access security tab
-    * Click the new security button
+    * Click the new security group button
     * Current page should have the new security form
     * Fill in the security group name field with #{security_group.name}
     * Fill in the security group description field with #{security_group.description}
@@ -311,20 +470,38 @@ Then /^the security group with attributes (.+), (.+) will be [Nn]ot [Cc]reated$/
     * Click the logout button if currently logged in
 
     * Visit the login page
-    * Fill in the username field with #{ @user.name }
-    * Fill in the password field with #{ @user.password }
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
     * Click the login button
 
     * Visit the projects page
     * Click the #{ @project.name } project
 
     * Click the access security tab
-    * Click the new security button
+    * Click the new security group button
     * Current page should have the new security form
     * Fill in the security group name field with #{@security_group.name}
     * Fill in the security group description field with #{@security_group.description}
     * Click the create security button    
     * The new security form should be visible
     * The new security form error message should be visible
+  }
+end
+
+Then /^the rules will be Added$/ do
+  steps %{
+    * Current page should have the new rules    
+  }
+end
+
+Then /^the rule will be [Uu]pdated$/ do
+  steps %{
+    * Current page should have the updated security group rule    
+  }
+end
+
+Then /^the rule will be [Nn]ot [Uu]pdated$/ do
+  steps %{
+    * A security group form error message element should be visible
   }
 end
