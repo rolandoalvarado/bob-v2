@@ -36,6 +36,7 @@ end
 
 Given /^The project has (\d+) security groups named default, and Web Servers$/ do |security_group_count|
   steps %{
+    * Ensure that a security group named default exist    
     * Ensure that a security group named Web Servers exist
     * Ensure that a project has #{security_group_count} security groups
   }

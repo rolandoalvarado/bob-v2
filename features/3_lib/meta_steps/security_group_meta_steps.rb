@@ -29,3 +29,15 @@ Then /^Ensure that a security group named Web Servers exist$/i do
 
   @new_security_group = new_security_group
 end
+
+Then /^Ensure that a security group named default exist$/i do
+  compute_service = ComputeService.session
+  security_group_attrs = CloudObjectBuilder.attributes_for(
+                      :security_group,
+                      :name     => Unique.name('default'),
+                      :description    => ('Default Security Group')
+                    )
+  new_security_group  = compute_service.create_security_group(@project, security_group_attrs)
+
+  @new_security_group = new_security_group
+end
