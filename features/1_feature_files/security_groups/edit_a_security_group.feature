@@ -33,22 +33,23 @@ Feature: Edit a Security Group
         | Role            | Can or Cannot Edit |
         | (None)          | Cannot Edit        |
 
-
+  @jira-MCF-34-esg
   Scenario Outline: Edit a Security Group
     Given I am authorized to edit a security group in the project
       And The project has 2 security groups named default, and Web Servers
      When I edit the Web Servers security group with the following rule: <Protocol>, <From Port>, <To Port>, <CIDR>
-     Then the rule will be <Updated or Not>
+     Then the rule will be <Added or Not>
 
      Scenarios: Valid Rules
-       | Protocol | From Port | To Port  | CIDR        | Updated or Not |
+       | Protocol | From Port | To Port  | CIDR        | Added or Not   |
        | TCP      | (Random)  | (Random) | 0.0.0.0/25  | Added          |
        | UDP      | (Random)  | (Random) | 0.0.0.0/25  | Added          |
        | ICMP     | (Random)  | (Random) | 0.0.0.0/25  | Added          |
+       | TCP      | (Random)  | (Random) | (None)      | Added          | 
 
      Scenarios: Invalid Rules
-       | Protocol | From Port | To Port  | CIDR        | Updated or Not | Reason                                     |
-       | (Any)    | (None)    | (Random) | 0.0.0.0/25  | Not Updated    | 'From Port' must be specified     |
-       | (Any)    | (Random)  | (None)   | 0.0.0.0/25  | Not Updated    | 'To Port' must be specified       |
-       | (Any)    | (Random)  | (None)   | 1.2.9.12    | Not Updated    | CIDR must be in CIDR notation     |
-       | (Any)    | (Random)  | (Random) | (None)      | Not Updated    | 'CIDR' can't be empty             |
+       | Protocol | From Port | To Port  | CIDR        | Added or Not   | Reason                            |
+       | (Any)    | (None)    | (Random) | 0.0.0.0/25  | Not Added      | 'From Port' must be specified     |
+       | (Any)    | (Random)  | (None)   | 0.0.0.0/25  | Not Added      | 'To Port' must be specified       |
+       | (Any)    | (Random)  | (None)   | 1.2.9.12    | Not Added      | CIDR must be in CIDR notation     |
+
