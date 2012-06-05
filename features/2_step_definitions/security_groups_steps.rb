@@ -42,7 +42,6 @@ end
 
 Given /^The project has (\d+) security groups named default, and Web Servers$/ do |security_group_count|
    steps %{
-    * Ensure that a security group named default exist
     * Ensure that a security group named Web Servers exist
     * Ensure that a project has #{security_group_count} security groups
   }
@@ -140,53 +139,8 @@ When /^I add the following rule: (.+), (.+), (.+), (.+)$/i do |protocol, from_po
   }
 end
 
-When /^I edit the default security group with the following rule:  (.+), (.+), (.+), (.+), (.+)$/ do |protocol, from_port, to_port, cidr|
 
-  compute_service = ComputeService.session
-  attrs           = CloudObjectBuilder.attributes_for(
-                    :security_group, 
-                    :name => Unique.name('default'), 
-                    :description => 'Default Security Group'
-                  )
-
-  security_group  = compute_service.ensure_security_group_exists(@project, attrs)
-  
-  security_group_rule  = compute_service.ensure_security_group_rule(@project)
-
-  # Assign response values to local variables.
-  ip_protocol = security_group_rule.body['security_group_rule']['ip_protocol']
-  from_port = security_group_rule.body['security_group_rule']['from_port']
-  to_port = security_group_rule.body['security_group_rule']['to_port']
-  cidr = security_group_rule.body['security_group_rule']['ip_range']['cidr']    
-
-
-  steps %{
-    * Click the logout button if currently logged in
-
-    * Visit the login page
-    * Fill in the username field with #{ @current_user.name }
-    * Fill in the password field with #{ @current_user.password }
-    * Click the login button
-
-    * Visit the projects page
-    * Click the #{ @project.name } project
-
-    * Click the access security tab
-    * Current page should have the security groups
-
-    * Click the modify security group button for security group #{ security_group.id }
-    * Current page should have the security group rules form
-    * Choose the 1st item in the ip protocol dropdown
-    * Set port to the from port field with #{from_port}
-    * Set port to the to port field with #{to_port}
-    * Fill in the CIDR field with #{cidr}
-    * Click the add security group rule button
-    * Click the close security group rule button
-  }
-
-end
-
-When /^I edit the Web Servers security group with the following rule: (.+), (.+), (.+), (\d+\.\d+\.\d+\.\d+(?:|\/\d+))$/ do |protocol, from_port, to_port, cidr|
+When /^I edit the Web Servers security group with the following rule: (.+), (.+), (.+), (\d+\.\d+\.\d+\.\d+(?:|\/\d+)|\(None\)|\(Random\))$/ do |protocol, from_port, to_port, cidr|
 
   compute_service = ComputeService.session
  
@@ -198,10 +152,6 @@ When /^I edit the Web Servers security group with the following rule: (.+), (.+)
 
   security_group  = compute_service.ensure_security_group_exists(@project, attrs)
   
-  security_group_rule  = compute_service.ensure_security_group_rule(@project)
-
-  # Assign response values to local variables.
-
   steps %{
     * Click the logout button if currently logged in
 
@@ -270,13 +220,10 @@ Then /^I [Cc]an [Ee]dit a security group in the project$/ do
 
   security_group  = compute_service.ensure_security_group_exists(@project, attrs)
   
-  security_group_rule  = compute_service.ensure_security_group_rule(@project)
-
   # Assign response values to local variables.
-  ip_protocol = security_group_rule.body['security_group_rule']['ip_protocol']
-  from_port = security_group_rule.body['security_group_rule']['from_port']
-  to_port = security_group_rule.body['security_group_rule']['to_port']
-  cidr = security_group_rule.body['security_group_rule']['ip_range']['cidr']
+  from_port = "(Random)"
+  to_port = "(Random)"
+  cidr = "0.0.0.0/25"
 
   steps %{
     * Click the logout button if currently logged in
@@ -299,7 +246,6 @@ Then /^I [Cc]an [Ee]dit a security group in the project$/ do
     * Set port to the to port field with #{to_port}
     * Fill in the CIDR field with #{cidr}
     * Click the add security group rule button
-    * Click the close security group rule button
   }
 end
 
@@ -489,13 +435,13 @@ Then /^the rules will be Added$/ do
   }
 end
 
-Then /^the rule will be [Uu]pdated$/ do
+Then /^the rule will be [Aa]dded$/ do
   steps %{
-    * Current page should have the updated security group rule    
+    * Current page should have the new security group rule    
   }
 end
 
-Then /^the rule will be [Nn]ot [Uu]pdated$/ do
+Then /^the rule will be [Nn]ot [Aa]dded$/ do
   steps %{
     * A security group form error message element should be visible
   }
