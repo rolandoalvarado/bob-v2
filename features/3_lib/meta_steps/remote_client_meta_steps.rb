@@ -96,14 +96,21 @@ Then /^Fail connecting to instance with floating IP (.+) via (.+)$/ do |floating
 end
 
 
-Then /^Fetch a list of device files on the instance with floating IP (.+)$/ do |floating_ip|
-  row        = @current_page.floating_ip_row( id: floating_ip )
+Then /^Fetch a list of device files on the instance named (.+)$/ do |instance_name|
+  row        = @current_page.attached_floating_ip_row( name: instance_name )
   ip_address = row.find('.public-ip').text
   raise "No public IP found for instance!" if ip_address.empty?
 
   # Parse the image name from the instance column value
   instance_name = row.find('.instance').text
   image_name    = instance_name.scan(/\((.+)\)/).flatten.first
+
+  # If the above fails, get the image name from the compute service
+  if image_name.blank?
+    instance   = ComputeService.session.servers.find { |i| i.name == instance_name }
+    image      = ComputeService.session.images.find { |i| i.id == instance.image['id'] }
+    image_name = image.name
+  end
 
   username = ServerConfigFile.username(image_name)
   password = ServerConfigFile.password(image_name)
@@ -118,14 +125,21 @@ Then /^Fetch a list of device files on the instance with floating IP (.+)$/ do |
 end
 
 
-Then /^A new device file should have been created on the instance with floating IP (.+)$/ do |floating_ip|
-  row        = @current_page.floating_ip_row( id: floating_ip )
+Then /^A new device file should have been created on the instance named (.+)$/ do |instance_name|
+  row        = @current_page.attached_floating_ip_row( name: instance_name )
   ip_address = row.find('.public-ip').text
   raise "No public IP found for instance!" if ip_address.empty?
 
   # Parse the image name from the instance column value
   instance_name = row.find('.instance').text
   image_name    = instance_name.scan(/\((.+)\)/).flatten.first
+
+  # If the above fails, get the image name from the compute service
+  if image_name.blank?
+    instance   = ComputeService.session.servers.find { |i| i.name == instance_name }
+    image      = ComputeService.session.images.find { |i| i.id == instance.image['id'] }
+    image_name = image.name
+  end
 
   username = ServerConfigFile.username(image_name)
   password = ServerConfigFile.password(image_name)
@@ -137,9 +151,9 @@ Then /^A new device file should have been created on the instance with floating 
     end
 
     if (changed_device_file_list - @device_file_list).count != 1
-      raise "Cannot ensure that a new device file has been created on the instance. " +
-            "Expected count is #{ @device_file_list.count + 1 }. " +
-            "Current count is #{ changed_device_file_list.count }."
+      raise "No new device file has been created on the instance. " +
+            "Found #{ changed_device_file_list.count } device files: " +
+            "#{ changed_device_file_list.join(', ') }."
     end
   rescue
     raise "Cannot fetch list of device files from #{ ip_address }."

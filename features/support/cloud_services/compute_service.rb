@@ -127,19 +127,7 @@ class ComputeService < BaseCloudService
         end
       end
 
-      volumes = service.volumes
-      attached_volumes = volumes.select{ |v| v.attachments.any?{ |a| a['serverId'] == instance.id } }
-      if strict && attached_volumes.count != desired_count
-        raise "Couldn't ensure that instance #{ instance.name } has #{ desired_count } attached volumes."
-      elsif !strict && attached_volumes.count < desired_count
-        raise "Couldn't ensure that instance #{ instance.name } has at least #{ desired_count } attached volumes."
-      end
-
-      if attached_volumes.count == 1
-        attached_volumes.first
-      elsif attached_volumes.count > 1
-        attached_volumes
-      end
+      volumes.count
     end
   end
 
@@ -253,13 +241,7 @@ class ComputeService < BaseCloudService
       end
     end # sleeping(x).seconds.between_tries.failing_after(y).tries
 
-    instances.reload
-    active_instances = instances.select { |i| i.state == 'ACTIVE' }
-    if active_instances.count == 1
-      active_instances.first
-    elsif active_instances.count > 1
-      active_instances
-    end
+    instances.count
   end
 
   # Ensures that there are `desired_count` number of instances in the project
