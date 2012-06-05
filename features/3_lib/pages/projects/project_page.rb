@@ -22,11 +22,22 @@ class ProjectPage < WebClientPage
   option    'keypair',                xpath: '//select[@id="keypair"]/option[@value="<name>"]'
   row       'instance',               '#instances-template .table-list #instance-item-<id>'
   form      'resize instance',        '#resize-instance-modal'
-  button    'quota modify',           '.show-quota-form'
 
   #==========================
   # Edit Quota Elements
   #==========================
+  button    'quota modify',           '.show-quota-form'
+  message   'Modify Quota',           xpath: '//h3[text()="Modify Quota"]'
+  button    'disabled quota modify',  '.show-quota-form.disabled'
+  button    'save quota edit',        '#action-modify-quota'
+  field     'floating ips quota edit',xpath: '//input[@name="floating_ips"]/@value'
+  field     'volumes quota edit',     xpath: '//input[@name="volumes"]/@value'
+  field     'cores quota edit',       xpath: '//input[@name="cores"]/@value'
+
+  field     'floating ips quota cur', xpath:'//input[@name="floating_ips"]/../../td[3]/text()'
+  field     'volumes quota cur',      xpath:'//input[@name="floating_ips"]/../../td[3]/text()'
+  field     'cores quota cur',        xpath:'//input[@name="floating_ips"]/../../td[3]/text()'
+
 
 
 # Type      Name                         Selector

@@ -585,6 +585,55 @@ TestCase /^A user with a role of (.+) in a project can edit the instance quota o
 
 end
 
+TestCase /^Project can be updated the quota of the project with (.+) , (.+) and (.+)$/i do |floating_ips,volumes,cores|
+  username      = Unique.username('bob')
+  password      = '123qwe'
+  project_name  = Unique.project_name('test')
+  instance_name = Unique.instance_name('test')
+  volume_name   = Unique.volume_name('test')
+
+  Preconditions %{
+    * Ensure that a user with username #{ username } and password #{ password } exists
+    * Ensure that a project named #{ project_name } exists
+    * Ensure that the user #{ username } has a role of Project Manager in the project #{ project_name }
+  }
+
+  Cleanup %{
+    * Register the project named #{ project_name } for deletion at exit
+    * Register the user named #{ username } for deletion at exit
+  }
+
+  Script %{
+
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ username }
+    * Fill in the Password field with #{ password }
+    * Click the Login button
+
+    * Click the Projects link
+    * Click the #{ project_name } project
+    * Wait 5 seconds
+    * Click the quota modify button
+
+    * Parse and set floating ips quota value with #{ floating_ips }
+    * Parse and set volumes quota value with #{ volumes }
+    * Parse and set cores quota value with #{ cores }
+    
+    * Click the save quota edit button
+
+    * Quota Values should be updated with #{ floating_ips } , #{ volumes } and #{ cores }
+
+  }
+
+end
+
+TestCase /^Project cannot be updated the quota of the project with (.+) , (.+) and (.+)$/i do |floating_ip,volumes,cores|
+end
+
+TestCase /^Project is warned the quota of the project with (.+) , (.+) and (.+)$/i do |floating_ip,volumes,cores|
+end
+
 TestCase /^A user with a role of (.+) in a project cannot edit the instance quota of the project$/i do |role_name|
   
   username      = Unique.username('bob')
@@ -596,7 +645,8 @@ TestCase /^A user with a role of (.+) in a project cannot edit the instance quot
   Preconditions %{
     * Ensure that a user with username #{ username } and password #{ password } exists
     * Ensure that a project named #{ project_name } exists
-    * Ensure that the user #{ username } has a role of #{ role_name } in the project #{ project_name }
+    * Ensure that the project named #{ project_name } has a volume named #{ volume_name }
+    * Ensure that the user #{ username } has a role of Project Manager in the project #{ project_name }
   }
 
   Cleanup %{
@@ -615,7 +665,7 @@ TestCase /^A user with a role of (.+) in a project cannot edit the instance quot
     * Click the Projects link
     * Click the #{ project_name } project
 
-    * The quota modify link should not be visible
+    * The quota modify button should be disabled
 
   }
 
