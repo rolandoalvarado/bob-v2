@@ -1,0 +1,100 @@
+code {
+  color: #666666;
+  padding: 2px;
+}
+
+.skipped,
+.pending {
+  color: #336699;
+}
+
+.undefined {
+  color: #336699;
+}
+
+.passed {
+  color: #339966;
+}
+
+.failed {
+  color: #996633;
+}
+
+/************************
+        HEADER
+************************/
+
+#header {
+  line-height: 30pt;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+#web-client-url {
+  font-size: 17pt;
+}
+
+#date {
+  float: right;
+}
+
+
+/************************
+          TOC
+************************/
+
+#toc > ul {
+  list-style: none;
+  margin-left: 5px;
+}
+
+#toc > ul ul li {
+  line-height: 175%;
+}
+
+/************************
+         FEATURE
+************************/
+
+#feature {
+  font-size: 14px;
+  margin: 5px;
+}
+
+#feature-name {
+  font-size: 20px;
+  font-weight: bold;
+  height: 30px;
+  line-height: 30px;
+}
+
+#feature .description,
+#feature .elements {
+  margin-top: 10px;
+}
+
+#feature .element .header {
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 5px;
+  margin-top: 20px;
+}
+
+#feature .element .description {
+  font-weight: normal;
+}
+
+#feature .element .header .name {
+  font-weight: normal;
+}
+
+#feature .element .examples {
+  margin-left: 10px;
+  margin-top: 20px;
+}
+
+#feature li.step {
+  line-height: 150%;
+  list-style: none;
+  margin-left: -15px;
+}

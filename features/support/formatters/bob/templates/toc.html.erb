@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Bob Report - Header</title>
+  <%= asset_tags %>
+</head>
+<body>
+  <div id="toc">
+    <ul>
+      <% @results.keys.sort{ |a, b| a <=> b}.each do |category| %>
+      <li>
+        <%= category.humanize %>
+        <ul>
+          <% @results[category].each do |feature_file|%>
+            <li><%= link_to_feature_file feature_file %></li>
+          <% end %>
+        </ul>
+      </li>
+      <% end #@results.keys.sort %>
+    </ul>
+  </div>
+</body>
+</html>
