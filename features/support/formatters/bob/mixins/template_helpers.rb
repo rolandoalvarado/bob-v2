@@ -33,8 +33,8 @@ module TemplateHelpers
     "#{category}-#{feature[:name].parameterize}"
   end
 
-  def build_id(feature, element, step)
-    "#{ feature }#{ element }#{ step }".parameterize
+  def build_id(feature, element, step, index)
+    "#{ feature }#{ element }#{ step }#{ index }".parameterize
   end
 
   def compute_statistics
@@ -47,9 +47,15 @@ module TemplateHelpers
 
     @results.each do |category_name, features|
       features.each do |feature|
-        @stats[:total_completed_features] += 1 if get_status(feature) == :passed
+
+        case get_feature_status(feature)
+        when :passed
+          @stats[:total_completed_features] += 1
+        when :undefined
+          @stats[:total_undefined_features] += 1
+        end
+
         @stats[:total_features] += 1
-        @stats[:total_undefined_features] += 1 if get_status(feature) != :passed
       end
     end
   end

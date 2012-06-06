@@ -1,4 +1,4 @@
-@jira-DWC-16 @jira-MCF-8
+@jira-DWC-16 @jira-MCF-8 @format-v2
 Feature: View Instance Statistics
   As a user, I want to see the statistics for my instance, so that I will know
   if I need to do something about its capacity or configuration.
@@ -17,32 +17,25 @@ Feature: View Instance Statistics
   He then connects to the instance using SSH and then investigates the logs
   in detail to further understand how to fix the problem.
 
-  Background:
-    * A project exists in the system
-    * The project has 1 active instance
-
-
   @permissions
   Scenario Outline: Check User Permissions
-    Given I have a role of <Role> in the project
-     Then I <Can or Cannot View> instance statistics in that project
+    * A user with a role of <Role> in a project <Can or Cannot View> the statistics of its instances
 
-      Scenarios: Authorized Roles
+      Examples: Authorized Roles
         | Role            | Can or Cannot View |
         | Member          | Can View           |
-        | System Admin    | Can View           |
         | Project Manager | Can View           |
 
-      Scenarios: Unauthorized Roles
+      Examples: Unauthorized Roles
         | Role            | Can or Cannot View |
         | (None)          | Cannot View        |
 
-  Scenario Outline: View Instance Statistics
-    Given I am authorized to view instance statistics in the project
-     Then I should see the <Type> statistics for the instance
+
+  Scenario Outline:
+    * Statistics for <Resource Type> should be visible from the Monitoring page
 
       Scenarios:
-        | Type |
-        | RAM  |
-        | CPU  |
-        | Disk |
+        | Resource Type |
+        | RAM           |
+        | CPU           |
+        | Disk          |
