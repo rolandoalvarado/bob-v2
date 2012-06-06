@@ -355,7 +355,7 @@ end
 Step /^The delete button of the volume named (.+) should not be visible$/ do |volume_name|
   volume = VolumeService.session.volumes.find { |v| v['display_name'] == volume_name }
   raise "Couldn't find a volume named '#{ volume_name }'" unless volume
-  binding.pry
+
   unless @current_page.send("has_no_delete_volume_button?", id: volume['id'])
     raise "The delete button of the volume #{ volume_name } should not be visible, but it is!"
   end
