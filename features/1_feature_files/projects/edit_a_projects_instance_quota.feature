@@ -1,4 +1,4 @@
-@jira-DPBLOG-10
+@jira-DPBLOG-10 @jira-MCF-27 @format_v2
 Feature: Edit a Project's Instance Quota
   As a project manager, I want to set the instance quota (aka maximum
   number of instances) in my project, so that I can control my project's
@@ -9,39 +9,36 @@ Feature: Edit a Project's Instance Quota
   the instance so that the user won't have to wait for a few minutes to find
   out that he's over the quota after all.
 
-  Background:
-    * A project exists in the system
+  June 5th: new mcloud has only 3 quota values. Floating IPs, Volumes and Cores
+  So I create scenario only for them. 
 
-  @permissions
+  @permissions @jira-MCF-27-CUP
   Scenario Outline: Check User Permissions
-    Given I have a role of <Role> in the project
-     Then I <Can or Cannot Edit> the instance quota of the project
+    * A user with a role of <Role> in a project <Can or Cannot Edit> the instance quota of the project
 
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Edit |
-        | Admin           | Can Edit           |
+        | Project Manager | Can Edit           |
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Edit |
         | Member          | Cannot Edit        |
-        | (None)          | Cannot Edit        |
 
-
+  @jira-MCF-27-EPIQ
   Scenario Outline: Edit the Project's Instance Quota
-    Given I am authorized to set instance quota of the project
-      And the project has <Running Instances> instances
-      And the project has an instance quota of <Old Quota>
-     When I set the instance quota to <New Quota>
-     Then the project's instance quota will be <Updated or Not>
+    * Project <Updated or Not> the quota of the project with <Floating IPs> , <Volumes> and <Cores>
 
       Scenarios: Valid New Quota
-        | Running Instances | Old Quota | New Quota | Updated or Not |
-        | 1                 | 2         | 1         | Updated        |
-        | 1                 | 2         | 3         | Updated        |
+        | Floating IPs | Volumes | Cores | Updated or Not | 
+        | 10           | 10      | 10    | can be updated | 
+        | 15           | 1       | 1     | can be updated | 
+        | 1            | 20      | 1     | can be updated | 
+        | -1           | -1      | -1    | can be updated | 
 
       Scenarios: Invalid New Quota
-        | Running Instances | Old Quota | New Quota | Updated or Not | Reason                                                        |
-        | 2                 | 2         | 1         | Not Updated    | Quota can't be lower than current number of running instances |
-        | 1                 | 1         | 0         | Not Updated    | Quota can't be zero                                           |
-        | 1                 | 1         | ABCD      | Not Updated    | Quota must be numeric                                         |
-        | 1                 | 1         | +1        | Not Updated    | Quota must be numeric                                         |
+        | Floating IPs | Volumes | Cores | Updated or Not   | Result                       | 
+        | ABCD         | 0      | 0     | cannot be updated | Floating IP should be numeric|
+        | 0            | ABCD   | 0     | cannot be updated | Volumes should be numeric    |
+        | 0            | 0      | ABCD  | cannot be updated | Cores should be numeric      |
+
+

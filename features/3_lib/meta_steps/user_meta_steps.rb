@@ -10,7 +10,12 @@ Then /^Ensure that a user with username (.+) does not exist$/i do |username|
   IdentityService.session.ensure_user_does_not_exist(user_attrs)
 end
 
+Then /^Ensure that the user (.+) has a role of (.+) in the system$/i do |user_name ,role_name|
+  step "Ensure that the user #{ user_name } has a role of #{ role_name } in the project admin"
+end
+
 Then /^Ensure that I have a role of (.+) in the system$/i do |role_name|
+
   user_attrs       = CloudObjectBuilder.attributes_for(
                        :user,
                        :name => Unique.username('bob')
@@ -57,7 +62,7 @@ Step /^Ensure that the user (.+) has a role of (.+) in the project (.+)$/ do |us
 
   EnvironmentCleaner.register(:user, user.id)
 
-  project = identity_service.tenants.find { |t| t.name == project_name }
+  project = identity_service.tenants.reload.find { |t| t.name == project_name }
   raise "The project named #{ project_name } couldn't be found!" if project.nil? or project.id.empty?
 
   identity_service.revoke_all_user_roles(user, project)

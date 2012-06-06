@@ -23,6 +23,19 @@ class ProjectPage < WebClientPage
   row       'instance',               '#instances-template .table-list #instance-item-<id>'
   form      'resize instance',        '#resize-instance-modal'
 
+  #==========================
+  # Edit Quota Elements
+  #==========================
+# Type      Name                         Selector
+  button    'quota modify',              '.show-quota-form'
+  message   'Modify Quota',              xpath: '//h3[text()="Modify Quota"]'
+  button    'disabled quota modify',     '.show-quota-form.disabled'
+  button    'save quota edit',           '.action-modify-quota'
+  field     'floating ips quota edit',   xpath: '//input[@name="floating_ips"]'
+  field     'volumes quota edit',        xpath: '//input[@name="volumes"]'
+  field     'cores quota edit',          xpath: '//input[@name="cores"]'
+  element   'quota edit error',          '.alert-heading'
+
 # Type      Name                         Selector
   span      'project name error',        "span.error[for='project-name']"
   span      'project description error', "span.error[for='project-description']"

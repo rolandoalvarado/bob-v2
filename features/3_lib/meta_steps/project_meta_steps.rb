@@ -146,6 +146,12 @@ Then /^Ensure that a project has (\d+) security groups$/ do |security_group_coun
   compute_service.ensure_project_security_group_count(@project, security_group_count.to_i)
 end
 
+Then /^Parse and set (.+) quota value with (.+)$/i do |quota_type, value|
+
+  @current_page.send("#{ quota_type } quota edit field").set value
+
+end
+
 Then /^Register the project named (.+) for deletion at exit$/i do |name|
   project = IdentityService.session.tenants.reload.find { |p| p.name == name }
   EnvironmentCleaner.register(:project, project.id) if project
@@ -155,4 +161,18 @@ Then /^Select Collaborator (.+)$/ do |username|
   @current_page.collaborators_email_link.click
   sleep(1)
   @current_page.collaborator_option( name: @user.email ).click
+end
+
+Then /^Quota Values should be updated with (.+) , (.+) and (.+)$/i do |floating_ip,volumes,cores|
+
+  #get floating ip values
+               
+  #get volumes
+
+  #cores
+
+end
+
+Then /^Quota Values should be warned with (.+) , (.+) and (.+)$/i do |floating_ip,volumes,cores|
+          
 end
