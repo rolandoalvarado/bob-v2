@@ -22,7 +22,7 @@ Around do |scenario, block|
   start_time = Time.now
   block.call
   end_time = Time.now
-  print " #{ "%.2f" % (end_time - start_time) }s"
+  print " #{ "%.2f" % (end_time - start_time) }x"
 end
 
 at_exit do
