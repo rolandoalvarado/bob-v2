@@ -54,8 +54,7 @@ class ComputeService < BaseCloudService
 
   def delete_instances_in_project(project)
     deleted_instances = []
-    service.set_tenant project
-    instances.reload
+    set_tenant project
     project_instances = instances.find_all{ |i| i.tenant_id == project.id }
     attached_volumes  = service.volumes.select{ |v| !v.attachments.empty? && v.attachments.none?(&:empty?) }
 
@@ -85,12 +84,12 @@ class ComputeService < BaseCloudService
 
   def release_addresses_from_project(project)
     released_addresses = []
-    service.set_tenant project
-    addresses.reload
+    set_tenant project
+    instance_ids = instances.select { |i| i.state == 'ACTIVE' }.collect(&:id)
 
     addresses.each do |address|
       address_attributes = { ip: address.ip, id: address.id }
-      unless address.instance_id.blank?
+      if instance_ids.include?(address.instance_id) && !address.instance_id.blank?
         address_attributes.merge!( instance_id: address.instance_id )
         service.disassociate_address(address.instance_id, address.ip)
       end
