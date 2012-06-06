@@ -96,4 +96,17 @@ Reset vms (in cn)
 	root@cn25.cb-1-1:~# list=`virsh list --all|grep shut| awk '{print $2}'`
 	root@cn25.cb-1-1:~# for i in $list; do virsh undefine $i; done
 
+# How you can connect nexenta server (volume server).
+
+Step 1. Create port forwarding connection   
+
+     ssh -p 2222 root@mc.cb-1-1.morphcloud.net -L 2000:172.16.255.27:2000
+
+Step 2. Access the URL using the browser
+
+     http://localhost:2000
+     username nova-cb-1-1
+     password klnm12
+
+The nexenta connection information is in /etc/nova/nova.conf
 
