@@ -53,7 +53,7 @@ class ComputeService < BaseCloudService
   def delete_instance_in_project(project, instance)
     set_tenant project
 
-    associated_addresses = addresses.find { |a| a.instance_id == instance.id }
+    associated_addresses = addresses.select { |a| a.instance_id == instance.id }
     associated_addresses.each do |address|
       service.disassociate_address(address.instance_id, address.ip)
       sleep(0.5)
@@ -240,7 +240,7 @@ class ComputeService < BaseCloudService
         # occuppy slots in the quota, preventing us from firing up more
         # instances.
         instances_with_errors.each do |instance|
-          delete_instance_in_project(instance)
+          delete_instance_in_project(project, instance)
         end
         raise_ensure_active_instance_count_error "Some instances that have errors took too long to delete.", desired_count
       end
@@ -255,7 +255,7 @@ class ComputeService < BaseCloudService
         raise_ensure_active_instance_count_error "The compute service doesn't seem to be responding to my 'launch instance' requests.", desired_count
       elsif strict && desired_count < instances.count
         (instances.count - desired_count).times do |i|
-          delete_instance_in_project(instances[i])
+          delete_instance_in_project(project, instances[i])
         end
         raise_ensure_active_instance_count_error "Some extra instances took to long to delete.", desired_count
       end
