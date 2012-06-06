@@ -110,3 +110,19 @@ Step 2. Access the URL using the browser
 
 The nexenta connection information is in /etc/nova/nova.conf
 
+# Conect Fog
+
+  cd `bundle show fog`
+  bundle install
+  bundle exec irb
+
+if you get error that require packages, please execute
+
+  bundle install 
+
+In irb, you can call fog library like this.
+
+  load './.irbrc'
+  connect('admin', 'klnm12','<<tenant name>>','http://mc.cb-1-1.morphcloud.net:35357/')
+  connection[:compute].volumes
+
