@@ -4,7 +4,7 @@ module Bob
 
 module AssetMethods
 
-  ASSET_SUBDIR_NAMES = ['img', 'javascripts', 'stylesheets']
+  ASSET_SUBDIR_NAMES ||= ['img', 'javascripts', 'stylesheets']
 
   def build_file_name_with_stamp(path, file_name)
     with_stamp      = file_name
