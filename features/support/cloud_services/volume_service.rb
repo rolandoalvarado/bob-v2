@@ -49,6 +49,7 @@ class VolumeService < BaseCloudService
     set_tenant project
 
     volumes.each do |volume|
+      next if volume['status'] !~ /available|error/
       deleted_volumes << { name: volume['display_name'], id: volume['id'] }
       service.delete_volume(volume['id'])
     end
