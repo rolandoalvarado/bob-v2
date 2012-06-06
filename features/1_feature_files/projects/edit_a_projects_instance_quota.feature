@@ -29,20 +29,16 @@ Feature: Edit a Project's Instance Quota
     * Project <Updated or Not> the quota of the project with <Floating IPs> , <Volumes> and <Cores>
 
       Scenarios: Valid New Quota
-        | Floating IPs | Volumes | Cores | Updated or Not | Result |
-        | +1           | +1      | +1    | can be updated | Normal update |
-        | -1           | +1      | +1    | can be updated | Floating IP is unlimited |
-        | +1           | -1      | +1    | can be updated | Volumes can't be lower than current values|
-        | +1           | +1      | -1    | can be updated | Cores can't be lower than values|
+        | Floating IPs | Volumes | Cores | Updated or Not | 
+        | 10           | 10      | 10    | can be updated | 
+        | 15           | 1       | 1     | can be updated | 
+        | 1            | 20      | 1     | can be updated | 
+        | -1           | -1      | -1    | can be updated | 
 
       Scenarios: Invalid New Quota
-        | Floating IPs | Volumes | Cores | Updated or Not    | Result | 
-        |  ABCD        | +0      | +0    | cannot be updated | Floating IP should be numeric|
-        | +0           | ABCD    | +0    | cannot be updated | Volumes should be numeric|
-        | +0           | +0      | ABCD  | cannot be updated | Cores should be numeric|
+        | Floating IPs | Volumes | Cores | Updated or Not   | Result                       | 
+        | ABCD         | 0      | 0     | cannot be updated | Floating IP should be numeric|
+        | 0            | ABCD   | 0     | cannot be updated | Volumes should be numeric    |
+        | 0            | 0      | ABCD  | cannot be updated | Cores should be numeric      |
 
-      Scenarios: Warned New Quota
-        | Floating IPs | Volumes | Cores | Updated or Not    | Result |
-        |  0           | +1      | +1    | is warned         | Floating IP should be red|
-        | +1           | 0       | +1    | is warned         | Volumes should be red|
-        | +1           | +1      |  0    | is warned         | Cores should be red |
+

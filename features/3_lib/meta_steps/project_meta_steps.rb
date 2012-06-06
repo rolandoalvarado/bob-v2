@@ -148,12 +148,6 @@ end
 
 Then /^Parse and set (.+) quota value with (.+)$/i do |quota_type, value|
 
-  current_value = @crreunt_page.send("#{ quota_type } quota cur field")
-
-  if value =~ /[-+]\d+/ then
-    value = cuurent_value.to_i + value.to_i
-  end
-
   @current_page.send("#{ quota_type } quota edit field").set value
 
 end

@@ -26,19 +26,15 @@ class ProjectPage < WebClientPage
   #==========================
   # Edit Quota Elements
   #==========================
-  button    'quota modify',           '.show-quota-form'
-  message   'Modify Quota',           xpath: '//h3[text()="Modify Quota"]'
-  button    'disabled quota modify',  '.show-quota-form.disabled'
-  button    'save quota edit',        '#action-modify-quota'
-  field     'floating ips quota edit',xpath: '//input[@name="floating_ips"]/@value'
-  field     'volumes quota edit',     xpath: '//input[@name="volumes"]/@value'
-  field     'cores quota edit',       xpath: '//input[@name="cores"]/@value'
-
-  field     'floating ips quota cur', xpath:'//input[@name="floating_ips"]/../../td[3]/text()'
-  field     'volumes quota cur',      xpath:'//input[@name="floating_ips"]/../../td[3]/text()'
-  field     'cores quota cur',        xpath:'//input[@name="floating_ips"]/../../td[3]/text()'
-
-
+# Type      Name                         Selector
+  button    'quota modify',              '.show-quota-form'
+  message   'Modify Quota',              xpath: '//h3[text()="Modify Quota"]'
+  button    'disabled quota modify',     '.show-quota-form.disabled'
+  button    'save quota edit',           '.action-modify-quota'
+  field     'floating ips quota edit',   xpath: '//input[@name="floating_ips"]'
+  field     'volumes quota edit',        xpath: '//input[@name="volumes"]'
+  field     'cores quota edit',          xpath: '//input[@name="cores"]'
+  element   'quota edit error',          '.alert-heading'
 
 # Type      Name                         Selector
   span      'project name error',        "span.error[for='project-name']"
