@@ -1,4 +1,4 @@
-@jira-DWC-16 @jira-MCF-8
+@jira-DWC-16 @jira-MCF-8 @format-v2
 Feature: View Instance Statistics
   As a user, I want to see the statistics for my instance, so that I will know
   if I need to do something about its capacity or configuration.
