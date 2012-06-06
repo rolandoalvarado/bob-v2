@@ -7,6 +7,7 @@ require 'cucumber/formatter/io'
 require 'cucumber/formatter/html'
 require 'cucumber/formatter/summary'
 require 'active_support/all'
+require 'securerandom'
 
 require_relative 'mixins/asset_methods'
 require_relative 'mixins/template_helpers'
@@ -245,13 +246,10 @@ class Html
 
       if is_scenario_outline?(@current_feature_element)
         @current_row.each do |cell|
-          if cell[:status] == :failed
-            cell[:screenshot] = "screenshots/#{filename}"
-            break
-          end
+          cell[:screenshot] = "../screenshots/#{filename}"
         end
       elsif !is_scenario_outline?(@current_feature_element)
-        @current_step[:screenshot] = "screenshots/#{filename}"
+        @current_step[:screenshot] = "../screenshots/#{filename}"
       end
     end
   end

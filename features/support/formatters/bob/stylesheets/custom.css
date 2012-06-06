@@ -4,20 +4,44 @@ code {
 }
 
 .skipped,
-.pending {
+span.skipped a,
+.pending,
+span.pending a {
   color: #336699;
 }
 
-.undefined {
-  color: #336699;
+.undefined,
+span.undefined a {
+  color: #666666;
 }
 
-.passed {
+.passed,
+span.passed a {
   color: #339966;
 }
 
-.failed {
-  color: #996633;
+.failed,
+span.failed a {
+  color: #993333;
+}
+
+/************************
+        INTRO
+************************/
+
+#intro .bob {
+  border-radius: 7px;
+  float: left;
+  margin: 5px;
+}
+
+#intro .content {
+  margin-left: 210px;
+  margin-right: 15px;
+}
+
+#intro .content ul {
+  margin-left: 30px;
 }
 
 /************************

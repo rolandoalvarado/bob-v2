@@ -24,10 +24,22 @@
           <span class="description"><%= element[:description].gsub(/\n/, '<br>') %></span>
         </div>
 
-        <ul class="steps">
+        <ul class="steps <%= "outline" if is_scenario_outline?(element) %>">
           <% element[:steps].each do |s| %>
-            <li class="step <%= status_class_name(s[:status]) %>">
-              <%= "#{ s[:keyword] } #{ s[:name] }" %>
+            <% modal_id = SecureRandom.uuid %>
+            <li class="step <%= status_class_name(s[:status]) unless is_scenario_outline?(element) %>">
+              <a data-toggle="modal" data-target="#<%= modal_id %>" href="#">
+                <%= "#{ s[:keyword] } #{ s[:name] }" %>
+              </a>
+              <div class="modal hide" id="<%= modal_id %>">
+                <% if s[:exception] %>
+                <%= s[:exception][:message] %>
+                <br><br><%= s[:exception][:backtrace].join("\n") %>
+                <br><br><%= s[:exception][:extra_failure_content] %>
+                <% else %>
+                  No errors
+                <% end %>
+              </div>
             </li>
           <% end %>
         </ul><!-- class="steps" -->
@@ -50,8 +62,20 @@
                 <% (1...x[:rows].length).each do |index| %>
                   <tr>
                     <% x[:rows][index].each do |cell| %>
+                      <% modal_id = SecureRandom.uuid %>
                       <td>
-                        <span class="<%= status_class_name(cell[:status]) %>"><%= cell[:value] %></span>
+                        <span class="<%= status_class_name(cell[:status]) %>">
+                          <a data-toggle="modal" data-target="#<%= modal_id %>" href="#"><%= cell[:value] %></a>
+                        </span>
+                        <div class="modal hide" id="<%= modal_id %>">
+                          <% if cell[:exception] %>
+                          <%= cell[:exception][:message] %>
+                          <br><br><%= cell[:exception][:backtrace].join("\n") %>
+                          <br><br><%= cell[:exception][:extra_failure_content] %>
+                          <% else %>
+                            No errors
+                          <% end %>
+                        </div>
                       </td>
                     <% end %>
                   </tr>
