@@ -396,6 +396,15 @@ Then /^The (.+) user row should be visible$/ do |username|
 end
 
 
+Step /^(?:A|The) floating IP should be associated to instance (.+)$/ do |instance_name|
+  sleeping(1).seconds.between_tries.failing_after(15).tries do
+    unless @current_page.has_associated_floating_ip_row?( name: instance_name )
+      raise "Couldn't find a floating IP to be associated to instance #{ instance_name }!"
+    end
+  end
+end
+
+
 Then /^The instance (.+) should be shown as rebooting$/ do |instance_id|
   sleeping(1).seconds.between_tries.failing_after(15).tries do
     unless @current_page.instance_row( id: instance_id ).find('.task').text.include?('rebooting')
@@ -423,11 +432,22 @@ Then /^The instance (.+) should be shown as suspending$/ do |instance_id|
 end
 
 
-Then /^The instance (.+) should be (?:in|of) (.+) status$/ do |instance_id, status|
+Then /^The instance ((?:(?!named )).+) should be (?:in|of) (.+) status$/ do |instance_id, status|
   sleeping(1).seconds.between_tries.failing_after(15).tries do
     unless @current_page.instance_row( id: instance_id ).find('.status').has_content?(status.upcase.gsub(' ', '_'))
       raise "Instance #{ instance_id } does not have #{ status } status."
     end
+  end
+end
+
+
+Step /^The instance named (.+) should be (?:in|of) (.+) status$/ do |instance_name, status|
+  # TODO To prevent conflict with other instance steps, temporarily forgo changing the selector,
+  # and instead finding it directly from the page object.
+  selector = "//*[@id='instances-list']//*[contains(@class, 'name') and contains(text(), \"#{ instance_name }\")]/.."
+  row      = @current_page.find_by_xpath(selector)
+  unless row.find('.status').has_content?(status.upcase.gsub(' ', '_'))
+    raise "Instance #{ instance_name } is not #{ status }."
   end
 end
 
@@ -551,7 +571,11 @@ Then /^The (.+) table should have (\d+) (?:row|rows)$/ do |table_name, num_rows|
   sleeping(1).seconds.between_tries.failing_after(30).tries do
     table_name      = table_name.split.join('_').downcase
     table           = @current_page.send("#{ table_name }_table")
-    actual_num_rows = table.has_no_css_selector?('td.empty-table') ? table.all('tr').count : 0
+    actual_num_rows = if table.has_no_css_selector?('td.empty-table')
+                        table.has_css_selector?('tbody tr') ? table.all('tbody tr').count : table.all('tr').count
+                      else
+                        0
+                      end
     num_rows        = num_rows.to_i
 
     if actual_num_rows != num_rows
