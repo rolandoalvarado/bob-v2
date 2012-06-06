@@ -18,6 +18,13 @@ After do |scenario|
   # end
 end
 
+Around do |scenario, block|
+  start_time = Time.now
+  block.call
+  end_time = Time.now
+  print " #{ "%.2f" % (end_time - start_time) }s"
+end
+
 at_exit do
   FileUtils.rm_rf(tmp_screenshots_dir)
   EnvironmentCleaner.delete_test_objects
