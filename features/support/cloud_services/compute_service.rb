@@ -410,7 +410,7 @@ class ComputeService < BaseCloudService
     end
 
     service.create_security_group_rule(parent_group_id, ip_protocol, from_port, to_port, cidr)
-    
+
   rescue => e
     raise "#test{ JSON.parse(e.response.body)['badRequest']['message'] }"
   end
@@ -424,11 +424,11 @@ class ComputeService < BaseCloudService
          new_security_group.destroy
          security_group = security_group.new(attributes)
          security_group.save
-         security_group   
+         security_group
       else
          security_group = security_group.new(attributes)
          security_group.save
-         security_group  
+         security_group
       end
   end
 
@@ -439,7 +439,7 @@ class ComputeService < BaseCloudService
   def ensure_security_group_exists(project, attributes)
     service.set_tenant project
     security_group = service.security_groups.find_by_name(attributes[:name]) rescue nil
-    
+
     if security_group
       security_group.destroy
       new_security_group = create_security_group(project, attributes)
@@ -453,9 +453,9 @@ class ComputeService < BaseCloudService
     service.set_tenant project
     security_groups = service.security_groups
     security_groups_count = security_groups.count
-    
+
     if desired_count < security_groups_count
-      i = security_groups_count  
+      i = security_groups_count
       while i > desired_count
         security_groups.reload
         security_groups[i].destroy rescue nil
@@ -475,7 +475,7 @@ class ComputeService < BaseCloudService
 
   def find_security_group_by_name(project, name)
     service.set_tenant project
-    security_group = service.security_groups  
+    security_group = service.security_groups
     security_group.find_by_name(name)
     security_group
   end
@@ -501,11 +501,11 @@ class ComputeService < BaseCloudService
          new_security_group.destroy
          security_group = security_group.new(attributes)
          security_group.save
-         security_group   
+         security_group
       else
          security_group = security_group.new(attributes)
          security_group.save
-         security_group  
+         security_group
       end
   end
 
@@ -529,9 +529,9 @@ class ComputeService < BaseCloudService
     service.set_tenant project
     security_groups = service.security_groups
     security_groups_count = security_groups.count
-    
+
     if desired_count < security_groups_count
-      i = security_groups_count  
+      i = security_groups_count
       while i > desired_count
         security_groups.reload
         security_groups[i].destroy rescue nil
@@ -558,9 +558,17 @@ class ComputeService < BaseCloudService
 
   def find_security_group_by_name(project, name)
     service.set_tenant project
-    security_group = service.security_groups  
+    security_group = service.security_groups
     security_group.find_by_name(name)
     security_group
+  end
+
+  def get_project_instances(project)
+    service.set_tenant project
+    instances.reload
+    i = instances
+    service.set_tenant 'admin'
+    i
   end
 
   def set_tenant(project, reload = true)

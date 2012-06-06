@@ -1,4 +1,4 @@
-@jira-MCF-40
+@jira-MCF-40 @format-v2
 Feature: Delete a volume
   As an authorized user, I want to delete a volume on the storage node so that
   I can free up resources.
@@ -22,7 +22,6 @@ Feature: Delete a volume
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Delete |
         | (None)          | Cannot Delete        |
-
 
   Scenario:
     * Volumes that are attached to an instance cannot be deleted
