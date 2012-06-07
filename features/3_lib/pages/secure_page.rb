@@ -6,7 +6,7 @@ require_relative 'web_client_page'
 
 class SecurePage < WebClientPage
   # Left menu items shared by all secure pages
-  link 'dashboard', '.main-nav *:not(.disabled) a[href="/"]'
+  link 'monitoring', '.main-nav *:not(.disabled) a[href="/"]'
   link 'projects',  '.main-nav *:not(.disabled) a[href="/projects"]'
   link 'users',     '.main-nav *:not(.disabled) a[href="/users"]'
   link 'usage',     '.main-nav *:not(.disabled) a[href="/usage"]'
