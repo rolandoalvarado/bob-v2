@@ -33,7 +33,6 @@ class ComputeService < BaseCloudService
         attributes[:flavor],
         {
           'tenant_id'      => project.id,
-          'key_name'       => service.key_pairs[0].name,
           'security_group' => service.security_groups[0].id,
           'user_id'        => service.current_user['id']
         }
@@ -41,8 +40,6 @@ class ComputeService < BaseCloudService
     end
 
     service.servers.find { |s| s.name == attributes[:name] }
-  rescue
-    raise "Couldn't initialize instance in #{ project.name }"
   end
 
   def create_volume(attributes = {})
