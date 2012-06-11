@@ -4,7 +4,7 @@ require_relative '../secure_page'
 class UsersPage < WebClientPage
   path '/users'
 
-  button  'New User',                "#create-user"
+  button  'New User',                "#new-user"
   form    'New User',                "#user-form"
   form    'Edit User',               "#user-form"
 
@@ -13,9 +13,9 @@ class UsersPage < WebClientPage
   field    'Email',                       "#email"
   field    'Password',                    "#password"
   dropdown 'Primary Project',             "#project"
-  checkbox 'Project Manager',             "#admin"
-  button   'Create User',                 "#submit-user"
-  button   'Update User',                 "#submit-user"
+  dropdown 'Role',                        "#admin"
+  button   'Create User',                 "#create-user"
+  button   'Update User',                 "#update-user"
   element  'New User Form Error Message', "#user-form .error"
   element  'Edit User Form Error Message', "#user-form .error"
 
