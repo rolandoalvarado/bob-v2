@@ -121,7 +121,7 @@ class ProjectPage < WebClientPage
   button    'attach volume',              '#volume-item-<id> #attach'
   form      'attach volume',              '#attach-volume-modal'
   dropdown  'attachable instance',        '#attach-volume-modal #instance'
-  button    'volume attach confirmation', '#attach-volume-modal .attach-volume'
+  button    'confirm volume attachment',  '#attach-volume-modal .attach-volume'
   button    'detach volume',              '#volume-item-<id> #detach'
   button    'volume detach confirmation', '#alert-template .okay'
   row       'volume',                     '#volume-item-<id>'
@@ -129,14 +129,14 @@ class ProjectPage < WebClientPage
   #==========================
   # Instance-related elements
   #==========================
-  button    'new floating IP allocation',    '#allocate-floating-ip'
-  form      'new floating IP allocation',    '#floating-ip-allocate-modal'
+  button    'new floating IP allocation',    '#allocate-floating-ip:not(.disabled)'
+  form      'new floating IP allocation',    '#allocate-floating-ip-modal'
   dropdown  'pool',                          '#pool'
   dropdown  'instance',                      '#instance-id'
   button    'create floating IP allocation', '#allocate'
   table     'floating IPs',                  '#floating-ip-list'
   row       'floating IP',                   '#floating-ip-list #floating-ip-item-<id>'
-  row       'attached floating IP',   xpath: "//*[@id='floating-ip-list']//td[@class='instance' and text()=\"<name>\"]/.."
+  row       'associated floating IP', xpath: "//*[@id='floating-ip-list']//*[@class='instance' and text()=\"<name>\"]/.."
 
   row       'instance',                      '#instances-template .table-list #instance-item-<id>'
   form      'resize instance',               '#resize-instance-modal'

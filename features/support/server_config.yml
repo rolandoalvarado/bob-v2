@@ -3,15 +3,23 @@ TTY:
   username: root
   password: password
 
-'Ubuntu 10.04 (Lucid)':
+'Ubuntu 10.04 Lucid':
   username: root
   password: s3l3ct10n
 
-'Ubuntu 11.04 (Oneiric)':
+'Ubuntu 11.04 Oneiric':
+  username: root
+  password: s3l3ct10n
+
+'Ubuntu 12.04 Precise':
   username: root
   password: s3l3ct10n
 
 'CentOS 5.8':
+  username: root
+  password: s3l3ct10n
+
+'CentOS 6.2 (testi2)':
   username: root
   password: s3l3ct10n
 
@@ -30,5 +38,9 @@ TTY:
   password: s3l3ct10n
 
 'Windows 7':
+  username: Administrator
+  password: s3l3ct10n
+
+'windows 2008 Enterprise server':
   username: Administrator
   password: s3l3ct10n

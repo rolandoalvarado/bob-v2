@@ -49,6 +49,27 @@ class ComputeService < BaseCloudService
     service.create_volume(attrs.name, attrs.description, attrs.size)
   end
 
+  # Delete instance and detach it from the resources that depend on it
+  def delete_instance_in_project(project, instance)
+    set_tenant project
+
+    associated_addresses = addresses.select { |a| a.instance_id == instance.id }
+    associated_addresses.each do |address|
+      service.disassociate_address(address.instance_id, address.ip)
+      sleep(0.5)
+    end
+
+    attached_volumes = service.volumes.select { |v| v.attachments.any? { |a| a['serverId'] == instance.id } }
+    attached_volumes.each do |volume|
+      service.detach_volume(instance.id, volume.id)
+      sleep(0.5)
+    end
+
+    service.delete_server(instance.id)
+  rescue
+    raise "Couldn't delete instance #{ instance.name } in #{ project.name }"
+  end
+
   def delete_instances_in_project(project)
     deleted_instances = []
     set_tenant project
@@ -218,7 +239,9 @@ class ComputeService < BaseCloudService
         # We have to remove instances that have errors because they also
         # occuppy slots in the quota, preventing us from firing up more
         # instances.
-        instances_with_errors.each{ |i| i.destroy }
+        instances_with_errors.each do |instance|
+          delete_instance_in_project(project, instance)
+        end
         raise_ensure_active_instance_count_error "Some instances that have errors took too long to delete.", desired_count
       end
 
@@ -232,7 +255,7 @@ class ComputeService < BaseCloudService
         raise_ensure_active_instance_count_error "The compute service doesn't seem to be responding to my 'launch instance' requests.", desired_count
       elsif strict && desired_count < instances.count
         (instances.count - desired_count).times do |i|
-          instances[i].destroy
+          delete_instance_in_project(project, instances[i])
         end
         raise_ensure_active_instance_count_error "Some extra instances took to long to delete.", desired_count
       end

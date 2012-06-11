@@ -97,7 +97,7 @@ end
 
 
 Then /^Fetch a list of device files on the instance named (.+)$/ do |instance_name|
-  row        = @current_page.attached_floating_ip_row( name: instance_name )
+  row        = @current_page.associated_floating_ip_row( name: instance_name )
   ip_address = row.find('.public-ip').text
   raise "No public IP found for instance!" if ip_address.empty?
 
@@ -126,7 +126,7 @@ end
 
 
 Then /^A new device file should have been created on the instance named (.+)$/ do |instance_name|
-  row        = @current_page.attached_floating_ip_row( name: instance_name )
+  row        = @current_page.associated_floating_ip_row( name: instance_name )
   ip_address = row.find('.public-ip').text
   raise "No public IP found for instance!" if ip_address.empty?
 
@@ -158,4 +158,27 @@ Then /^A new device file should have been created on the instance named (.+)$/ d
   rescue
     raise "Cannot fetch list of device files from #{ ip_address }."
   end
+end
+
+
+Step /^Connect to the instance named (.+) in project (.+) via (.+)$/ do |instance_name, project_name, remote_client|
+  row        = @current_page.associated_floating_ip_row( name: instance_name )
+  ip_address = row.find('.public-ip').text
+  raise "No public IP found for instance!" if ip_address.empty?
+
+  project = IdentityService.session.tenants.find { |p| p.name == project_name }
+  raise "#{ project_name } couldn't be found!" unless project
+
+  ComputeService.session.set_tenant project
+  instance = ComputeService.session.instances.find { |i| i.name == instance_name }
+  raise "Instance #{ instance_name } couldn't be found!" unless instance
+
+  image      = ImageService.session.images.find { |i| i.id == instance.image['id'] }
+  raise "Couldn't find image for instance #{ instance_name }!" unless image
+  image_name = image.name
+
+  username = ServerConfigFile.username(image_name)
+  password = ServerConfigFile.password(image_name)
+
+  remote_client_connection( remote_client, ip_address, username, password: password )
 end
