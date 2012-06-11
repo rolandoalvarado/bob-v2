@@ -120,7 +120,7 @@ class ProjectPage < WebClientPage
   button    'attach volume',              '#volume-item-<id> #attach'
   form      'attach volume',              '#attach-volume-modal'
   dropdown  'attachable instance',        '#attach-volume-modal #instance'
-  button    'confirm volume attachment',  '#attach-volume-modal .attach-volume'
+  button    'volume attach confirmation', '#attach-volume-modal .attach-volume'
   button    'detach volume',              '#volume-item-<id> #detach'
   button    'volume detach confirmation', '#alert-template .okay'
   row       'volume',                     '#volume-item-<id>'
@@ -135,6 +135,7 @@ class ProjectPage < WebClientPage
   button    'create floating IP allocation', '#floating-ip-allocate-modal .action-allocate'
   table     'floating IPs',                  '#floating-ip-list'
   row       'floating IP',                   '#floating-ip-list #floating-ip-item-<id>'
+  row       'attached floating IP',   xpath: "//*[@id='floating-ip-list']//td[@class='instance' and text()=\"<name>\"]/.."
 
   row       'instance',                      '#instances-template .table-list #instance-item-<id>'
   form      'resize instance',               '#resize-instance-modal'
