@@ -129,8 +129,8 @@ class ProjectPage < WebClientPage
   #==========================
   # Instance-related elements
   #==========================
-  button    'new floating IP allocation',    '#allocate-floating-ip'
-  form      'new floating IP allocation',    '#floating-ip-allocate-modal'
+  button    'new floating IP allocation',    '#allocate-floating-ip:not(.disabled)'
+  form      'new floating IP allocation',    '#allocate-floating-ip-modal'
   dropdown  'pool',                          '#pool'
   dropdown  'instance',                      '#instance-id'
   button    'create floating IP allocation', '#allocate'

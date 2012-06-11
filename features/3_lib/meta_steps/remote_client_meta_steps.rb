@@ -97,7 +97,7 @@ end
 
 
 Then /^Fetch a list of device files on the instance named (.+)$/ do |instance_name|
-  row        = @current_page.attached_floating_ip_row( name: instance_name )
+  row        = @current_page.associated_floating_ip_row( name: instance_name )
   ip_address = row.find('.public-ip').text
   raise "No public IP found for instance!" if ip_address.empty?
 
@@ -126,7 +126,7 @@ end
 
 
 Then /^A new device file should have been created on the instance named (.+)$/ do |instance_name|
-  row        = @current_page.attached_floating_ip_row( name: instance_name )
+  row        = @current_page.associated_floating_ip_row( name: instance_name )
   ip_address = row.find('.public-ip').text
   raise "No public IP found for instance!" if ip_address.empty?
 
@@ -161,12 +161,16 @@ Then /^A new device file should have been created on the instance named (.+)$/ d
 end
 
 
-Step /^Connect to the instance named (.+) via (.+)$/ do |instance_name, remote_client|
+Step /^Connect to the instance named (.+) in project (.+) via (.+)$/ do |instance_name, project_name, remote_client|
   row        = @current_page.associated_floating_ip_row( name: instance_name )
   ip_address = row.find('.public-ip').text
   raise "No public IP found for instance!" if ip_address.empty?
 
-  instance = ComputeService.session.servers.find { |i| i.name == instance_name }
+  project = IdentityService.session.tenants.find { |p| p.name == project_name }
+  raise "#{ project_name } couldn't be found!" unless project
+
+  ComputeService.session.set_tenant project
+  instance = ComputeService.session.instances.find { |i| i.name == instance_name }
   raise "Instance #{ instance_name } couldn't be found!" unless instance
 
   image      = ImageService.session.images.find { |i| i.id == instance.image['id'] }
@@ -176,16 +180,5 @@ Step /^Connect to the instance named (.+) via (.+)$/ do |instance_name, remote_c
   username = ServerConfigFile.username(image_name)
   password = ServerConfigFile.password(image_name)
 
-  begin
-    case remote_client.upcase
-    when 'RDP'
-      `rdesktop #{ ip_address } -u #{ username } -p #{ password }`
-    when 'SSH'
-      Net::SSH.start(ip_address, username, password: password, port: 2222, timeout: 10) do |ssh|
-        # Test connection and automatically close
-      end
-    end
-  rescue
-    raise "The instance is not publicly accessible on #{ ip_address } via #{ remote_client }."
-  end
+  remote_client_connection( remote_client, ip_address, username, password: password )
 end

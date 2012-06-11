@@ -665,14 +665,13 @@ TestCase /^An instance created based on the image (.+) is accessible via (.+)$/ 
     * Click the access security tab
     * Click the new floating IP allocation button
     * Current page should have the new floating IP allocation form
-    * Choose the 2nd item in the pool dropdown
     * Choose the item with text #{ instance_name } in the instance dropdown
     * Click the create floating IP allocation button
 
     * The floating IPs table should have 1 row
     * The floating IP should be associated to instance #{ instance_name }
 
-    * Connect to the instance named #{ instance_name } via #{ remote_client }
+    * Connect to the instance named #{ instance_name } in project #{ project_name } via #{ remote_client }
   }
 
 end
