@@ -5,23 +5,24 @@ class ProjectPage < WebClientPage
 
   tab       'instances and volumes', '.nav-tabs .instances-and-volumes a'
 
-  button    'new instance',          '#create-instance:not(.disabled)'
-  button    'disabled new instance', '#create-instance.disabled'
+  button    'new instance',          '#new-instance:not(.disabled)'
+  button    'disabled new instance', '#new-instance.disabled'
   field     'project name',          '#project-name'
   field     'project description',   '#project-description'
   button    'modify project',        '#edit-project'
-  form      'new instance',          '#create-instance-modal'
+  form      'new instance',          '#new-instance-modal'
   radiolist 'images',                '#instances-list'
   field     'server name',           '#server-name'
   checklist 'security groups',       xpath: "//input[@name='securityGroupCheckbox']/../../.."
-  button    'create instance',       '#create-instance-modal .create-instance'
+  button    'create instance',       '#create-instance'
   table     'instances',             '#instances-template .table-list'
-  option    'imageslist',             xpath: '//div[@class="instance-item clearfix"]/label[text()]'
-  option    'image',                  xpath: '//div[@class="instance-item clearfix"]/label[text()="<name>"]'
-  option    'security group',         xpath: "//input[@name='securityGroupCheckbox' and @value='<name>']"
-  option    'keypair',                xpath: '//select[@id="keypair"]/option[@value="<name>"]'
-  row       'instance',               '#instances-template .table-list #instance-item-<id>'
-  form      'resize instance',        '#resize-instance-modal'
+  option    'imageslist',            xpath: '//div[@class="instance-item clearfix"]/label[text()]'
+  option    'image',                 xpath: '//div[@class="instance-item clearfix"]/label[text()="<name>"]'
+  option    'security group',        xpath: "//input[@name='securityGroupCheckbox' and @value='<name>']"
+  option    'keypair',               xpath: '//select[@id="keypair"]/option[@value="<name>"]'
+  field     'password',              '#password'
+  row       'instance',              '#instances-template .table-list #instance-item-<id>'
+  form      'resize instance',       '#resize-instance-modal'
 
   #==========================
   # Edit Quota Elements
@@ -43,12 +44,12 @@ class ProjectPage < WebClientPage
   #==========================
   # Security Group Elements
   #==========================
-  button    'new security group',             "#create-security-group"
+  button    'new security group',             "#new-security-group"
   button    'modify security group',          "#security-item-<id> .security-rules"
   button    'delete security group',          "#security-item-<id> .delete-security-group"  
   button    'Context Menu',                   xpath: "//tr[@id='security-item-<id>']/..//a[@class='dropdown-toggle']"
-  form      'new security',                   "#new-security-group-form"
-  form      'security group rules',           "#security-group-rules-form"
+  form      'new security',                   "#new-security-group-modal"
+  form      'security group rules',           "#security-group-rules-modal"
   link      'delete security group',          "#security-item-<id> .delete-security-group"
   link      'modify security group',          "#security-item-<id> .security-rules"
   link      'security group',                 "#security-item-<id> .security-rules"
@@ -77,7 +78,7 @@ class ProjectPage < WebClientPage
 
   # The following buttons appear with the confirmation dialog that appears
   # when you click the delete security group.
-  button  'confirm security  group deletion', "a.okay"
+  button  'confirm security group deletion',  "a.okay"
   button  'cancel security group deletion',   "a.cancel"
   
   #==========================
@@ -85,14 +86,14 @@ class ProjectPage < WebClientPage
   #==========================
 
 # Type      Name                    Selector
-  button    'new volume',          '#add-volume:not(.disabled)'
-  button    'disabled new volume', '#add-volume.disabled'
-  form      'new volume',          '#add-volume-modal'
+  button    'new volume',          '#new-volume:not(.disabled)'
+  button    'disabled new volume', '#new-volume.disabled'
+  form      'new volume',          '#new-volume-modal'
   field     'volume name',         '#name'
   field     'volume description',  '#textarea'
   field     'volume size',         '#appendedInput'
   button    'create volume',       '#save-volume'
-  table     'volumes',             '#volume-template tbody'
+  table     'volumes',             '#volume-list tbody'
 
   button    'delete volume',               '#volume-item-<id> a[data-action="delete-volume"]'
   button    'volume delete confirmation',  'a.okay'
@@ -101,10 +102,10 @@ class ProjectPage < WebClientPage
   button    'volume menu',                 '#volume-item-<id> .dropdown-toggle'
   button    'volume context menu',         '#volume-item-<id> .dropdown-toggle'
   button    'new volume snapshot',         '#volume-item-<id> #create-snapshot'
-  form      'new volume snapshot',         '#create-snapshot-modal'
-  field     'volume snapshot name',        '#create-snapshot-modal #name'
-  field     'volume snapshot description', '#create-snapshot-modal #textarea'
-  button    'create volume snapshot',      '#create-snapshot-modal .create-snapshot'
+  form      'new volume snapshot',         '#new-volume-snapshot-modal'
+  field     'volume snapshot name',        '#new-volume-snapshot-modal #name'
+  field     'volume snapshot description', '#new-volume-snapshot-modal #textarea'
+  button    'create volume snapshot',      '#create-volume-snapshot'
   tab       'snapshots',                   '.nav-tabs .snapshots a'
 
 # Type      Name                                Selector
@@ -128,11 +129,11 @@ class ProjectPage < WebClientPage
   #==========================
   # Instance-related elements
   #==========================
-  button    'new floating IP allocation',    '#allocate-btn'
+  button    'new floating IP allocation',    '#allocate-floating-ip'
   form      'new floating IP allocation',    '#floating-ip-allocate-modal'
   dropdown  'pool',                          '#pool'
   dropdown  'instance',                      '#instance-id'
-  button    'create floating IP allocation', '#floating-ip-allocate-modal .action-allocate'
+  button    'create floating IP allocation', '#allocate'
   table     'floating IPs',                  '#floating-ip-list'
   row       'floating IP',                   '#floating-ip-list #floating-ip-item-<id>'
   row       'attached floating IP',   xpath: "//*[@id='floating-ip-list']//td[@class='instance' and text()=\"<name>\"]/.."

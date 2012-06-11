@@ -139,7 +139,7 @@ Then /^I can create a user$/i do
     * Fill in the Email field with #{ new_user.email }
     * Fill in the Password field with #{ new_user.password }
     * Choose the 2nd item in the Primary Project dropdown
-    * Check the Project Manager checkbox
+    * Choose the item with text Project Manager in the Role dropdown
     * Click the Create User button
     * The New User form should not be visible
     * The #{ new_user.name } user row should be visible
@@ -176,7 +176,7 @@ Then /^I can create a user with attributes (.+), (.+), (.+), (.+), and (.+)$/i d
                              '1st'
                            end
 
-  check_or_uncheck = (is_pm_or_not == "Yes" ? "Check" : "Uncheck")
+  role = (is_pm_or_not == "Yes" ? "Project Manager" : "Member")
   me       = @me
 
   steps %{
@@ -199,7 +199,7 @@ Then /^I can create a user with attributes (.+), (.+), (.+), (.+), and (.+)$/i d
     * Fill in the Email field with #{ new_user.email }
     * Fill in the Password field with #{ new_user.password }
     * Choose the #{ primary_project_choice } item in the Primary Project dropdown
-    * #{ check_or_uncheck } the Project Manager checkbox
+    * Choose the item with text #{ role } in the Role dropdown
     * Click the Create User button
     * The New User form should not be visible
     * The #{ new_user.name } user row should be visible
@@ -221,7 +221,7 @@ Then /^I cannot create a user with attributes (.+), (.+), (.+), (.+), and (.+)$/
                              '1st'
                            end
 
-  check_or_uncheck = (is_pm_or_not == "Yes" ? "Check" : "Uncheck")
+  role = (is_pm_or_not == "Yes" ? "Project Manager" : "Member")
   me       = @me
 
   steps %{
@@ -244,7 +244,7 @@ Then /^I cannot create a user with attributes (.+), (.+), (.+), (.+), and (.+)$/
     * Fill in the Email field with #{ new_user.email }
     * Fill in the Password field with #{ new_user.password }
     * Choose the #{ primary_project_choice } item in the Primary Project dropdown
-    * #{ check_or_uncheck } the Project Manager checkbox
+    * Choose the item with text #{ role } in the Role dropdown
     * Click the Create User button
     * The New User form should be visible
     * A New User Form Error Message element should be visible
@@ -330,7 +330,7 @@ Then /^I can update a user with attributes (.+), (.+), (.+), (.+), and (.+)$/i d
                              '1st'
                            end
 
-  check_or_uncheck = (is_pm_or_not == "Yes" ? "Check" : "Uncheck")
+  role = (is_pm_or_not == "Yes" ? "Project Manager" : "Member")
   me = @me
 
   steps %{
@@ -355,7 +355,7 @@ Then /^I can update a user with attributes (.+), (.+), (.+), (.+), and (.+)$/i d
     * Fill in the Email field with #{ new_attrs.email }
     * Fill in the Password field with #{ new_attrs.password }
     * Choose the #{ primary_project_choice } item in the Primary Project dropdown
-    * #{ check_or_uncheck } the Project Manager checkbox
+    * Choose the item with text #{ role } in the Role dropdown
     * Click the Update User button
     * The Edit User form should not be visible
     * The #{ new_attrs.name } user row should be visible
@@ -394,7 +394,7 @@ Then /^I cannot update a user with attributes (.+), (.+), (.+), (.+), and (.+)$/
                              '1st'
                            end
 
-  check_or_uncheck = (is_pm_or_not == "Yes" ? "Check" : "Uncheck")
+  role = (is_pm_or_not == "Yes" ? "Project Manager" : "Member")
   me = @me
 
   steps %{
@@ -419,7 +419,7 @@ Then /^I cannot update a user with attributes (.+), (.+), (.+), (.+), and (.+)$/
     * Fill in the Email field with #{ new_attrs.email }
     * Fill in the Password field with #{ new_attrs.password }
     * Choose the #{ primary_project_choice } item in the Primary Project dropdown
-    * #{ check_or_uncheck } the Project Manager checkbox
+    * Choose the item with text #{ role } in the Role dropdown
     * Click the Update User button
     * The Edit User form should be visible
     * An Edit User Form Error Message element should be visible
