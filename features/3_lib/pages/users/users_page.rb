@@ -19,18 +19,19 @@ class UsersPage < WebClientPage
   element  'New User Form Error Message', "#user-form .error"
   element  'Edit User Form Error Message', "#user-form .error"
 
-  row      'User',                   "#user-item-<user_id>"
-  link     'User',                   "#user-item-<user_id> td"
+  row      'User', xpath: "//*[@id='user-list']//td[normalize-space(text())=\"<name>\"]/.."
+  link     'User', xpath: "//*[@id='user-list']//td[normalize-space(text())=\"<name>\"]"
 
   # The 'username' cell in the Users table
-  element 'Username',              xpath: "//tr[@class='user']/td[text()='<name>']"
+  element 'Username',              xpath: "//tr[@class='user']/td[normalize-space(text())='<name>']"
 
   # Toggles the menu of actions for a specific user in the table
-  button  'Context Menu',          xpath: "//tr[@class='user']/td[text()='<name>']/..//a[@class='dropdown-toggle']"
+  button  'Context Menu',          xpath: "//tr[@class='user']/td[normalize-space(text())='<name>']/..//a[@class='dropdown-toggle']"
 
+  button  'Edit User',             xpath: "//tr[@class='user']/td[normalize-space(text())='<name>']/..//a[@class='edit']"
   # The following links appear in the context menu
-  link    'Disable User',          xpath: "//tr[@class='user']/td[text()='<name>']/..//a[@class='disable']"
-  link    'Delete User',           xpath: "//tr[@class='user']/td[text()='<name>']/..//a[@class='destroy']"
+  link    'Disable User',          xpath: "//tr[@class='user']/td[normalize-space(text())='<name>']/..//a[@class='disable']"
+  link    'Delete User',           xpath: "//tr[@class='user']/td[normalize-space(text())='<name>']/..//a[@class='destroy']"
 
   # The following buttons appear with the confirmation dialog that appears
   # when you click the delete link of a user.

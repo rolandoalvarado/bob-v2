@@ -1,3 +1,10 @@
+Step /^All Edit User buttons should not be visible$/ do
+  if @current_page.has_content?("#user-list a.edit")
+    raise "Edit user buttons should not be visible, but they are."
+  end
+end
+
+
 Then /^(A|An) (.+) element should be visible$/i do |a_or_an, element_name|
   element_name = element_name.split.join('_').downcase
   unless @current_page.send("has_#{ element_name }_element?")
@@ -385,12 +392,7 @@ end
 
 
 Then /^The (.+) user row should be visible$/ do |username|
-  user = IdentityService.session.users.find_by_name(username)
-  unless user
-    raise "Couldn't find a user named #{ username } in the system!"
-  end
-
-  unless @current_page.has_user_row?( user_id: user.id )
+  unless @current_page.has_user_row?( name: username )
     raise "The row for user #{ username } should exist, but it doesn't."
   end
 end
@@ -462,6 +464,23 @@ Then /^The instance (.+) should not have flavor (.+)$/ do |instance_id, flavor_n
 end
 
 
+Step /^The item with text (.+) should be default in the (.+) dropdown$/ do |item_text, dropdown_name|
+  dropdown_name = dropdown_name.split.join('_').downcase
+  if item = @current_page.send("#{ dropdown_name }_dropdown_items").find { |d| d.text == item_text }
+    unless item[:selected] || item[:default]
+      raise "Expected option '#{ item_text }' to be the default for the #{ dropdown_name } dropdown."
+    end
+  else
+    raise "Couldn't find the dropdown option '#{ item_text }'."
+  end
+end
+
+
+Step /^Click the (.+) button for the user named (.+)$/ do |button_name, username|
+  button_name = button_name.split.join('_').downcase
+  @current_page.send("#{ button_name }_user_button", name: username).click
+end
+
 Then /^The volume named (.+) should be attached to the instance named (.+)$/ do |volume_name, instance_name|
   VolumeService.session.reload_volumes
   volume = VolumeService.session.volumes.find { |v| v['display_name'] == volume_name }
@@ -479,7 +498,6 @@ Then /^The volume named (.+) should be attached to the instance named (.+)$/ do 
     end
   end
 end
-
 
 Then /^The volume named (.+) should not be attached to the instance named (.+)$/ do |volume_name, instance_name|
   VolumeService.session.reload_volumes
