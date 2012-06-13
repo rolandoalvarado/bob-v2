@@ -401,7 +401,9 @@ Then /^I [Cc]an [Dd]elete (?:that|the) project$/ do
     * Visit the projects page
     * The #{ (@project || @project_attrs).name } project should be visible
 
-    * Delete the #{ (@project || @project_attrs).name } project
+    * Click the #{ (@project || @project_attrs).name } project menu
+    * Click the #{ (@project || @project_attrs).name } delete project menu
+
   }
 
   project =  IdentityService.session.tenants.find_by_name((@project || @project_attrs).name)
@@ -464,11 +466,10 @@ Then /^I [Cc]annot [Ee]dit (?:that|the) project$/ do
 
     * Visit the projects page
     * The #{ (@project || @project_attrs).name } project should be visible
+    * The edit project link should be disabled with #{(@project || @project_attrs).name}
   }
 
-  if ( @current_page.has_edit_project_link?(name: (@project || @project_attrs).name) )
-    raise "The project edit should not have been created, but it seems that it was."
-  end
+#  @current_page.has_disabled_edit_project_link?(name: (@project || @project_attrs).name)
 
 end
 

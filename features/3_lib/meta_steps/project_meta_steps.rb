@@ -164,15 +164,23 @@ Then /^Select Collaborator (.+)$/ do |username|
 end
 
 Then /^Quota Values should be updated with (.+) , (.+) and (.+)$/i do |floating_ip,volumes,cores|
-
-  #get floating ip values
-               
-  #get volumes
-
-  #cores
-
+  @pending
 end
 
 Then /^Quota Values should be warned with (.+) , (.+) and (.+)$/i do |floating_ip,volumes,cores|
-          
+  @pending          
+end
+
+Then /^Edit the (.+) project$/i do |project_name|
+  project_name.strip!
+  @current_page.project_menu_button( name: project_name ).click
+  @current_page.edit_project_link( name: project_name ).click
+  @current_page = ProjectPage.new
+end
+
+Then /^Delete the (.+) project$/i do |project_name|
+  project_name.strip!
+  @current_page.project_menu_button( name: project_name ).click
+  @current_page.delete_project_link( name: project_name ).click
+  @current_page = ProjectPage.new
 end
