@@ -1,4 +1,4 @@
-Then /^Ensure that a user with username (.+) and password (.+) exists$/i do |username, password|
+Then /^Ensure that (?:a|another) user with username (.+) and password (.+) exists$/i do |username, password|
   username           = Unique.username(username)
   @user_attrs        = CloudObjectBuilder.attributes_for(:user, :name => username, :password => password)
   @user = IdentityService.session.ensure_user_exists(@user_attrs)
