@@ -182,5 +182,5 @@ Then /^Delete the (.+) project$/i do |project_name|
   project_name.strip!
   @current_page.project_menu_button( name: project_name ).click
   @current_page.delete_project_link( name: project_name ).click
-  @current_page = ProjectPage.new
+  @current_page.delete_confirmation_button.click
 end

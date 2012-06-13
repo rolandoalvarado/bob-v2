@@ -19,7 +19,7 @@ Feature: Edit a Project
         | Project Manager | System Admin         | Can Edit           |
         | Member          | System Admin         | Can Edit           |
         | Project Manager | User                 | Can Edit           |
-@take
+
       Scenarios: Unauthorized Roles
         | Role            | System Admin or User | Can or Cannot Edit |
         | Member          | User                 | Cannot Edit        |

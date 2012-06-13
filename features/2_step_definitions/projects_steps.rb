@@ -389,7 +389,7 @@ Then /^I [Cc]annot [Vv]iew (?:that|the) project$/ do
   }
 end
 
-Then /^I [Cc]an [Dd]elete (?:that|the) project$/ do
+Then /^I can delete (?:that|the) project$/i do
 
   steps %{
     * Click the logout button if currently logged in
@@ -401,8 +401,7 @@ Then /^I [Cc]an [Dd]elete (?:that|the) project$/ do
     * Visit the projects page
     * The #{ (@project || @project_attrs).name } project should be visible
 
-    * Click the #{ (@project || @project_attrs).name } project menu
-    * Click the #{ (@project || @project_attrs).name } delete project menu
+    * Delete the #{ (@project || @project_attrs).name } project
 
   }
 
@@ -435,7 +434,7 @@ Then /^I [Cc]annot [Dd]elete (?:that|the) project$/ do
 
 end
 
-Then /^I [Cc]an [Ee]dit (?:that|the) project$/ do
+Then /^I can edit (?:that|the) project$/i do
   steps %{
 
     * Click the logout button if currently logged in
