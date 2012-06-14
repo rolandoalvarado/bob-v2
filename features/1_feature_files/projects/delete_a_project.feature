@@ -16,17 +16,14 @@ Feature: Delete a project
 
       Scenarios: Authorized Roles
         | Role            | System Admin or User | Can or Cannot Delete |
-        | Project Manager | System Admin         | Can Delete           |
         | Member          | System Admin         | Can Delete           |
-        | Project Manager | User                 | Can Delete           |
 
       Scenarios: Unauthorized Roles
         | Role            | System Admin or User | Can or Cannot Delete |
         | Member          | User                 | Cannot Delete        |
 
-
   Scenario: Delete a Project with resource
     Given I am authorized to delete the project
       And The project has 1 active instance
-     Then I Can Delete the project
+     Then I Cannot Delete the project
 

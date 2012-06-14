@@ -9,7 +9,7 @@ class ProjectPage < WebClientPage
   button    'disabled new instance', '#new-instance.disabled'
   field     'project name',          '#project-name'
   field     'project description',   '#project-description'
-  button    'modify project',        '#edit-project'
+  button    'modify project',        '#update-project'
   form      'new instance',          '#new-instance-modal'
   radiolist 'images',                '#instances-list'
   field     'server name',           '#server-name'

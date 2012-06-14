@@ -71,13 +71,8 @@ Given /^I have a role of (.+) in the project$/ do |role_name|
           "in the feature file."
   end
 
-  user_attrs       = CloudObjectBuilder.attributes_for(
-                       :user,
-                       :name => Unique.username('rstark')
-                     )
   identity_service = IdentityService.session
-  user             = identity_service.ensure_user_exists(user_attrs)
-  EnvironmentCleaner.register(:user, user.id)
+  user             = @current_user
   identity_service.revoke_all_user_roles(user, @project)
 
   # Ensure user has the following role in the project
@@ -97,8 +92,6 @@ Given /^I have a role of (.+) in the project$/ do |role_name|
     end
   end
 
-  # Make variable(s) available for use in succeeding steps
-  @current_user = user
 end
 
 
@@ -389,7 +382,7 @@ Then /^I [Cc]annot [Vv]iew (?:that|the) project$/ do
   }
 end
 
-Then /^I [Cc]an [Dd]elete (?:that|the) project$/ do
+Then /^I can delete (?:that|the) project$/i do
 
   steps %{
     * Click the logout button if currently logged in
@@ -402,6 +395,7 @@ Then /^I [Cc]an [Dd]elete (?:that|the) project$/ do
     * The #{ (@project || @project_attrs).name } project should be visible
 
     * Delete the #{ (@project || @project_attrs).name } project
+
   }
 
   project =  IdentityService.session.tenants.find_by_name((@project || @project_attrs).name)
@@ -412,7 +406,7 @@ Then /^I [Cc]an [Dd]elete (?:that|the) project$/ do
 
 end
 
-Then /^I [Cc]annot [Dd]elete (?:that|the) project$/ do
+Then /^I cannot delete (?:that|the) project$/i do
   steps %{
     * Click the logout button if currently logged in
     * Visit the login page
@@ -433,7 +427,27 @@ Then /^I [Cc]annot [Dd]elete (?:that|the) project$/ do
 
 end
 
-Then /^I [Cc]an [Ee]dit (?:that|the) project$/ do
+Then /^I failed to delete (?:that|the) project$/i do
+  steps %{
+    * Click the logout button if currently logged in
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * The #{ (@project || @project_attrs).name } project should be visible
+  }
+
+  @current_page.project_menu_button( name: project_name ).click
+  @current_page.delete_project_link( name: project_name ).click
+  if (!@current_page.has_unable_to_delete_field?) then
+    raise "The project deletng should be failed, but it seems to succeeed."
+  end
+
+end
+
+Then /^I can edit (?:that|the) project$/i do
   steps %{
 
     * Click the logout button if currently logged in
@@ -464,11 +478,10 @@ Then /^I [Cc]annot [Ee]dit (?:that|the) project$/ do
 
     * Visit the projects page
     * The #{ (@project || @project_attrs).name } project should be visible
+    * The edit project link should be disabled with #{(@project || @project_attrs).name}
   }
 
-  if ( @current_page.has_edit_project_link?(name: (@project || @project_attrs).name) )
-    raise "The project edit should not have been created, but it seems that it was."
-  end
+#  @current_page.has_disabled_edit_project_link?(name: (@project || @project_attrs).name)
 
 end
 
