@@ -127,6 +127,11 @@ class ProjectPage < WebClientPage
   row       'volume',                     '#volume-item-<id>'
 
   #==========================
+  # Monitoring-related elements
+  #==========================
+  element  "project details",                xpath: '//*[div[@name="<name>"]]'
+
+  #==========================
   # Instance-related elements
   #==========================
   button    'new floating IP allocation',    '#allocate-floating-ip:not(.disabled)'

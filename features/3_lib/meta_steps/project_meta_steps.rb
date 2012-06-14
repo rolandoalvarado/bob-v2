@@ -141,6 +141,15 @@ Then /^Ensure that the a project has an instance$/ do
   compute_service.ensure_active_instance_count(@project, 1)
 end
 
+Step /^Ensure that the project (.+) has an instance$/ do |project|
+  project = @project
+  
+  if project
+    compute_service = ComputeService.session
+    compute_service.ensure_active_instance_count(project, 1)
+  end
+end
+
 Then /^Ensure that a project has (\d+) security groups$/ do |security_group_count|
   compute_service = ComputeService.session
   compute_service.ensure_project_security_group_count(@project, security_group_count.to_i)

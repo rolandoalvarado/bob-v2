@@ -2,7 +2,7 @@ TestCase /^A user with a role of (.+) in a project can view the statistics of it
   Preconditions %{
     * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
     * Ensure that a project named #{ test_project_name } exists
-    * Ensure that the project named #{ test_project_name } has 1 instance
+    * Ensure that the project named #{ test_project_name } has an instance
     * Ensure that the user #{ bob_username } has a role of #{ role_name } in the project #{ test_project_name }
   }
 
@@ -15,19 +15,17 @@ TestCase /^A user with a role of (.+) in a project can view the statistics of it
 
     * Click the Monitoring link
     * Current page should be the Monitoring page
-    * There should be 1 tile visible in the page
-    * Double-click on the tile for project #{ test_project_name }
-    * There should be 1 tile visible in the page
+    * The #{test_project_name} project tile should be visible
+    * Double-click on the tile element for project #{ test_project_name }
+    * The #{ test_project_name } project details should be visible in the sidebar
   }
 end
 
 
-TestCase /^A user with a role of (.+) in a project cannot view the statistics of its instances$/i do |role_name|
+TestCase /^A user with a role of (\(None\)) in a project cannot view the statistics of its instances$/i do |role_name|
   Preconditions %{
     * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
     * Ensure that a project named #{ test_project_name } exists
-    * Ensure that the project named #{ test_project_name } has 1 instance
-    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the project #{ test_project_name }
   }
 
   Script %{
