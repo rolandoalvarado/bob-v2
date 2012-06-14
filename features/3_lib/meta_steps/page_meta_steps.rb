@@ -131,7 +131,7 @@ end
 
 Step /^Double\-click on the tile element for project (.+)$/ do |project_name|
   project_name.strip!
-  @current_page.project_element( name: project_name ).click
+  @current_page.tile_element( name: project_name ).click
   @current_page = ProjectPage.new
 end
 
@@ -195,13 +195,6 @@ Then /^Current page should have the (.+) (button|field|form|tile)$/ do |name, ty
   end
 end
 
-Step /^Current page should have (.+)$/ do |name|
-  name = name.split.join('_').downcase
-  unless @current_page.send("has_tile_element?")
-    raise "Current page doesn't have a #{ name }"
-  end
-end
-
 Step /^There should be project tile element for (.+)$/ do |project_name|
   type = 'tile'
   name = project_name.split.join('_').downcase
@@ -240,6 +233,12 @@ end
 Then /^Current page should have the new (.+) security group$/ do |security_group|
   unless @current_page.has_security_groups_element?
     raise "Current page doesn't have the new #{security_group} security group."
+  end
+end
+
+Step /^Current page should display project details in the sidebar$/ do
+  unless @current_page.has_project_element?
+    raise "Current page doesn't have the #{project_name} details."
   end
 end
 
@@ -556,12 +555,26 @@ Then /^The (.+) project should be visible$/ do |project_name|
   end
 end
 
+Step /^The (.+) project details should be visible in the sidebar$/ do |project_name|
+  unless @current_page.has_project_details_element?( name: project_name )
+    raise "The project '#{ project_name }' should be visible, but it's not."
+  end
+end
+
 
 Step /^The (.+) project tile should be visible$/ do |project_name|
   unless @current_page.has_project_name_element?( name: project_name )
     raise "The project '#{ project_name }' should be visible, but it's not."
   end
 end
+
+Step /^There should be (\d+) tiles visible in the page$/ do |tile_count|
+  tile_count = tile_count.to_i
+  unless @current_page.send("has_no_tile_element?")
+    raise "There should be #{ tile_count } tile visible, but it is."
+  end
+end
+
 
 Then /^The (.+) project should not be visible$/ do |project_name|
   if @current_page.has_project_link?( name: project_name )
