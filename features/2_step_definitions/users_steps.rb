@@ -139,7 +139,7 @@ Then /^I can create a user$/i do
     * Fill in the Email field with #{ new_user.email }
     * Fill in the Password field with #{ new_user.password }
     * Choose the 2nd item in the Primary Project dropdown
-    * Check the Project Manager checkbox
+    * Choose the item with text Project Manager in the Role dropdown
     * Click the Create User button
     * The New User form should not be visible
     * The #{ new_user.name } user row should be visible
@@ -176,7 +176,7 @@ Then /^I can create a user with attributes (.+), (.+), (.+), (.+), and (.+)$/i d
                              '1st'
                            end
 
-  check_or_uncheck = (is_pm_or_not == "Yes" ? "Check" : "Uncheck")
+  role = (is_pm_or_not == "Yes" ? "Project Manager" : "Member")
   me       = @me
 
   steps %{
@@ -199,7 +199,7 @@ Then /^I can create a user with attributes (.+), (.+), (.+), (.+), and (.+)$/i d
     * Fill in the Email field with #{ new_user.email }
     * Fill in the Password field with #{ new_user.password }
     * Choose the #{ primary_project_choice } item in the Primary Project dropdown
-    * #{ check_or_uncheck } the Project Manager checkbox
+    * Choose the item with text #{ role } in the Role dropdown
     * Click the Create User button
     * The New User form should not be visible
     * The #{ new_user.name } user row should be visible
@@ -221,7 +221,7 @@ Then /^I cannot create a user with attributes (.+), (.+), (.+), (.+), and (.+)$/
                              '1st'
                            end
 
-  check_or_uncheck = (is_pm_or_not == "Yes" ? "Check" : "Uncheck")
+  role = (is_pm_or_not == "Yes" ? "Project Manager" : "Member")
   me       = @me
 
   steps %{
@@ -244,7 +244,7 @@ Then /^I cannot create a user with attributes (.+), (.+), (.+), (.+), and (.+)$/
     * Fill in the Email field with #{ new_user.email }
     * Fill in the Password field with #{ new_user.password }
     * Choose the #{ primary_project_choice } item in the Primary Project dropdown
-    * #{ check_or_uncheck } the Project Manager checkbox
+    * Choose the item with text #{ role } in the Role dropdown
     * Click the Create User button
     * The New User form should be visible
     * A New User Form Error Message element should be visible
@@ -330,7 +330,7 @@ Then /^I can update a user with attributes (.+), (.+), (.+), (.+), and (.+)$/i d
                              '1st'
                            end
 
-  check_or_uncheck = (is_pm_or_not == "Yes" ? "Check" : "Uncheck")
+  role = (is_pm_or_not == "Yes" ? "Project Manager" : "Member")
   me = @me
 
   steps %{
@@ -355,7 +355,7 @@ Then /^I can update a user with attributes (.+), (.+), (.+), (.+), and (.+)$/i d
     * Fill in the Email field with #{ new_attrs.email }
     * Fill in the Password field with #{ new_attrs.password }
     * Choose the #{ primary_project_choice } item in the Primary Project dropdown
-    * #{ check_or_uncheck } the Project Manager checkbox
+    * Choose the item with text #{ role } in the Role dropdown
     * Click the Update User button
     * The Edit User form should not be visible
     * The #{ new_attrs.name } user row should be visible
@@ -394,7 +394,7 @@ Then /^I cannot update a user with attributes (.+), (.+), (.+), (.+), and (.+)$/
                              '1st'
                            end
 
-  check_or_uncheck = (is_pm_or_not == "Yes" ? "Check" : "Uncheck")
+  role = (is_pm_or_not == "Yes" ? "Project Manager" : "Member")
   me = @me
 
   steps %{
@@ -419,9 +419,97 @@ Then /^I cannot update a user with attributes (.+), (.+), (.+), (.+), and (.+)$/
     * Fill in the Email field with #{ new_attrs.email }
     * Fill in the Password field with #{ new_attrs.password }
     * Choose the #{ primary_project_choice } item in the Primary Project dropdown
-    * #{ check_or_uncheck } the Project Manager checkbox
+    * Choose the item with text #{ role } in the Role dropdown
     * Click the Update User button
     * The Edit User form should be visible
     * An Edit User Form Error Message element should be visible
   }
+end
+
+
+TestCase /^A user with a role of (.+) in the system can change user permissions$/i do |role_name|
+
+  pm_username     = Unique.username('pm')
+  member_username = Unique.username('member')
+  password        = '123qwe'
+  project_name    = Unique.project_name('test')
+
+  Preconditions %{
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the system
+
+    * Ensure that a project named #{ project_name } exists
+    * Ensure that another user with username #{ pm_username } and password #{ password } exists
+    * Ensure that the user #{ pm_username } has a role of Project Manager in the project #{ project_name }
+    * Ensure that another user with username #{ member_username } and password #{ password } exists
+    * Ensure that the user #{ member_username } has a role of Member in the project #{ project_name }
+  }
+
+  Cleanup %{
+    * Register the project named #{ project_name } for deletion at exit
+    * Register the user named #{ bob_username } for deletion at exit
+    * Register the user named #{ pm_username } for deletion at exit
+    * Register the user named #{ member_username } for deletion at exit
+  }
+
+  Script %{
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ bob_username }
+    * Fill in the Password field with #{ bob_password }
+    * Click the Login button
+
+    * Click the Users link
+
+    * Click the Edit button for the user named #{ pm_username }
+    * Current page should have the Edit User form
+
+    * Choose the item with text Member in the Role dropdown
+    * Click the Update User button
+
+    * The item with text Member should be default in the Role dropdown
+
+    * Click the Edit button for the user named #{ member_username }
+    * Current page should have the Edit User form
+
+    * Choose the item with text Project Manager in the Role dropdown
+    * Click the Update User button
+
+    * The item with text Project Manager should be default in the Role dropdown
+  }
+
+end
+
+
+TestCase /^A user with a role of (.+) in the system cannot change user permissions$/i do |role_name|
+
+  username      = Unique.username('test')
+  password      = '123qwe'
+  project_name  = Unique.project_name('test')
+
+  Preconditions %{
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the system
+
+    * Ensure that a project named #{ project_name } exists
+    * Ensure that another user with username #{ username } and password #{ password } exists
+    * Ensure that the user #{ username } has a role of Member in the project #{ project_name }
+  }
+
+  Cleanup %{
+    * Register the project named #{ project_name } for deletion at exit
+    * Register the user named #{ bob_username } for deletion at exit
+    * Register the user named #{ username } for deletion at exit
+  }
+
+  Script %{
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ bob_username }
+    * Fill in the Password field with #{ bob_password }
+    * Click the Login button
+
+    * The Users link should not be visible
+  }
+
 end

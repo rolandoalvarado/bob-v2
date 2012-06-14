@@ -1,3 +1,4 @@
+@pending
 Feature: Delete an Image
   As a user, I want to delete an image in my project so that I can keep my list
   of images manageable

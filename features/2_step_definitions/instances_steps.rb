@@ -620,3 +620,58 @@ Then /^the instance will reboot$/i do
     * The instance #{ @instance.id } should be shown as rebooting
   }
 end
+
+
+TestCase /^An instance created based on the image (.+) is accessible via (.+)$/ do |image_name, remote_client|
+
+  username      = Unique.username('bob')
+  password      = '123qwe'
+  project_name  = Unique.project_name('test')
+  instance_name = Unique.instance_name('test')
+
+  Preconditions %{
+    * Ensure that a user with username #{ username } and password #{ password } exists
+    * Ensure that a project named #{ project_name } exists
+    * Ensure that the project named #{ project_name } has 0 active instances
+    * Ensure that the user #{ username } has a role of Member in the project #{ project_name }
+  }
+
+  Cleanup %{
+    * Register the project named #{ project_name } for deletion at exit
+    * Register the user named #{ username } for deletion at exit
+  }
+
+  Script %{
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ username }
+    * Fill in the Password field with #{ password }
+    * Click the Login button
+
+    * Click the Projects link
+    * Click the #{ project_name } project
+
+    * Click the new instance button
+    * Current page should have the new instance form
+    * Click the #{ image_name } image
+    * Fill in the server name field with #{ instance_name }
+    * Check the 1st item in the security groups checklist
+    * Click the create instance button
+
+    * The instances table should have 1 row
+    * The instances table should include the text #{ instance_name }
+    * The instance named #{ instance_name } should be in active status
+
+    * Click the access security tab
+    * Click the new floating IP allocation button
+    * Current page should have the new floating IP allocation form
+    * Choose the item with text #{ instance_name } in the instance dropdown
+    * Click the create floating IP allocation button
+
+    * The floating IPs table should have 1 row
+    * The floating IP should be associated to instance #{ instance_name }
+
+    * Connect to the instance named #{ instance_name } in project #{ project_name } via #{ remote_client }
+  }
+
+end

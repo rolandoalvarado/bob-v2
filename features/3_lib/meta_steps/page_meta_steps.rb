@@ -1,3 +1,10 @@
+Step /^All Edit User buttons should not be visible$/ do
+  if @current_page.has_content?("#user-list a.edit")
+    raise "Edit user buttons should not be visible, but they are."
+  end
+end
+
+
 Then /^(A|An) (.+) element should be visible$/i do |a_or_an, element_name|
   element_name = element_name.split.join('_').downcase
   unless @current_page.send("has_#{ element_name }_element?")
@@ -160,7 +167,7 @@ Step /^Click the context menu button of the volume named (.+)$/ do |volume_name|
   @current_page.volume_context_menu_button(:id => volume['id']).click
 end
 
-Step /^Click the (delete|detach) button of the volume named (.+)$/ do |button_name, volume_name|
+Step /^Click the (attach|delete|detach) button of the volume named (.+)$/ do |button_name, volume_name|
   volume = VolumeService.session.volumes.find { |v| v['display_name'] == volume_name }
 
   raise "Couldn't find a volume named '#{ volume_name }'" unless volume
@@ -407,13 +414,17 @@ end
 
 
 Then /^The (.+) user row should be visible$/ do |username|
-  user = IdentityService.session.users.find_by_name(username)
-  unless user
-    raise "Couldn't find a user named #{ username } in the system!"
-  end
-
-  unless @current_page.has_user_row?( user_id: user.id )
+  unless @current_page.has_user_row?( name: username )
     raise "The row for user #{ username } should exist, but it doesn't."
+  end
+end
+
+
+Step /^(?:A|The) floating IP should be associated to instance (.+)$/ do |instance_name|
+  sleeping(1).seconds.between_tries.failing_after(15).tries do
+    unless @current_page.has_associated_floating_ip_row?( name: instance_name )
+      raise "Couldn't find a floating IP to be associated to instance #{ instance_name }!"
+    end
   end
 end
 
@@ -445,11 +456,22 @@ Then /^The instance (.+) should be shown as suspending$/ do |instance_id|
 end
 
 
-Then /^The instance (.+) should be (?:in|of) (.+) status$/ do |instance_id, status|
+Then /^The instance ((?:(?!named )).+) should be (?:in|of) (.+) status$/ do |instance_id, status|
   sleeping(1).seconds.between_tries.failing_after(15).tries do
     unless @current_page.instance_row( id: instance_id ).find('.status').has_content?(status.upcase.gsub(' ', '_'))
       raise "Instance #{ instance_id } does not have #{ status } status."
     end
+  end
+end
+
+
+Step /^The instance named (.+) should be (?:in|of) (.+) status$/ do |instance_name, status|
+  # TODO To prevent conflict with other instance steps, temporarily forgo changing the selector,
+  # and instead finding it directly from the page object.
+  selector = "//*[@id='instances-list']//*[contains(@class, 'name') and contains(text(), \"#{ instance_name }\")]/.."
+  row      = @current_page.find_by_xpath(selector)
+  unless row.find('.status').has_content?(status.upcase.gsub(' ', '_'))
+    raise "Instance #{ instance_name } is not #{ status }."
   end
 end
 
@@ -464,19 +486,40 @@ Then /^The instance (.+) should not have flavor (.+)$/ do |instance_id, flavor_n
 end
 
 
-Then /^The volume (.+) should be attached to instance (.+)$/ do |volume_id, instance_name|
-  sleeping(1).seconds.between_tries.failing_after(15).tries do
-    unless @current_page.has_volume_row?( id: volume_id )
-      raise "Could not find row for volume #{ volume_id }!"
+Step /^The item with text (.+) should be default in the (.+) dropdown$/ do |item_text, dropdown_name|
+  dropdown_name = dropdown_name.split.join('_').downcase
+  if item = @current_page.send("#{ dropdown_name }_dropdown_items").find { |d| d.text == item_text }
+    unless item[:selected] || item[:default]
+      raise "Expected option '#{ item_text }' to be the default for the #{ dropdown_name } dropdown."
     end
-
-    attachment = @current_page.volume_row( id: volume_id ).find('.attachments a').text()
-    if attachment != instance_name
-      raise "Expected volume #{ volume_id } to be attached to instance #{ instance_name }, but it's not."
-    end
+  else
+    raise "Couldn't find the dropdown option '#{ item_text }'."
   end
 end
 
+
+Step /^Click the (.+) button for the user named (.+)$/ do |button_name, username|
+  button_name = button_name.split.join('_').downcase
+  @current_page.send("#{ button_name }_user_button", name: username).click
+end
+
+Then /^The volume named (.+) should be attached to the instance named (.+)$/ do |volume_name, instance_name|
+  VolumeService.session.reload_volumes
+  volume = VolumeService.session.volumes.find { |v| v['display_name'] == volume_name }
+
+  raise "Couldn't find a volume named '#{ volume_name }'" unless volume
+
+  sleeping(1).seconds.between_tries.failing_after(15).tries do
+    unless @current_page.has_volume_row?(id: volume['id'])
+      raise "Could not find row for the volume named #{ volume_name }!"
+    end
+
+    attachment = @current_page.volume_row(id: volume['id']).find('.attachments a').text()
+    if attachment != instance_name
+      raise "Expected volume #{ volume_name } to be attached to instance #{ instance_name }, but it's not."
+    end
+  end
+end
 
 Then /^The volume named (.+) should not be attached to the instance named (.+)$/ do |volume_name, instance_name|
   VolumeService.session.reload_volumes
@@ -574,7 +617,11 @@ Then /^The (.+) table should have (\d+) (?:row|rows)$/ do |table_name, num_rows|
   sleeping(1).seconds.between_tries.failing_after(30).tries do
     table_name      = table_name.split.join('_').downcase
     table           = @current_page.send("#{ table_name }_table")
-    actual_num_rows = table.has_no_css_selector?('td.empty-table') ? table.all('tr').count : 0
+    actual_num_rows = if table.has_no_css_selector?('td.empty-table')
+                        table.has_css_selector?('tbody tr') ? table.all('tbody tr').count : table.all('tr').count
+                      else
+                        0
+                      end
     num_rows        = num_rows.to_i
 
     if actual_num_rows != num_rows

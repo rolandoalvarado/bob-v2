@@ -23,3 +23,13 @@ Step /^Ensure that the project named (.+) has an instance named (.+)$/ do |proje
 
   ComputeService.session.create_instance_in_project(project, name: instance_name)
 end
+
+Step /^Ensure that the project named (.+) has (.+) active (?:instance|instances)/ do |project_name, desired_count|
+  desired_count = desired_count.to_i
+
+  project = IdentityService.session.find_project_by_name(project_name)
+  raise "#{ project_name } couldn't be found!" unless project
+
+  actual_count = ComputeService.session.ensure_active_instance_count(project, desired_count)
+  raise "Couldn't ensure #{ project.name } has #{ desired_count } active instances" unless actual_count == desired_count
+end

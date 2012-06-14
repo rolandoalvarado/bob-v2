@@ -33,7 +33,6 @@ class ComputeService < BaseCloudService
         attributes[:flavor],
         {
           'tenant_id'      => project.id,
-          'key_name'       => service.key_pairs[0].name,
           'security_group' => service.security_groups[0].id,
           'user_id'        => service.current_user['id']
         }
@@ -41,8 +40,6 @@ class ComputeService < BaseCloudService
     end
 
     service.servers.find { |s| s.name == attributes[:name] }
-  rescue
-    raise "Couldn't initialize instance in #{ project.name }"
   end
 
   def create_volume(attributes = {})
@@ -50,6 +47,27 @@ class ComputeService < BaseCloudService
     attrs.merge!(attributes)
 
     service.create_volume(attrs.name, attrs.description, attrs.size)
+  end
+
+  # Delete instance and detach it from the resources that depend on it
+  def delete_instance_in_project(project, instance)
+    set_tenant project
+
+    associated_addresses = addresses.select { |a| a.instance_id == instance.id }
+    associated_addresses.each do |address|
+      service.disassociate_address(address.instance_id, address.ip)
+      sleep(0.5)
+    end
+
+    attached_volumes = service.volumes.select { |v| v.attachments.any? { |a| a['serverId'] == instance.id } }
+    attached_volumes.each do |volume|
+      service.detach_volume(instance.id, volume.id)
+      sleep(0.5)
+    end
+
+    service.delete_server(instance.id)
+  rescue
+    raise "Couldn't delete instance #{ instance.name } in #{ project.name }"
   end
 
   def delete_instances_in_project(project)
@@ -127,19 +145,7 @@ class ComputeService < BaseCloudService
         end
       end
 
-      volumes = service.volumes
-      attached_volumes = volumes.select{ |v| v.attachments.any?{ |a| a['serverId'] == instance.id } }
-      if strict && attached_volumes.count != desired_count
-        raise "Couldn't ensure that instance #{ instance.name } has #{ desired_count } attached volumes."
-      elsif !strict && attached_volumes.count < desired_count
-        raise "Couldn't ensure that instance #{ instance.name } has at least #{ desired_count } attached volumes."
-      end
-
-      if attached_volumes.count == 1
-        attached_volumes.first
-      elsif attached_volumes.count > 1
-        attached_volumes
-      end
+      volumes.count
     end
   end
 
@@ -233,7 +239,9 @@ class ComputeService < BaseCloudService
         # We have to remove instances that have errors because they also
         # occuppy slots in the quota, preventing us from firing up more
         # instances.
-        instances_with_errors.each{ |i| i.destroy }
+        instances_with_errors.each do |instance|
+          delete_instance_in_project(project, instance)
+        end
         raise_ensure_active_instance_count_error "Some instances that have errors took too long to delete.", desired_count
       end
 
@@ -247,19 +255,13 @@ class ComputeService < BaseCloudService
         raise_ensure_active_instance_count_error "The compute service doesn't seem to be responding to my 'launch instance' requests.", desired_count
       elsif strict && desired_count < instances.count
         (instances.count - desired_count).times do |i|
-          instances[i].destroy
+          delete_instance_in_project(project, instances[i])
         end
         raise_ensure_active_instance_count_error "Some extra instances took to long to delete.", desired_count
       end
     end # sleeping(x).seconds.between_tries.failing_after(y).tries
 
-    instances.reload
-    active_instances = instances.select { |i| i.state == 'ACTIVE' }
-    if active_instances.count == 1
-      active_instances.first
-    elsif active_instances.count > 1
-      active_instances
-    end
+    instances.count
   end
 
   # Ensures that there are `desired_count` number of instances in the project
