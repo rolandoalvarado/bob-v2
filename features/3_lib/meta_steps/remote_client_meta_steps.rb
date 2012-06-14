@@ -96,7 +96,7 @@ Then /^Fail connecting to instance with floating IP (.+) via (.+)$/ do |floating
 end
 
 
-Then /^Fetch a list of device files on the instance named (.+)$/ do |instance_name|
+Step /^A new device file should have been created on the instance named (.+) in project (.+)$/ do |instance_name, project_name|
   row        = @current_page.associated_floating_ip_row( name: instance_name )
   ip_address = row.find('.public-ip').text
   raise "No public IP found for instance!" if ip_address.empty?
@@ -107,56 +107,32 @@ Then /^Fetch a list of device files on the instance named (.+)$/ do |instance_na
 
   # If the above fails, get the image name from the compute service
   if image_name.blank?
-    instance   = ComputeService.session.servers.find { |i| i.name == instance_name }
-    image      = ComputeService.session.images.find { |i| i.id == instance.image['id'] }
+    project    = IdentityService.session.tenants.find { |i| i.name == project_name }
+    raise "#{ project_name } couldn't be found!" unless project
+    ComputeService.session.set_tenant project
+    instance   = ComputeService.session.instances.find { |i| i.name == instance_name }
+    image      = ImageService.session.images.find { |i| i.id == instance.image['id'] }
     image_name = image.name
   end
 
   username = ServerConfigFile.username(image_name)
   password = ServerConfigFile.password(image_name)
 
-  begin
-    Net::SSH.start(ip_address, username, password: password, port: 2222, timeout: 10) do |ssh|
-      @device_file_list = ssh.exec!('ls -1 /dev/vc*').split
-    end
-  rescue
-    raise "Cannot fetch list of device files from #{ ip_address }."
-  end
-end
-
-
-Then /^A new device file should have been created on the instance named (.+)$/ do |instance_name|
-  row        = @current_page.associated_floating_ip_row( name: instance_name )
-  ip_address = row.find('.public-ip').text
-  raise "No public IP found for instance!" if ip_address.empty?
-
-  # Parse the image name from the instance column value
-  instance_name = row.find('.instance').text
-  image_name    = instance_name.scan(/\((.+)\)/).flatten.first
-
-  # If the above fails, get the image name from the compute service
-  if image_name.blank?
-    instance   = ComputeService.session.servers.find { |i| i.name == instance_name }
-    image      = ComputeService.session.images.find { |i| i.id == instance.image['id'] }
-    image_name = image.name
-  end
-
-  username = ServerConfigFile.username(image_name)
-  password = ServerConfigFile.password(image_name)
-  changed_device_file_list = []
+  delta_time       = ((Time.now - @time_started) / 60).ceil
+  device_file_list = []
 
   begin
     Net::SSH.start(ip_address, username, password: password, port: 2222, timeout: 10) do |ssh|
-      changed_device_file_list = ssh.exec!('ls -1 /dev/vc*').split
+      # Get a list of all device /dev/vd* files modified/created from x minutes ago
+      device_file_list = ssh.exec!("find /dev/vd* -mmin -#{ delta_time }").split
     end
 
-    if (changed_device_file_list - @device_file_list).count != 1
-      raise "No new device file has been created on the instance. " +
-            "Found #{ changed_device_file_list.count } device files: " +
-            "#{ changed_device_file_list.join(', ') }."
+    if device_file_list.empty?
+      raise "No new device file has been created on the instance."
     end
-  rescue
-    raise "Cannot fetch list of device files from #{ ip_address }."
+  rescue => e
+    raise "Cannot fetch list of device files from #{ ip_address }. " +
+          "The error returned was: #{ e.message }"
   end
 end
 
