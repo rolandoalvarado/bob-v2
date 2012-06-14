@@ -4,6 +4,7 @@ Feature: Edit a Project
 
   Ideally, a user who is not a system admin but is granted manager role in a
   project should have the ability to edit that project.
+  #MCF-84 from WC 1.0.1 , project manager role does not depend on project.
 
   Background:
     * A project exists in the system
@@ -18,11 +19,11 @@ Feature: Edit a Project
         | Role            | System Admin or User | Can or Cannot Edit |
         | Project Manager | System Admin         | Can Edit           |
         | Member          | System Admin         | Can Edit           |
-        | Project Manager | User                 | Can Edit           |
-@take
+
       Scenarios: Unauthorized Roles
         | Role            | System Admin or User | Can or Cannot Edit |
         | Member          | User                 | Cannot Edit        |
+        | Project Manager | User                 | Cannot Edit        |
 
   Scenario Outline: Edit a Project
     Given I am authorized to edit the project

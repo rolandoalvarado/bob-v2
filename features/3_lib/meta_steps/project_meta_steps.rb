@@ -16,7 +16,7 @@ Step /^Ensure that a project named (.+) exists$/i do |project_name|
     raise "Test project couldn't be initialized!"
   end
 
-  @test_project = project
+  @named_project = project
 end
 
 Step /^Ensure that the project named (.+) has (\d+) instances?$/i do |project_name, instance_count|
@@ -39,22 +39,21 @@ Then /^Ensure that a test project is available for use$/i do
     raise "Test project couldn't be initialized!"
   end
 
-  @test_project = project
+  @named_project = project
 end
 
-Then /^Ensure that I have a role of (.+) in the test project$/i do |role_name|
+Then /^Ensure that I have a role of (.+) in the named project$/i do |role_name|
 
-  if @test_project.nil?
+  if @named_project.nil?
     raise "No test project is available. You need to call " +
           "'* Ensure that a test project is available for use' " +
           "before this step."
   end
 
   identity_service = IdentityService.session
-  user             = @me
-  EnvironmentCleaner.register(:user, user.id)
+  user             = @current_user
 
-  identity_service.revoke_all_user_roles(user, @test_project)
+  identity_service.revoke_all_user_roles(user, @named_project)
 
   # Ensure user has the following role in the project
   unless role_name.downcase == "(none)"
@@ -67,7 +66,7 @@ Then /^Ensure that I have a role of (.+) in the test project$/i do |role_name|
     end
 
     begin
-      role.add_to_user(user,@test_project)
+      role.add_to_user(user,@named_project)
     rescue Fog::Identity::OpenStack::NotFound => e
       raise "Couldn't add #{ user.name } to #{ @project.name } as #{ role.name }"
     end
@@ -95,14 +94,8 @@ Then /^Ensure that I have a role of (.+) in the project$/i do |role_name|
           "before this step."
   end
 
-  user_attrs       = CloudObjectBuilder.attributes_for(
-                       :user,
-                       :name => Unique.username('rstark')
-                     )
-
   identity_service = IdentityService.session
-  user             = identity_service.ensure_user_exists(user_attrs)
-  EnvironmentCleaner.register(:user, user.id)
+  user             = @current_user
 
   identity_service.revoke_all_user_roles(user, @project)
 
@@ -123,7 +116,6 @@ Then /^Ensure that I have a role of (.+) in the project$/i do |role_name|
     end
   end
 
-  @current_user = user
 end
 
 Then /^Ensure that the project has no security groups$/i do
