@@ -634,6 +634,7 @@ TestCase /^An instance created based on the image (.+) is accessible via (.+)$/ 
     * Ensure that a project named #{ project_name } exists
     * Ensure that the project named #{ project_name } has 0 active instances
     * Ensure that the user #{ username } has a role of Member in the project #{ project_name }
+    * Ensure that a security group rule exists for project #{ project_name }
   }
 
   Cleanup %{

@@ -398,7 +398,7 @@ class ComputeService < BaseCloudService
 
     service.create_security_group_rule(parent_group_id, ip_protocol, from_port, to_port, cidr)
   rescue => e
-    raise "#test{ JSON.parse(e.response.body)['badRequest']['message'] }"
+    raise "#{ JSON.parse(e.response.body)['badRequest']['message'] }"
   end
 
   def ensure_security_group_rule_exist(project, ip_protocol='tcp', from_port=2222, to_port=2222, cidr='0.0.0.0/0')
