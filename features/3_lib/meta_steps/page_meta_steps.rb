@@ -129,6 +129,12 @@ Then /^Click the (.+) project$/ do |project_name|
   @current_page = ProjectPage.new
 end
 
+Step /^Double\-click on the tile element for project (.+)$/ do |project_name|
+  project_name.strip!
+  @current_page.project_element( name: project_name ).click
+  @current_page = ProjectPage.new
+end
+
 Then /^Click the (.+) tab$/ do |tab_name|
   tab_name = tab_name.split.join('_').downcase
   @current_page.send("#{ tab_name }_tab").click
@@ -169,6 +175,7 @@ Then /^Click the link for user with username (.+)$/i do |username|
   @current_page.user_link(user_id: user.id).click
 end
 
+
 Then /^Click the (.+) image$/ do |image_name|
   @current_page.image_element( name: image_name.strip ).click
 end
@@ -181,8 +188,23 @@ Then /^Current page should be the (.+) page$/i do |page_name|
 end
 
 
-Then /^Current page should have the (.+) (button|field|form)$/ do |name, type|
+Then /^Current page should have the (.+) (button|field|form|tile)$/ do |name, type|
   name = name.split.join('_').downcase
+  unless @current_page.send("has_#{ name }_#{type}?")
+    raise "Current page doesn't have a #{ name } #{ type }"
+  end
+end
+
+Step /^Current page should have (.+)$/ do |name|
+  name = name.split.join('_').downcase
+  unless @current_page.send("has_tile_element?")
+    raise "Current page doesn't have a #{ name }"
+  end
+end
+
+Step /^There should be project tile element for (.+)$/ do |project_name|
+  type = 'tile'
+  name = project_name.split.join('_').downcase
   unless @current_page.send("has_#{ name }_#{type}?")
     raise "Current page doesn't have a #{ name } #{ type }"
   end
@@ -534,6 +556,12 @@ Then /^The (.+) project should be visible$/ do |project_name|
   end
 end
 
+
+Step /^The (.+) project tile should be visible$/ do |project_name|
+  unless @current_page.has_project_name_element?( name: project_name )
+    raise "The project '#{ project_name }' should be visible, but it's not."
+  end
+end
 
 Then /^The (.+) project should not be visible$/ do |project_name|
   if @current_page.has_project_link?( name: project_name )
