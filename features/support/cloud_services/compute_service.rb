@@ -46,7 +46,9 @@ class ComputeService < BaseCloudService
     attrs = CloudObjectBuilder.attributes_for(:volume)
     attrs.merge!(attributes)
 
-    service.create_volume(attrs.name, attrs.description, attrs.size)
+    if service.volumes.none? { |v| v.name == attrs.name }
+      service.create_volume(attrs.name, attrs.description, attrs.size)
+    end
   end
 
   # Delete instance and detach it from the resources that depend on it
@@ -131,11 +133,14 @@ class ComputeService < BaseCloudService
         end
       end
 
+      volumes.reload
+      raise "Requires #{ desired_count } volumes. Only #{ volumes.count } volumes exist!" if desired_count > volumes.count
+
       attached_volumes     = volumes.select{ |v| v.attachments.any?{ |a| a['serverId'] == instance.id } }
       non_attached_volumes = volumes.select{ |v| v.attachments.first.empty? }
       if desired_count > attached_volumes.count
         (desired_count - attached_volumes.count).times do |i|
-          service.attach_volume(non_attached_volumes[i].id, instance.id, '/dev/vdz')
+          service.attach_volume(non_attached_volumes[i].id, instance.id, '/dev/vdc')
           sleep(0.5)
         end
       elsif strict && desired_count < attached_volumes.count
@@ -145,7 +150,15 @@ class ComputeService < BaseCloudService
         end
       end
 
-      volumes.count
+      volumes.reload
+      attached_volumes = volumes.select{ |v| v.attachments.any?{ |a| a['serverId'] == instance.id } }
+      if strict && desired_count != attached_volumes.count
+        raise "Couldn't ensure instance #{ instance.name } has #{ desired_count } attached volumes."
+      elsif !strict && desired_count > attached_volumes.count
+        raise "Couldn't ensure instance #{ instance.name } has at least #{ desired_count } attached volumes."
+      end
+
+      return attached_volumes.count
     end
   end
 
@@ -398,7 +411,7 @@ class ComputeService < BaseCloudService
 
     service.create_security_group_rule(parent_group_id, ip_protocol, from_port, to_port, cidr)
   rescue => e
-    raise "#test{ JSON.parse(e.response.body)['badRequest']['message'] }"
+    raise "#{ JSON.parse(e.response.body)['badRequest']['message'] }"
   end
 
   def ensure_security_group_rule_exist(project, ip_protocol='tcp', from_port=2222, to_port=2222, cidr='0.0.0.0/0')

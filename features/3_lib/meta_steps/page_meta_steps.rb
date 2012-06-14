@@ -136,6 +136,12 @@ Then /^Click the (.+) project$/ do |project_name|
   @current_page = ProjectPage.new
 end
 
+Step /^Double\-click on the tile element for project (.+)$/ do |project_name|
+  project_name.strip!
+  @current_page.tile_element( name: project_name ).click
+  @current_page = ProjectPage.new
+end
+
 Then /^Click the (.+) tab$/ do |tab_name|
   tab_name = tab_name.split.join('_').downcase
   @current_page.send("#{ tab_name }_tab").click
@@ -176,6 +182,7 @@ Then /^Click the link for user with username (.+)$/i do |username|
   @current_page.user_link(user_id: user.id).click
 end
 
+
 Then /^Click the (.+) image$/ do |image_name|
   @current_page.image_element( name: image_name.strip ).click
 end
@@ -188,8 +195,16 @@ Then /^Current page should be the (.+) page$/i do |page_name|
 end
 
 
-Then /^Current page should have the (.+) (button|field|form)$/ do |name, type|
+Then /^Current page should have the (.+) (button|field|form|tile)$/ do |name, type|
   name = name.split.join('_').downcase
+  unless @current_page.send("has_#{ name }_#{type}?")
+    raise "Current page doesn't have a #{ name } #{ type }"
+  end
+end
+
+Step /^There should be project tile element for (.+)$/ do |project_name|
+  type = 'tile'
+  name = project_name.split.join('_').downcase
   unless @current_page.send("has_#{ name }_#{type}?")
     raise "Current page doesn't have a #{ name } #{ type }"
   end
@@ -225,6 +240,12 @@ end
 Then /^Current page should have the new (.+) security group$/ do |security_group|
   unless @current_page.has_security_groups_element?
     raise "Current page doesn't have the new #{security_group} security group."
+  end
+end
+
+Step /^Current page should display project details in the sidebar$/ do
+  unless @current_page.has_project_element?
+    raise "Current page doesn't have the #{project_name} details."
   end
 end
 
@@ -581,6 +602,26 @@ end
 Then /^The (.+) project should be visible$/ do |project_name|
   unless @current_page.has_project_name_element?( name: project_name )
     raise "The project '#{ project_name }' should be visible, but it's not."
+  end
+end
+
+Step /^The (.+) project details should be visible in the sidebar$/ do |project_name|
+  unless @current_page.has_project_details_element?( name: project_name )
+    raise "The project '#{ project_name }' should be visible, but it's not."
+  end
+end
+
+
+Step /^The (.+) project tile should be visible$/ do |project_name|
+  unless @current_page.has_project_name_element?( name: project_name )
+    raise "The project '#{ project_name }' should be visible, but it's not."
+  end
+end
+
+Step /^There should be (\d+) tiles visible in the page$/ do |tile_count|
+  tile_count = tile_count.to_i
+  unless @current_page.send("has_no_tile_element?")
+    raise "There should be #{ tile_count } tile visible, but it is."
   end
 end
 

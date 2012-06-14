@@ -404,8 +404,7 @@ TestCase /^A user with a role of (.+) in a project cannot (?:attach|delete|detac
     * Fill in the Password field with #{ password }
     * Click the Login button
 
-    * Click the Projects link
-    * The #{ project_name } project should not be visible
+    * The Projects link should not be visible
   }
 
 end
@@ -451,6 +450,7 @@ TestCase /^Volumes that are attached to an instance will be accessible from the 
   project_name  = Unique.project_name('test')
   instance_name = Unique.instance_name('test')
   volume_name   = Unique.volume_name('test')
+  @time_started = Time.now
 
   Preconditions %{
     * Ensure that a user with username #{ username } and password #{ password } exists
@@ -476,9 +476,6 @@ TestCase /^Volumes that are attached to an instance will be accessible from the 
     * Click the Projects link
     * Click the #{ project_name } project
 
-    * Click the access security tab
-    * Fetch a list of device files on the instance named #{ instance_name }
-
     * Click the instances and volumes tab
     * Click the attach button of the volume named #{ volume_name }
     * Current page should have the attach volume form
@@ -488,7 +485,7 @@ TestCase /^Volumes that are attached to an instance will be accessible from the 
     * The volume named #{ volume_name } should be attached to the instance named #{ instance_name }
 
     * Click the access security tab
-    * A new device file should have been created on the instance named #{ instance_name }
+    * A new device file should have been created on the instance named #{ instance_name } in project #{ project_name }
   }
 
 end
