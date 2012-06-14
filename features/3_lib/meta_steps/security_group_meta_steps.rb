@@ -99,3 +99,10 @@ Then /^the security group rules will be Not Added$/i do
   end
 end
 
+
+Step /^Ensure that a security group rule exists for project (.+)$/ do |project_name|
+  project = IdentityService.session.find_project_by_name(project_name)
+  raise "#{ project_name } couldn't be found!" unless project
+
+  ComputeService.session.ensure_security_group_rule project
+end
