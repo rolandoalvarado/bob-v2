@@ -406,7 +406,7 @@ Then /^I can delete (?:that|the) project$/i do
 
 end
 
-Then /^I [Cc]annot [Dd]elete (?:that|the) project$/ do
+Then /^I cannot delete (?:that|the) project$/i do
   steps %{
     * Click the logout button if currently logged in
     * Visit the login page
@@ -423,6 +423,26 @@ Then /^I [Cc]annot [Dd]elete (?:that|the) project$/ do
 
   if ( @current_page.has_delete_project_link?(name: (@project || @project_attrs).name) )
     raise "The project delete link should not have been created, but it seems that it was."
+  end
+
+end
+
+Then /^I failed to delete (?:that|the) project$/i do
+  steps %{
+    * Click the logout button if currently logged in
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * The #{ (@project || @project_attrs).name } project should be visible
+  }
+
+  @current_page.project_menu_button( name: project_name ).click
+  @current_page.delete_project_link( name: project_name ).click
+  if (!@current_page.has_unable_to_delete_field?) then
+    raise "The project deletng should be failed, but it seems to succeeed."
   end
 
 end

@@ -10,21 +10,20 @@ Feature: Delete a project
 
   @permissions
   Scenario Outline: Check User Permissions
-    Given I am a <Project Manager or User>
+    Given I am a <System Admin or User>
     Given I have a role of <Role> in the project
      Then I <Can or Cannot Delete> the project
 
       Scenarios: Authorized Roles
-        | Role            | Project Manager or User | Can or Cannot Delete |
-        | Member          | Project Manager         | Can Delete           |
+        | Role            | System Admin or User | Can or Cannot Delete |
+        | Member          | System Admin         | Can Delete           |
 
       Scenarios: Unauthorized Roles
-        | Role            | Project Manager or User | Can or Cannot Delete |
-        | Member          | User                    | Cannot Delete        |
-
+        | Role            | System Admin or User | Can or Cannot Delete |
+        | Member          | User                 | Cannot Delete        |
 
   Scenario: Delete a Project with resource
     Given I am authorized to delete the project
       And The project has 1 active instance
-     Then I Can Delete the project
+     Then I Cannot Delete the project
 

@@ -19,4 +19,5 @@ class ProjectsPage < WebClientPage
   link    'delete project',        xpath:  "//td[@title='<name>']/..//a[@class='destroy-project']"
   button  'project menu',          xpath:  "//*[@id='project-list']//td[@title='<name>']/..//a[@class='dropdown-toggle']"
   button  'delete confirmation',   xpath:  "//*[@class='btn btn-danger okay']"
+  field   'unable to delete',      xpath:  "//h4[@class='alert-heading'][contains(text(),'Unable to delete the project')]"
 end
