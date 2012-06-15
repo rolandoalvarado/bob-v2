@@ -86,6 +86,24 @@ Then /^Ensure that a project is available for use$/i do
   @project = project
 end
 
+Step /^Ensure that a user exists in the project$/ do
+  user_attrs       = CloudObjectBuilder.attributes_for(
+                       :user,
+                       :name => Unique.username('roland')
+                     )
+  identity_service = IdentityService.session
+
+  user             = identity_service.ensure_user_exists(user_attrs)
+
+  if user.nil? or user.id.empty?
+    raise "User couldn't be initialized!"
+  end
+  EnvironmentCleaner.register(:user, user.id)
+
+  # Make variable(s) available for use in succeeding steps
+  @current_user = user
+end
+
 Then /^Ensure that I have a role of (.+) in the project$/i do |role_name|
 
   if @project.nil?

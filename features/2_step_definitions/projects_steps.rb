@@ -1,4 +1,4 @@
-
+#=================
 # GIVENs
 #=================
 
@@ -91,6 +91,8 @@ Given /^I have a role of (.+) in the project$/ do |role_name|
       raise "Couldn't add #{ user.name } to #{ @project.name } as #{ role.name }"
     end
   end
+
+  @current_user = user
 
 end
 
