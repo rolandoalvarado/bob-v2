@@ -323,7 +323,7 @@ end
 Then /^Select Security Group (.+) item from the security group checklist$/ do |security_group|
  if security_group.downcase == "(any)"
    #nothing
- elsif security_groupy.downcase == "(none)"
+ elsif security_group.downcase == "(none)"
    #nothing
  else
    pending
