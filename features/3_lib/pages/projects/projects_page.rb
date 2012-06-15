@@ -7,7 +7,7 @@ class ProjectsPage < WebClientPage
   button  'disabled create project',       '#new-project.disabled'
   field   'project name',                  '#new-project-name'
   field   'project description',           '#new-project-description'
-  button  'save project',                  '#save-project'
+  button  'save project',                  '#create-project'
   span    'new project name error',        "span.error[for='new-project-name']"
   span    'new project description error', "span.error[for='new-project-description']"
 
