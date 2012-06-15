@@ -454,7 +454,7 @@ class ComputeService < BaseCloudService
   def ensure_security_group_exists(project, attributes)
     service.set_tenant project
     security_group = service.security_groups.find_by_name(attributes[:name]) rescue nil
-
+   
     if security_group
       security_group.destroy
       new_security_group = create_security_group(project, attributes)

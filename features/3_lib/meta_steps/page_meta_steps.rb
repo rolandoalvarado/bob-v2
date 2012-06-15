@@ -45,6 +45,7 @@ Then /^Choose the (\d+)(?:st|nd|rd|th) item in the (.+) dropdown$/ do |item_numb
   @current_page.send("#{ dropdown_name }_dropdown_items")[item_number.to_i - 1].click
 end
 
+
 Then /^Choose the item with text (.+) in the (.+) dropdown$/ do |item_text, dropdown_name|
   dropdown_name = dropdown_name.split.join('_').downcase
   if item = @current_page.send("#{ dropdown_name }_dropdown_items").find { |d| d.text == item_text }
@@ -237,11 +238,11 @@ Then /^Current page should have the new security group rule$/ do
   end
 end
 
-Then /^Current page should have the new (.+) security group$/ do |security_group|
-  unless @current_page.has_security_groups_element?
-    raise "Current page doesn't have the new #{security_group} security group."
-  end
-end
+#Then /^Current page should have the new (.+) security group$/ do |security_group|
+#  unless @current_page.has_security_groups_element?
+#    raise "Current page doesn't have the new #{security_group} security group."
+#  end
+#end
 
 Step /^Current page should display project details in the sidebar$/ do
   unless @current_page.has_project_element?

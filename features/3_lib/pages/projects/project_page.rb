@@ -45,14 +45,14 @@ class ProjectPage < WebClientPage
   # Security Group Elements
   #==========================
   button    'new security group',             "#new-security-group"
-  button    'modify security group',          "#security-item-<id> .security-rules"
+  button    'edit security group',            "#security-item-<id> .edit-security-rules"
   button    'delete security group',          "#security-item-<id> .delete-security-group"  
   button    'Context Menu',                   xpath: "//tr[@id='security-item-<id>']/..//a[@class='dropdown-toggle']"
   form      'new security',                   "#new-security-group-modal"
   form      'security group rules',           "#security-group-rules-modal"
   link      'delete security group',          "#security-item-<id> .delete-security-group"
-  link      'modify security group',          "#security-item-<id> .security-rules"
-  link      'security group',                 "#security-item-<id> .security-rules"
+  link      'edit security group',          "#security-item-<id> .edit-security-rules"
+  link      'security group',                 "#security-item-<id> .edit-security-rules"
   element   'security groups',                "#security-groups-list"
   tab       'access security',                ".nav-tabs .access-and-security a"
   
@@ -61,7 +61,8 @@ class ProjectPage < WebClientPage
   field     'security group name',                "#new-security-name"
   field     'security group description',         "#new-security-description"
   button    'create security',                    "#create-security-group"
-  span      'new security form error',            "span.error[for='new-security-name'], span.error[for='new-security-description']"
+  message   'new security group form error',      "span.error[for='new-security-name'], span.error[for='new-security-description']"
+  span      'new security group form error',      "span.error[for='new-security-name'], span.error[for='new-security-description']"
   element   'security group form error message',  "#security-group-rules-form .error"
 
   #dropdown   'ip protocol',                   xpath: '//select[@id="ip-protocol"]/option[text()="<name>"]'
