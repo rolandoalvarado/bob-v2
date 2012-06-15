@@ -283,11 +283,11 @@ Then /^Fill in the (.+) field with (.+)$/ do |field_name, value|
 end
 
 
-Then /^Select OS image (.+) item from the images radiolist$/ do |imagename|
- if imagename == "(Any)"
+Then /^Select OS image (.+) item from the images radiolist$/ do |image_name|
+ if image_name == "(Any)"
    step "Choose the 1st item in the images radiolist"
  else
-   pending
+   step "Click the #{ image_name } image"
  end
 end
 
