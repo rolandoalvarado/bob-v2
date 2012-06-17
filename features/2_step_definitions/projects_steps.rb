@@ -71,8 +71,13 @@ Given /^I have a role of (.+) in the project$/ do |role_name|
           "in the feature file."
   end
 
+  user_attrs       = CloudObjectBuilder.attributes_for(
+                       :user,
+                       :name => Unique.username('rstark')
+                     )
   identity_service = IdentityService.session
-  user             = @current_user
+  user             = identity_service.ensure_user_exists(user_attrs)
+  EnvironmentCleaner.register(:user, user.id)
   identity_service.revoke_all_user_roles(user, @project)
 
   # Ensure user has the following role in the project
@@ -92,10 +97,9 @@ Given /^I have a role of (.+) in the project$/ do |role_name|
     end
   end
 
+  # Make variable(s) available for use in succeeding steps
   @current_user = user
-
 end
-
 
 Given /^I am authorized to create projects$/ do
   steps %{
