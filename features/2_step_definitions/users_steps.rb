@@ -124,7 +124,7 @@ Then /^I can create a user$/i do
 
     * Ensure that a user with username #{ new_user.name } does not exist
     * Ensure that a test project is available for use
-    * Ensure that I have a role of Project Manager in the test project
+    * Ensure that I have a role of Project Manager in the named project
 
     * Click the Logout button if currently logged in
     * Visit the Login page
@@ -184,7 +184,7 @@ Then /^I can create a user with attributes (.+), (.+), (.+), (.+), and (.+)$/i d
 
     * Ensure that a user with username #{ new_user.name } does not exist
     * Ensure that a test project is available for use
-    * Ensure that I have a role of Project Manager in the test project
+    * Ensure that I have a role of Project Manager in the named project
 
     * Click the Logout button if currently logged in
     * Visit the Login page
@@ -229,7 +229,7 @@ Then /^I cannot create a user with attributes (.+), (.+), (.+), (.+), and (.+)$/
 
     * Ensure that a user with username #{ new_user.name } does not exist
     * Ensure that a test project is available for use
-    * Ensure that I have a role of Project Manager in the test project
+    * Ensure that I have a role of Project Manager in the named project
 
     * Click the Logout button if currently logged in
     * Visit the Login page
@@ -294,7 +294,7 @@ Then /^I can edit a user$/i do
 
     * Ensure that a user with username #{ existing_user.name } and password 123qwe exists
     * Ensure that a test project is available for use
-    * Ensure that I have a role of Project Manager in the test project
+    * Ensure that I have a role of Project Manager in the named project
 
     * Click the Logout button if currently logged in
     * Visit the Login page
@@ -340,7 +340,7 @@ Then /^I can update a user with attributes (.+), (.+), (.+), (.+), and (.+)$/i d
     * Ensure that a user with username #{ existing_user.name } and password 123qwe exists
     * Ensure that a user with username #{ new_attrs.name } does not exist
     * Ensure that a test project is available for use
-    * Ensure that I have a role of Project Manager in the test project
+    * Ensure that I have a role of Project Manager in the named project
 
     * Click the Logout button if currently logged in
     * Visit the Login page
@@ -404,7 +404,7 @@ Then /^I cannot update a user with attributes (.+), (.+), (.+), (.+), and (.+)$/
     * Ensure that a user with username #{ existing_user.name } and password 123qwe exists
     * Ensure that a user with username #{ new_attrs.name } does not exist
     * Ensure that a test project is available for use
-    * Ensure that I have a role of Project Manager in the test project
+    * Ensure that I have a role of Project Manager in the named project
 
     * Click the Logout button if currently logged in
     * Visit the Login page
