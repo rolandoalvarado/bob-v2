@@ -74,7 +74,8 @@ Then /^an attached volume will be accessible from the instance$/ do
   compute_service.set_tenant @project
 
   # We need to ensure that there is a floating IP so we can connect to it via SSH later
-  floating_ip = compute_service.ensure_project_floating_ip_count(@project, 1, instance)
+  compute_service.ensure_project_floating_ip_count(@project, 1, instance)
+  floating_ip = compute_service.addresses.find { |a| a.instance_id == instance.id }
   raise "No floating IP associated to instance #{ instance.name }!" unless floating_ip
   compute_service.ensure_security_group_rule @project
 

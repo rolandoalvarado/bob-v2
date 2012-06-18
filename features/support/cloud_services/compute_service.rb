@@ -55,6 +55,19 @@ class ComputeService < BaseCloudService
   def delete_instance_in_project(project, instance)
     set_tenant project
 
+    if instance.state !~ /ACTIVE|ERROR/
+      case instance.state
+      when 'SUSPENDED'
+        service.resume_server(instance.id)
+      when 'PAUSED'
+        service.unpause_server(instance.id)
+      end
+
+      sleeping(1).seconds.between_tries.failing_after(30).tries do
+        raise "Some instances took too long to be ready for deletion." if instance.state !~ /ACTIVE|ERROR/
+      end
+    end
+
     associated_addresses = addresses.select { |a| a.instance_id == instance.id }
     associated_addresses.each do |address|
       service.disassociate_address(address.instance_id, address.ip)
@@ -68,8 +81,9 @@ class ComputeService < BaseCloudService
     end
 
     service.delete_server(instance.id)
-  rescue
-    raise "Couldn't delete instance #{ instance.name } in #{ project.name }"
+  rescue => e
+    raise "Couldn't delete instance #{ instance.name } in #{ project.name }. " +
+          "The error returned was: #{ e.inspect }."
   end
 
   def delete_instances_in_project(project)
@@ -87,6 +101,7 @@ class ComputeService < BaseCloudService
     if project_instances
       project_instances.each do |instance|
         deleted_instances << { name: instance.name, id: instance.id }
+        delete_instance_in_project(project, instance)
 
         # Detach any attached volumes
         attachments = attached_volumes.select{ |v| v.attachments.any?{ |a| a['serverId'] == instance.id } }
@@ -163,9 +178,9 @@ class ComputeService < BaseCloudService
   end
 
   def ensure_project_floating_ip_count(project, desired_count, instance=nil)
-    service.set_tenant project
+    set_tenant project
 
-    keep_trying do
+    sleeping(1).seconds.between_tries.failing_after(60).tries do
       addresses = service.addresses
       actual_count = addresses.count
 
@@ -189,9 +204,9 @@ class ComputeService < BaseCloudService
       end
 
       # Floating IPs should usually be associated to an instance
-      if instance
+      unless instance.nil? && instance.id.blank?
         desired_count.times do |n|
-          if addresses[n]
+          if addresses[n] && !addresses[n].ip.blank?
             service.associate_address(instance.id, addresses[n].ip)
             sleep(0.5)
           end
@@ -199,17 +214,13 @@ class ComputeService < BaseCloudService
       end
 
       addresses.reload
-      addresses = addresses.select { |a| a.instance_id == instance.id } if instance
+      addresses = addresses.select { |a| a.instance_id == instance.id } unless instance.nil? && instance.id.blank?
       if addresses.length != desired_count
         raise "Couldn't ensure that #{ project.name } has #{ desired_count } " +
               "floating IPs. Current number of floating IPs is #{ addresses.length }."
       end
 
-      if addresses.count == 1
-        addresses.first
-      elsif addresses.count > 1
-        addresses
-      end
+      return addresses.count
     end
   end
 

@@ -24,7 +24,8 @@ Feature: Suspend an Instance
         | Project Manager | Can Suspend           |
 
 
+  @test-delete-inst
   Scenario: Suspend an Instance
     Given I am authorized to suspend instances in the project
      Then I can suspend the instance
-      And I cannot connect to that instance via ssh
+      And I cannot assign a floating IP to that instance
