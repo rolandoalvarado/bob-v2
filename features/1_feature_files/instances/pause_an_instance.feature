@@ -22,7 +22,6 @@ Feature: Pause an Instance
         | Project Manager | Can Pause           |
         | System Admin    | Can Pause           |
 
-  @test-delete-inst
   Scenario: Pause an Instance
     Given I am authorized to pause instances in the project
      Then I can pause the instance in the project

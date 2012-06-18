@@ -24,7 +24,6 @@ Feature: Suspend an Instance
         | Project Manager | Can Suspend           |
 
 
-  @test-delete-inst
   Scenario: Suspend an Instance
     Given I am authorized to suspend instances in the project
      Then I can suspend the instance
