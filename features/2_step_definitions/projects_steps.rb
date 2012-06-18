@@ -412,26 +412,26 @@ Then /^I can delete (?:that|the) project$/i do
 
 end
 
-Then /^I cannot delete (?:that|the) project$/i do
-  steps %{
-    * Click the logout button if currently logged in
-    * Visit the login page
-    * Fill in the username field with #{ @current_user.name }
-    * Fill in the password field with #{ @current_user.password }
-    * Click the login button
+#Then /^I cannot delete (?:that|the) project$/i do
+#  steps %{
+#    * Click the logout button if currently logged in
+#    * Visit the login page
+#    * Fill in the username field with #{ @current_user.name }
+#    * Fill in the password field with #{ @current_user.password }
+#    * Click the login button
 
-    * Visit the projects page
-    * The #{ (@project || @project_attrs).name } project should be visible
+#    * Visit the projects page
+#    * The #{ (@project || @project_attrs).name } project should be visible
 
-  }
+#  }
 
-  # Deleting row in the page is asynchronous. So script has to wait 5 seconds.
+#  # Deleting row in the page is asynchronous. So script has to wait 5 seconds.
 
-  if ( @current_page.has_delete_project_link?(name: (@project || @project_attrs).name) )
-    raise "The project delete link should not have been created, but it seems that it was."
-  end
+#  if ( @current_page.has_delete_project_link?(name: (@project || @project_attrs).name) )
+#    raise "The project delete link should not have been created, but it seems that it was."
+#  end
 
-end
+#end
 
 Then /^I failed to delete (?:that|the) project$/i do
   steps %{
@@ -651,6 +651,36 @@ TestCase /^A user with a role of (.+) in a project cannot edit the instance quot
   }
 
 end
+
+TestCase /^I cannot delete (?:that|the) project$/i do
+  username      = Unique.username('bob')
+  password      = '123qwe'
+  project_name  = Unique.project_name('project')
+
+  Preconditions %{
+    * Ensure that a user with username #{ username } and password #{ password } exists
+    * Ensure that a project named #{ project_name } exists
+    * Ensure that the user #{ username } has a role of Member in the system
+  }
+
+  Cleanup %{
+    * Register the project named #{ project_name } for deletion at exit
+    * Register the user named #{ username } for deletion at exit
+  }
+  
+  Script %{
+
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ username }
+    * Fill in the Password field with #{ password }
+    * Click the Login button
+
+    * Visit the projects page
+    * The #{ project_name } project should not be visible
+  }
+end
+
 
 
 TestCase /^Project can be updated the quota of the project with (.+) , (.+) and (.+)$/i do |floating_ips,volumes,cores|
