@@ -562,6 +562,13 @@ Then /^The (.+) link should not be visible$/ do |link_name|
   end
 end
 
+Step /^The (.+) button should not be visible$/ do |button_name|
+  button_name = button_name.split.join('_').downcase
+  if @current_page.send("has_#{ button_name }_button?")
+    raise "The '#{ button_name.gsub('_',' ') }' button should not be visible, but it is."
+  end
+end
+
 Then /^The (.+) message should be visible$/ do |message_name|
   message_name = message_name.split.join('_').downcase
   unless @current_page.send("has_#{ message_name }_message?")
