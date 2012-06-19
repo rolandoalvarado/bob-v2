@@ -23,7 +23,7 @@ class ProjectPage < WebClientPage
   field     'password',                           '#password'
   row       'instance',                           '#instances-template .table-list #instance-item-<id>'
   form      'resize instance',                    '#resize-instance-modal'
-
+  element 'project name',                         "td.project-details[title='<name>']"
   #==========================
   # Edit Quota Elements
   #==========================
