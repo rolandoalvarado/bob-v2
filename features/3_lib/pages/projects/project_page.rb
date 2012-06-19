@@ -168,9 +168,10 @@ class ProjectPage < WebClientPage
 
   button    'confirm instance deletion',          '#alert-template .okay'
   button    'confirm instance reboot',            "#alert-template .okay"
-  button    'confirm instance resize',            "#resize-instance-modal .action-resize-instance"
+  button    'confirm instance resize',            "#resize-instance"
 
   element   'image',                              xpath: "//*[@id='instances-list']//label[text()='<name>']"
+
 
   #==========================
   # Collaborators

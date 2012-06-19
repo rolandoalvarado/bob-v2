@@ -312,6 +312,7 @@ Then /^I can connect to that instance via (.+)/ do |remote_client|
   compute_service.ensure_security_group_rule @project
 
   floating_ip = compute_service.addresses.find { |a| a.instance_id == @instance.id }
+  raise "Couldn't find a floating IP associated with instance #{ @instance.name }!" unless floating_ip
 
   steps %{
     * Click the logout button if currently logged in
@@ -334,6 +335,7 @@ Then /^I cannot connect to that instance via (.+)/ do |remote_client|
   compute_service.ensure_security_group_rule @project
 
   floating_ip = compute_service.addresses.find { |a| a.instance_id == @instance.id }
+  raise "Couldn't find a floating IP associated with instance #{ @instance.name }!" unless floating_ip
 
   steps %{
     * Click the logout button if currently logged in
@@ -378,7 +380,7 @@ end
 
 Then /^I [Cc]an [Dd]elete an instance in the project$/ do
   compute_service = ComputeService.session
-  compute_service.service.set_tenant @project
+  compute_service.set_tenant @project
   instance        = compute_service.instances.first
 
   steps %{
@@ -401,8 +403,8 @@ end
 
 Then /^I [Cc]an [Pp]ause the instances?(?:| in the project)$/ do
   compute_service = ComputeService.session
-  compute_service.service.set_tenant @project
-  instance        = compute_service.instances.find { |i| i.state == 'ACTIVE' }
+  compute_service.set_tenant @project
+  @instance       = compute_service.instances.find { |i| i.state == 'ACTIVE' }
 
   steps %{
     * Click the logout button if currently logged in
@@ -415,16 +417,16 @@ Then /^I [Cc]an [Pp]ause the instances?(?:| in the project)$/ do
     * Visit the projects page
     * Click the #{ @project.name } project
 
-    * Click the instance menu button for instance #{ instance.id }
-    * Click the pause instance button for instance #{ instance.id }
+    * Click the instance menu button for instance #{ @instance.id }
+    * Click the pause instance button for instance #{ @instance.id }
 
-    * The instance #{ instance.id } should be of paused status
+    * The instance #{ @instance.id } should be of paused status
   }
 end
 
 Then /^I [Cc]an [Rr]eboot an instance in the project$/ do
   compute_service = ComputeService.session
-  compute_service.service.set_tenant @project
+  compute_service.set_tenant @project
   instance        = compute_service.instances.find { |i| i.state == 'ACTIVE' }
 
   steps %{
@@ -448,9 +450,9 @@ end
 
 Then /^I [Cc]an [Rr]esize (?:that|the) instance$/ do
   compute_service = ComputeService.session
-  compute_service.service.set_tenant @project
+  compute_service.set_tenant @project
   instance        = compute_service.instances.find { |i| i.state == 'ACTIVE' }
-  old_flavor      = instance.flavor
+  old_flavor      = compute_service.flavors.find { |f| f.id == instance.flavor['id'].to_s }
 
   steps %{
     * Click the logout button if currently logged in
@@ -466,15 +468,17 @@ Then /^I [Cc]an [Rr]esize (?:that|the) instance$/ do
     * Click the instance menu button for instance #{ instance.id }
     * Click the resize instance button for instance #{ instance.id }
     * Current page should have the resize instance form
-    * Drag the instance flavor slider to the left
+    * Drag the instance flavor slider to a different flavor
     * Click the confirm instance resize button
+
+    * The instance #{ instance.id } should be in resizing status
     * The instance #{ instance.id } should not have flavor #{ old_flavor.name }
   }
 end
 
 Then /^I [Cc]an [Rr]esume the instance$/ do
   compute_service = ComputeService.session
-  compute_service.service.set_tenant @project
+  compute_service.set_tenant @project
   instance        = compute_service.instances.find { |i| i.state == 'SUSPENDED' }
 
   steps %{
@@ -497,7 +501,7 @@ end
 
 Then /^I [Cc]an [Ss]uspend (?:an|the) instance(?:| in the project)$/ do
   compute_service = ComputeService.session
-  compute_service.service.set_tenant @project
+  compute_service.set_tenant @project
   @instance       = compute_service.instances.find { |i| i.state == 'ACTIVE' }
 
   steps %{
@@ -520,7 +524,7 @@ end
 
 Then /^I [Cc]an [Uu]npause (?:that|the) instance$/ do
   compute_service = ComputeService.session
-  compute_service.service.set_tenant @project
+  compute_service.set_tenant @project
   instance        = compute_service.instances.find { |i| i.state == 'PAUSED' }
 
   steps %{
@@ -543,7 +547,7 @@ end
 
 Then /^I [Cc]an [Vv]iew console output of the instance$/ do
   compute_service = ComputeService.session
-  compute_service.service.set_tenant @project
+  compute_service.set_tenant @project
   instance        = compute_service.instances.find { |i| i.state == 'ACTIVE' }
 
   steps %{
@@ -566,7 +570,7 @@ end
 
 Then /^I [Cc]an [Vv]iew the instance's web-based VNC console$/ do
   compute_service = ComputeService.session
-  compute_service.service.set_tenant @project
+  compute_service.set_tenant @project
   instance        = compute_service.instances.find { |i| i.state == 'ACTIVE' }
 
   steps %{
@@ -584,6 +588,35 @@ Then /^I [Cc]an [Vv]iew the instance's web-based VNC console$/ do
     * Click the VNC console button for instance #{ instance.id }
 
     * A new window should show the instance's VNC console
+  }
+end
+
+Then /^I cannot assign a floating IP to (?:that|the) instance$/ do
+  compute_service = ComputeService.session
+  compute_service.set_tenant @project
+  addresses       = compute_service.addresses
+
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * Click the #{ @project.name } project
+
+    * Click the access security tab
+    * Click the new floating IP allocation button
+    * Current page should have the new floating IP allocation form
+
+    * The instance dropdown should not have the item with text #{ @instance.name }
+
+    * Click the create floating IP allocation button
+
+    * The floating IPs table should have #{ addresses.count + 1 } rows
+    * The floating IPs table's last row should not include the text #{ @instance.name }
   }
 end
 
@@ -612,9 +645,9 @@ Then /^the instance is publicly accessible via that floating IP$/ do
 end
 
 Then /^the instance should be resized$/i do
-  old_flavor = @instance.flavor
+  old_flavor = ComputeService.session.flavors.find { |f| f.id == @instance.flavor['id'].to_s }
   step %{
-    * The instance #{ @instance.id } should not have flavor #{ old_flavor }
+    * The instance #{ @instance.id } should not have flavor #{ old_flavor.name }
   }
 end
 

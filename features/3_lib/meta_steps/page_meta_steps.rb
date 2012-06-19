@@ -257,15 +257,15 @@ Then /^Current page should have the (.+) security group$/ do |security_group|
 end
 
 Then /^Drag the instance flavor slider to a different flavor$/ do
-  @current_page.execute_script %{
+  @current_page.session.execute_script %{
     var slider = $('#flavor-slider'),
       value = slider.slider('option', 'value'),
       min = slider.slider('option', 'min'),
       max = slider.slider('option', 'max');
 
     // change value to min or max
-    if(value > min) { slider.slider('option', 'value', min); }
-    else if(value < max) { slider.slider('option', 'value', max); }
+    if(value < max) { slider.slider('option', 'value', value + 1); }
+    else if(value == max) { slider.slider('option', 'value', min); }
   }
 end
 
@@ -394,6 +394,13 @@ Then /^The (.+) button should be disabled$/ do |button_name|
   button_name = button_name.split.join('_').downcase
   unless @current_page.send("has_disabled_#{ button_name }_button?")
     raise "Couldn't find disabled #{ button_name } button."
+  end
+end
+
+Then /^The (.+) dropdown should not have the item with text (.+)$/ do |dropdown_name, item_text|
+  dropdown_name = dropdown_name.split.join('_').downcase
+  if @current_page.send("#{ dropdown_name }_dropdown_items").find { |d| d.text == item_text }
+    raise "Expected to not find the dropdown option '#{ item_text }'."
   end
 end
 
@@ -665,6 +672,17 @@ Then /^The (.+) table's last row should include the text (.+)$/ do |table_name, 
     table_rows = @current_page.send("#{ table_name }_table").all('tbody tr')
     unless table_rows.last.has_content?(text)
       raise "Couldn't find the text '#{ text }' in the last row of the #{ table_name } table."
+    end
+  end
+end
+
+
+Then /^The (.+) table's last row should not include the text (.+)$/ do |table_name, text|
+  sleeping(1).seconds.between_tries.failing_after(5).tries do
+    table_name = table_name.split.join('_').downcase
+    table_rows = @current_page.send("#{ table_name }_table").all('tbody tr')
+    unless table_rows.last.has_no_content?(text)
+      raise "Found the text '#{ text }' in the last row of the #{ table_name } table."
     end
   end
 end
