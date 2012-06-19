@@ -123,11 +123,12 @@ class ProjectPage < WebClientPage
   span      'new volume form error',              'span.error[for="name"], span.error[for="appendedInput"]'
 
 # Type      Name                                  Selector
-  button    'attach volume',                      '#volume-item-<id> #attach'
+  button    'attach volume',                      '#volume-item-<id> .attach'
   form      'attach volume',                      '#attach-volume-modal'
   dropdown  'attachable instance',                '#attach-volume-modal #instance'
-  button    'confirm volume attachment',          '#attach-volume-modal .attach-volume'
-  button    'detach volume',                      '#volume-item-<id> #detach'
+  button    'confirm volume attachment',          '#attach-volume'
+  button    'volume attach confirmation',         '#attach-volume'
+  button    'detach volume',                      '#volume-item-<id> .detach'
   button    'volume detach confirmation',         '#alert-template .okay'
   row       'volume',                             '#volume-item-<id>'
 
