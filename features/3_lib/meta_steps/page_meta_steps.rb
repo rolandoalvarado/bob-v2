@@ -126,6 +126,11 @@ Then /^Click the (.+) button for security group (.+)$/ do |button_name, security
   @current_page.send("#{ button_name }_button", id: security_group_id).click
 end
 
+Step /^Click the (.+) button for user (.+)$/ do |button_name, user_id|
+  button_name = button_name.split.join('_').downcase
+  @current_page.send("#{ button_name }_button", id: user_id).click
+end
+
 Then /^Click the (.+) button for volume snapshot named (.+)$/ do |button_name, snapshot_name|
   button_name = button_name.split.join('_').downcase
   @current_page.send("#{ button_name }_button", name: snapshot_name).click
@@ -231,6 +236,14 @@ Then /^Current page should have the security groups$/ do
     raise "Current page doesn't have security groups."
   end
 end
+
+
+Then /^Current page should have the users$/ do
+  unless @current_page.has_users_element?
+    raise "Current page doesn't have users."
+  end
+end
+
 
 Then /^Current page should have the new security group rule$/ do
   unless @current_page.has_security_groups_element?

@@ -105,6 +105,7 @@ class ProjectPage < WebClientPage
 # Type      Name                                  Selector
   button    'volume menu',                        '#volume-item-<id> .dropdown-toggle'
   button    'volume context menu',                '#volume-item-<id> .dropdown-toggle'
+  #button    'volume delete',                      '#volume-item-<id> a[data-action="delete-volume"]'
   button    'new volume snapshot',                '#volume-item-<id> #create-snapshot'
   form      'new volume snapshot',                '#new-volume-snapshot-modal'
   field     'volume snapshot name',               '#new-volume-snapshot-modal #name'
