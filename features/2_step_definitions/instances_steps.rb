@@ -41,7 +41,7 @@ When /^I assign a floating IP to the instance$/ do
     * Click the access security tab
     * Click the new floating IP allocation button
     * Current page should have the new floating IP allocation form
-    * Choose the 2nd item in the pool dropdown
+    * Choose the 1st item in the pool dropdown
     * Choose the 2nd item in the instance dropdown
     * Click the create floating IP allocation button
 
@@ -53,6 +53,8 @@ When /^I assign a floating IP to the instance$/ do
   @floating = addresses.find {|a| a.instance_id == instance.id}
 
   raise "No floating IP associated to instance #{ instance.name }" if @floating.nil?
+  
+  @instance = instance
 end
 
 When /^I create an instance on that project based on the image (.+)$/ do |image_name|
@@ -281,7 +283,7 @@ Then /^I [Cc]an [Aa]ssign a floating IP to an instance in the project$/ do
     * Click the access security tab
     * Click the new floating IP allocation button
     * Current page should have the new floating IP allocation form
-    * Choose the 2nd item in the pool dropdown
+    * Choose the 1st item in the pool dropdown
     * Choose the 2nd item in the instance dropdown
     * Click the create floating IP allocation button
 
@@ -635,9 +637,10 @@ end
 Then /^the instance is publicly accessible via that floating IP$/ do
   compute_service = ComputeService.session
   compute_service.ensure_security_group_rule @project
-
+  remote_client = 'SSH'
+  
   steps %{
-    * Connect to instance with floating IP #{ @floating.id } via SSH
+    * Connect to the instance named #{@instance.name} in project #{@project} via #{remote_client}
   }
 end
 
