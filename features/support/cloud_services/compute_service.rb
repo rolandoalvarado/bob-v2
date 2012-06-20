@@ -14,10 +14,11 @@ class ComputeService < BaseCloudService
 
   def attach_volume_to_instance_in_project(project, instance, volume)
     set_tenant project, false
-    volume = volumes.find { |v| v.id == volume['id'].to_i }
+    volume      = volumes.find { |v| v.id == volume['id'].to_i }
+    device_name = "/dev/vd#{ ('a'..'z').to_a.sample(2).join }"
 
     sleeping(0.5).seconds.between_tries.failing_after(10).tries do
-      service.attach_volume(volume.id, instance.id, '/dev/vdc')
+      service.attach_volume(volume.id, instance.id, device_name)
 
       unless volume.attachments.any? { |a| a['serverId'] == instance.id }
         raise "Couldn't ensure that instance #{ instance.name } has attached volume #{ volume.name }!"
