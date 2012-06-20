@@ -41,8 +41,24 @@ Step /^Ensure that the project named (.+) has a volume named (.+)$/ do |project_
   project = IdentityService.session.find_project_by_name(project_name)
   raise "#{ project_name } couldn't be found!" unless project
 
-  VolumeService.session.create_volume_in_project(project, :name => volume_name)
+  VolumeService.session.create_volume_in_project(project, name: volume_name)
+  volume = VolumeService.session.find_volume_by_name(project, volume_name)
+  raise "Volume #{ volume_name } couldn't be found!" unless volume
 end
+
+
+Step /^Ensure that the project named (.+) has an available volume named (.+)$/ do |project_name, volume_name|
+  project = IdentityService.session.find_project_by_name(project_name)
+  raise "#{ project_name } couldn't be found!" unless project
+
+  VolumeService.session.create_volume_in_project(project, name: volume_name)
+  if volume = VolumeService.session.find_volume_by_name(project, volume_name)
+    raise "Volume #{ volume_name } was found but is not available!" if volume['status'] != 'available'
+  else
+    raise "Volume #{ volume_name } couldn't be found!"
+  end
+end
+
 
 Step /^Ensure that the volume named (.+) is attached to the (\d+)(?:st|nd|rd|th) instace of the project named (.+)$/ do |volume_name, nth_instance, project_name|
   index = nth_instance.to_i - 1
