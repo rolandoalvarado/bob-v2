@@ -175,7 +175,6 @@ end
 
 Step /^Click the (attach|delete|detach) button of the volume named (.+)$/ do |button_name, volume_name|
   volume = VolumeService.session.volumes.find { |v| v['display_name'] == volume_name }
-
   raise "Couldn't find a volume named '#{ volume_name }'" unless volume
 
   button_name = button_name.split.join('_')
