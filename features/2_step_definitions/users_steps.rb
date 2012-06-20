@@ -38,9 +38,8 @@ Given /^A user named (.+) exists in the system$/ do |user_name|
                        :user,
                        :name => Unique.username(user_name)
                      )
-  identity_service = IdentityService.session
 
-  user             = identity_service.ensure_user_exists(user_attrs)
+  user             = IdentityService.session.ensure_user_exists(user_attrs)
 
   if user.nil? or user.id.empty?
     raise "User couldn't be initialized!"

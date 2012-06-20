@@ -232,6 +232,13 @@ Then /^Current page should have the security groups$/ do
   end
 end
 
+
+Then /^Current page should have the new collaborator$/ do
+  unless @current_page.has_collaborator_element?
+    raise "Current page doesn't have collaborator."
+  end
+end
+
 Then /^Current page should have the new security group rule$/ do
   unless @current_page.has_security_groups_element?
     raise "Current page doesn't have security groups."

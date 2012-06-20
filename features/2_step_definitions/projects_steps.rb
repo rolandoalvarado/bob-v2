@@ -315,7 +315,9 @@ Then /^I Can Create a project$/ do
 end
 
 Then /^I can grant project membership to (.+)$/i do |username|
-
+  
+  user = @user
+  
   steps %{
 
     * Click the logout button if currently logged in
@@ -332,10 +334,9 @@ Then /^I can grant project membership to (.+)$/i do |username|
     * Click the add collaborator button
     * Click the collaborators tab
     * Click the add collaborator button
-    * Select Collaborator #{username}
-    * Click the add collaborator action button
-    * The collaborators table should include the text #{ username }
-
+    * Fill in the email field with #{ user.email }
+    * Click the add collaborator button
+    * Current page should have the new collaborator
   }
 
 end
@@ -351,10 +352,7 @@ Then /^I cannot grant project membership to (.+)$/i do |username|
     * Click the login button
 
     * Visit the projects page
-    * The #{ (@project || @project_attrs).name  } project should be visible
-    * Click the #{ (@project || @project_attrs).name } project
-
-    * The collaborators tab should be disabled
+    * The #{ (@project || @project_attrs).name } project should not be visible
    }
 
 end
@@ -519,8 +517,8 @@ Then /^(?:She|He) can view the project$/ do
     * Click the logout button if currently logged in
 
     * Visit the login page
-    * Fill in the username field with #{ @user.name }
-    * Fill in the password field with #{ @user.password }
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
     * Click the login button
 
     * Visit the projects page

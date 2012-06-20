@@ -179,8 +179,14 @@ class ProjectPage < WebClientPage
   tab       'collaborators',                      '.nav-tabs .collaborators a'
   tab       'disabled collaborators',             '.nav-tabs .collaborators.disabled'
   button    'add collaborator',                   '#add-collaborator:not(.disabled)'
-  option    'collaborator',                       xpath: '//*[@class="chzn-drop"]//li[text()="<name>"]'
-  button    'add collaborator action',            '#add-collaborator-modal .action-add'
-  table     'collaborators',                      '#users-template tbody'
+  option    'collaborator',                       xpath: '//*[@class="chzn-drop"]//*[li[text()="<name>"]]'
+  button    'add collaborator',                   'a.btn-primary'
+  table     'collaborators',                      xpath: "//*[tr[@class='user']]/td[normalize-space(text())='<name>']"
 
+  dropdown  'Users',                              "#user-id"
+  field     'email',                              xpath: '//form[@id="add-collaborator-form"]//input[@class="default"]'
+  option    'email',                              xpath: '//select[@id="user-id"]/option[@value="<name>"]'
+  link      'user',                               xpath: '//*[@class="chzn-drop"]//*[li[text()="<name>"]]'
+  row       'User',                               xpath: "//*[@id='users-list']//td[normalize-space(text())=\"<name>\"]/.."
+  element   'collaborator',                       "#users-list"
 end
