@@ -177,7 +177,7 @@ When /^I edit the project's attributes to (.*), (.*)$/ do |name, desc|
             :description => desc
           )
           
-  IdentityService.session.ensure_project_exists(attrs)      
+  project = IdentityService.session.ensure_project_exists(attrs)      
 
   steps %{
     * Click the logout button if currently logged in
@@ -198,7 +198,8 @@ When /^I edit the project's attributes to (.*), (.*)$/ do |name, desc|
   # Register created project for post-test deletion
   created_project = IdentityService.session.find_project_by_name(attrs.name)
   EnvironmentCleaner.register(:project, created_project.id) if created_project
-
+  EnvironmentCleaner.register(:project, project.id) if project
+  
   # Make the project name available to subsequent steps
   @project_attrs = @project
 
@@ -443,7 +444,7 @@ Then /^I can edit (?:that|the) project$/i do
             :description => 'Succucessed MCF-26'
           )
           
-  IdentityService.session.ensure_project_exists(attrs)   
+  project = IdentityService.session.ensure_project_exists(attrs)   
   
   steps %{
 
@@ -464,6 +465,7 @@ Then /^I can edit (?:that|the) project$/i do
   # Register created project for post-test deletion
   created_project = IdentityService.session.find_project_by_name(attrs.name)
   EnvironmentCleaner.register(:project, created_project.id) if created_project
+  EnvironmentCleaner.register(:project, project.id) if project
 
   # Make project attributes available to subsequent steps
   @project_attrs = attrs
