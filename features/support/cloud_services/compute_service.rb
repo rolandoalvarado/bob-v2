@@ -17,8 +17,16 @@ class ComputeService < BaseCloudService
     volume      = volumes.find { |v| v.id == volume['id'].to_i }
     device_name = "/dev/vd#{ ('a'..'z').to_a.sample(2).join }"
 
-    sleeping(0.5).seconds.between_tries.failing_after(10).tries do
-      service.attach_volume(volume.id, instance.id, device_name)
+    sleeping(1).seconds.between_tries.failing_after(10).tries do
+      raise "Instance #{ instance.name } is not active!" if instance.state != 'ACTIVE'
+      raise "Volume #{ volume.name } is not available!" if volume.status != 'available'
+
+      begin
+        service.attach_volume(volume.id, instance.id, device_name)
+      rescue => e
+        raise "Couldn't attach volume #{ volume.name } to instance #{ instance.name }! " +
+              "The error returned was: #{ e.inspect }"
+      end
 
       unless volume.attachments.any? { |a| a['serverId'] == instance.id }
         raise "Couldn't ensure that instance #{ instance.name } has attached volume #{ volume.name }!"

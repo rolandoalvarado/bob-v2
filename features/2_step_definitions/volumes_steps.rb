@@ -412,8 +412,8 @@ TestCase /^Volumes that are attached to an instance cannot be deleted$/i do
     * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
     * Ensure that a project named #{ test_project_name } exists
     * Ensure that the project named #{ test_project_name } has 1 instance
-    * Ensure that the project named #{ test_project_name } has a volume named #{ test_volume_name }
-    * Ensure that the volume named #{ test_volume_name } is attached to the 1st instace of the project named #{ test_project_name }
+    * Ensure that the project named #{ test_project_name } has an available volume named #{ test_volume_name }
+    * Ensure that the volume named #{ test_volume_name } is attached to the instance named #{ test_instance_name } in the project #{ test_project_name }
     * Ensure that the user #{ bob_username } has a role of Project Manager in the project #{ test_project_name }
   }
 
@@ -441,47 +441,48 @@ end
 
 TestCase /^Volumes that are attached to an instance will be accessible from the instance$/ do
 
-  username      = Unique.username('bob')
-  password      = '123qwe'
-  project_name  = Unique.project_name('test')
-  instance_name = Unique.instance_name('test')
-  volume_name   = Unique.volume_name('test')
   @time_started = Time.now
 
   Preconditions %{
-    * Ensure that a user with username #{ username } and password #{ password } exists
-    * Ensure that a project named #{ project_name } exists
-    * Ensure that the project named #{ project_name } has an instance named #{ instance_name }
-    * Ensure that the project named #{ project_name } has a volume named #{ volume_name }
-    * Ensure that the instance named #{ instance_name } has an attached volume named #{ volume_name } in the project #{ project_name }
-    * Ensure that the user #{ username } has a role of Member in the project #{ project_name }
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that the project named #{ test_project_name } has an instance named #{ test_instance_name }
+    * Ensure that the project named #{ test_project_name } has a volume named #{ test_volume_name }
+    * Ensure that the user #{ bob_username } has a role of Member in the project #{ test_project_name }
   }
 
   Cleanup %{
-    * Register the project named #{ project_name } for deletion at exit
-    * Register the user named #{ username } for deletion at exit
+    * Register the project named #{ test_project_name } for deletion at exit
+    * Register the user named #{ bob_username } for deletion at exit
   }
 
   Script %{
     * Click the Logout button if currently logged in
     * Visit the Login page
-    * Fill in the Username field with #{ username }
-    * Fill in the Password field with #{ password }
+    * Fill in the Username field with #{ bob_username }
+    * Fill in the Password field with #{ bob_password }
     * Click the Login button
 
     * Click the Projects link
-    * Click the #{ project_name } project
+    * Click the #{ test_project_name } project
 
-    * Click the instances and volumes tab
-    * Click the attach button of the volume named #{ volume_name }
+    * Click the attach button of the volume named #{ test_volume_name }
     * Current page should have the attach volume form
-    * Choose the item with text #{ instance_name } in the attachable instance dropdown
+    * Choose the item with text #{ test_instance_name } in the attachable instance dropdown
     * Click the volume attach confirmation button
 
-    * The volume named #{ volume_name } should be attached to the instance named #{ instance_name }
+    * The volume named #{ test_volume_name } should be attached to the instance named #{ test_instance_name }
 
     * Click the access security tab
-    * A new device file should have been created on the instance named #{ instance_name } in project #{ project_name }
+    * Click the new floating IP allocation button
+    * Current page should have the new floating IP allocation form
+    * Choose the item with text #{ test_instance_name } in the instance dropdown
+    * Click the create floating IP allocation button
+
+    * The floating IPs table should have 1 row
+    * The floating IP should be associated to instance #{ test_instance_name }
+
+    * A new device file should have been created on the instance named #{ test_instance_name } in project #{ test_project_name }
   }
 
 end

@@ -39,12 +39,26 @@ Step /^Ensure that the project named (.+) has an active instance named (.+)$/ do
   end
 end
 
-Step /^Ensure that the project named (.+) has (.+) active (?:instance|instances)/ do |project_name, desired_count|
+
+Step /^Ensure that the project named (.+) has (?:a|an) (active|paused|suspended) instance named (.+)$/ do |project_name, status, instance_name|
+  project = IdentityService.session.find_project_by_name(project_name)
+  raise "#{ project_name } couldn't be found!" unless project
+
+  ComputeService.session.create_instance_in_project(project, name: instance_name)
+
+  if instance = ComputeService.session.find_instance_by_name(project, instance_name)
+    raise "Instance #{ instance_name } was found, but is not #{ status }!" unless instance.state == status.upcase
+  else
+    raise "Instance #{ instance_name } couldn't be found!"
+  end
+end
+
+Step /^Ensure that the project named (.+) has (\d+) (active|paused|suspended) (?:instance|instances)/ do |project_name, status, desired_count|
   desired_count = desired_count.to_i
 
   project = IdentityService.session.find_project_by_name(project_name)
   raise "#{ project_name } couldn't be found!" unless project
 
-  actual_count = ComputeService.session.ensure_active_instance_count(project, desired_count)
-  raise "Couldn't ensure #{ project.name } has #{ desired_count } active instances" unless actual_count == desired_count
+  actual_count = ComputeService.session.send(:"ensure_#{ status }_instance_count", project, desired_count)
+  raise "Couldn't ensure #{ project.name } has #{ desired_count } #{ status } instances" unless actual_count == desired_count
 end
