@@ -338,7 +338,7 @@ TestCase /^A user with a role of (.+) in a project can detach any of its volumes
     * Ensure that a user with username #{ username } and password #{ password } exists
     * Ensure that a project named #{ project_name } exists
     * Ensure that the project named #{ project_name } has an instance named #{ instance_name }
-    * Ensure that the project named #{ project_name } has a volume named #{ volume_name }
+    * Ensure that the project named #{ project_name } has an available volume named #{ volume_name }
     * Ensure that the user #{ username } has a role of #{ role_name } in the project #{ project_name }
   }
 
@@ -383,7 +383,7 @@ TestCase /^A user with a role of (.+) in a project cannot (?:attach|delete|detac
   Preconditions %{
     * Ensure that a user with username #{ username } and password #{ password } exists
     * Ensure that a project named #{ project_name } exists
-    * Ensure that the project named #{ project_name } has a volume named #{ volume_name }
+    * Ensure that the project named #{ project_name } has an available volume named #{ volume_name }
     * Ensure that the user #{ username } has a role of #{ role_name } in the project #{ project_name }
   }
 
@@ -399,7 +399,8 @@ TestCase /^A user with a role of (.+) in a project cannot (?:attach|delete|detac
     * Fill in the Password field with #{ password }
     * Click the Login button
 
-    * The Projects link should not be visible
+    * Visit the projects page
+    * The #{ project_name } project should not be visible
   }
 
 end
