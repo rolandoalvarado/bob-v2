@@ -23,7 +23,7 @@ class ProjectPage < WebClientPage
   field     'password',                           '#password'
   row       'instance',                           '#instances-template .table-list #instance-item-<id>'
   form      'resize instance',                    '#resize-instance-modal'
-
+  element 'project name',                         "td.project-details[title='<name>']"
   #==========================
   # Edit Quota Elements
   #==========================
@@ -105,6 +105,7 @@ class ProjectPage < WebClientPage
 # Type      Name                                  Selector
   button    'volume menu',                        '#volume-item-<id> .dropdown-toggle'
   button    'volume context menu',                '#volume-item-<id> .dropdown-toggle'
+  #button    'volume delete',                      '#volume-item-<id> a[data-action="delete-volume"]'
   button    'new volume snapshot',                '#volume-item-<id> #create-snapshot'
   form      'new volume snapshot',                '#new-volume-snapshot-modal'
   field     'volume snapshot name',               '#new-volume-snapshot-modal #name'
@@ -145,8 +146,8 @@ class ProjectPage < WebClientPage
   button    'create floating IP allocation',      '#allocate'
   table     'floating IPs',                       '#floating-ip-list'
   row       'floating IP',                        '#floating-ip-list #floating-ip-item-<id>'
-  row       'associated floating IP', xpath:      "//*[@id='floating-ip-list']//*[@class='instance' and text()=\"<name>\"]/.."
-
+  #row       'associated floating IP', xpath:      "//*[@id='floating-ip-list']//*[@class='floating-ip' and text()=\"<name>\"]/.."
+  row       'associated floating IP',              xpath: "//*[@id='floating-ip-list']//td[contains(@class, 'instance') and normalize-space(text())=\"<name>\"]/.."
   row       'instance',                           '#instances-template .table-list #instance-item-<id>'
   form      'resize instance',                    '#resize-instance-modal'
 
@@ -168,9 +169,10 @@ class ProjectPage < WebClientPage
 
   button    'confirm instance deletion',          '#alert-template .okay'
   button    'confirm instance reboot',            "#alert-template .okay"
-  button    'confirm instance resize',            "#resize-instance-modal .action-resize-instance"
+  button    'confirm instance resize',            "#resize-instance"
 
   element   'image',                              xpath: "//*[@id='instances-list']//label[text()='<name>']"
+
 
   #==========================
   # Collaborators

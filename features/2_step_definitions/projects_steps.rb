@@ -169,13 +169,15 @@ When /^I create a project with attributes (.*), (.*)$/ do |name, desc|
   @project_attrs = attrs
 end
 
-When /^I edit the project.s attributes to (.*), (.*)$/ do |name, desc|
+When /^I edit the project's attributes to (.*), (.*)$/ do |name, desc|
 
   attrs = CloudObjectBuilder.attributes_for(
             :project,
             :name        => name.downcase == '(none)' ? name : Unique.name(name),
             :description => desc
           )
+          
+  project = IdentityService.session.ensure_project_exists(attrs)      
 
   steps %{
     * Click the logout button if currently logged in
@@ -187,7 +189,7 @@ When /^I edit the project.s attributes to (.*), (.*)$/ do |name, desc|
 
     * Visit the projects page
 
-    * Edit the #{@project.name} project
+    * Edit the #{@project} project
     * Fill in the project name field with #{ attrs.name }
     * Fill in the project description field with #{ attrs.description }
     * Click the modify project button
@@ -196,9 +198,10 @@ When /^I edit the project.s attributes to (.*), (.*)$/ do |name, desc|
   # Register created project for post-test deletion
   created_project = IdentityService.session.find_project_by_name(attrs.name)
   EnvironmentCleaner.register(:project, created_project.id) if created_project
-
+  EnvironmentCleaner.register(:project, project.id) if project
+  
   # Make the project name available to subsequent steps
-  @project_attrs = attrs
+  @project_attrs = @project
 
 end
 
@@ -410,26 +413,6 @@ Then /^I can delete (?:that|the) project$/i do
 
 end
 
-Then /^I cannot delete (?:that|the) project$/i do
-  steps %{
-    * Click the logout button if currently logged in
-    * Visit the login page
-    * Fill in the username field with #{ @current_user.name }
-    * Fill in the password field with #{ @current_user.password }
-    * Click the login button
-
-    * Visit the projects page
-    * The #{ (@project || @project_attrs).name } project should be visible
-
-  }
-
-  # Deleting row in the page is asynchronous. So script has to wait 5 seconds.
-
-  if ( @current_page.has_delete_project_link?(name: (@project || @project_attrs).name) )
-    raise "The project delete link should not have been created, but it seems that it was."
-  end
-
-end
 
 Then /^I failed to delete (?:that|the) project$/i do
   steps %{
@@ -452,6 +435,15 @@ Then /^I failed to delete (?:that|the) project$/i do
 end
 
 Then /^I can edit (?:that|the) project$/i do
+  
+  attrs = CloudObjectBuilder.attributes_for(
+            :project,
+            :name        => 'MCF-26_EDIT_PROJECT',
+            :description => 'Succucessed MCF-26'
+          )
+          
+  project = IdentityService.session.ensure_project_exists(attrs)   
+  
   steps %{
 
     * Click the logout button if currently logged in
@@ -467,27 +459,17 @@ Then /^I can edit (?:that|the) project$/i do
     * Fill in the project description field with "editting project"
     * Click the modify project button
   }
+  
+  # Register created project for post-test deletion
+  created_project = IdentityService.session.find_project_by_name(attrs.name)
+  EnvironmentCleaner.register(:project, created_project.id) if created_project
+  EnvironmentCleaner.register(:project, project.id) if project
+
+  # Make project attributes available to subsequent steps
+  @project_attrs = attrs
 
 end
 
-
-Then /^I [Cc]annot [Ee]dit (?:that|the) project$/ do
-
-  steps %{
-    * Click the logout button if currently logged in
-    * Visit the login page
-    * Fill in the username field with #{ @current_user.name }
-    * Fill in the password field with #{ @current_user.password }
-    * Click the login button
-
-    * Visit the projects page
-    * The #{ (@project || @project_attrs).name } project should be visible
-    * The edit project link should be disabled with #{(@project || @project_attrs).name}
-  }
-
-#  @current_page.has_disabled_edit_project_link?(name: (@project || @project_attrs).name)
-
-end
 
 Then /^Arya Stark cannot view that project$/ do
   user_attrs       = CloudObjectBuilder.attributes_for(
@@ -543,12 +525,14 @@ Then /^the project will be Not Created$/ do
   end
 end
 
+
 Then /^the project will be [Uu]pdated$/ do
   steps %{
     * Visit the projects page
     * The #{ @project_attrs.name } project should be visible
   }
 end
+
 
 Then /^the project will be Not Updated$/ do
   # current_page should still have a new project form
@@ -649,6 +633,66 @@ TestCase /^A user with a role of (.+) in a project cannot edit the instance quot
   }
 
 end
+
+Then /^I [Cc]annot [Ee]dit (?:that|the) project$/ do
+  username      = Unique.username('bob')
+  password      = '123qwe'
+  project_name  = Unique.project_name('project')
+
+  Preconditions %{
+    * Ensure that a user with username #{ username } and password #{ password } exists
+    * Ensure that a project named #{ project_name } exists
+    * Ensure that the user #{ username } has a role of Member in the system
+  }
+
+  Cleanup %{
+    * Register the project named #{ project_name } for deletion at exit
+    * Register the user named #{ username } for deletion at exit
+  }
+  
+  Script %{
+
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ username }
+    * Fill in the Password field with #{ password }
+    * Click the Login button
+
+    * Visit the projects page
+    * The #{ project_name } project should not be visible
+  }
+end
+
+
+TestCase /^I cannot delete (?:that|the) project$/i do
+  username      = Unique.username('bob')
+  password      = '123qwe'
+  project_name  = Unique.project_name('project')
+
+  Preconditions %{
+    * Ensure that a user with username #{ username } and password #{ password } exists
+    * Ensure that a project named #{ project_name } exists
+    * Ensure that the user #{ username } has a role of Member in the system
+  }
+
+  Cleanup %{
+    * Register the project named #{ project_name } for deletion at exit
+    * Register the user named #{ username } for deletion at exit
+  }
+  
+  Script %{
+
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ username }
+    * Fill in the Password field with #{ password }
+    * Click the Login button
+
+    * Visit the projects page
+    * The #{ project_name } project should not be visible
+  }
+end
+
 
 
 TestCase /^Project can be updated the quota of the project with (.+) , (.+) and (.+)$/i do |floating_ips,volumes,cores|

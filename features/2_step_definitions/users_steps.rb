@@ -123,7 +123,7 @@ Then /^I can create a user$/i do
 
     * Ensure that a user with username #{ new_user.name } does not exist
     * Ensure that a test project is available for use
-    * Ensure that I have a role of Project Manager in the test project
+    * Ensure that I have a role of Project Manager in the named project
 
     * Click the Logout button if currently logged in
     * Visit the Login page
@@ -183,7 +183,7 @@ Then /^I can create a user with attributes (.+), (.+), (.+), (.+), and (.+)$/i d
 
     * Ensure that a user with username #{ new_user.name } does not exist
     * Ensure that a test project is available for use
-    * Ensure that I have a role of Project Manager in the test project
+    * Ensure that I have a role of Project Manager in the named project
 
     * Click the Logout button if currently logged in
     * Visit the Login page
@@ -228,7 +228,7 @@ Then /^I cannot create a user with attributes (.+), (.+), (.+), (.+), and (.+)$/
 
     * Ensure that a user with username #{ new_user.name } does not exist
     * Ensure that a test project is available for use
-    * Ensure that I have a role of Project Manager in the test project
+    * Ensure that I have a role of Project Manager in the named project
 
     * Click the Logout button if currently logged in
     * Visit the Login page
@@ -283,17 +283,25 @@ end
 
 
 Then /^I can edit a user$/i do
-  existing_user = CloudObjectBuilder.attributes_for(:user, :name => Unique.username('existing'))
-  new_attrs     = CloudObjectBuilder.attributes_for(:user, :name => Unique.username('updated'))
-  me            = @me
-
+  existing_user = CloudObjectBuilder.attributes_for(:user, :name => Unique.username('existing'), :password => '123qwe')
+  new_attrs     = CloudObjectBuilder.attributes_for(
+                    :user,
+                    :name     => ( Unique.username('new_user') ),
+                    :email    => ( Unique.email('new_email@mail.com') ),
+                    :password => '123qwe'
+                  )
+                  
+  IdentityService.session.ensure_user_does_not_exist(new_attrs)                
+  @existing_user = IdentityService.session.ensure_user_exists(existing_user)                
+  me = @me
+  
   steps %{
     * Register the user named #{ existing_user.name } for deletion at exit
     * Register the user named #{ new_attrs.name } for deletion at exit
-
-    * Ensure that a user with username #{ existing_user.name } and password 123qwe exists
+    
+    * Ensure that a user with username #{ existing_user.name } and password #{ existing_user.password } exists
     * Ensure that a test project is available for use
-    * Ensure that I have a role of Project Manager in the test project
+    * Ensure that I have a role of Project Manager in the named project
 
     * Click the Logout button if currently logged in
     * Visit the Login page
@@ -303,7 +311,7 @@ Then /^I can edit a user$/i do
 
     * Click the Users link
     * Current page should be the Users page
-    * Click the link for user with username #{ existing_user.name }
+    * Click the edit user button for user #{ @existing_user.id }
     * Fill in the Username field with #{ new_attrs.name }
     * Fill in the Email field with #{ new_attrs.email }
     * Choose the 2nd item in the Primary Project dropdown
@@ -315,7 +323,7 @@ end
 
 
 Then /^I can update a user with attributes (.+), (.+), (.+), (.+), and (.+)$/i do |username, email, password, primary_project, is_pm_or_not|
-  existing_user = CloudObjectBuilder.attributes_for(:user, :name => Unique.username('existing'))
+  existing_user = CloudObjectBuilder.attributes_for(:user, :name => Unique.username('existing'), :password => '123qwe')
   new_attrs     = CloudObjectBuilder.attributes_for(
                     :user,
                     :name     => ( username.downcase == "(none)" ? username : Unique.username(username) ),
@@ -330,16 +338,19 @@ Then /^I can update a user with attributes (.+), (.+), (.+), (.+), and (.+)$/i d
                            end
 
   role = (is_pm_or_not == "Yes" ? "Project Manager" : "Member")
+  
+  IdentityService.session.ensure_user_does_not_exist(new_attrs)
+  @existing_user = IdentityService.session.ensure_user_exists(existing_user)
   me = @me
 
   steps %{
     * Register the user named #{ existing_user.name } for deletion at exit
     * Register the user named #{ new_attrs.name } for deletion at exit
 
-    * Ensure that a user with username #{ existing_user.name } and password 123qwe exists
+    * Ensure that a user with username #{ existing_user.name } and password #{ existing_user.password } exists
     * Ensure that a user with username #{ new_attrs.name } does not exist
     * Ensure that a test project is available for use
-    * Ensure that I have a role of Project Manager in the test project
+    * Ensure that I have a role of Project Manager in the named project
 
     * Click the Logout button if currently logged in
     * Visit the Login page
@@ -349,7 +360,7 @@ Then /^I can update a user with attributes (.+), (.+), (.+), (.+), and (.+)$/i d
 
     * Click the Users link
     * Current page should be the Users page
-    * Click the link for user with username #{ existing_user.name }
+    * Click the edit user button for user #{ @existing_user.id }
     * Fill in the Username field with #{ new_attrs.name }
     * Fill in the Email field with #{ new_attrs.email }
     * Fill in the Password field with #{ new_attrs.password }
@@ -394,6 +405,8 @@ Then /^I cannot update a user with attributes (.+), (.+), (.+), (.+), and (.+)$/
                            end
 
   role = (is_pm_or_not == "Yes" ? "Project Manager" : "Member")
+  
+  @existing_user = IdentityService.session.ensure_user_exists(existing_user)
   me = @me
 
   steps %{
@@ -403,7 +416,7 @@ Then /^I cannot update a user with attributes (.+), (.+), (.+), (.+), and (.+)$/
     * Ensure that a user with username #{ existing_user.name } and password 123qwe exists
     * Ensure that a user with username #{ new_attrs.name } does not exist
     * Ensure that a test project is available for use
-    * Ensure that I have a role of Project Manager in the test project
+    * Ensure that I have a role of Project Manager in the named project
 
     * Click the Logout button if currently logged in
     * Visit the Login page
@@ -413,7 +426,7 @@ Then /^I cannot update a user with attributes (.+), (.+), (.+), (.+), and (.+)$/
 
     * Click the Users link
     * Current page should be the Users page
-    * Click the link for user with username #{ existing_user.name }
+    * Click the edit user button for user #{ @existing_user.id }
     * Fill in the Username field with #{ new_attrs.name }
     * Fill in the Email field with #{ new_attrs.email }
     * Fill in the Password field with #{ new_attrs.password }
