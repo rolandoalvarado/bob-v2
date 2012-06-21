@@ -55,6 +55,12 @@ Then /^Choose the item with text (.+) in the (.+) dropdown$/ do |item_text, drop
   end
 end
 
+Then /^Clear the (.+) field$/i do |field_name|
+  field_name = field_name.split.join('_').downcase
+  @current_page.send("#{ field_name }_field").set ""
+end
+
+
 Then /^Click the context menu button for user (.+)$/ do |username|
   username = Unique.username(username)
   @current_page.context_menu_button(name: username).click
