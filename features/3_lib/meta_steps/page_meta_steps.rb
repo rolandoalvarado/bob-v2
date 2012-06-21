@@ -284,13 +284,15 @@ end
 Then /^Drag the instance flavor slider to a different flavor$/ do
   @current_page.session.execute_script %{
     var slider = $('#flavor-slider'),
-      value = slider.slider('option', 'value'),
-      min = slider.slider('option', 'min'),
-      max = slider.slider('option', 'max');
+      value = parseInt(slider.slider('option', 'value')),
+      min = parseInt(slider.slider('option', 'min')),
+      max = parseInt(slider.slider('option', 'max'));
 
     // change value to min or max
-    if(value < max) { slider.slider('option', 'value', value + 1); }
-    else if(value == max) { slider.slider('option', 'value', min); }
+    if(value < max) { value = value + 1; }
+    else if(value == max) { value = min; }
+    slider.slider('option', 'value', value);
+    slider.trigger('slide', { 'value': value });
   }
 end
 
@@ -463,6 +465,15 @@ Step /^(?:A|The) floating IP should be associated to instance (.+)$/ do |instanc
   sleeping(1).seconds.between_tries.failing_after(15).tries do
     unless @current_page.has_associated_floating_ip_row?( name: instance_name )
       raise "Couldn't find a floating IP to be associated to instance #{ instance_name }!"
+    end
+  end
+end
+
+
+Then /^The instance (.+) should be performing task (.+)$/ do |instance_id, task|
+  sleeping(1).seconds.between_tries.failing_after(15).tries do
+    unless @current_page.instance_row( id: instance_id ).find('.task').text.include?(task)
+      raise "Instance #{ instance_id } is not shown as performing task #{ task }."
     end
   end
 end

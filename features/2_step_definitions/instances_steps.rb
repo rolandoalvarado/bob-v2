@@ -193,7 +193,7 @@ When /^I resize the instance to a different flavor$/ do
     * Click the resize instance button for instance #{ @instance.id }
     * Current page should have the resize instance form
     * Drag the instance flavor slider to a different flavor
-    * Click the confirm instance resize button
+    * Click the resize instance confirmation button
   }
 end
 
@@ -469,9 +469,18 @@ Then /^I [Cc]an [Rr]esize (?:that|the) instance$/ do
     * Click the resize instance button for instance #{ instance.id }
     * Current page should have the resize instance form
     * Drag the instance flavor slider to a different flavor
-    * Click the confirm instance resize button
+    * Click the resize instance confirmation button
 
     * The instance #{ instance.id } should be in resizing status
+    * The instance #{ instance.id } should be performing task resize_prep
+
+    * The instance #{ instance.id } should be in active status
+    * The instance #{ instance.id } should be performing task resize_verify
+
+    * Click the instance menu button for instance #{ instance.id }
+    * Click the confirm resize instance button for instance #{ instance.id }
+    * The instance #{ instance.id } should be performing task resize_verify
+
     * The instance #{ instance.id } should not have flavor #{ old_flavor.name }
   }
 end
