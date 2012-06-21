@@ -81,7 +81,7 @@ STEPS:
    => press <enter>
    => type in <yes>
    => press <enter>
-   => type in the password < lcd4-0286-01 >
+   => type in the password < server-password >
    => press <enter>
 
    Result will be:
@@ -138,7 +138,7 @@ STEPS:
 
 5. SSH to cn25
    => type in < ssh cn25 >
-   => type in the password < lcd4-0286-01 >
+   => type in the password < server-password >
 
    Result will be:
 
@@ -218,7 +218,7 @@ STEPS:
 
 12. Login to Postgre SQL
    => root@mc.cb-1-1:~# psql nova nova -W -h 172.16.1.1
-   => type in password < nova >
+   => type in password < db-password >
 
    Result will be:
 
@@ -269,7 +269,7 @@ STEPS:
    nova-volume start/running, process 9937
 19. Login to Postgre SQL
    => root@mc.cb-1-1:~# psql nova nova -W -h 172.16.1.1
-   => type in password < nova >
+   => type in password < db-password >
 20. Check the status of the Nova Services.
    => root@mc.cb-1-1:~# nova-manage service list
    Result will be:
@@ -290,7 +290,7 @@ STEPS:
 
 22. SSH to cn25
    => root@mc.cb-1-1:~# ssh cn25
-   => type in password < lcd4-0286-01 >
+   => type in password < server-password >
 
    Result will be:
 

@@ -45,7 +45,7 @@ When /^I assign a floating IP to the instance$/ do
     * Choose the 2nd item in the instance dropdown
     * Click the create floating IP allocation button
 
-    * The floating IPs table should have #{ addresses.count + 1 } rows
+    * The floating IPs table should have #{ addresses.count } rows
     * The floating IPs table's last row should include the text #{ instance.name }
   }
 
@@ -287,7 +287,7 @@ Then /^I [Cc]an [Aa]ssign a floating IP to an instance in the project$/ do
     * Choose the 2nd item in the instance dropdown
     * Click the create floating IP allocation button
 
-    * The floating IPs table should have #{ num_addresses + 1 } rows
+    * The floating IPs table should have #{ num_addresses } rows
     * The floating IPs table's last row should include the text #{ instance.name }
   }
 end
@@ -637,7 +637,7 @@ end
 Then /^the instance is publicly accessible via that floating IP$/ do
   compute_service = ComputeService.session
   compute_service.ensure_security_group_rule @project
-  remote_client = 'SSH'
+  remote_client = 'RDP'
   
   steps %{
     * Connect to the instance named #{@instance.name} in project #{@project} via #{remote_client}

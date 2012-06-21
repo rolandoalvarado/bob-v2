@@ -32,6 +32,7 @@ class ComputeService < BaseCloudService
   def create_instance_in_project(project, attributes={})
     set_tenant project
     attributes[:name]   ||= Faker::Name.name
+    attributes[:password]   ||= 'password'
     attributes[:image]  ||= service.images[0].id
     attributes[:flavor] ||= service.flavors[0].id
 
@@ -182,6 +183,53 @@ class ComputeService < BaseCloudService
   end
 
   def ensure_project_floating_ip_count(project, desired_count, instance=nil)
+    set_tenant project
+
+    sleeping(1).seconds.between_tries.failing_after(60).tries do
+      addresses = service.addresses
+      actual_count = addresses.count
+
+      if desired_count > actual_count
+
+        how_many = desired_count - actual_count
+        how_many.times do |n|
+          service.allocate_address
+          sleep(0.5)
+        end
+        addresses.reload
+
+
+      elsif desired_count < addresses.length
+
+        while addresses.length > desired_count
+          addresses.reload
+          addresses[0].destroy rescue nil
+        end
+
+      end
+
+      # Floating IPs should usually be associated to an instance
+      unless instance.nil? && instance.id.blank?
+        desired_count.times do |n|
+          if addresses[n] && !addresses[n].ip.blank?
+            service.associate_address(instance.id, addresses[n].ip)
+            sleep(0.5)
+          end
+        end
+      end
+
+      addresses.reload
+      addresses = addresses.select { |a| a.instance_id == instance.id } unless instance.nil? && instance.id.blank?
+      if addresses.length != desired_count
+        raise "Couldn't ensure that #{ project.name } has #{ desired_count } " +
+              "floating IPs. Current number of floating IPs is #{ addresses.length }."
+      end
+
+      return addresses.count
+    end
+  end
+  
+  def ensure_project_does_not_have_floating_ip(project, desired_count, instance)
     set_tenant project
 
     sleeping(1).seconds.between_tries.failing_after(60).tries do

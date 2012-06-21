@@ -44,3 +44,7 @@ TTY:
 'windows 2008 Enterprise server':
   username: Administrator
   password: s3l3ct10n
+  
+'32Bit TTY':
+  username: Administrator
+  password: s3l3ct10n
