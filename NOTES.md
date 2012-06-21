@@ -81,7 +81,7 @@ STEPS:
    => press <enter>
    => type in <yes>
    => press <enter>
-   => type in the password < lcd4-0286-01 >
+   => type in the password < server-password >
    => press <enter>
 
    Result will be:
@@ -130,15 +130,10 @@ STEPS:
 4. Check the nova config.
    => type in < cat novarc >
 
-   Result will be:
-   export OS_USERNAME=admin
-   export OS_PASSWORD=klnm12
-   export OS_TENANT_NAME=admin
-   export OS_AUTH_URL=http://10.50.1.1:35357/v2.0/
 
 5. SSH to cn25
    => type in < ssh cn25 >
-   => type in the password < lcd4-0286-01 >
+   => type in the password < server-password >
 
    Result will be:
 
@@ -218,7 +213,7 @@ STEPS:
 
 12. Login to Postgre SQL
    => root@mc.cb-1-1:~# psql nova nova -W -h 172.16.1.1
-   => type in password < nova >
+   => type in password < db-password >
 
    Result will be:
 
@@ -290,7 +285,7 @@ STEPS:
 
 22. SSH to cn25
    => root@mc.cb-1-1:~# ssh cn25
-   => type in password < lcd4-0286-01 >
+   => type in password < server-password >
 
    Result will be:
 
