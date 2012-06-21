@@ -169,15 +169,7 @@ When /^I create a project with attributes (.*), (.*)$/ do |name, desc|
   @project_attrs = attrs
 end
 
-When /^I edit the project's attributes to (.*), (.*)$/ do |name, desc|
-
-  attrs = CloudObjectBuilder.attributes_for(
-            :project,
-            :name        => name.downcase == '(none)' ? name : Unique.name(name),
-            :description => desc
-          )
-          
-  project = IdentityService.session.ensure_project_exists(attrs)      
+When /^I (.*) edit the project's attributes to (.*), (.*)$/i do |can_or_cannot, name, desc|
 
   steps %{
     * Click the logout button if currently logged in
@@ -190,19 +182,31 @@ When /^I edit the project's attributes to (.*), (.*)$/ do |name, desc|
     * Visit the projects page
 
     * Edit the #{@project} project
-    * Fill in the project name field with #{ attrs.name }
-    * Fill in the project description field with #{ attrs.description }
-    * Click the modify project button
-  }
+  } 
 
-  # Register created project for post-test deletion
-  created_project = IdentityService.session.find_project_by_name(attrs.name)
-  EnvironmentCleaner.register(:project, created_project.id) if created_project
-  EnvironmentCleaner.register(:project, project.id) if project
-  
-  # Make the project name available to subsequent steps
-  @project_attrs = @project
+  if name.downcase == "(none)"
+   step "Clear the project name field"
+  else 
+   step "Fill in the project name field with #{ name }"
+  end
 
+  if desc.downcase == "(none)"
+    step "Clear the project description field"
+  else 
+    step "Fill in the project description field with #{ desc }"
+  end
+
+  step "Click the modify project button"
+
+  if can_or_cannot.downcase == "can" 
+    step "The #{name} project should be visible"
+    @project.save
+  else
+    if ( !@current_page.has_project_name_error_span? && 
+         !@current_page.has_project_description_error_span? )
+      raise "The project should not have been created, but it seems that it was."
+    end
+  end
 end
 
 When /^I create a project$/ do
@@ -436,14 +440,6 @@ end
 
 Then /^I can edit (?:that|the) project$/i do
   
-  attrs = CloudObjectBuilder.attributes_for(
-            :project,
-            :name        => 'MCF-26_EDIT_PROJECT',
-            :description => 'Succucessed MCF-26'
-          )
-          
-  project = IdentityService.session.ensure_project_exists(attrs)   
-  
   steps %{
 
     * Click the logout button if currently logged in
@@ -456,17 +452,15 @@ Then /^I can edit (?:that|the) project$/i do
     * The #{ (@project || @project_attrs).name } project should be visible
 
     * Edit the #{ (@project || @project_attrs).name } project
-    * Fill in the project description field with "editting project"
+    * Fill in the project name field with editting project
     * Click the modify project button
-  }
-  
-  # Register created project for post-test deletion
-  created_project = IdentityService.session.find_project_by_name(attrs.name)
-  EnvironmentCleaner.register(:project, created_project.id) if created_project
-  EnvironmentCleaner.register(:project, project.id) if project
 
-  # Make project attributes available to subsequent steps
-  @project_attrs = attrs
+    * The editting project project should be visible
+
+  }
+
+  # restore project name
+  @project.save
 
 end
 
@@ -525,22 +519,6 @@ Then /^the project will be Not Created$/ do
   end
 end
 
-
-Then /^the project will be [Uu]pdated$/ do
-  steps %{
-    * Visit the projects page
-    * The #{ @project_attrs.name } project should be visible
-  }
-end
-
-
-Then /^the project will be Not Updated$/ do
-  # current_page should still have a new project form
-  # new project form should have the error message "This field is required".
-  if ( !@current_page.has_project_name_error_span? && !@current_page.has_project_description_error_span? )
-    raise "The project should not have been created, but it seems that it was."
-  end
-end
 
 Then /^the project and all its resources will be deleted$/ do
   pending # express the regexp above with the code you wish you had
