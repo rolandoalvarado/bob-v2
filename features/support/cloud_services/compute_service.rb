@@ -17,23 +17,19 @@ class ComputeService < BaseCloudService
     volume      = volumes.find { |v| v.id == volume['id'].to_i }
     device_name = "/dev/vd#{ ('a'..'z').to_a.sample(2).join }"
 
-    sleeping(1).seconds.between_tries.failing_after(10).tries do
-      raise "Instance #{ instance.name } is not active!" if instance.state != 'ACTIVE'
-      raise "Volume #{ volume.name } is not available!" if volume.status != 'available'
+    begin
+      service.attach_volume(volume.id, instance.id, device_name)
+    rescue => e
+      raise "Couldn't attach volume #{ volume.name } to instance #{ instance.name }! " +
+            "The error returned was: #{ e.inspect }"
+    end
 
-      begin
-        service.attach_volume(volume.id, instance.id, device_name)
-      rescue => e
-        raise "Couldn't attach volume #{ volume.name } to instance #{ instance.name }! " +
-              "The error returned was: #{ e.inspect }"
-      end
-
+    sleeping(1).seconds.between_tries.failing_after(30).tries do
+      volumes.reload
+      volume = volumes.get(volume.id)
       unless volume.attachments.any? { |a| a['serverId'] == instance.id }
         raise "Couldn't ensure that instance #{ instance.name } has attached volume #{ volume.name }!"
       end
-
-      volumes.reload
-      volume = volumes.get(volume.id)
     end
   end
 
@@ -127,6 +123,29 @@ class ComputeService < BaseCloudService
     end
 
     deleted_instances
+  end
+
+  def detach_volume_from_instance_in_project(project, instance, volume)
+    set_tenant project, false
+    volume = volumes.find { |v| v.id == volume['id'].to_i }
+
+    # Check if volume is attached to the instance
+    if volume.attachments.any? { |a| a['serverId'] == instance.id }
+      begin
+        service.detach_volume(instance.id, volume.id)
+      rescue => e
+        raise "Couldn't detach volume #{ volume.name } from instance #{ instance.name }! " +
+              "The error returned was: #{ e.inspect }"
+      end
+    end
+
+    sleeping(1).seconds.between_tries.failing_after(30).tries do
+      volumes.reload
+      volume = volumes.get(volume.id)
+      if volume.attachments.any? { |a| a['serverId'] == instance.id }
+        raise "Couldn't ensure that instance #{ instance.name } has no attached volume #{ volume.name }!"
+      end
+    end
   end
 
   def release_addresses_from_project(project)
