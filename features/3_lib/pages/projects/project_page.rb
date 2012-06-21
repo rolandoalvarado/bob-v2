@@ -123,11 +123,12 @@ class ProjectPage < WebClientPage
   span      'new volume form error',              'span.error[for="name"], span.error[for="appendedInput"]'
 
 # Type      Name                                  Selector
-  button    'attach volume',                      '#volume-item-<id> #attach'
+  button    'attach volume',                      '#volume-item-<id> .attach'
   form      'attach volume',                      '#attach-volume-modal'
   dropdown  'attachable instance',                '#attach-volume-modal #instance'
-  button    'confirm volume attachment',          '#attach-volume-modal .attach-volume'
-  button    'detach volume',                      '#volume-item-<id> #detach'
+  button    'confirm volume attachment',          '#attach-volume'
+  button    'volume attach confirmation',         '#attach-volume'
+  button    'detach volume',                      '#volume-item-<id> .detach'
   button    'volume detach confirmation',         '#alert-template .okay'
   row       'volume',                             '#volume-item-<id>'
 
@@ -181,8 +182,15 @@ class ProjectPage < WebClientPage
   tab       'collaborators',                      '.nav-tabs .collaborators a'
   tab       'disabled collaborators',             '.nav-tabs .collaborators.disabled'
   button    'add collaborator',                   '#add-collaborator:not(.disabled)'
-  option    'collaborator',                       xpath: '//*[@class="chzn-drop"]//li[text()="<name>"]'
-  button    'add collaborator action',            '#add-collaborator-modal .action-add'
-  table     'collaborators',                      '#users-template tbody'
+  option    'collaborator',                       xpath: '//*[@class="chzn-drop"]//*[li[text()="<name>"]]'
+  button    'add collaborator',                   'a.btn-primary'
+  table     'collaborators',                      xpath: "//*[tr[@class='user']]/td[normalize-space(text())='<name>']"
 
+  dropdown  'Users',                              "#user-id"
+  field     'email',                              xpath: '//form[@id="add-collaborator-form"]//input[@class="default"]'
+  option    'email',                              xpath: '//select[@id="user-id"]/option[@value="<name>"]'
+  link      'user',                               xpath: '//*[@class="chzn-drop"]//*[li[text()="<name>"]]'
+  row       'User',                               xpath: "//*[@id='users-list']//td[normalize-space(text())=\"<name>\"]/.."
+  element   'collaborator',                       "#users-list"
+  
 end

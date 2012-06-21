@@ -38,7 +38,7 @@ class VolumeService < BaseCloudService
   def create_volume_in_project(project, attributes)
     attrs = CloudObjectBuilder.attributes_for(:volume, attributes)
     set_tenant project
-    if service.list_volumes.body['volumes'].none? { |v| v['id'] == attrs.name }
+    if volumes.none? { |v| v['display_name'] == attrs.name }
       service.create_volume(attrs.name, attrs.description, attrs.size)
     end
     set_tenant 'admin'

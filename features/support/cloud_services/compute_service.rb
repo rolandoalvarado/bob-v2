@@ -14,10 +14,19 @@ class ComputeService < BaseCloudService
 
   def attach_volume_to_instance_in_project(project, instance, volume)
     set_tenant project, false
-    service.attach_volume(volume['id'], instance.id, '/dev/vdz')
-    set_tenant 'admin'
-  rescue
-    raise "Couldn't attach volume #{ volume['display_name'] } to instance #{ instance.name }!"
+    volume      = volumes.find { |v| v.id == volume['id'].to_i }
+    device_name = "/dev/vd#{ ('a'..'z').to_a.sample(2).join }"
+
+    sleeping(0.5).seconds.between_tries.failing_after(10).tries do
+      service.attach_volume(volume.id, instance.id, device_name)
+
+      unless volume.attachments.any? { |a| a['serverId'] == instance.id }
+        raise "Couldn't ensure that instance #{ instance.name } has attached volume #{ volume.name }!"
+      end
+
+      volumes.reload
+      volume = volumes.get(volume.id)
+    end
   end
 
   def create_instance_in_project(project, attributes={})
@@ -33,6 +42,7 @@ class ComputeService < BaseCloudService
         attributes[:flavor],
         {
           'tenant_id'      => project.id,
+          'key_name'       => service.key_pairs[0] && service.key_pairs[0].name,
           'security_group' => service.security_groups[0].id,
           'user_id'        => service.current_user['id']
         }
@@ -40,6 +50,9 @@ class ComputeService < BaseCloudService
     end
 
     service.servers.find { |s| s.name == attributes[:name] }
+  rescue => e
+    raise "Couldn't initialize instance in #{ project.name }. " +
+          "The error returned was: #{ e.inspect }"
   end
 
   def create_volume(attributes = {})
@@ -102,15 +115,6 @@ class ComputeService < BaseCloudService
       project_instances.each do |instance|
         deleted_instances << { name: instance.name, id: instance.id }
         delete_instance_in_project(project, instance)
-
-        # Detach any attached volumes
-        attachments = attached_volumes.select{ |v| v.attachments.any?{ |a| a['serverId'] == instance.id } }
-        attachments.each do |attachment|
-          service.detach_volume(instance.id, attachment.id)
-          sleep(0.5)
-        end
-
-        service.delete_server(instance.id)
       end
     end
 
@@ -606,6 +610,7 @@ class ComputeService < BaseCloudService
       addresses.reload
       flavors.reload
       instances.reload
+      volumes.reload
     end
   end
 
@@ -634,6 +639,10 @@ class ComputeService < BaseCloudService
   def raise_ensure_suspended_instance_count_error(message, desired_count)
     raise "ERROR: Couldn't ensure #{ desired_count } suspended instances in project. " +
           message
+  end
+
+  def volumes
+    service.volumes
   end
 
 end

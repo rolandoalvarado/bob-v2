@@ -175,7 +175,6 @@ end
 
 Step /^Click the (attach|delete|detach) button of the volume named (.+)$/ do |button_name, volume_name|
   volume = VolumeService.session.volumes.find { |v| v['display_name'] == volume_name }
-
   raise "Couldn't find a volume named '#{ volume_name }'" unless volume
 
   button_name = button_name.split.join('_')
@@ -234,6 +233,13 @@ end
 Then /^Current page should have the security groups$/ do
   unless @current_page.has_security_groups_element?
     raise "Current page doesn't have security groups."
+  end
+end
+
+
+Then /^Current page should have the new collaborator$/ do
+  unless @current_page.has_collaborator_element?
+    raise "Current page doesn't have collaborator."
   end
 end
 
