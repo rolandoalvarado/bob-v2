@@ -312,7 +312,7 @@ class ComputeService < BaseCloudService
     # This block will keep running until it stops raising an error, or until
     # the max number of tries is reached. In the last try, whatever error is
     # raised by the block is thrown.
-    sleeping(1).seconds.between_tries.failing_after(30).tries do
+    sleeping(1).seconds.between_tries.failing_after(60).tries do
       instances.reload
 
       non_active_instances  = instances.select{ |i| i.state !~ /^ACTIVE|ERROR$/}
@@ -376,6 +376,8 @@ class ComputeService < BaseCloudService
     # This block will keep running until it stops raising an error, or until
     # the max number of tries is reached. In the last try, whatever error is
     # raised by the block is thrown.
+    # 60 tries is needed for rebooting instances so please don't change it.
+    # Since instance reboot will take a while.
     sleeping(1).seconds.between_tries.failing_after(60).tries do
       instances.reload
 
