@@ -28,7 +28,8 @@ end
 Given /^The project has (\d+) active instances?$/ do |number_of_instances|
   number_of_instances = number_of_instances.to_i
   compute_service     = ComputeService.session
-  @instance           = compute_service.ensure_active_instance_count(@project, number_of_instances)
+  compute_service.ensure_active_instance_count(@project, number_of_instances)
+  @instance           = compute_service.instances.reload.find { |i| i.state == 'ACTIVE' }
 end
 
 Given /^The project has (\d+) available volumes?$/ do |number_of_volumes|
@@ -51,7 +52,7 @@ end
 
 Given /^[Tt]he project does not have any floating IPs$/ do
   compute_service = ComputeService.session
-  compute_service.ensure_project_floating_ip_count(@project, 0)
+  compute_service.ensure_project_does_not_have_floating_ip(@project, 0, @instance)
 end
 
 Given /^The project has more than (\d+) instance flavors?$/ do |number_of_flavors|

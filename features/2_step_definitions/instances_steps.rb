@@ -45,7 +45,7 @@ When /^I assign a floating IP to the instance$/ do
     * Choose the 2nd item in the instance dropdown
     * Click the create floating IP allocation button
 
-    * The floating IPs table should have #{ addresses.count + 1 } rows
+    * The floating IPs table should have #{ addresses.count } rows
     * The floating IPs table's last row should include the text #{ instance.name }
   }
 
@@ -193,7 +193,16 @@ When /^I resize the instance to a different flavor$/ do
     * Click the resize instance button for instance #{ @instance.id }
     * Current page should have the resize instance form
     * Drag the instance flavor slider to a different flavor
-    * Click the confirm instance resize button
+    * Click the resize instance confirmation button
+
+    * The instance #{ @instance.id } should be in resizing status
+    * The instance #{ @instance.id } should be performing task resize_prep
+
+    * The instance #{ @instance.id } should be in active status
+    * The instance #{ @instance.id } should be performing task resize_verify
+
+    * Click the instance menu button for instance #{ @instance.id }
+    * Click the confirm resize instance button for instance #{ @instance.id }
   }
 end
 
@@ -287,7 +296,7 @@ Then /^I [Cc]an [Aa]ssign a floating IP to an instance in the project$/ do
     * Choose the 2nd item in the instance dropdown
     * Click the create floating IP allocation button
 
-    * The floating IPs table should have #{ num_addresses + 1 } rows
+    * The floating IPs table should have #{ num_addresses } rows
     * The floating IPs table's last row should include the text #{ instance.name }
   }
 end
@@ -469,9 +478,17 @@ Then /^I [Cc]an [Rr]esize (?:that|the) instance$/ do
     * Click the resize instance button for instance #{ instance.id }
     * Current page should have the resize instance form
     * Drag the instance flavor slider to a different flavor
-    * Click the confirm instance resize button
+    * Click the resize instance confirmation button
 
     * The instance #{ instance.id } should be in resizing status
+    * The instance #{ instance.id } should be performing task resize_prep
+
+    * The instance #{ instance.id } should be in active status
+    * The instance #{ instance.id } should be performing task resize_verify
+
+    * Click the instance menu button for instance #{ instance.id }
+    * Click the confirm resize instance button for instance #{ instance.id }
+
     * The instance #{ instance.id } should not have flavor #{ old_flavor.name }
   }
 end
@@ -646,7 +663,7 @@ end
 
 Then /^the instance should be resized$/i do
   old_flavor = ComputeService.session.flavors.find { |f| f.id == @instance.flavor['id'].to_s }
-  step %{
+  steps %{
     * The instance #{ @instance.id } should not have flavor #{ old_flavor.name }
   }
 end
