@@ -264,7 +264,7 @@ STEPS:
    nova-volume start/running, process 9937
 19. Login to Postgre SQL
    => root@mc.cb-1-1:~# psql nova nova -W -h 172.16.1.1
-   => type in password < nova >
+   => type in password < db-password >
 20. Check the status of the Nova Services.
    => root@mc.cb-1-1:~# nova-manage service list
    Result will be:
