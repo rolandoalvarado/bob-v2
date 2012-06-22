@@ -40,6 +40,7 @@ class ProjectPage < WebClientPage
   field     'volumes quota edit',                 xpath: '//input[@name="volumes"]'
   field     'cores quota edit',                   xpath: '//input[@name="cores"]'
   element   'quota edit error',                   '.alert-heading'
+  element   'quota edit error2',                  xpath: '//div[@class="control-group error"]'
 
 # Type      Name                                  Selector
   span      'project name error',                 "span.error[for='project-name']"

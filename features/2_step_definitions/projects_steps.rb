@@ -533,7 +533,7 @@ TestCase /^A user with a role of (.+) in a project can edit the instance quota o
   
   username      = Unique.username('bob')
   password      = '123qwe'
-  project_name  = Unique.project_name('test')
+  project_name  = Unique.project_name('project')
   instance_name = Unique.instance_name('test')
   volume_name   = Unique.volume_name('test')
   floating_ips  = 10
@@ -561,7 +561,7 @@ TestCase /^A user with a role of (.+) in a project can edit the instance quota o
 
     * Click the Projects link
     * Click the #{ project_name } project
-    * Wait 5 seconds
+    * Wait 10 seconds
     * Click the quota modify button
     * Current page should have the modify quota form
     * Fill in the floating ips quota edit field with #{ floating_ips }
@@ -579,7 +579,7 @@ TestCase /^A user with a role of (.+) in a project cannot edit the instance quot
   
   username      = Unique.username('bob')
   password      = '123qwe'
-  project_name  = Unique.project_name('test')
+  project_name  = Unique.project_name('project')
   instance_name = Unique.instance_name('test')
   volume_name   = Unique.volume_name('test')
   floating_ips  = 10
@@ -608,7 +608,7 @@ TestCase /^A user with a role of (.+) in a project cannot edit the instance quot
 
     * Click the Projects link
     * Click the #{ project_name } project
-    * Wait 5 seconds
+    * Wait 10 seconds
     * The quota modify link should be disabled
   }
 
@@ -678,7 +678,7 @@ end
 TestCase /^Project can be updated the quota of the project with (.+) , (.+) and (.+)$/i do |floating_ips,volumes,cores|
   username      = Unique.username('bob')
   password      = '123qwe'
-  project_name  = Unique.project_name('test')
+  project_name  = Unique.project_name('project')
   instance_name = Unique.instance_name('test')
   volume_name   = Unique.volume_name('test')
 
@@ -703,7 +703,7 @@ TestCase /^Project can be updated the quota of the project with (.+) , (.+) and 
 
     * Click the Projects link
     * Click the #{ project_name } project
-    * Wait 5 seconds
+    * Wait 10 seconds
     * Click the quota modify button
 
     * Fill in the floating ips quota edit field with #{ floating_ips }
@@ -721,7 +721,7 @@ TestCase /^Project cannot be updated the quota of the project with (.+) , (.+) a
 
   username      = Unique.username('bob')
   password      = '123qwe'
-  project_name  = Unique.project_name('test')
+  project_name  = Unique.project_name('project')
   instance_name = Unique.instance_name('test')
   volume_name   = Unique.volume_name('test')
 
@@ -746,7 +746,7 @@ TestCase /^Project cannot be updated the quota of the project with (.+) , (.+) a
 
     * Click the Projects link
     * Click the #{ project_name } project
-    * Wait 5 seconds
+    * Wait 10 seconds
     * Click the quota modify button
 
     * Fill in the floating ips quota edit field with #{ floating_ips }
@@ -754,8 +754,9 @@ TestCase /^Project cannot be updated the quota of the project with (.+) , (.+) a
     * Fill in the cores quota edit field with #{ cores }
     
     * Click the save quota edit button
-    * A quota edit error element should be visible
+    * A quota edit dialog show error
   }
 
 end
+
 
