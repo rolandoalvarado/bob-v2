@@ -40,6 +40,7 @@ class ProjectPage < WebClientPage
   field     'volumes quota edit',                 xpath: '//input[@name="volumes"]'
   field     'cores quota edit',                   xpath: '//input[@name="cores"]'
   element   'quota edit error',                   '.alert-heading'
+  element   'quota edit error2',                  xpath: '//div[@class="control-group error"]'
 
 # Type      Name                                  Selector
   span      'project name error',                 "span.error[for='project-name']"
@@ -170,7 +171,9 @@ class ProjectPage < WebClientPage
 
   button    'confirm instance deletion',          '#alert-template .okay'
   button    'confirm instance reboot',            "#alert-template .okay"
-  button    'confirm instance resize',            "#resize-instance"
+  button    'resize instance confirmation',       "#resize-instance"
+
+  button    'confirm resize instance',            "#instance-item-<id> .confirm-resize"
 
   element   'image',                              xpath: "//*[@id='instances-list']//label[text()='<name>']"
 

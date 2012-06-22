@@ -284,13 +284,13 @@ end
 Then /^Drag the instance flavor slider to a different flavor$/ do
   @current_page.session.execute_script %{
     var slider = $('#flavor-slider'),
-      value = slider.slider('option', 'value'),
-      min = slider.slider('option', 'min'),
-      max = slider.slider('option', 'max');
+      value = parseInt(slider.slider('option', 'value')),
+      min = parseInt(slider.slider('option', 'min'));
 
-    // change value to min or max
-    if(value < max) { slider.slider('option', 'value', value + 1); }
-    else if(value == max) { slider.slider('option', 'value', min); }
+    if(value == min) { value = value + 1; }
+    else if(value > min) { value = min; }
+    slider.slider('option', 'value', value);
+    slider.trigger('slide', { 'value': value });
   }
 end
 
@@ -468,6 +468,15 @@ Step /^(?:A|The) floating IP should be associated to instance (.+)$/ do |instanc
 end
 
 
+Then /^The instance (.+) should be performing task (.+)$/ do |instance_id, task|
+  sleeping(1).seconds.between_tries.failing_after(15).tries do
+    unless @current_page.instance_row( id: instance_id ).find('.task').text.include?(task)
+      raise "Instance #{ instance_id } is not shown as performing task #{ task }."
+    end
+  end
+end
+
+
 Then /^The instance (.+) should be shown as rebooting$/ do |instance_id|
   sleeping(1).seconds.between_tries.failing_after(15).tries do
     unless @current_page.instance_row( id: instance_id ).find('.task').text.include?('rebooting')
@@ -640,7 +649,8 @@ end
 
 
 Then /^The (.+) project should be visible$/ do |project_name|
-  unless @current_page.has_project_name_element?( name: project_name )
+  if !@current_page.has_project_name_element?( name: project_name ) &&
+     !@current_page.has_project_name_title_element?( name: project_name )
     raise "The project '#{ project_name }' should be visible, but it's not."
   end
 end

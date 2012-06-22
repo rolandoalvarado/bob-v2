@@ -6,6 +6,15 @@ Then /^A project does not have collaborator/i do
   end
 end
 
+Then /^A quota edit dialog show error/i do
+  element_name =  "quota edit error element".split.join('_').downcase
+  element_name2 = "quota edit error2 element".split.join('_').downcase
+  if ( !@current_page.send("has_#{ element_name }?") && 
+      !@current_page.send("has_#{ element_name2 }?")  )
+    raise "A quota edit should show error, but it does not."
+  end
+end
+
 Step /^Ensure that a project named (.+) exists$/i do |project_name|
   identity_service = IdentityService.session
   project          = identity_service.ensure_project_exists(:name => project_name)
