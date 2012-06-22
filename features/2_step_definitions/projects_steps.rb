@@ -139,7 +139,7 @@ end
 When /^I create a project with attributes (.*), (.*)$/ do |name, desc|
   attrs = CloudObjectBuilder.attributes_for(
             :project,
-            :name        => name.downcase == '(none)' ? name : Unique.name(name),
+            :name        => name.downcase == '(none)' ? name : Unique.project_name(name),
             :description => desc
           )
 
@@ -212,7 +212,7 @@ end
 When /^I create a project$/ do
   attrs = CloudObjectBuilder.attributes_for(
             :project,
-            :name => Unique.name('project')
+            :name => Unique.project_name('project')
           )
 
   IdentityService.session.ensure_project_does_not_exist(attrs)
@@ -290,8 +290,9 @@ end
 Then /^I Can Create a project$/ do
   attrs = CloudObjectBuilder.attributes_for(
             :project,
-            :name => Unique.name('projext_x')
+            :name => Unique.project_name('newproject')
           )
+
   IdentityService.session.ensure_project_does_not_exist(attrs)
 
   steps %{
@@ -319,6 +320,7 @@ Then /^I Can Create a project$/ do
 
   # Make project attributes available to subsequent steps
   @project_attrs = attrs
+
 end
 
 Then /^I can grant project membership to (.+)$/i do |username|

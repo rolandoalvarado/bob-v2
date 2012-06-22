@@ -640,7 +640,8 @@ end
 
 
 Then /^The (.+) project should be visible$/ do |project_name|
-  unless @current_page.has_project_name_element?( name: project_name )
+  if !@current_page.has_project_name_element?( name: project_name ) &&
+     !@current_page.has_project_name_title_element?( name: project_name )
     raise "The project '#{ project_name }' should be visible, but it's not."
   end
 end

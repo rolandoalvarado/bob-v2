@@ -43,6 +43,8 @@ class IdentityService < BaseCloudService
   end
 
   def delete_tenant(tenant)
+    tenants.reload
+    tenant = tenants.find_by_name(tenant.name)
     users = tenant.users
     users.reload.each do |user|
       revoke_all_user_roles(user, tenant)
