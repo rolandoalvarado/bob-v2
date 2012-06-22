@@ -7,8 +7,7 @@ Feature: Create an Instance
   created by launching a VM using a given machine image and machine flavor.
 
   Current restrictions:
-  We have not implemented falvor , keypair , security group selection system. 
-  We have to review specific images
+  We have not implemented keypair, and security group selection system.
 
   Background:
     * A project exists in the system
@@ -40,7 +39,6 @@ Feature: Create an Instance
         | Image  | Name        | Flavor | Keypair | Security Group | Created or Not |
         | (Any)  | My Server   | (Any)  | (Any)   | (Any)          | Created        |
 
-
       Scenarios: Invalid Values
         | Image  | Name        | Flavor | Keypair | Security Group | Created or Not | Reason                                           |
         | (Any)  | (None)      | (Any)  | (Any)   | (Any)          | Not Created    | Must specify a name                              |
@@ -48,9 +46,17 @@ Feature: Create an Instance
         | (Any)  | My Server   | (Any)  | (Any)   | (None)         | Not Created    | Instance should have at least one security group |
 
       Scenarios: Specific Images
-        | Image                          | Name        | Flavor | Keypair | Security Group | Created or Not |
-        | Windows 2008 Enterprise Server | My Server   | (Any)  | (Any)   | (Any)          | Created        |
-        | CentOS 5.8                     | My Server   | (Any)  | (Any)   | (Any)          | Created        |
-        | Ubuntu 10.04 Lucid             | My Server   | (Any)  | (Any)   | (Any)          | Created        |
-        | Ubuntu 12.04 Precise           | My Server   | (Any)  | (Any)   | (Any)          | Created        |
+        | Image                                | Name        | Flavor | Keypair | Security Group | Created or Not |
+        | 32Bit TTY                            | My Server   | (Any)  | (Any)   | (Any)          | Created        |
+        | 64Bit CentOS 5.8                     | My Server   | (Any)  | (Any)   | (Any)          | Created        |
+        | 64Bit CentOS 6.2                     | My Server   | (Any)  | (Any)   | (Any)          | Created        |
+        | 64Bit Ubuntu 10.04                   | My Server   | (Any)  | (Any)   | (Any)          | Created        |
+        | 64Bit Ubuntu 12.04                   | My Server   | (Any)  | (Any)   | (Any)          | Created        |
+        | 64Bit Windows 2008 R2 Enterprise SP1 | My Server   | (Any)  | (Any)   | (Any)          | Created        |
 
+      Scenarios: Specific Flavors
+        | Image  | Name        | Flavor    | Keypair | Security Group | Created or Not |
+        | (Any)  | My Server   | m1.small  | (Any)   | (Any)          | Created        |
+        | (Any)  | My Server   | m1.medium | (Any)   | (Any)          | Created        |
+        | (Any)  | My Server   | m1.large  | (Any)   | (Any)          | Created        |
+        | (Any)  | My Server   | m1.xlarge | (Any)   | (Any)          | Created        |

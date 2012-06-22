@@ -281,7 +281,7 @@ Then /^Current page should have the (.+) security group$/ do |security_group|
   end
 end
 
-Then /^Drag the instance flavor slider to a different flavor$/ do
+Then /^Drag the(?:| instance) flavor slider to a different flavor$/ do
   @current_page.session.execute_script %{
     var slider = $('#flavor-slider'),
       value = parseInt(slider.slider('option', 'value')),
@@ -292,6 +292,20 @@ Then /^Drag the instance flavor slider to a different flavor$/ do
     slider.slider('option', 'value', value);
     slider.trigger('slide', { 'value': value });
   }
+end
+
+Then /^Drag the(?:| instance) flavor slider to (.+)$/ do |flavor|
+  flavors = %w[ m1.small m1.medium m1.large m1.xlarge ]
+
+  if flavor.downcase != '(any)'
+    value = flavors.index(flavor)
+
+    @current_page.session.execute_script %{
+      var slider = $('#flavor-slider');
+      slider.slider('option', 'value', #{ value });
+      slider.trigger('slide', { 'value': #{ value } });
+    }
+  end
 end
 
 
@@ -507,7 +521,7 @@ end
 Then /^The instance ((?:(?!named )).+) should be (?:in|of) (.+) status$/ do |instance_id, status|
   sleeping(1).seconds.between_tries.failing_after(15).tries do
     unless @current_page.instance_row( id: instance_id ).find('.status').has_content?(status.upcase.gsub(' ', '_'))
-      raise "Instance #{ instance_id } does not have #{ status } status."
+      raise "Instance #{ instance_id } does not have or took to long to become #{ status } status."
     end
   end
 end
@@ -519,7 +533,7 @@ Step /^The instance named (.+) should be (?:in|of) (.+) status$/ do |instance_na
   selector = "//*[@id='instances-list']//*[contains(@class, 'name') and contains(text(), \"#{ instance_name }\")]/.."
   row      = @current_page.find_by_xpath(selector)
   unless row.find('.status').has_content?(status.upcase.gsub(' ', '_'))
-    raise "Instance #{ instance_name } is not #{ status }."
+    raise "Instance #{ instance_name } is not or took too long to become #{ status }."
   end
 end
 
