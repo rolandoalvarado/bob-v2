@@ -329,39 +329,39 @@ end
 TestCase /^A user with a role of (.+) in a project can detach any of its volumes$/i do |role_name|
 
   Preconditions %{
-    * Ensure that a user with username #{ username } and password #{ password } exists
-    * Ensure that a project named #{ project_name } exists
-    * Ensure that the project named #{ project_name } has an instance named #{ instance_name }
-    * Ensure that the project named #{ project_name } has an available volume named #{ volume_name }
-    * Ensure that the user #{ username } has a role of #{ role_name } in the project #{ project_name }
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that the project named #{ test_project_name } has an instance named #{ test_instance_name }
+    * Ensure that the project named #{ test_project_name } has an available volume named #{ test_volume_name }
+    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the project #{ test_project_name }
   }
 
   Cleanup %{
-    * Register the project named #{ project_name } for deletion at exit
-    * Register the user named #{ username } for deletion at exit
+    * Register the project named #{ test_project_name } for deletion at exit
+    * Register the user named #{ bob_username } for deletion at exit
   }
 
   Script %{
     * Click the Logout button if currently logged in
     * Visit the Login page
-    * Fill in the Username field with #{ username }
-    * Fill in the Password field with #{ password }
+    * Fill in the Username field with #{ bob_username }
+    * Fill in the Password field with #{ bob_password }
     * Click the Login button
 
     * Click the Projects link
-    * Click the #{ project_name } project
+    * Click the #{ test_project_name } project
 
-    * Click the attach button of the volume named #{ volume_name }
-    * Choose the item with text #{ instance_name } in the attachable instance dropdown
+    * Click the attach button of the volume named #{ test_volume_name }
+    * Choose the item with text #{ test_instance_name } in the attachable instance dropdown
     * Click the volume attach confirmation button
 
-    * The volume named #{ volume_name } should be attached to the instance named #{ instance_name }
+    * The volume named #{ test_volume_name } should be attached to the instance named #{ test_instance_name }
 
-    * Click the context menu button of the volume named #{ volume_name }
-    * Click the detach button of the volume named #{ volume_name }
+    * Click the context menu button of the volume named #{ test_volume_name }
+    * Click the detach button of the volume named #{ test_volume_name }
     * Click the volume detach confirmation button
 
-    * The volume named #{ volume_name } should not be attached to the instance named #{ instance_name }
+    * The volume named #{ test_volume_name } should not be attached to the instance named #{ test_instance_name }
   }
 
 end
