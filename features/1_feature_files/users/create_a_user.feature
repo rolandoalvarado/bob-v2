@@ -1,7 +1,7 @@
 @jira-DPBLOG-16 @jira-DPBLOG-17 @jira-MCF-7
 Feature: Create a User
 
-  @permissions
+  @permissions @jira-MCF-7-CUP
   Scenario Outline: Check User Permissions
     Given I have a role of <Role> in the system
      Then I <Can or Cannot Create> a user
