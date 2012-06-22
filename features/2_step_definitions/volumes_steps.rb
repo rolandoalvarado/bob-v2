@@ -318,7 +318,6 @@ TestCase /^A user with a role of (.+) in a project can delete any of its volumes
 
     * Click the context menu button of the volume named #{ test_volume_name }
     * Click the delete button of the volume named #{ test_volume_name }
-     raise "naa ngari"
     * Click the volume delete confirmation button
     * The volumes table should have 0 rows
   }
