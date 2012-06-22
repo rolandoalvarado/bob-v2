@@ -1,4 +1,4 @@
-@jira-MCF-6
+@jira-MCF-6 @wip
 Feature: Assign a Floating IP to an Instance
   As a user, I want to assign a floating IP address to my instance, so that
   when my instance's fixed IP changes after a relaunch, I can still reach it
