@@ -14,7 +14,7 @@ Feature: Create a Project
   API request, Compute attempts to use a project with the same id as the user.
 
 
-  @permissions
+  @permissions @jira-MCF-4-CUP
   Scenario Outline: Check User Permissions
     Given I have a role of <Role> in the system
      Then I <Can or Cannot Create> a project
@@ -27,7 +27,7 @@ Feature: Create a Project
         | Role            | Can or Cannot Create |
         | User            | Cannot Create        |
 
-
+  @jira-MCF-4-CAP
   Scenario Outline: Create a Project
     Given I am authorized to create projects
      When I create a project with attributes <Name>, <Description>
@@ -35,7 +35,7 @@ Feature: Create a Project
 
       Scenarios: Valid Values
         | Name            | Description     | Created or Not |
-        | Awesome         | Another project | Created        |
+        | MCF-4-CAP       | Another project | Created        |
 
 
       Scenarios: Invalid Values
@@ -43,6 +43,7 @@ Feature: Create a Project
         | (None)          | Wrong name      | Not Created    | Name is required |
         | Wrong Desc      | (None)          | Not Created    | Description is required |
 
+  @jira-MCF-4-CPT
   Scenario: Create a Project That is Not Accessible to Another User
    Given I am authorized to create projects
      And a user named Arya Stark exists in the system
