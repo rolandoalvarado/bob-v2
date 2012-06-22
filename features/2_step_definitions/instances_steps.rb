@@ -637,7 +637,7 @@ end
 Then /^the instance is publicly accessible via that floating IP$/ do
   compute_service = ComputeService.session
   compute_service.ensure_security_group_rule @project
-  remote_client = 'RDP'
+  remote_client = 'SSH'
   
   steps %{
     * Connect to the instance named #{@instance.name} in project #{@project} via #{remote_client}
