@@ -116,7 +116,7 @@ end
 
 Then /^I can create a user$/i do
   new_user = CloudObjectBuilder.attributes_for(:user, :name => Unique.username('new'))
-  me       = @me
+  me       = @current_user
 
   steps %{
     * Register the user named #{ new_user.name } for deletion at exit
@@ -140,13 +140,13 @@ Then /^I can create a user$/i do
     * Choose the 2nd item in the Primary Project dropdown
     * Choose the item with text Project Manager in the Role dropdown
     * Click the Create User button
-    * The New User form should not be visible
+    * The New User form should be visible
     * The #{ new_user.name } user row should be visible
   }
 end
 
 Then /^I cannot create a user$/i do
-  me = @me
+  me = @current_user
 
   steps %{
     * Click the Logout button if currently logged in
@@ -176,7 +176,7 @@ Then /^I can create a user with attributes (.+), (.+), (.+), (.+), and (.+)$/i d
                            end
 
   role = (is_pm_or_not == "Yes" ? "Project Manager" : "Member")
-  me       = @me
+  me       = @current_user
 
   steps %{
     * Register the user named #{ new_user.name } for deletion at exit
@@ -221,7 +221,7 @@ Then /^I cannot create a user with attributes (.+), (.+), (.+), (.+), and (.+)$/
                            end
 
   role = (is_pm_or_not == "Yes" ? "Project Manager" : "Member")
-  me       = @me
+  me       = @current_user
 
   steps %{
     * Register the user named #{ new_user.name } for deletion at exit
@@ -293,7 +293,7 @@ Then /^I can edit a user$/i do
                   
   IdentityService.session.ensure_user_does_not_exist(new_attrs)                
   @existing_user = IdentityService.session.ensure_user_exists(existing_user)                
-  me = @me
+  me = @current_user
   
   steps %{
     * Register the user named #{ existing_user.name } for deletion at exit
@@ -341,7 +341,7 @@ Then /^I can update a user with attributes (.+), (.+), (.+), (.+), and (.+)$/i d
   
   IdentityService.session.ensure_user_does_not_exist(new_attrs)
   @existing_user = IdentityService.session.ensure_user_exists(existing_user)
-  me = @me
+  me = @current_user
 
   steps %{
     * Register the user named #{ existing_user.name } for deletion at exit
@@ -374,7 +374,7 @@ end
 
 
 Then /^I cannot edit a user$/i do
-  me = @me
+  me = @current_user
 
   steps %{
     * Click the Logout button if currently logged in
@@ -407,7 +407,7 @@ Then /^I cannot update a user with attributes (.+), (.+), (.+), (.+), and (.+)$/
   role = (is_pm_or_not == "Yes" ? "Project Manager" : "Member")
   
   @existing_user = IdentityService.session.ensure_user_exists(existing_user)
-  me = @me
+  me = @current_user
 
   steps %{
     * Register the user named #{ existing_user.name } for deletion at exit

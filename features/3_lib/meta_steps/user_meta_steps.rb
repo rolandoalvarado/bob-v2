@@ -52,7 +52,7 @@ Then /^Ensure that I have a role of (.+) in the system$/i do |role_name|
   end
 
   # Make variable(s) available for use in succeeding steps
-  @me = @current_user = user
+  @current_user = user
 end
 
 
