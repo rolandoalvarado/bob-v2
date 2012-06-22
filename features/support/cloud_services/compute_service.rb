@@ -54,7 +54,7 @@ class ComputeService < BaseCloudService
       )
     end
 
-    service.servers.find { |s| s.name == attributes[:name] }
+    find_instance_by_name project, attributes[:name]
   rescue => e
     raise "Couldn't initialize instance in #{ project.name }. " +
           "The error returned was: #{ e.inspect }"

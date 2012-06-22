@@ -285,12 +285,10 @@ Then /^Drag the instance flavor slider to a different flavor$/ do
   @current_page.session.execute_script %{
     var slider = $('#flavor-slider'),
       value = parseInt(slider.slider('option', 'value')),
-      min = parseInt(slider.slider('option', 'min')),
-      max = parseInt(slider.slider('option', 'max'));
+      min = parseInt(slider.slider('option', 'min'));
 
-    // change value to min or max
-    if(value < max) { value = value + 1; }
-    else if(value == max) { value = min; }
+    if(value == min) { value = value + 1; }
+    else if(value > min) { value = min; }
     slider.slider('option', 'value', value);
     slider.trigger('slide', { 'value': value });
   }
