@@ -674,6 +674,12 @@ Then /^the instance will reboot$/i do
   }
 end
 
+Then /^the instance should be active$/ do
+  status = 'ACTIVE'  
+  steps %{
+    * The instance #{ @instance.id } should be of #{status} status
+  }
+end
 
 TestCase /^An instance created based on the image (.+) is accessible via (.+)$/ do |image_name, remote_client|
 
