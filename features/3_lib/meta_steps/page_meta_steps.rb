@@ -55,6 +55,12 @@ Then /^Choose the item with text (.+) in the (.+) dropdown$/ do |item_text, drop
   end
 end
 
+Then /^Clear the (.+) field$/i do |field_name|
+  field_name = field_name.split.join('_').downcase
+  @current_page.send("#{ field_name }_field").set ""
+end
+
+
 Then /^Click the context menu button for user (.+)$/ do |username|
   username = Unique.username(username)
   @current_page.context_menu_button(name: username).click
@@ -539,7 +545,6 @@ end
 Then /^The volume named (.+) should be attached to the instance named (.+)$/ do |volume_name, instance_name|
   VolumeService.session.reload_volumes
   volume = VolumeService.session.volumes.find { |v| v['display_name'] == volume_name }
-
   raise "Couldn't find a volume named '#{ volume_name }'" unless volume
 
   sleeping(1).seconds.between_tries.failing_after(15).tries do
@@ -547,9 +552,10 @@ Then /^The volume named (.+) should be attached to the instance named (.+)$/ do 
       raise "Could not find row for the volume named #{ volume_name }!"
     end
 
-    attachment = @current_page.volume_row(id: volume['id']).find('.attachments a').text()
+    attachment = @current_page.volume_row(id: volume['id']).find('.attachments').text.to_s.strip
     if attachment != instance_name
-      raise "Expected volume #{ volume_name } to be attached to instance #{ instance_name }, but it's not."
+      raise "Expected volume #{ volume_name } to be attached to instance #{ instance_name }, " +
+            "but it's not."
     end
   end
 end
@@ -565,7 +571,7 @@ Then /^The volume named (.+) should not be attached to the instance named (.+)$/
       raise "Could not find row for the volume named #{ volume_name }!"
     end
 
-    attachment = @current_page.volume_row(id: volume['id']).find('.attachments a').text()
+    attachment = @current_page.volume_row(id: volume['id']).find('.attachments').text.to_s.strip
     if attachment == instance_name
       raise "Expected volume #{ volume_name } to not be attached to instance #{ instance_name }, but it is."
     end

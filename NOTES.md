@@ -130,11 +130,6 @@ STEPS:
 4. Check the nova config.
    => type in < cat novarc >
 
-   Result will be:
-   export OS_USERNAME=admin
-   export OS_PASSWORD=klnm12
-   export OS_TENANT_NAME=admin
-   export OS_AUTH_URL=http://10.50.1.1:35357/v2.0/
 
 5. SSH to cn25
    => type in < ssh cn25 >
