@@ -672,7 +672,6 @@ end
 
 Then /^the instance will be created$/i do
   steps %{
-    * The instances table's last row should include the text #{ @instance.name }
     * The instances table should have #{ @instance_count + 1 } rows
     * The instance #{ @instance.id } should be in active status
   }
@@ -680,7 +679,6 @@ end
 
 Then /^the instance will be not created$/i do
   steps %{
-    * The instances table's last row should not include the text #{ @instance.name }
     * The instances table should have #{ @instance_count } rows
     * The instance #{ @instance.id } should be in active status
   }
