@@ -294,7 +294,7 @@ Then /^Drag the(?:| instance) flavor slider to a different flavor$/ do
   }
 end
 
-Then /^Drag the(?:| instance) flavor slider to (.+)$/ do |flavor|
+Then /^Drag the(?:| instance) flavor slider to the (.+)$/ do |flavor|
   flavors = %w[ m1.small m1.medium m1.large m1.xlarge ]
 
   if flavor.downcase != '(any)'

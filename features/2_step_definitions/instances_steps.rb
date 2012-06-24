@@ -146,7 +146,7 @@ When /^I create an instance with attributes (.+), (.+), (.+), (.+) and (.+)$/ do
 
     * Select OS image #{ image } item from the images radiolist
     * Set instance name field with #{ name }
-    * Drag the flavor slider to #{ flavor }
+    * Drag the flavor slider to the #{ flavor }
     * Select keypair #{ keypair } item from the keypair dropdown
     * Select Security Group #{ security_group } item from the security group checklist
     * Click the create instance button
