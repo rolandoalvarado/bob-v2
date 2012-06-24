@@ -45,7 +45,7 @@ Step /^Ensure that the project named (.+) has (?:a|an) (active|paused|suspended)
   end
 end
 
-Step /^Ensure that the project named (.+) has (\d+) (active|paused|suspended) (?:instance|instances)/ do |project_name, status, desired_count|
+Step /^Ensure that the project named (.+) has (\d+) (.+) (?:instance|instances)/ do |project_name, desired_count,status |
   desired_count = desired_count.to_i
 
   project = IdentityService.session.find_project_by_name(project_name)
