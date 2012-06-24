@@ -1,4 +1,4 @@
-@jira-MCF-9 @format-v2
+@jira-MCF-9 @format-v2 @wip
 Feature: Connect to an Instance
   As a user, I want to be able to connect to an instance, so that I can
   install binaries to it and configure it according to my needs.

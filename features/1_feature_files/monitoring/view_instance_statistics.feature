@@ -30,7 +30,7 @@ Feature: View Instance Statistics
         | Role            | Can or Cannot View |
         | (None)          | Cannot View        |
 
-
+  @wip
   Scenario Outline:
     * Statistics for <Resource Type> should be visible from the Monitoring page
 
