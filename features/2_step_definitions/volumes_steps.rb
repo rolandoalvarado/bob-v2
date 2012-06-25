@@ -281,6 +281,7 @@ TestCase /^A user with a role of (.+) in a project can attach any of its volumes
     * Click the Projects link
     * Click the #{ test_project_name } project
 
+    * The volume named #{ test_volume_name } should be in available status
     * Click the attach button of the volume named #{ test_volume_name }
     * Current page should have the attach volume form
     * Choose the item with text #{ test_instance_name } in the attachable instance dropdown
