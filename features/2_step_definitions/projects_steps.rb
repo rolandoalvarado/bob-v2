@@ -25,31 +25,24 @@ Given /^At least (\d+) images? should be available for use in the project$/ do |
   end
 end
 
-Given /^The project has (\d+) active instances?$/ do |number_of_instances|
+Given /^The project has (\d+) (active|paused|suspended) instances?$/ do |number_of_instances, status|
   number_of_instances = number_of_instances.to_i
   compute_service     = ComputeService.session
-  compute_service.ensure_active_instance_count(@project, number_of_instances)
+  compute_service.send("ensure_#{ status }_instance_count", @project, number_of_instances)
 
   compute_service.set_tenant @project
-  @instance           = compute_service.instances.find { |i| i.state == 'ACTIVE' }
+  instances = compute_service.instances
+  if number_of_instances == 1
+    @instance = instances.find { |i| i.state == status.upcase }
+  else
+    @instance = instances.select { |i| i.state == status.upcase }
+  end
 end
 
 Given /^The project has (\d+) available volumes?$/ do |number_of_volumes|
   number_of_volumes = number_of_volumes.to_i
   volume_service    = VolumeService.session
   total_volumes     = volume_service.ensure_volume_count(@project, number_of_volumes)
-end
-
-Given /^The project has (\d+) paused instances?$/ do |number_of_instances|
-  number_of_instances = number_of_instances.to_i
-  compute_service     = ComputeService.session
-  total_instances     = compute_service.ensure_paused_instance_count(@project, number_of_instances)
-end
-
-Given /^The project has (\d+) suspended instances?$/ do |number_of_instances|
-  number_of_instances = number_of_instances.to_i
-  compute_service     = ComputeService.session
-  total_instances     = compute_service.ensure_suspended_instance_count(@project, number_of_instances)
 end
 
 Given /^[Tt]he project does not have any floating IPs$/ do
