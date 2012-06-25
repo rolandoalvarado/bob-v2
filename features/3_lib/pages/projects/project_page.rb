@@ -3,6 +3,8 @@ require_relative '../secure_page'
 class ProjectPage < WebClientPage
   path '/projects'
 
+  button    'close',                              '.close'
+
   tab       'instances and volumes',              '.nav-tabs .instances-and-volumes a'
 
   button    'new instance',                       '#new-instance:not(.disabled)'
@@ -11,6 +13,7 @@ class ProjectPage < WebClientPage
   field     'project description',                '#project-description'
   button    'modify project',                     '#update-project'
   form      'new instance',                       '#new-instance-modal'
+  message   'new instance error',                 '#new-instance-modal .error'
   radiolist 'images',                             '#instances-list'
   field     'server name',                        '#server-name'
   checklist 'security groups',                    xpath: "//input[@name='securityGroupCheckbox']/../../.."
@@ -18,7 +21,7 @@ class ProjectPage < WebClientPage
   table     'instances',                          '#instances-template .table-list'
   option    'imageslist',                         xpath: '//div[@class="instance-item clearfix"]/label[text()]'
   option    'image',                              xpath: '//div[@class="instance-item clearfix"]/label[text()="<name>"]'
-  option    'security group',                     xpath: "//input[@name='securityGroupCheckbox' and @value='<name>']"
+  checkbox  'security group',                     xpath: "//input[@name='securityGroupCheckbox' and @value='<name>']"
   option    'keypair',                            xpath: '//select[@id="keypair"]/option[@value="<name>"]'
   field     'password',                           '#password'
   row       'instance',                           '#instances-template .table-list #instance-item-<id>'

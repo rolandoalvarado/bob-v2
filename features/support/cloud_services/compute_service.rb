@@ -659,7 +659,6 @@ class ComputeService < BaseCloudService
   def find_instance_by_name(project, name)
     service.set_tenant project
     instance = service.servers.find_by_name(name)
-    service.set_tenant 'admin'
     instance
   end
 
@@ -673,9 +672,7 @@ class ComputeService < BaseCloudService
   def get_project_instances(project)
     service.set_tenant project
     instances.reload
-    i = instances
-    service.set_tenant 'admin'
-    i
+    instances
   end
 
   def set_tenant(project, reload = true)

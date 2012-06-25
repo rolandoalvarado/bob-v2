@@ -45,7 +45,6 @@ When /^I assign a floating IP to the instance$/ do
     * Choose the 2nd item in the instance dropdown
     * Click the create floating IP allocation button
 
-    * The floating IPs table should have #{ addresses.count + 1} rows
     * The floating IPs table's last row should include the text #{ instance.name }
   }
 
@@ -54,7 +53,7 @@ When /^I assign a floating IP to the instance$/ do
 
   raise "No floating IP associated to instance #{ instance.name }" if @floating.nil?
 
-  @instance = instance
+  #@instance = instance
 end
 
 When /^I create an instance on that project based on the image (.+)$/ do |image_name|
@@ -298,7 +297,6 @@ Then /^I [Cc]an [Aa]ssign a floating IP to an instance in the project$/ do
     * Choose the 2nd item in the instance dropdown
     * Click the create floating IP allocation button
 
-    * The floating IPs table should have #{ num_addresses + 1} rows
     * The floating IPs table's last row should include the text #{ instance.name }
   }
 end
@@ -392,7 +390,6 @@ end
 Then /^I [Cc]an [Dd]elete an instance in the project$/ do
   compute_service = ComputeService.session
   compute_service.set_tenant @project
-  instance        = compute_service.instances.first
 
   steps %{
     * Click the logout button if currently logged in
@@ -405,10 +402,10 @@ Then /^I [Cc]an [Dd]elete an instance in the project$/ do
     * Visit the projects page
     * Click the #{ @project.name } project
 
-    * Click the instance menu button for instance #{ instance.id }
-    * Click the delete instance button for instance #{ instance.id }
+    * Click the instance menu button for instance #{ @instance.id }
+    * Click the delete instance button for instance #{ @instance.id }
     * Click the confirm instance deletion button
-    * The instances table should not include the text #{ instance.name }
+    * The instances table should not include the text #{ @instance.name }
   }
 end
 
@@ -679,8 +676,10 @@ end
 
 Then /^the instance will be not created$/i do
   steps %{
+    * Current page should still have the new instance form
+    * The new instance form has an error message
+    * Click the close button
     * The instances table should have #{ @instance_count } rows
-    * The instance #{ @instance.id } should be in active status
   }
 end
 
