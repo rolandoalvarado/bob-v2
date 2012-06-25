@@ -122,3 +122,25 @@ code {
   list-style: none;
   margin-left: -15px;
 }
+
+.linenum {
+  color: #999;
+  font-size: 10px;
+  padding-right: 1em;
+}
+
+.comment {
+  color: #666;
+  font-style: italic;
+}
+
+.offending,
+.offending .linenum {
+  color: #900;
+  font-weight: bold;
+}
+
+.viewport {
+  overflow: auto;
+  white-space: nowrap;
+}
