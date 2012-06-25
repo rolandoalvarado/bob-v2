@@ -100,13 +100,10 @@ class ProjectPage < WebClientPage
   button    'create volume',                      '#save-volume'
   table     'volumes',                            '#volume-list tbody'
 
-  button    'delete volume',                      '#volume-item-<id> a[data-action="delete-volume"]'
-  button    'volume delete confirmation',         'a.okay'
-
 # Type      Name                                  Selector
   button    'volume menu',                        '#volume-item-<id> .dropdown-toggle'
-  button    'volume context menu',                '#volume-item-<id> .dropdown-toggle'
-  #button    'volume delete',                     '#volume-item-<id> a[data-action="delete-volume"]'
+  button    'volume context menu',                xpath: "//*[@id='volume-item-<id>']/..//a[@class='dropdown-toggle']"
+  button    'delete volume',                      '#volume-item-<id> .delete-volume'
   button    'new volume snapshot',                '#volume-item-<id> a[data-action="create-snapshot"]'
   form      'new volume snapshot',                '#new-volume-snapshot-modal'
   field     'volume snapshot name',               '#new-volume-snapshot-modal #name'
@@ -131,6 +128,7 @@ class ProjectPage < WebClientPage
   button    'volume attach confirmation',         '#attach-volume'
   button    'detach volume',                      '#volume-item-<id> .detach'
   button    'volume detach confirmation',         '#alert-template .okay'
+  button    'volume delete confirmation',         '#alert-template .okay'
   row       'volume',                             '#volume-item-<id>'
 
   #==========================

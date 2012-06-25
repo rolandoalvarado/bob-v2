@@ -16,12 +16,8 @@ Feature: Delete a volume
 
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Delete |
+        | System Admin    | Can Delete           |
         | Project Manager | Can Delete           |
-        | Member          | Can Delete           |
-
-      Scenarios: Unauthorized Roles
-        | Role            | Can or Cannot Delete |
-        | (None)          | Cannot Delete        |
 
   Scenario:
     * Volumes that are attached to an instance cannot be deleted
