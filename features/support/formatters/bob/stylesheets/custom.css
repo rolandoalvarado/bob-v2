@@ -4,24 +4,24 @@ code {
 }
 
 .skipped,
-span.skipped a,
+.skipped a,
 .pending,
-span.pending a {
+.pending a {
   color: #336699;
 }
 
 .undefined,
-span.undefined a {
+.undefined a {
   color: #666666;
 }
 
 .passed,
-span.passed a {
+.passed a {
   color: #339966;
 }
 
 .failed,
-span.failed a {
+.failed a {
   color: #993333;
 }
 

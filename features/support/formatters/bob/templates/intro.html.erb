@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta charset="utf-8">
   <title>Bob Report - Intro</title>
   <%= asset_tags %>
 </head>
@@ -10,7 +11,8 @@
     <div class="content">
       <p>Wazaaaaaaap!</p>
 
-      <p>Here's my report for http://mc.cb-1-1.morphcloud.net. Click on any feature to your left to see more details
+      <p>Here's my report for <a href="<%= web_client_url %>"><%= web_client_url %></a>.
+         Click on any feature to your left to see more details
          about which specific parts passed or failed.</p>
 
       <p>
