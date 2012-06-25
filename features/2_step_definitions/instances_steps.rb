@@ -45,7 +45,6 @@ When /^I assign a floating IP to the instance$/ do
     * Choose the 2nd item in the instance dropdown
     * Click the create floating IP allocation button
 
-    * The floating IPs table should have #{ addresses.count + 1} rows
     * The floating IPs table's last row should include the text #{ instance.name }
   }
 
@@ -54,7 +53,7 @@ When /^I assign a floating IP to the instance$/ do
 
   raise "No floating IP associated to instance #{ instance.name }" if @floating.nil?
 
-  @instance = instance
+  #@instance = instance
 end
 
 When /^I create an instance on that project based on the image (.+)$/ do |image_name|
@@ -298,7 +297,6 @@ Then /^I [Cc]an [Aa]ssign a floating IP to an instance in the project$/ do
     * Choose the 2nd item in the instance dropdown
     * Click the create floating IP allocation button
 
-    * The floating IPs table should have #{ num_addresses + 1} rows
     * The floating IPs table's last row should include the text #{ instance.name }
   }
 end
