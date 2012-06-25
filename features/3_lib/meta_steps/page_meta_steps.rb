@@ -725,17 +725,6 @@ Then /^The (.+) table's last row should include the text (.+)$/ do |table_name, 
   end
 end
 
-Then /^The (.+) table's row should include the text (.+)$/ do |table_name, text|
-  sleeping(1).seconds.between_tries.failing_after(20).tries do
-    table_name = table_name.split.join('_').downcase
-    table_rows = @current_page.send("#{ table_name }_table").all('tbody tr')
-    unless table_rows.last.has_content?(text)
-      raise "Couldn't find the text '#{ text }' in the row of the #{ table_name } table."
-    end
-  end
-end
-
-
 Then /^The (.+) table's last row should not include the text (.+)$/ do |table_name, text|
   sleeping(1).seconds.between_tries.failing_after(5).tries do
     table_name = table_name.split.join('_').downcase
