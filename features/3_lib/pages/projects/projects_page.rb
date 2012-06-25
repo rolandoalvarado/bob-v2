@@ -12,7 +12,7 @@ class ProjectsPage < WebClientPage
   span    'new project description error', "span.error[for='new-project-description']"
 
   # To click on a project link, use ProjectsPage#project_link( name: NAME_OF_PROJECT ).click
-  element 'project name',                  "td.project-details[title='<name>']"
+  element 'project name',          xpath:  "//td[@class='project-details clickable-row'][@title='<name>']"
   link    'project',               xpath:  "//*[@id='project-list']//td[@title='<name>']/..//a[@class='view-project']"
   link    'edit project',          xpath:  "//td[@title='<name>']/..//a[@class='edit-project']"
   link    'disabled edit project', xpath:  "//td[@title='<name>']/..//a[@class='edit-project disabled'][@disabled='disabled']"

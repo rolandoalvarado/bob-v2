@@ -72,7 +72,7 @@ Then /^Logging out redirects me to the Log In page$/ do
     * Fill in the Username field with #{ username }
     * Fill in the Password field with #{ password }
     * Click the Login button
-    * Current page should be the Root page
+    * Current page should be the Monitoring page
     * Click the Logout button
     * Current page should be the Login page
   }
@@ -92,7 +92,7 @@ Then /^Logging out clears my session$/ do
     * Fill in the Username field with #{ username }
     * Fill in the Password field with #{ password }
     * Click the Login button
-    * Current page should be the Root page
+    * Current page should be the Monitoring page
     * Click the Logout button
     * Visit the Projects page
     * Current page should be the Login page

@@ -17,21 +17,26 @@ class ComputeService < BaseCloudService
     volume      = volumes.find { |v| v.id == volume['id'].to_i }
     device_name = "/dev/vd#{ ('a'..'z').to_a.sample(2).join }"
 
-    sleeping(0.5).seconds.between_tries.failing_after(10).tries do
+    begin
       service.attach_volume(volume.id, instance.id, device_name)
+    rescue => e
+      raise "Couldn't attach volume #{ volume.name } to instance #{ instance.name }! " +
+            "The error returned was: #{ e.inspect }"
+    end
 
+    sleeping(1).seconds.between_tries.failing_after(30).tries do
+      volumes.reload
+      volume = volumes.get(volume.id)
       unless volume.attachments.any? { |a| a['serverId'] == instance.id }
         raise "Couldn't ensure that instance #{ instance.name } has attached volume #{ volume.name }!"
       end
-
-      volumes.reload
-      volume = volumes.get(volume.id)
     end
   end
 
   def create_instance_in_project(project, attributes={})
     set_tenant project
     attributes[:name]   ||= Faker::Name.name
+    attributes[:password]   ||= 'password'
     attributes[:image]  ||= service.images[0].id
     attributes[:flavor] ||= service.flavors[0].id
 
@@ -49,7 +54,7 @@ class ComputeService < BaseCloudService
       )
     end
 
-    service.servers.find { |s| s.name == attributes[:name] }
+    find_instance_by_name project, attributes[:name]
   rescue => e
     raise "Couldn't initialize instance in #{ project.name }. " +
           "The error returned was: #{ e.inspect }"
@@ -119,6 +124,29 @@ class ComputeService < BaseCloudService
     end
 
     deleted_instances
+  end
+
+  def detach_volume_from_instance_in_project(project, instance, volume)
+    set_tenant project, false
+    volume = volumes.find { |v| v.id == volume['id'].to_i }
+
+    # Check if volume is attached to the instance
+    if volume.attachments.any? { |a| a['serverId'] == instance.id }
+      begin
+        service.detach_volume(instance.id, volume.id)
+      rescue => e
+        raise "Couldn't detach volume #{ volume.name } from instance #{ instance.name }! " +
+              "The error returned was: #{ e.inspect }"
+      end
+    end
+
+    sleeping(1).seconds.between_tries.failing_after(30).tries do
+      volumes.reload
+      volume = volumes.get(volume.id)
+      if volume.attachments.any? { |a| a['serverId'] == instance.id }
+        raise "Couldn't ensure that instance #{ instance.name } has no attached volume #{ volume.name }!"
+      end
+    end
   end
 
   def release_addresses_from_project(project)
@@ -227,6 +255,53 @@ class ComputeService < BaseCloudService
       return addresses.count
     end
   end
+  
+  def ensure_project_does_not_have_floating_ip(project, desired_count, instance)
+    set_tenant project
+
+    sleeping(1).seconds.between_tries.failing_after(60).tries do
+      addresses = service.addresses
+      actual_count = addresses.count
+
+      if desired_count > actual_count
+
+        how_many = desired_count - actual_count
+        how_many.times do |n|
+          service.allocate_address
+          sleep(0.5)
+        end
+        addresses.reload
+
+
+      elsif desired_count < addresses.length
+
+        while addresses.length > desired_count
+          addresses.reload
+          addresses[0].destroy rescue nil
+        end
+
+      end
+
+      # Floating IPs should usually be associated to an instance
+      unless instance.nil? && instance.id.blank?
+        desired_count.times do |n|
+          if addresses[n] && !addresses[n].ip.blank?
+            service.associate_address(instance.id, addresses[n].ip)
+            sleep(0.5)
+          end
+        end
+      end
+
+      addresses.reload
+      addresses = addresses.select { |a| a.instance_id == instance.id } unless instance.nil? && instance.id.blank?
+      if addresses.length != desired_count
+        raise "Couldn't ensure that #{ project.name } has #{ desired_count } " +
+              "floating IPs. Current number of floating IPs is #{ addresses.length }."
+      end
+
+      return addresses.count
+    end
+  end
 
   # Ensures that there are `desired_count` number of instances in the project
   # Set `strict` to false if you don't mind having more than `desired_count`
@@ -237,7 +312,7 @@ class ComputeService < BaseCloudService
     # This block will keep running until it stops raising an error, or until
     # the max number of tries is reached. In the last try, whatever error is
     # raised by the block is thrown.
-    sleeping(1).seconds.between_tries.failing_after(30).tries do
+    sleeping(1).seconds.between_tries.failing_after(60).tries do
       instances.reload
 
       non_active_instances  = instances.select{ |i| i.state !~ /^ACTIVE|ERROR$/}
@@ -301,6 +376,8 @@ class ComputeService < BaseCloudService
     # This block will keep running until it stops raising an error, or until
     # the max number of tries is reached. In the last try, whatever error is
     # raised by the block is thrown.
+    # 60 tries is needed for rebooting instances so please don't change it.
+    # Since instance reboot will take a while.
     sleeping(1).seconds.between_tries.failing_after(60).tries do
       instances.reload
 

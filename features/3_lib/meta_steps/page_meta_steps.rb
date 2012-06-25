@@ -55,6 +55,12 @@ Then /^Choose the item with text (.+) in the (.+) dropdown$/ do |item_text, drop
   end
 end
 
+Then /^Clear the (.+) field$/i do |field_name|
+  field_name = field_name.split.join('_').downcase
+  @current_page.send("#{ field_name }_field").set ""
+end
+
+
 Then /^Click the context menu button for user (.+)$/ do |username|
   username = Unique.username(username)
   @current_page.context_menu_button(name: username).click
@@ -275,17 +281,31 @@ Then /^Current page should have the (.+) security group$/ do |security_group|
   end
 end
 
-Then /^Drag the instance flavor slider to a different flavor$/ do
+Then /^Drag the(?:| instance) flavor slider to a different flavor$/ do
   @current_page.session.execute_script %{
     var slider = $('#flavor-slider'),
-      value = slider.slider('option', 'value'),
-      min = slider.slider('option', 'min'),
-      max = slider.slider('option', 'max');
+      value = parseInt(slider.slider('option', 'value')),
+      min = parseInt(slider.slider('option', 'min'));
 
-    // change value to min or max
-    if(value < max) { slider.slider('option', 'value', value + 1); }
-    else if(value == max) { slider.slider('option', 'value', min); }
+    if(value == min) { value = value + 1; }
+    else if(value > min) { value = min; }
+    slider.slider('option', 'value', value);
+    slider.trigger('slide', { 'value': value });
   }
+end
+
+Then /^Drag the(?:| instance) flavor slider to the (.+)$/ do |flavor|
+  flavors = %w[ m1.small m1.medium m1.large m1.xlarge ]
+
+  if flavor.downcase != '(any)'
+    value = flavors.index(flavor)
+
+    @current_page.session.execute_script %{
+      var slider = $('#flavor-slider');
+      slider.slider('option', 'value', #{ value });
+      slider.trigger('slide', { 'value': #{ value } });
+    }
+  end
 end
 
 
@@ -462,6 +482,15 @@ Step /^(?:A|The) floating IP should be associated to instance (.+)$/ do |instanc
 end
 
 
+Then /^The instance (.+) should be performing task (.+)$/ do |instance_id, task|
+  sleeping(1).seconds.between_tries.failing_after(15).tries do
+    unless @current_page.instance_row( id: instance_id ).find('.task').text.include?(task)
+      raise "Instance #{ instance_id } is not shown as performing task #{ task }."
+    end
+  end
+end
+
+
 Then /^The instance (.+) should be shown as rebooting$/ do |instance_id|
   sleeping(1).seconds.between_tries.failing_after(15).tries do
     unless @current_page.instance_row( id: instance_id ).find('.task').text.include?('rebooting')
@@ -492,7 +521,7 @@ end
 Then /^The instance ((?:(?!named )).+) should be (?:in|of) (.+) status$/ do |instance_id, status|
   sleeping(1).seconds.between_tries.failing_after(15).tries do
     unless @current_page.instance_row( id: instance_id ).find('.status').has_content?(status.upcase.gsub(' ', '_'))
-      raise "Instance #{ instance_id } does not have #{ status } status."
+      raise "Instance #{ instance_id } does not have or took to long to become #{ status } status."
     end
   end
 end
@@ -504,7 +533,7 @@ Step /^The instance named (.+) should be (?:in|of) (.+) status$/ do |instance_na
   selector = "//*[@id='instances-list']//*[contains(@class, 'name') and contains(text(), \"#{ instance_name }\")]/.."
   row      = @current_page.find_by_xpath(selector)
   unless row.find('.status').has_content?(status.upcase.gsub(' ', '_'))
-    raise "Instance #{ instance_name } is not #{ status }."
+    raise "Instance #{ instance_name } is not or took too long to become #{ status }."
   end
 end
 
@@ -539,7 +568,6 @@ end
 Then /^The volume named (.+) should be attached to the instance named (.+)$/ do |volume_name, instance_name|
   VolumeService.session.reload_volumes
   volume = VolumeService.session.volumes.find { |v| v['display_name'] == volume_name }
-
   raise "Couldn't find a volume named '#{ volume_name }'" unless volume
 
   sleeping(1).seconds.between_tries.failing_after(15).tries do
@@ -547,9 +575,10 @@ Then /^The volume named (.+) should be attached to the instance named (.+)$/ do 
       raise "Could not find row for the volume named #{ volume_name }!"
     end
 
-    attachment = @current_page.volume_row(id: volume['id']).find('.attachments a').text()
+    attachment = @current_page.volume_row(id: volume['id']).find('.attachments').text.to_s.strip
     if attachment != instance_name
-      raise "Expected volume #{ volume_name } to be attached to instance #{ instance_name }, but it's not."
+      raise "Expected volume #{ volume_name } to be attached to instance #{ instance_name }, " +
+            "but it's not."
     end
   end
 end
@@ -565,7 +594,7 @@ Then /^The volume named (.+) should not be attached to the instance named (.+)$/
       raise "Could not find row for the volume named #{ volume_name }!"
     end
 
-    attachment = @current_page.volume_row(id: volume['id']).find('.attachments a').text()
+    attachment = @current_page.volume_row(id: volume['id']).find('.attachments').text.to_s.strip
     if attachment == instance_name
       raise "Expected volume #{ volume_name } to not be attached to instance #{ instance_name }, but it is."
     end
@@ -634,7 +663,8 @@ end
 
 
 Then /^The (.+) project should be visible$/ do |project_name|
-  unless @current_page.has_project_name_element?( name: project_name )
+  if !@current_page.has_project_name_element?( name: project_name ) &&
+     !@current_page.has_project_name_title_element?( name: project_name )
     raise "The project '#{ project_name }' should be visible, but it's not."
   end
 end

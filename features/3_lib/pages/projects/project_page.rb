@@ -40,6 +40,7 @@ class ProjectPage < WebClientPage
   field     'volumes quota edit',                 xpath: '//input[@name="volumes"]'
   field     'cores quota edit',                   xpath: '//input[@name="cores"]'
   element   'quota edit error',                   '.alert-heading'
+  element   'quota edit error2',                  xpath: '//div[@class="control-group error"]'
 
 # Type      Name                                  Selector
   span      'project name error',                 "span.error[for='project-name']"
@@ -105,8 +106,8 @@ class ProjectPage < WebClientPage
 # Type      Name                                  Selector
   button    'volume menu',                        '#volume-item-<id> .dropdown-toggle'
   button    'volume context menu',                '#volume-item-<id> .dropdown-toggle'
-  #button    'volume delete',                      '#volume-item-<id> a[data-action="delete-volume"]'
-  button    'new volume snapshot',                '#volume-item-<id> #create-snapshot'
+  #button    'volume delete',                     '#volume-item-<id> a[data-action="delete-volume"]'
+  button    'new volume snapshot',                '#volume-item-<id> a[data-action="create-snapshot"]'
   form      'new volume snapshot',                '#new-volume-snapshot-modal'
   field     'volume snapshot name',               '#new-volume-snapshot-modal #name'
   field     'volume snapshot description',        '#new-volume-snapshot-modal #textarea'
@@ -170,7 +171,9 @@ class ProjectPage < WebClientPage
 
   button    'confirm instance deletion',          '#alert-template .okay'
   button    'confirm instance reboot',            "#alert-template .okay"
-  button    'confirm instance resize',            "#resize-instance"
+  button    'resize instance confirmation',       "#resize-instance"
+
+  button    'confirm resize instance',            "#instance-item-<id> .confirm-resize"
 
   element   'image',                              xpath: "//*[@id='instances-list']//label[text()='<name>']"
 

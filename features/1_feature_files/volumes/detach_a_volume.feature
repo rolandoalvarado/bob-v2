@@ -1,4 +1,4 @@
-@jira-MCF-41 @format-v2
+@jira-MCF-41 @format-v2 @wip
 Feature: Detach a Volume
   As a user, I want to detach a volume from my instance so that I can re-use
   the volume for other purposes or delete it altogether.
