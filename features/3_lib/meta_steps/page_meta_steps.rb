@@ -206,7 +206,7 @@ Then /^Current page should be the (.+) page$/i do |page_name|
 end
 
 
-Then /^Current page should have the (.+) (button|field|form|tile)$/ do |name, type|
+Then /^Current page should(?:| still) have the (.+) (button|field|form|tile)$/ do |name, type|
   name = name.split.join('_').downcase
   unless @current_page.send("has_#{ name }_#{type}?")
     raise "Current page doesn't have a #{ name } #{ type }"
@@ -359,11 +359,13 @@ Then /^Select instance count (.+)$/ do |count|
  end
 end
 
-Then /^Select Security Group (.+) item from the security group checklist$/ do |security_group|
+Then /^Select Security Group (.+) item from the security group checklist$/i do |security_group|
  if security_group.downcase == "(any)"
    #nothing
  elsif security_group.downcase == "(none)"
-   #nothing
+   steps %{
+     * Uncheck all items in the security groups checklist
+   }
  else
    pending
  end
@@ -393,6 +395,14 @@ Then /^The (.+) form should be visible$/ do |form_name|
   form_name = form_name.split.join('_').downcase
   unless @current_page.send("has_#{ form_name }_form?")
     raise "The '#{ form_name.gsub('_',' ') }' form should be visible, but it's not."
+  end
+end
+
+
+Then /^The (.+) form has an error message$/ do |form_name|
+  name = form_name.split.join('_').downcase
+  if @current_page.send("has_no_#{ name }_error_message?")
+    raise "Expected the #{ form_name } form to have an error message, but none was found."
   end
 end
 
@@ -736,6 +746,13 @@ Then /^The (.+) table's last row should not include the text (.+)$/ do |table_na
   end
 end
 
+Then /^Uncheck all items in the (.+) checklist$/ do |list_name|
+  list_name = list_name.split.join('_').downcase
+  checklist = @current_page.send("#{ list_name }_checklist_items")
+  checklist.each do |checkbox|
+    checkbox.click if checkbox.checked?
+  end
+end
 
 Then /^Uncheck the (\d+)(?:st|nd|rd|th) item in the (.+) checklist$/ do |item_number, list_name|
   list_name = list_name.split.join('_').downcase
@@ -746,6 +763,12 @@ end
 Then /^Uncheck the (.+) checkbox$/ do |checkbox_name|
   checkbox_name = checkbox_name.split.join('_').downcase
   checkbox = @current_page.send("#{ checkbox_name }_checkbox")
+  checkbox.click if checkbox.checked?
+end
+
+Then /^Uncheck the (.+) checkbox with value (.+)$/ do |checkbox_name, value|
+  checkbox_name = checkbox_name.split.join('_').downcase
+  checkbox = @current_page.send("#{ checkbox_name }_checkbox", name: value)
   checkbox.click if checkbox.checked?
 end
 

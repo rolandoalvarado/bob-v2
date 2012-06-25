@@ -42,7 +42,6 @@ Feature: Create an Instance
       Scenarios: Invalid Values
         | Image  | Name        | Flavor | Keypair | Security Group | Created or Not | Reason                                           |
         | (Any)  | (None)      | (Any)  | (Any)   | (Any)          | Not Created    | Must specify a name                              |
-        | (Any)  | My Server   | (Any)  | (None)  | (Any)          | Not Created    | Must supply a keypair                            |
         | (Any)  | My Server   | (Any)  | (Any)   | (None)         | Not Created    | Instance should have at least one security group |
 
       Scenarios: Specific Images
