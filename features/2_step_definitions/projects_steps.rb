@@ -29,7 +29,9 @@ Given /^The project has (\d+) active instances?$/ do |number_of_instances|
   number_of_instances = number_of_instances.to_i
   compute_service     = ComputeService.session
   compute_service.ensure_active_instance_count(@project, number_of_instances)
-  @instance           = compute_service.instances.reload.find { |i| i.state == 'ACTIVE' }
+
+  compute_service.set_tenant @project
+  @instance           = compute_service.instances.find { |i| i.state == 'ACTIVE' }
 end
 
 Given /^The project has (\d+) available volumes?$/ do |number_of_volumes|
