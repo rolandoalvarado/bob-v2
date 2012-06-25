@@ -22,7 +22,7 @@ end
 
 When /^I assign a floating IP to the instance$/ do
   compute_service = ComputeService.session
-  compute_service.service.set_tenant @project
+  compute_service.set_tenant @project
 
   instance        = compute_service.instances.find { |i| i.state == 'ACTIVE' }
   addresses       = compute_service.addresses
@@ -319,6 +319,7 @@ Then /^I can connect to that instance via (.+)/ do |remote_client|
   compute_service = ComputeService.session
   compute_service.ensure_project_floating_ip_count(@project, 1, @instance)
   compute_service.ensure_security_group_rule @project
+  compute_service.set_tenant @project
 
   floating_ip = compute_service.addresses.find { |a| a.instance_id == @instance.id }
   raise "Couldn't find a floating IP associated with instance #{ @instance.name }!" unless floating_ip
@@ -541,7 +542,6 @@ end
 Then /^I [Cc]an [Uu]npause (?:that|the) instance$/ do
   compute_service = ComputeService.session
   compute_service.set_tenant @project
-  instance        = compute_service.instances.find { |i| i.state == 'PAUSED' }
 
   steps %{
     * Click the logout button if currently logged in
@@ -554,10 +554,10 @@ Then /^I [Cc]an [Uu]npause (?:that|the) instance$/ do
     * Visit the projects page
     * Click the #{ @project.name } project
 
-    * Click the instance menu button for instance #{ instance.id }
-    * Click the unpause instance button for instance #{ instance.id }
+    * Click the instance menu button for instance #{ @instance.id }
+    * Click the unpause instance button for instance #{ @instance.id }
 
-    * The instance #{ instance.id } should be in active status
+    * The instance #{ @instance.id } should be in active status
   }
 end
 
