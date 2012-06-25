@@ -74,6 +74,20 @@ Step /^Ensure that the volume named (.+) is attached to the (\d+)(?:st|nd|rd|th)
 end
 
 
+Step /^Ensure that the volume named (.+) is attached to the instance named (.+) in the project (.+)$/ do |volume_name, instance_name, project_name|
+  project = IdentityService.session.find_project_by_name(project_name)
+  raise "Project #{ project_name } couldn't be found!" unless project
+
+  instance = ComputeService.session.find_instance_by_name(project, instance_name)
+  raise "Instance #{ instance_name } couldn't be found!" unless instance
+
+  volume = VolumeService.session.find_volume_by_name(project, volume_name)
+  raise "Volume #{ volume_name } couldn't be found!" unless volume
+
+  ComputeService.session.attach_volume_to_instance_in_project project, instance, volume
+end
+
+
 Step /^Ensure that the volume named (.+) is not attached to the instance named (.+) in the project (.+)$/ do |volume_name, instance_name, project_name|
   project = IdentityService.session.find_project_by_name(project_name)
   raise "Project #{ project_name } couldn't be found!" unless project
