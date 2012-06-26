@@ -575,6 +575,21 @@ Step /^Click the (.+) button for the user named (.+)$/ do |button_name, username
   @current_page.send("#{ button_name }_user_button", name: username).click
 end
 
+Then /^The volume named (.+) should be (?:in|of) (.+) status$/ do |volume_name, status|
+  VolumeService.session.reload_volumes
+  volume = VolumeService.session.volumes.find { |v| v['display_name'] == volume_name }
+  raise "Couldn't find a volume named '#{ volume_name }'" unless volume
+
+  status.downcase!
+  sleeping(1).seconds.between_tries.failing_after(15).tries do
+    volume_row    = @current_page.volume_row( id: volume['id'] ).find('.volume-status')
+    volume_status = volume_row.text.to_s.strip.downcase
+    unless volume_status == status
+      raise "Volume #{ volume_name } took to long to become #{ status }."
+    end
+  end
+end
+
 Then /^The volume named (.+) should be attached to the instance named (.+)$/ do |volume_name, instance_name|
   VolumeService.session.reload_volumes
   volume = VolumeService.session.volumes.find { |v| v['display_name'] == volume_name }

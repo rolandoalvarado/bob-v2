@@ -281,6 +281,7 @@ TestCase /^A user with a role of (.+) in a project can attach any of its volumes
     * Click the Projects link
     * Click the #{ test_project_name } project
 
+    * The volume named #{ test_volume_name } should be in available status
     * Click the attach button of the volume named #{ test_volume_name }
     * Current page should have the attach volume form
     * Choose the item with text #{ test_instance_name } in the attachable instance dropdown
@@ -426,7 +427,7 @@ TestCase /^Volumes that are attached to an instance cannot be deleted$/i do
   Preconditions %{
     * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
     * Ensure that a project named #{ test_project_name } exists
-    * Ensure that the project named #{ test_project_name } has 1 instance
+    * Ensure that the project named #{ test_project_name } has an instance named #{ test_instance_name }
     * Ensure that the project named #{ test_project_name } has an available volume named #{ test_volume_name }
     * Ensure that the user #{ bob_username } has a role of Project Manager in the project #{ test_project_name }
 
