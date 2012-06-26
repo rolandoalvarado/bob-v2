@@ -7,10 +7,12 @@ def remote_client_connection(protocol, ip_address, username, options = {})
             "The error returned was: #{ result }"
     end
   when 'SSH'
-    options.merge!( port: 2222, timeout: 10 )
+    options.merge!( port: 2222, timeout: 20 )
     begin
       Net::SSH.start(ip_address, username, options) do |ssh|
         # Test connection and automatically close
+        result = ssh.exec!("ls -l")
+        puts result
       end
     rescue Exception => e
       raise "The instance is not publicly accessible on #{ ip_address } via SSH. " +

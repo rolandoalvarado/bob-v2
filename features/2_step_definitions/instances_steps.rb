@@ -698,17 +698,13 @@ end
 
 TestCase /^An instance created based on the image (.+) is accessible via (.+)$/ do |image_name, remote_client|
 
-  username      = Unique.username('bob')
-  password      = '123qwe'
-  project_name  = Unique.project_name('test')
-  instance_name = Unique.instance_name('test')
-
   Preconditions %{
     * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
     * Ensure that a project named #{ test_project_name } exists
     * Ensure that the project named #{ test_project_name } has 0 active instances
     * Ensure that the user #{ bob_username } has a role of Member in the project #{ test_project_name }
     * Ensure that a security group rule exists for project #{ test_project_name }
+    * Ensure that an instance named #{ test_instance_name } does not have any floating IPs
   }
 
   Cleanup %{
@@ -731,7 +727,7 @@ TestCase /^An instance created based on the image (.+) is accessible via (.+)$/ 
     * Click the #{ image_name } image
     * Fill in the server name field with #{ test_instance_name }
     * Check the 1st item in the security groups checklist
-    * Fill in the server password field with #{ instance_password }
+    * Fill in the server password field with #{ test_instance_password }
     * Click the create instance button
 
     * The instances table should have 1 row
