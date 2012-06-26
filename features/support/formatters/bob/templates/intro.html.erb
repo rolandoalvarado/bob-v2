@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta charset="utf-8">
   <title>Bob Report - Intro</title>
   <%= asset_tags %>
 </head>
@@ -10,29 +11,32 @@
     <div class="content">
       <p>Wazaaaaaaap!</p>
 
-      <p>Here's my report for http://mc.cb-1-1.morphcloud.net. Click on any feature to your left to see more details
+      <p>Here's my report for <a href="<%= web_client_url %>"><%= web_client_url %></a>.
+         Click on any feature to your left to see more details
          about which specific parts passed or failed.</p>
 
       <p>
         <ul>
-          <li><%= total_completed_features %> out of <%= total_features %> features passed.</li>
+          <li><strong><%= total_completed_features %> out of <%= total_features %></strong> features passed.</li>
           <% if total_undefined_features > 0 %>
-            <li><%= total_undefined_features %> features don't have corresponding test specs yet.</li>
+            <li><strong><%= total_undefined_features %></strong> features don't have corresponding test specs yet.</li>
           <% else %>
             <li>All features are fully spec'd out.</li>
           <% end %>
         </ul>
       </p>
 
-      <p>
-        Some hints regarding the colors:
-          <ul>
-            <li>Green - Passed. Woohoo!</li>
-            <li>Red - Failed. Booooo</li>
-            <li>Blue - Skipped, usually because the previous step failed</li>
-            <li>Gray - Means the underlying test scripts are not yet defined</li>
-          </ul>
-      </p>
+      <p>Some hints regarding the colors:</p>
+      <dl class="dl-horizontal">
+        <dt><span class="label label-success">Green</span></dt>
+        <dd>Passed. Woohoo!</dd>
+        <dt><span class="label label-important">Red</span></dt>
+        <dd>Failed. Booooo</dd>
+        <dt><span class="label label-info">Blue</span></dt>
+        <dd>Skipped, usually because the previous step failed</dd>
+        <dt><span class="label">Gray</span></dt>
+        <dd>Means the underlying test scripts are not yet defined</dd>
+      </dl>
     </div>
   </div>
 </body>
