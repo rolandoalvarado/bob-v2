@@ -17,7 +17,7 @@ Feature: Edit a Security Group
 
   Background:
     * A project exists in the system
-
+    * Ensure that a user exists in the project
 
   @permissions @jira-MCF-34-cup
   Scenario Outline: Check User Permissions

@@ -106,39 +106,6 @@ When /^I create a security group with attributes (.+), (.+)$/ do |name, descript
   }
 end
 
-When /^I add the following rule: (.+), (.+), (.+), (.+)$/i do |protocol, from_port, to_port, cidr |
-
-  @security_group_rule = { 
-    :protocol => protocol ,
-    :from_port => from_port, 
-    :to_port => to_port , 
-    :cidr => cidr }
-
- steps %{
-    * Click the logout button if currently logged in
-
-    * Visit the login page
-    * Fill in the username field with #{ @current_user.name }
-    * Fill in the password field with #{ @current_user.password }
-    * Click the login button
-
-    * Visit the projects page
-    * Click the #{ @project.name } project
-
-    * Click the access security tab
-    * Current page should have the security groups
-
-    * Click the modify security group button for security group #{ @new_security_group.id }
-    * Current page should have the security group rules form
-    * Choose the #{protocol} in the ip protocol dropdown
-    * Set port to the from port field with #{from_port}
-    * Set port to the to port field with #{to_port}
-    * Fill in the CIDR field with #{cidr}
-    * Click the add security group rule button
-    * Click the close security group rule button
-  }
-end
-
 
 When /^I edit the Web Servers security group with the following rule: (.+), (.+), (.+), (\d+\.\d+\.\d+\.\d+(?:|\/\d+)|\(None\)|\(Random\))$/ do |protocol, from_port, to_port, cidr|
 
@@ -166,7 +133,44 @@ When /^I edit the Web Servers security group with the following rule: (.+), (.+)
     * Click the access security tab
     * Current page should have the security groups
 
-    * Click the modify security group button for security group #{ security_group.id }
+    * Click the edit security group button for security group #{ security_group.id }
+    * Current page should have the security group rules form
+    * Choose the 1st item in the ip protocol dropdown
+    * Set port to the from port field with #{from_port}
+    * Set port to the to port field with #{to_port}
+    * Fill in the CIDR field with #{cidr}
+    * Click the add security group rule button
+  }
+
+end
+
+When /^I add the following rule: (.+), (.+), (.+), (\d+\.\d+\.\d+\.\d+(?:|\/\d+)|\(None\)|\(Random\))$/ do |protocol, from_port, to_port, cidr|
+
+  compute_service = ComputeService.session
+ 
+  attrs           = CloudObjectBuilder.attributes_for(
+                    :security_group, 
+                    :name => Unique.name('Web Servers'), 
+                    :description => 'Web Servers Security Group'
+                  )
+
+  security_group  = compute_service.ensure_security_group_exists(@project, attrs)
+  
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * Click the #{ @project.name } project
+
+    * Click the access security tab
+    * Current page should have the security groups
+
+    * Click the edit security group button for security group #{ security_group.id }
     * Current page should have the security group rules form
     * Choose the 1st item in the ip protocol dropdown
     * Set port to the from port field with #{from_port}
@@ -239,7 +243,7 @@ Then /^I [Cc]an [Ee]dit a security group in the project$/ do
     * Click the access security tab
     * Current page should have the security groups
 
-    * Click the modify security group button for security group #{ security_group.id }
+    * Click the edit security group button for security group #{ security_group.id }
     * Current page should have the security group rules form
     * Choose the 1st item in the ip protocol dropdown
     * Set port to the from port field with #{from_port}
@@ -375,7 +379,7 @@ Then /^the security group with attributes (.+), (.+) will be [Cc]reated$/ do |na
                     :description    => description
                   )
 
-  ComputeService.session.ensure_security_group_does_not_exist(@project, security_group)
+  @security_group = ComputeService.session.ensure_security_group_does_not_exist(@project, security_group)
   
   steps %{
     * Click the logout button if currently logged in
@@ -421,11 +425,11 @@ Then /^the security group with attributes (.+), (.+) will be [Nn]ot [Cc]reated$/
     * Click the access security tab
     * Click the new security group button
     * Current page should have the new security form
-    * Fill in the security group name field with #{@security_group.name}
-    * Fill in the security group description field with #{@security_group.description}
+    * Fill in the security group name field with #{name}
+    * Fill in the security group description field with #{description}
     * Click the create security button    
     * The new security form should be visible
-    * The new security form error message should be visible
+    * The new security group form error message should be visible
   }
 end
 

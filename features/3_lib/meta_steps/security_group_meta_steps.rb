@@ -44,17 +44,18 @@ Then /^Ensure that a security group named default exist$/i do
 end
 
 Then /^the security group rules will be Added$/i do
-
+  
   raise ("there is no security group value") if @security_group == nil
   
   #check protocol
-  field     'list ip protocol'               '#security-group-rules-list div.ip-protocoll'  
-  field     'list from port'                 '#security-group-rules-list div.from-port'   
-  field     'list to port'                   '#security-group-rules-list div.to-port'   
-  field     'list cidr'                      '#security-group-rules-list div.cidr'   
+  field     'list ip protocol'               '#security-group-rules-form div.ip-protocoll'  
+  field     'list from port'                 '#security-group-rules-form div.from-port'   
+  field     'list to port'                   '#security-group-rules-form div.to-port'   
+  field     'list cidr'                      '#security-group-rules-form div.cidr'   
 
   #check protocol
   protocol = @security_group[:protocol].downcase
+ 
   if protocol != "(any)" 
     value = @current_page.send("list ip protocol field").get
     if value != protocol

@@ -6,6 +6,15 @@ Then /^A project does not have collaborator/i do
   end
 end
 
+Then /^A quota edit dialog show error/i do
+  element_name =  "quota edit error element".split.join('_').downcase
+  element_name2 = "quota edit error2 element".split.join('_').downcase
+  if ( !@current_page.send("has_#{ element_name }?") && 
+      !@current_page.send("has_#{ element_name2 }?")  )
+    raise "A quota edit should show error, but it does not."
+  end
+end
+
 Step /^Ensure that a project named (.+) exists$/i do |project_name|
   identity_service = IdentityService.session
   project          = identity_service.ensure_project_exists(:name => project_name)
@@ -16,7 +25,7 @@ Step /^Ensure that a project named (.+) exists$/i do |project_name|
     raise "Test project couldn't be initialized!"
   end
 
-  @test_project = project
+  @named_project = project
 end
 
 Step /^Ensure that the project named (.+) has (\d+) instances?$/i do |project_name, instance_count|
@@ -39,22 +48,21 @@ Then /^Ensure that a test project is available for use$/i do
     raise "Test project couldn't be initialized!"
   end
 
-  @test_project = project
+  @named_project = project
 end
 
-Then /^Ensure that I have a role of (.+) in the test project$/i do |role_name|
+Then /^Ensure that I have a role of (.+) in the named project$/i do |role_name|
 
-  if @test_project.nil?
+  if @named_project.nil?
     raise "No test project is available. You need to call " +
           "'* Ensure that a test project is available for use' " +
           "before this step."
   end
 
   identity_service = IdentityService.session
-  user             = @me
-  EnvironmentCleaner.register(:user, user.id)
+  user             = @current_user
 
-  identity_service.revoke_all_user_roles(user, @test_project)
+  identity_service.revoke_all_user_roles(user, @named_project)
 
   # Ensure user has the following role in the project
   unless role_name.downcase == "(none)"
@@ -67,7 +75,7 @@ Then /^Ensure that I have a role of (.+) in the test project$/i do |role_name|
     end
 
     begin
-      role.add_to_user(user,@test_project)
+      role.add_to_user(user,@named_project)
     rescue Fog::Identity::OpenStack::NotFound => e
       raise "Couldn't add #{ user.name } to #{ @project.name } as #{ role.name }"
     end
@@ -87,6 +95,24 @@ Then /^Ensure that a project is available for use$/i do
   @project = project
 end
 
+Step /^Ensure that a user exists in the project$/ do
+  user_attrs       = CloudObjectBuilder.attributes_for(
+                       :user,
+                       :name => Unique.username('roland')
+                     )
+  identity_service = IdentityService.session
+
+  user             = identity_service.ensure_user_exists(user_attrs)
+
+  if user.nil? or user.id.empty?
+    raise "User couldn't be initialized!"
+  end
+  EnvironmentCleaner.register(:user, user.id)
+
+  # Make variable(s) available for use in succeeding steps
+  @current_user = user
+end
+
 Then /^Ensure that I have a role of (.+) in the project$/i do |role_name|
 
   if @project.nil?
@@ -95,14 +121,8 @@ Then /^Ensure that I have a role of (.+) in the project$/i do |role_name|
           "before this step."
   end
 
-  user_attrs       = CloudObjectBuilder.attributes_for(
-                       :user,
-                       :name => Unique.username('rstark')
-                     )
-
   identity_service = IdentityService.session
-  user             = identity_service.ensure_user_exists(user_attrs)
-  EnvironmentCleaner.register(:user, user.id)
+  user             = @current_user
 
   identity_service.revoke_all_user_roles(user, @project)
 
@@ -123,7 +143,6 @@ Then /^Ensure that I have a role of (.+) in the project$/i do |role_name|
     end
   end
 
-  @current_user = user
 end
 
 Then /^Ensure that the project has no security groups$/i do
@@ -173,15 +192,23 @@ Then /^Select Collaborator (.+)$/ do |username|
 end
 
 Then /^Quota Values should be updated with (.+) , (.+) and (.+)$/i do |floating_ip,volumes,cores|
-
-  #get floating ip values
-               
-  #get volumes
-
-  #cores
-
+  @pending
 end
 
 Then /^Quota Values should be warned with (.+) , (.+) and (.+)$/i do |floating_ip,volumes,cores|
-          
+  @pending          
+end
+
+Then /^Edit the (.+) project$/i do |project_name|
+  project_name.strip!
+  @current_page.project_menu_button( name: project_name ).click
+  @current_page.edit_project_link( name: project_name ).click
+  @current_page = ProjectPage.new
+end
+
+Then /^Delete the (.+) project$/i do |project_name|
+  project_name.strip!
+  @current_page.project_menu_button( name: project_name ).click
+  @current_page.delete_project_link( name: project_name ).click
+  @current_page.delete_confirmation_button.click
 end

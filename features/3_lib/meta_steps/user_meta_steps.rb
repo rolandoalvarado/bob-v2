@@ -1,9 +1,10 @@
 Then /^Ensure that (?:a|another) user with username (.+) and password (.+) exists$/i do |username, password|
   username           = Unique.username(username)
   @user_attrs        = CloudObjectBuilder.attributes_for(:user, :name => username, :password => password)
-  @user = IdentityService.session.ensure_user_exists(@user_attrs)
+  @existing_user = @user = IdentityService.session.ensure_user_exists(@user_attrs)
   EnvironmentCleaner.register(:user, @user.id)
 end
+
 
 Then /^Ensure that a user with username (.+) does not exist$/i do |username|
   user_attrs = CloudObjectBuilder.attributes_for(:user, :name => username)
@@ -51,7 +52,7 @@ Then /^Ensure that I have a role of (.+) in the system$/i do |role_name|
   end
 
   # Make variable(s) available for use in succeeding steps
-  @me = @current_user = user
+  @current_user = user
 end
 
 

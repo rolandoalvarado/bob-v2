@@ -18,6 +18,7 @@ Feature: Create a Security Group
   Background:
     * A project exists in the system
     * Ensure that the project has no security groups
+    * Ensure that a user exists in the project
 
 
   @permissions @jira-MCF-32-cup
@@ -52,8 +53,9 @@ Feature: Create a Security Group
   Scenario Outline: Add a Rule
     Given I am authorized to create a security group in the project
       And the project has only one security group named Web Servers
-     When I add the following rule: <Protocol>, <From Port>, <To Port>, <CIDR>
-     Then the security group rules will be <Added or Not>
+    When I add the following rule: <Protocol>, <From Port>, <To Port>, <CIDR>
+    Then the rule will be <Added or Not>
+
 
       Scenarios: Valid Rules
         | Protocol | From Port | To Port  | CIDR        | Added or Not |
