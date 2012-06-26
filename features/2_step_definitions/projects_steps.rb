@@ -527,36 +527,31 @@ end
 
 TestCase /^A user with a role of (.+) in a project can edit the instance quota of the project$/i do |role_name|
   
-  username      = Unique.username('bob')
-  password      = '123qwe'
-  project_name  = Unique.project_name('project')
-  instance_name = Unique.instance_name('test')
-  volume_name   = Unique.volume_name('test')
   floating_ips  = 10
   volumes       = 10
   cores         = 20
 
   Preconditions %{
-    * Ensure that a user with username #{ username } and password #{ password } exists
-    * Ensure that a project named #{ project_name } exists
-    * Ensure that the user #{ username } has a role of #{ role_name } in the project #{ project_name }
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the project #{ test_project_name }
   }
 
   Cleanup %{
-    * Register the project named #{ project_name } for deletion at exit
-    * Register the user named #{ username } for deletion at exit
+    * Register the project named #{ test_project_name } for deletion at exit
+    * Register the user named #{ bob_username } for deletion at exit
   }
 
   Script %{
 
     * Click the Logout button if currently logged in
     * Visit the Login page
-    * Fill in the Username field with #{ username }
-    * Fill in the Password field with #{ password }
+    * Fill in the Username field with #{ bob_username }
+    * Fill in the Password field with #{ bob_password }
     * Click the Login button
 
     * Click the Projects link
-    * Click the #{ project_name } project
+    * Click the #{ test_project_name } project
     * Wait 10 seconds
     * Click the quota modify button
     * Current page should have the modify quota form
@@ -573,37 +568,32 @@ end
 
 TestCase /^A user with a role of (.+) in a project cannot edit the instance quota of the project$/i do |role_name| 
   
-  username      = Unique.username('bob')
-  password      = '123qwe'
-  project_name  = Unique.project_name('project')
-  instance_name = Unique.instance_name('test')
-  volume_name   = Unique.volume_name('test')
   floating_ips  = 10
   volumes       = 10
   cores         = 20
 
   Preconditions %{
-    * Ensure that a user with username #{ username } and password #{ password } exists
-    * Ensure that a project named #{ project_name } exists
-    * Ensure that the user #{ username } has a role of Member in the system
-    * Ensure that the user #{ username } has a role of #{role_name} in the project #{ project_name }
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that the user #{ bob_username } has a role of Member in the system
+    * Ensure that the user #{ bob_username } has a role of #{role_name} in the project #{ test_project_name }
   }
 
   Cleanup %{
-    * Register the project named #{ project_name } for deletion at exit
-    * Register the user named #{ username } for deletion at exit
+    * Register the project named #{ test_project_name } for deletion at exit
+    * Register the user named #{ bob_username } for deletion at exit
   }
   
   Script %{
 
     * Click the Logout button if currently logged in
     * Visit the Login page
-    * Fill in the Username field with #{ username }
-    * Fill in the Password field with #{ password }
+    * Fill in the Username field with #{ bob_username }
+    * Fill in the Password field with #{ bob_password }
     * Click the Login button
 
     * Click the Projects link
-    * Click the #{ project_name } project
+    * Click the #{ test_project_name } project
     * Wait 10 seconds
     * The quota modify link should be disabled
   }
@@ -672,33 +662,28 @@ end
 
 
 TestCase /^Project can be updated the quota of the project with (.+) , (.+) and (.+)$/i do |floating_ips,volumes,cores|
-  username      = Unique.username('bob')
-  password      = '123qwe'
-  project_name  = Unique.project_name('project')
-  instance_name = Unique.instance_name('test')
-  volume_name   = Unique.volume_name('test')
 
   Preconditions %{
-    * Ensure that a user with username #{ username } and password #{ password } exists
-    * Ensure that a project named #{ project_name } exists
-    * Ensure that the user #{ username } has a role of Project Manager in the project #{ project_name } 
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that the user #{ bob_username } has a role of Project Manager in the project #{ test_project_name } 
   }
 
   Cleanup %{
-    * Register the project named #{ project_name } for deletion at exit
-    * Register the user named #{ username } for deletion at exit
+    * Register the project named #{ test_project_name } for deletion at exit
+    * Register the user named #{ bob_username } for deletion at exit
   }
 
   Script %{
 
     * Click the Logout button if currently logged in
     * Visit the Login page
-    * Fill in the Username field with #{ username }
-    * Fill in the Password field with #{ password }
+    * Fill in the Username field with #{ bob_username }
+    * Fill in the Password field with #{ bob_password }
     * Click the Login button
 
     * Click the Projects link
-    * Click the #{ project_name } project
+    * Click the #{ test_project_name } project
     * Wait 10 seconds
     * Click the quota modify button
 
@@ -715,33 +700,27 @@ end
 
 TestCase /^Project cannot be updated the quota of the project with (.+) , (.+) and (.+)$/i do |floating_ips,volumes,cores|
 
-  username      = Unique.username('bob')
-  password      = '123qwe'
-  project_name  = Unique.project_name('project')
-  instance_name = Unique.instance_name('test')
-  volume_name   = Unique.volume_name('test')
-
   Preconditions %{
-    * Ensure that a user with username #{ username } and password #{ password } exists
-    * Ensure that a project named #{ project_name } exists
-    * Ensure that the user #{ username } has a role of Project Manager in the project #{ project_name }
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that the user #{ bob_username } has a role of Project Manager in the project #{ test_project_name }
   }
 
   Cleanup %{
-    * Register the project named #{ project_name } for deletion at exit
-    * Register the user named #{ username } for deletion at exit
+    * Register the project named #{ test_project_name } for deletion at exit
+    * Register the user named #{ bob_username } for deletion at exit
   }
 
   Script %{
 
     * Click the Logout button if currently logged in
     * Visit the Login page
-    * Fill in the Username field with #{ username }
-    * Fill in the Password field with #{ password }
+    * Fill in the Username field with #{ bob_username }
+    * Fill in the Password field with #{ bob_password }
     * Click the Login button
 
     * Click the Projects link
-    * Click the #{ project_name } project
+    * Click the #{ test_project_name } project
     * Wait 10 seconds
     * Click the quota modify button
 
