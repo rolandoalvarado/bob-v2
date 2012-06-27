@@ -132,7 +132,7 @@ Then /^Click the (.+) button for security group (.+)$/ do |button_name, security
   @current_page.send("#{ button_name }_button", id: security_group_id).click
 end
 
-Step /^Click the (.+) button for user (.+)$/ do |button_name, user_id|
+Step /^Click the (?:(?!context menu)) button for user (.+)$/ do |button_name, user_id|
   button_name = button_name.split.join('_').downcase
   @current_page.send("#{ button_name }_button", id: user_id).click
 end
