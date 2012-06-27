@@ -38,13 +38,16 @@
                   <h4><%= "#{ s[:keyword] } #{ s[:name] }" %></h4>
                 </div>
                 <div class="modal-body">
-                  <% if s[:screenshot] %>
+                  <% if s[:screenshot] && s[:status] != :skipped %>
+                    <pre class="viewport"><%= s[:url] %></pre>
                     <a href="<%= s[:screenshot] %>" target="_blank"><img src="<%= s[:screenshot] %>"/></a>
                   <% end %>
                   <% if s[:exception] %>
                     <pre class="viewport"><%= s[:exception][:message] %></pre>
                     <pre class="viewport"><%= s[:exception][:backtrace].join('<br>') %></pre>
                     <pre><%= s[:exception][:extra_failure_content] %></pre>
+                  <% elsif s[:status] == :skipped %>
+                    <p>Skipped</p>
                   <% else %>
                     <p>No errors</p>
                   <% end %>
@@ -83,13 +86,16 @@
                             <h4><%= "#{ cell[:value] }" %></h4>
                           </div>
                           <div class="modal-body">
-                            <% if cell[:screenshot] %>
+                            <% if cell[:screenshot] && cell[:status] != :skipped %>
+                              <pre class="viewport"><%= cell[:url] %></pre>
                               <a href="<%= cell[:screenshot] %>" target="_blank"><img src="<%= cell[:screenshot] %>"/></a>
                             <% end %>
                             <% if cell[:exception] %>
                               <pre class="viewport"><%= cell[:exception][:message] %></pre>
                               <pre class="viewport"><%= cell[:exception][:backtrace].join('<br>') %></pre>
                               <pre><%= cell[:exception][:extra_failure_content] %></pre>
+                            <% elsif cell[:status] == :skipped %>
+                              <p>Skipped</p>
                             <% else %>
                               <p>No errors</p>
                             <% end %>

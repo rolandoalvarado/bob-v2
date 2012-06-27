@@ -204,12 +204,22 @@ class Html
   def before_table_row(table_row)
     return if skip_current_step?
     @current_row = []
+    @failure_printed = false
     @current_table << @current_row
   end
 
   def table_cell_value(value, status)
     return if skip_current_step?
     @previous_cell = @current_cell
+    
+    if status == :failed
+      if @failure_printed
+        status = :skipped
+      else
+        @failure_printed = true
+      end
+    end
+
     @current_cell = { :value => value, :status => status }
     @current_row << @current_cell
   end
@@ -243,13 +253,17 @@ class Html
       filename = File.basename(src)
       filepath = File.join(screenshots_dir, filename)
       FileUtils.cp(src, filepath)
+      page = Capybara.current_session
+      url = page.current_host + page.current_path
 
       if is_scenario_outline?(@current_feature_element)
         @current_row.each do |cell|
           cell[:screenshot] = "../screenshots/#{filename}"
+          cell[:url] = url
         end
       elsif !is_scenario_outline?(@current_feature_element)
         @current_step[:screenshot] = "../screenshots/#{filename}"
+        @current_step[:url] = url
       end
     end
   end
