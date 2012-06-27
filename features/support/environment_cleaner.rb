@@ -97,13 +97,15 @@ class EnvironmentCleaner
           end
         end
 
-        if @compute_service.volumes.count > 0
+        if @volume_service.snapshots.count > 0
           puts "    Deleting volume snapshots..."
           deleted_volume_snapshots = @volume_service.delete_volume_snapshots_in_project(project)
           deleted_volume_snapshots.each do |snapshot|
             puts "      DELETED: #{ snapshot[:name] } (id: #{ snapshot[:id] })"
           end
+        end
 
+        if @volume_service.volumes.count > 0
           puts "    Deleting volumes..."
           deleted_volumes = @volume_service.delete_volumes_in_project(project)
           deleted_volumes.each do |volume|
