@@ -204,12 +204,22 @@ class Html
   def before_table_row(table_row)
     return if skip_current_step?
     @current_row = []
+    @failure_printed = false
     @current_table << @current_row
   end
 
   def table_cell_value(value, status)
     return if skip_current_step?
     @previous_cell = @current_cell
+    
+    if status == :failed
+      if @failure_printed
+        status = :skipped
+      else
+        @failure_printed = true
+      end
+    end
+
     @current_cell = { :value => value, :status => status }
     @current_row << @current_cell
   end
