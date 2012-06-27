@@ -54,3 +54,9 @@ Step /^Ensure that the project named (.+) has (\d+) (.+) (?:instance|instances)/
   actual_count = ComputeService.session.send(:"ensure_#{ status }_instance_count", project, desired_count)
   raise "Couldn't ensure #{ project.name } has #{ desired_count } #{ status } instances" unless actual_count == desired_count
 end
+
+Step /^Ensure that an instance named (.+) does not have any floating IPs$/ do |instance|
+  compute_service = ComputeService.session
+  compute_service.ensure_project_does_not_have_floating_ip(@named_project, 0, instance)
+end
+
