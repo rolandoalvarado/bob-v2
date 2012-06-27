@@ -253,13 +253,17 @@ class Html
       filename = File.basename(src)
       filepath = File.join(screenshots_dir, filename)
       FileUtils.cp(src, filepath)
+      page = Capybara.current_session
+      url = page.current_host + page.current_path
 
       if is_scenario_outline?(@current_feature_element)
         @current_row.each do |cell|
           cell[:screenshot] = "../screenshots/#{filename}"
+          cell[:url] = url
         end
       elsif !is_scenario_outline?(@current_feature_element)
         @current_step[:screenshot] = "../screenshots/#{filename}"
+        @current_step[:url] = url
       end
     end
   end

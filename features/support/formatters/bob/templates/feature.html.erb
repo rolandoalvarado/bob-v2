@@ -39,6 +39,7 @@
                 </div>
                 <div class="modal-body">
                   <% if s[:screenshot] && s[:status] != :skipped %>
+                    <pre class="viewport"><%= s[:url] %></pre>
                     <a href="<%= s[:screenshot] %>" target="_blank"><img src="<%= s[:screenshot] %>"/></a>
                   <% end %>
                   <% if s[:exception] %>
@@ -86,6 +87,7 @@
                           </div>
                           <div class="modal-body">
                             <% if cell[:screenshot] && cell[:status] != :skipped %>
+                              <pre class="viewport"><%= cell[:url] %></pre>
                               <a href="<%= cell[:screenshot] %>" target="_blank"><img src="<%= cell[:screenshot] %>"/></a>
                             <% end %>
                             <% if cell[:exception] %>
