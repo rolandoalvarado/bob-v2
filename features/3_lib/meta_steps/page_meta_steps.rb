@@ -181,7 +181,7 @@ Then /^Click the row for security group with id (.+)$/i do |security_group_id|
   @current_page.security_group_link(id: security_group_id).click
 end
 
-Step /^Click the context menu button of the volume named (.+)$/ do |volume_name|
+Step /^Click the context menu button of the volume named (.+)$/i do |volume_name|
   VolumeService.session.reload_volumes
   volume = VolumeService.session.volumes.find { |v| v['display_name'] == volume_name }
 
@@ -190,11 +190,11 @@ Step /^Click the context menu button of the volume named (.+)$/ do |volume_name|
   @current_page.volume_context_menu_button(:id => volume['id']).click
 end
 
-Step /^Click the (attach|delete|detach) button of the volume named (.+)$/ do |button_name, volume_name|
-  volume = VolumeService.session.volumes.find { |v| v['display_name'] == volume_name }
-  raise "Couldn't find a volume named '#{ volume_name }'" unless volume
+Step /^Click the (attach|delete|detach) button of the volume named (.+)$/i do |button_name, volume_name|
+  volume = VolumeService.session.volumes.find { |v| v['display_name'] == volume_name && v['status'] == 'available' }
+  raise "Couldn't find an available volume named '#{ volume_name }'" unless volume
 
-  button_name = button_name.split.join('_')
+  button_name = button_name.split.join('_').downcase
   @current_page.send("#{ button_name }_volume_button", id: volume['id']).click
 end
 
