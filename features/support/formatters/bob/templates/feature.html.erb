@@ -83,8 +83,8 @@
                             <h4><%= "#{ cell[:value] }" %></h4>
                           </div>
                           <div class="modal-body">
-                            <% if s[:screenshot] %>
-                              <a href="<%= s[:screenshot] %>" target="_blank"><img src="<%= s[:screenshot] %>"/></a>
+                            <% if cell[:screenshot] %>
+                              <a href="<%= cell[:screenshot] %>" target="_blank"><img src="<%= cell[:screenshot] %>"/></a>
                             <% end %>
                             <% if cell[:exception] %>
                               <pre class="viewport"><%= cell[:exception][:message] %></pre>
