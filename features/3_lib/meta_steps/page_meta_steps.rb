@@ -715,7 +715,7 @@ Then /^The (.+) table should have (\d+) (?:row|rows)$/ do |table_name, num_rows|
 end
 
 
-Then /^The (.+) table's last row should include the text (.+)$/ do |table_name, text|
+Step /^The (.+) table's last row should include the text (.+)$/ do |table_name, text|
   sleeping(1).seconds.between_tries.failing_after(20).tries do
     table_name = table_name.split.join('_').downcase
     table_rows = @current_page.send("#{ table_name }_table").all('tbody tr')
@@ -724,6 +724,7 @@ Then /^The (.+) table's last row should include the text (.+)$/ do |table_name, 
     end
   end
 end
+
 
 Then /^The (.+) table's last row should not include the text (.+)$/ do |table_name, text|
   sleeping(1).seconds.between_tries.failing_after(5).tries do
