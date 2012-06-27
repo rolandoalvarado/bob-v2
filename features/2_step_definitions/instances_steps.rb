@@ -24,8 +24,7 @@ When /^I assign a floating IP to the instance$/ do
   compute_service = ComputeService.session
   compute_service.set_tenant @project
 
-  instance        = compute_service.instances.find { |i| i.state == 'ACTIVE' }
-  addresses       = compute_service.addresses
+  num_addresses       = compute_service.addresses
 
   steps %{
     * Click the logout button if currently logged in
@@ -45,15 +44,13 @@ When /^I assign a floating IP to the instance$/ do
     * Choose the 2nd item in the instance dropdown
     * Click the create floating IP allocation button
 
-    * The floating IPs table's last row should include the text #{ instance.name }
+    * The floating IPs table's last row should include the text #{ @instance.name }
   }
 
-  addresses.reload
-  @floating = addresses.find {|a| a.instance_id == instance.id}
+  num_addresses.reload
+  @floating = num_addresses.find {|a| a.instance_id == @instance.id}
 
-  raise "No floating IP associated to instance #{ instance.name }" if @floating.nil?
-
-  #@instance = instance
+  raise "No floating IP associated to instance #{ @instance.name }" if @floating.nil?
 end
 
 When /^I create an instance on that project based on the image (.+)$/ do |image_name|
@@ -275,10 +272,7 @@ end
 #=================
 
 Then /^I [Cc]an [Aa]ssign a floating IP to an instance in the project$/ do
-  compute_service = ComputeService.session
-  instance        = compute_service.instances.find { |i| i.state == 'ACTIVE' }
-  num_addresses   = compute_service.addresses.count
-
+  
   steps %{
     * Click the logout button if currently logged in
 
@@ -296,8 +290,8 @@ Then /^I [Cc]an [Aa]ssign a floating IP to an instance in the project$/ do
     * Choose the 1st item in the pool dropdown
     * Choose the 2nd item in the instance dropdown
     * Click the create floating IP allocation button
-
-    * The floating IPs table's last row should include the text #{ instance.name }
+    
+    * The floating IPs table's last row should include the text #{ @instance.name }
   }
 end
 
