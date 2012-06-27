@@ -2,13 +2,14 @@ require_relative 'base_cloud_service'
 
 class ComputeService < BaseCloudService
 
-  attr_reader :addresses, :flavors, :instances, :security_groups, :current_project
+  attr_reader :addresses, :flavors, :instances, :security_groups, :volumes, :current_project
 
   def initialize
     initialize_service Compute
     @addresses = service.addresses
     @flavors   = service.flavors
     @instances = service.servers
+    @volumes   = service.volumes
     @security_groups = service.security_groups
   end
 
@@ -713,10 +714,6 @@ class ComputeService < BaseCloudService
   def raise_ensure_suspended_instance_count_error(message, desired_count)
     raise "ERROR: Couldn't ensure #{ desired_count } suspended instances in project. " +
           message
-  end
-
-  def volumes
-    service.volumes
   end
 
 end
