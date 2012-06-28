@@ -61,7 +61,6 @@ Given /^The project has more than (\d+) instance flavors?$/ do |number_of_flavor
 end
 
 Given /^I have a role of (.+) in the project$/ do |role_name|
-
   if @project.nil?
     raise "No project was defined. You might need to add '* A project exists in the system' " +
           "in the feature file."
@@ -81,7 +80,7 @@ Given /^I have a role of (.+) in the project$/ do |role_name|
     role = identity_service.roles.find_by_name(RoleNameDictionary.db_name(role_name))
 
     if role.nil?
-      raise "Role #{ role_name } couldn't be found. Make sure it's defined in " +
+        raise "Role #{ role_name } couldn't be found. Make sure it's defined in " +
         "features/support/role_name_dictionary.rb and that it exists in " +
         "#{ ConfigFile.web_client_url }."
     end
@@ -166,7 +165,6 @@ When /^I create a project with attributes (.*), (.*)$/ do |name, desc|
 end
 
 When /^I (.*) edit the project's attributes to (.*), (.*)$/i do |can_or_cannot, name, desc|
-
   steps %{
     * Click the logout button if currently logged in
 
@@ -181,9 +179,9 @@ When /^I (.*) edit the project's attributes to (.*), (.*)$/i do |can_or_cannot, 
   } 
 
   if name.downcase == "(none)"
-   step "Clear the project name field"
+    step "Clear the project name field"
   else 
-   step "Fill in the project name field with #{ name }"
+    step "Fill in the project name field with #{ name }"
   end
 
   if desc.downcase == "(none)"
@@ -192,7 +190,7 @@ When /^I (.*) edit the project's attributes to (.*), (.*)$/i do |can_or_cannot, 
     step "Fill in the project description field with #{ desc }"
   end
 
-  step "Click the modify project button"
+    step "Click the modify project button"
 
   if can_or_cannot.downcase == "can" 
     step "The #{name} project should be visible"
@@ -200,7 +198,7 @@ When /^I (.*) edit the project's attributes to (.*), (.*)$/i do |can_or_cannot, 
   else
     if ( !@current_page.has_project_name_error_span? && 
          !@current_page.has_project_description_error_span? )
-      raise "The project should not have been created, but it seems that it was."
+         raise "The project should not have been created, but it seems that it was."
     end
   end
 end
@@ -437,9 +435,7 @@ Then /^I failed to delete (?:that|the) project$/i do
 end
 
 Then /^I can edit (?:that|the) project$/i do
-  
   steps %{
-
     * Click the logout button if currently logged in
     * Visit the login page
     * Fill in the username field with #{ @current_user.name }
@@ -454,12 +450,10 @@ Then /^I can edit (?:that|the) project$/i do
     * Click the modify project button
 
     * The editting project project should be visible
-
   }
 
   # restore project name
   @project.save
-
 end
 
 
@@ -527,36 +521,31 @@ end
 
 TestCase /^A user with a role of (.+) in a project can edit the instance quota of the project$/i do |role_name|
   
-  username      = Unique.username('bob')
-  password      = '123qwe'
-  project_name  = Unique.project_name('project')
-  instance_name = Unique.instance_name('test')
-  volume_name   = Unique.volume_name('test')
   floating_ips  = 10
   volumes       = 10
   cores         = 20
 
   Preconditions %{
-    * Ensure that a user with username #{ username } and password #{ password } exists
-    * Ensure that a project named #{ project_name } exists
-    * Ensure that the user #{ username } has a role of #{ role_name } in the project #{ project_name }
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the project #{ test_project_name }
   }
 
   Cleanup %{
-    * Register the project named #{ project_name } for deletion at exit
-    * Register the user named #{ username } for deletion at exit
+    * Register the project named #{ test_project_name } for deletion at exit
+    * Register the user named #{ bob_username } for deletion at exit
   }
 
   Script %{
 
     * Click the Logout button if currently logged in
     * Visit the Login page
-    * Fill in the Username field with #{ username }
-    * Fill in the Password field with #{ password }
+    * Fill in the Username field with #{ bob_username }
+    * Fill in the Password field with #{ bob_password }
     * Click the Login button
 
     * Click the Projects link
-    * Click the #{ project_name } project
+    * Click the #{ test_project_name } project
     * Wait 10 seconds
     * Click the quota modify button
     * Current page should have the modify quota form
@@ -573,37 +562,32 @@ end
 
 TestCase /^A user with a role of (.+) in a project cannot edit the instance quota of the project$/i do |role_name| 
   
-  username      = Unique.username('bob')
-  password      = '123qwe'
-  project_name  = Unique.project_name('project')
-  instance_name = Unique.instance_name('test')
-  volume_name   = Unique.volume_name('test')
   floating_ips  = 10
   volumes       = 10
   cores         = 20
 
   Preconditions %{
-    * Ensure that a user with username #{ username } and password #{ password } exists
-    * Ensure that a project named #{ project_name } exists
-    * Ensure that the user #{ username } has a role of Member in the system
-    * Ensure that the user #{ username } has a role of #{role_name} in the project #{ project_name }
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that the user #{ bob_username } has a role of Member in the system
+    * Ensure that the user #{ bob_username } has a role of #{role_name} in the project #{ test_project_name }
   }
 
   Cleanup %{
-    * Register the project named #{ project_name } for deletion at exit
-    * Register the user named #{ username } for deletion at exit
+    * Register the project named #{ test_project_name } for deletion at exit
+    * Register the user named #{ bob_username } for deletion at exit
   }
   
   Script %{
 
     * Click the Logout button if currently logged in
     * Visit the Login page
-    * Fill in the Username field with #{ username }
-    * Fill in the Password field with #{ password }
+    * Fill in the Username field with #{ bob_username }
+    * Fill in the Password field with #{ bob_password }
     * Click the Login button
 
     * Click the Projects link
-    * Click the #{ project_name } project
+    * Click the #{ test_project_name } project
     * Wait 10 seconds
     * The quota modify link should be disabled
   }
@@ -672,33 +656,28 @@ end
 
 
 TestCase /^Project can be updated the quota of the project with (.+) , (.+) and (.+)$/i do |floating_ips,volumes,cores|
-  username      = Unique.username('bob')
-  password      = '123qwe'
-  project_name  = Unique.project_name('project')
-  instance_name = Unique.instance_name('test')
-  volume_name   = Unique.volume_name('test')
 
   Preconditions %{
-    * Ensure that a user with username #{ username } and password #{ password } exists
-    * Ensure that a project named #{ project_name } exists
-    * Ensure that the user #{ username } has a role of Project Manager in the project #{ project_name } 
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that the user #{ bob_username } has a role of Project Manager in the project #{ test_project_name } 
   }
 
   Cleanup %{
-    * Register the project named #{ project_name } for deletion at exit
-    * Register the user named #{ username } for deletion at exit
+    * Register the project named #{ test_project_name } for deletion at exit
+    * Register the user named #{ bob_username } for deletion at exit
   }
 
   Script %{
 
     * Click the Logout button if currently logged in
     * Visit the Login page
-    * Fill in the Username field with #{ username }
-    * Fill in the Password field with #{ password }
+    * Fill in the Username field with #{ bob_username }
+    * Fill in the Password field with #{ bob_password }
     * Click the Login button
 
     * Click the Projects link
-    * Click the #{ project_name } project
+    * Click the #{ test_project_name } project
     * Wait 10 seconds
     * Click the quota modify button
 
@@ -715,33 +694,27 @@ end
 
 TestCase /^Project cannot be updated the quota of the project with (.+) , (.+) and (.+)$/i do |floating_ips,volumes,cores|
 
-  username      = Unique.username('bob')
-  password      = '123qwe'
-  project_name  = Unique.project_name('project')
-  instance_name = Unique.instance_name('test')
-  volume_name   = Unique.volume_name('test')
-
   Preconditions %{
-    * Ensure that a user with username #{ username } and password #{ password } exists
-    * Ensure that a project named #{ project_name } exists
-    * Ensure that the user #{ username } has a role of Project Manager in the project #{ project_name }
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that the user #{ bob_username } has a role of Project Manager in the project #{ test_project_name }
   }
 
   Cleanup %{
-    * Register the project named #{ project_name } for deletion at exit
-    * Register the user named #{ username } for deletion at exit
+    * Register the project named #{ test_project_name } for deletion at exit
+    * Register the user named #{ bob_username } for deletion at exit
   }
 
   Script %{
 
     * Click the Logout button if currently logged in
     * Visit the Login page
-    * Fill in the Username field with #{ username }
-    * Fill in the Password field with #{ password }
+    * Fill in the Username field with #{ bob_username }
+    * Fill in the Password field with #{ bob_password }
     * Click the Login button
 
     * Click the Projects link
-    * Click the #{ project_name } project
+    * Click the #{ test_project_name } project
     * Wait 10 seconds
     * Click the quota modify button
 

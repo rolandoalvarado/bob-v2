@@ -16,6 +16,7 @@ class ProjectPage < WebClientPage
   message   'new instance error',                 '#new-instance-modal .error'
   radiolist 'images',                             '#instances-list'
   field     'server name',                        '#server-name'
+  field     'server password',                        '#password'
   checklist 'security groups',                    xpath: "//input[@name='securityGroupCheckbox']/../../.."
   button    'create instance',                    '#create-instance'
   table     'instances',                          '#instances-template .table-list'

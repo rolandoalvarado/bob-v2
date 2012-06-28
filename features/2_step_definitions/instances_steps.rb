@@ -24,8 +24,7 @@ When /^I assign a floating IP to the instance$/ do
   compute_service = ComputeService.session
   compute_service.set_tenant @project
 
-  instance        = compute_service.instances.find { |i| i.state == 'ACTIVE' }
-  addresses       = compute_service.addresses
+  num_addresses       = compute_service.addresses
 
   steps %{
     * Click the logout button if currently logged in
@@ -45,15 +44,13 @@ When /^I assign a floating IP to the instance$/ do
     * Choose the 2nd item in the instance dropdown
     * Click the create floating IP allocation button
 
-    * The floating IPs table's last row should include the text #{ instance.name }
+    * The floating IPs table's last row should include the text #{ @instance.name }
   }
 
-  addresses.reload
-  @floating = addresses.find {|a| a.instance_id == instance.id}
+  num_addresses.reload
+  @floating = num_addresses.find {|a| a.instance_id == @instance.id}
 
-  raise "No floating IP associated to instance #{ instance.name }" if @floating.nil?
-
-  #@instance = instance
+  raise "No floating IP associated to instance #{ @instance.name }" if @floating.nil?
 end
 
 When /^I create an instance on that project based on the image (.+)$/ do |image_name|
@@ -275,10 +272,7 @@ end
 #=================
 
 Then /^I [Cc]an [Aa]ssign a floating IP to an instance in the project$/ do
-  compute_service = ComputeService.session
-  instance        = compute_service.instances.find { |i| i.state == 'ACTIVE' }
-  num_addresses   = compute_service.addresses.count
-
+  
   steps %{
     * Click the logout button if currently logged in
 
@@ -296,8 +290,8 @@ Then /^I [Cc]an [Aa]ssign a floating IP to an instance in the project$/ do
     * Choose the 1st item in the pool dropdown
     * Choose the 2nd item in the instance dropdown
     * Click the create floating IP allocation button
-
-    * The floating IPs table's last row should include the text #{ instance.name }
+    
+    * The floating IPs table's last row should include the text #{ @instance.name }
   }
 end
 
@@ -698,55 +692,52 @@ end
 
 TestCase /^An instance created based on the image (.+) is accessible via (.+)$/ do |image_name, remote_client|
 
-  username      = Unique.username('bob')
-  password      = '123qwe'
-  project_name  = Unique.project_name('test')
-  instance_name = Unique.instance_name('test')
-
   Preconditions %{
-    * Ensure that a user with username #{ username } and password #{ password } exists
-    * Ensure that a project named #{ project_name } exists
-    * Ensure that the project named #{ project_name } has 0 active instances
-    * Ensure that the user #{ username } has a role of Member in the project #{ project_name }
-    * Ensure that a security group rule exists for project #{ project_name }
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that the project named #{ test_project_name } has 0 active instances
+    * Ensure that the user #{ bob_username } has a role of Member in the project #{ test_project_name }
+    * Ensure that a security group rule exists for project #{ test_project_name }
+    * Ensure that an instance named #{ test_instance_name } does not have any floating IPs
   }
 
   Cleanup %{
-    * Register the project named #{ project_name } for deletion at exit
-    * Register the user named #{ username } for deletion at exit
+    * Register the project named #{ test_project_name } for deletion at exit
+    * Register the user named #{ bob_username } for deletion at exit
   }
 
   Script %{
     * Click the Logout button if currently logged in
     * Visit the Login page
-    * Fill in the Username field with #{ username }
-    * Fill in the Password field with #{ password }
+    * Fill in the Username field with #{ bob_username }
+    * Fill in the Password field with #{ bob_password }
     * Click the Login button
 
     * Click the Projects link
-    * Click the #{ project_name } project
+    * Click the #{ test_project_name } project
 
     * Click the new instance button
     * Current page should have the new instance form
     * Click the #{ image_name } image
-    * Fill in the server name field with #{ instance_name }
+    * Fill in the server name field with #{ test_instance_name }
     * Check the 1st item in the security groups checklist
+    * Fill in the server password field with #{ test_instance_password }
     * Click the create instance button
 
     * The instances table should have 1 row
-    * The instances table should include the text #{ instance_name }
-    * The instance named #{ instance_name } should be in active status
+    * The instances table should include the text #{ test_instance_name }
+    * The instance named #{ test_instance_name } should be in active status
 
     * Click the access security tab
     * Click the new floating IP allocation button
     * Current page should have the new floating IP allocation form
-    * Choose the item with text #{ instance_name } in the instance dropdown
+    * Choose the item with text #{ test_instance_name } in the instance dropdown
     * Click the create floating IP allocation button
 
     * The floating IPs table should have 1 row
-    * The floating IP should be associated to instance #{ instance_name }
+    * The floating IP should be associated to instance #{ test_instance_name }
 
-    * Connect to the instance named #{ instance_name } in project #{ project_name } via #{ remote_client }
+    * Connect to the instance named #{ test_instance_name } in project #{ test_project_name } via #{ remote_client }
   }
 
 end

@@ -15,7 +15,7 @@ class UsersPage < WebClientPage
   dropdown 'Primary Project',             "#project"
   dropdown 'Role',                        "#admin"
   button   'Create User',                 "#create-user"
-  button   'edit user',                   "#user-item-<id> .edit"
+  button   'Edit User',                   xpath: "//tr[@class='user']/td[normalize-space(text())='<name>']/..//a[@class='edit']"
   button   'Update User',                 "#update-user"
   element  'New User Form Error Message', "#user-form .error"
   element  'Edit User Form Error Message', "#user-form .error"
@@ -30,7 +30,6 @@ class UsersPage < WebClientPage
   # Toggles the menu of actions for a specific user in the table
   button  'Context Menu',          xpath: "//tr[@class='user']/td[normalize-space(text())='<name>']/..//a[@class='dropdown-toggle']"
 
-  #button  'edit user',             xpath: "//tr[@class='user']/td[normalize-space(text())='<name>']/..//a[@class='edit']"
   # The following links appear in the context menu
   link    'Disable User',          xpath: "//tr[@class='user']/td[normalize-space(text())='<name>']/..//a[@class='disable']"
   link    'Delete User',           xpath: "//tr[@class='user']/td[normalize-space(text())='<name>']/..//a[@class='destroy']"
