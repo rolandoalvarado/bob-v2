@@ -286,8 +286,8 @@ Then /^I can edit a user$/i do
   existing_user = CloudObjectBuilder.attributes_for(:user, :name => Unique.username('existing'), :password => '123qwe')
   new_attrs     = CloudObjectBuilder.attributes_for(
                     :user,
-                    :name     => ( Unique.username('new_user') ),
-                    :email    => ( Unique.email('new_email@mail.com') ),
+                    :name     => ( Unique.username('NewUser') ),
+                    :email    => ( Unique.email('NewEmail@mail.com') ),
                     :password => '123qwe'
                   )
 
@@ -426,7 +426,7 @@ Then /^I cannot update a user with attributes (.+), (.+), (.+), (.+), and (.+)$/
 
     * Click the Users link
     * Current page should be the Users page
-    * Click the Edit button for the user named #{ @existing_user.id }
+    * Click the Edit button for the user named #{ @existing_user.name }
     * Fill in the Username field with #{ new_attrs.name }
     * Fill in the Email field with #{ new_attrs.email }
     * Fill in the Password field with #{ new_attrs.password }
