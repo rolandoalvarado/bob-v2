@@ -286,8 +286,8 @@ Then /^I can edit a user$/i do
   existing_user = CloudObjectBuilder.attributes_for(:user, :name => Unique.username('existing'), :password => '123qwe')
   new_attrs     = CloudObjectBuilder.attributes_for(
                     :user,
-                    :name     => ( Unique.username('new_user') ),
-                    :email    => ( Unique.email('new_email@mail.com') ),
+                    :name     => ( Unique.username('NewUser') ),
+                    :email    => ( Unique.email('NewEmail@mail.com') ),
                     :password => '123qwe'
                   )
 
