@@ -81,7 +81,7 @@ class ComputeService < BaseCloudService
         service.unpause_server(instance.id)
       end
 
-      sleeping(1).seconds.between_tries.failing_after(30).tries do
+      sleeping(1).seconds.between_tries.failing_after(60).tries do
         raise "Some instances took too long to be ready for deletion." if instance.state !~ /ACTIVE|ERROR/
       end
     end
@@ -255,7 +255,7 @@ class ComputeService < BaseCloudService
       return addresses.count
     end
   end
-  
+
   def ensure_project_does_not_have_floating_ip(project, desired_count, instance)
     set_tenant project
 
@@ -387,7 +387,11 @@ class ComputeService < BaseCloudService
         # Cannot pause without any active instances so we need to ensure active instance count
         active_instances = instances.select{ |i| i.state =~ /^ACTIVE$/ }
         if active_instances.count < desired_count - paused_instances.count
-          ensure_active_instance_count(project, desired_count - paused_instances.count, false)
+          (desired_count - paused_instances.count).times do
+            create_instance_in_project(project)
+            sleep(0.5)
+          end
+          raise_ensure_active_instance_count_error "The compute service doesn't seem to be responding to my 'launch instance' requests.", (desired_count - paused_instances.count)
 
           # Reload list of active instances
           instances.reload
@@ -431,7 +435,11 @@ class ComputeService < BaseCloudService
         # Cannot suspend without any active instances so we need to ensure active instance count
         active_instances = instances.select{ |i| i.state =~ /^ACTIVE$/ }
         if active_instances.count < desired_count - suspended_instances.count
-          ensure_active_instance_count(project, desired_count - suspended_instances.count, false)
+          (desired_count - suspended_instances.count).times do
+            create_instance_in_project(project)
+            sleep(0.5)
+          end
+          raise_ensure_active_instance_count_error "The compute service doesn't seem to be responding to my 'launch instance' requests.", (desired_count - suspended_instances.count)
 
           # Reload list of active instances
           instances.reload
