@@ -47,8 +47,19 @@ end
 
 
 Then /^Choose the item with text (.+) in the (.+) dropdown$/ do |item_text, dropdown_name|
-  dropdown_name = dropdown_name.split.join('_').downcase
-  if item = @current_page.send("#{ dropdown_name }_dropdown_items").find { |d| d.text == item_text }
+  dropdown_name  = dropdown_name.split.join('_').downcase
+  dropdown_items = @current_page.send("#{ dropdown_name }_dropdown_items")
+
+  item = case item_text.downcase
+         when '(none)'
+           dropdown_items.find { |d| d.value.blank? }
+         when '(any)'
+           dropdown_items[1]
+         else
+           dropdown_items.find { |d| d.text == item_text }
+         end
+
+  if item
     item.click
   else
     raise "Couldn't find the dropdown option '#{ item_text }'."
