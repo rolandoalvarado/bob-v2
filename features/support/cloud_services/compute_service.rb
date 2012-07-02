@@ -128,7 +128,7 @@ class ComputeService < BaseCloudService
   end
 
   def detach_volume_from_instance_in_project(project, instance, volume)
-    set_tenant project, false
+    set_tenant project
     volume = volumes.find { |v| v.id == volume['id'].to_i }
 
     # Check if volume is attached to the instance
