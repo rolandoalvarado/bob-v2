@@ -80,6 +80,7 @@ class EnvironmentCleaner
 
       begin
         @compute_service.set_tenant project
+        @volume_service.set_tenant project
 
         if @compute_service.addresses.count > 0
           puts "    Releasing addresses..."

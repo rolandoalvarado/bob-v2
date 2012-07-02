@@ -317,10 +317,10 @@ TestCase /^A user with a role of (.+) in a project can delete any of its volumes
     * Click the Projects link
     * Click the #{ test_project_name } project
 
-    * Click the context menu button of the volume named #{ test_volume_name }
-    * Click the delete button of the volume named #{ test_volume_name }
-    * Click the volume delete confirmation button
-    * The volumes table should have 0 rows
+    * Click the Context Menu button of the volume named #{ test_volume_name }
+    * Click the Delete button of the volume named #{ test_volume_name }
+    * Click the Volume Delete confirmation button
+    * The Volumes table should have 0 rows
   }
 
 end
