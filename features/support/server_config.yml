@@ -3,68 +3,14 @@ TTY:
   username: root
   password: password
 
-'Ubuntu 10.04 Lucid':
+'CentOS':
   username: root
   password: s3l3ct10n
 
-'Ubuntu 11.04 Oneiric':
+'Ubuntu':
   username: root
   password: s3l3ct10n
 
-'Ubuntu 12.04 Precise':
-  username: root
-  password: s3l3ct10n
-
-'CentOS 5.8':
-  username: root
-  password: s3l3ct10n
-
-'CentOS 6.2 (testi2)':
-  username: root
-  password: s3l3ct10n
-
-'CentOS 6.3':
-  username: root
-  password: s3l3ct10n
-
-'Windows 2008-R2-Server':
-  username: Administrator
-  password:
-    - s3l3ct10n
-    - !23admin
-
-'Windows 2003 Server':
+'Windows':
   username: Administrator
   password: s3l3ct10n
-
-'Windows 7':
-  username: Administrator
-  password: s3l3ct10n
-
-'windows 2008 Enterprise server':
-  username: Administrator
-  password: s3l3ct10n
-
-'64Bit Windows 2008 R2 Enterprise SP1':
-  username: Administrator
-  password: s3l3ct10n  
-  
-'32Bit TTY':
-  username: Administrator
-  password: s3l3ct10n
-  
-'64Bit Ubuntu 10.04':
-  username: root
-  password: s3l3ct10n
-  
-'64Bit Ubuntu 12.04':
-  username: root
-  password: s3l3ct10n  
-  
-'64Bit CentOS 5.8':
-  username: root
-  password: s3l3ct10n  
-  
-'64Bit CentOS 6.2':
-  username: root
-  password: s3l3ct10n      
