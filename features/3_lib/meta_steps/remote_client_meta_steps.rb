@@ -116,13 +116,12 @@ Step /^A new device file should have been created on the instance named (.+) in 
   end
 
   username = ServerConfigFile.username(image_name)
-  password = ServerConfigFile.password(image_name)
 
   delta_time       = ((Time.now - @time_started) / 60).ceil
   device_file_list = []
 
   begin
-    Net::SSH.start(ip_address, username, password: password, port: 2222, timeout: 10) do |ssh|
+    Net::SSH.start(ip_address, username, password: 'password', port: 2222, timeout: 60) do |ssh|
       # Get a list of all device /dev/vd* files modified/created from x minutes ago
       device_file_list = ssh.exec!("find /dev/vd* -mmin -#{ delta_time }").split
     end

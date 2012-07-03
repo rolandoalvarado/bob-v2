@@ -18,16 +18,16 @@ module ServerConfiguration
     end
 
     def self.username(name)
-      if operating_systems.include?(name)
-        self.instance[name][USERNAME]
+      if shortname = operating_systems.find { |os_name| name.include?(os_name) }
+        self.instance[shortname][USERNAME]
       else
         raise "ERROR: Server configuration for #{name} was not found."
       end
     end
 
     def self.password(name)
-      if operating_systems.include?(name)
-        password = self.instance[name][PASSWORD]
+      if shortname = operating_systems.find { |os_name| name.include?(os_name) }
+        password = self.instance[shortname][PASSWORD]
         password.kind_of?(Array) ? password.sample : password
       else
         raise "ERROR: Server configuration for #{name} was not found."
