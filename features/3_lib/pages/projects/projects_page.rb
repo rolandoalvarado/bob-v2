@@ -13,11 +13,11 @@ class ProjectsPage < WebClientPage
 
   # To click on a project link, use ProjectsPage#project_link( name: NAME_OF_PROJECT ).click
   element 'project name',          xpath:  "//td[@class='project-details clickable-row'][@title='<name>']"
-  link    'project',               xpath:  "//*[@id='projects-list']//td[@title='<name>']/..//a[@class='view-project']"
+  link    'project',               xpath:  "//td[@title='<name>']/..//a[@class='view-project']"
   link    'edit project',          xpath:  "//td[@title='<name>']/..//a[@class='edit-project']"
   link    'disabled edit project', xpath:  "//td[@title='<name>']/..//a[@class='edit-project disabled'][@disabled='disabled']"
   link    'delete project',        xpath:  "//td[@title='<name>']/..//a[@class='destroy-project']"
-  button  'project menu',          xpath:  "//*[@id='projects-list']//td[@title='<name>']/..//a[@class='dropdown-toggle']"
+  button  'project menu',          xpath:  "//td[@title='<name>']/..//a[@class='dropdown-toggle']"
   button  'delete confirmation',   xpath:  "//*[@class='btn btn-danger okay']"
   field   'unable to delete',      xpath:  "//h4[@class='alert-heading'][contains(text(),'Unable to delete the project')]"
 end
