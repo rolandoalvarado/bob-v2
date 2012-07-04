@@ -209,6 +209,11 @@ Then /^Click the (.+) image$/ do |image_name|
   @current_page.image_element( name: image_name.strip ).click
 end
 
+Step /^Close the (.+) form$/i do |form_name|
+  form_name = form_name.split.join('_').downcase
+  @current_page.send("#{ form_name }_form").find('.close').click
+end
+
 Then /^Current page should be the (.+) page$/i do |page_name|
   @current_page = eval("#{ page_name.downcase.capitalize }Page").new
   unless @current_page.has_expected_path?
@@ -811,6 +816,14 @@ Then /^Visit the (.+) page$/ do |page_name|
   @current_page.visit
 end
 
-Then /Wait (.+) second(?:s|)/i  do |wait_secs|
+Then /^Wait (.+) second(?:s|)/i  do |wait_secs|
   sleep(wait_secs.to_i)  
+end
+
+Step /^Write the contents of the (.+) field to file (.+)$/i do |field_name, filename|
+  field_name = field_name.split.join('_').downcase
+  field      = @current_page.send("#{ field_name }_field")
+  File.open('filename', 'w') do |file|
+    file.puts field.text
+  end
 end

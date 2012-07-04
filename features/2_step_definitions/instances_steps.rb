@@ -647,10 +647,9 @@ end
 Then /^the instance is publicly accessible via that floating IP$/ do
   compute_service = ComputeService.session
   compute_service.ensure_security_group_rule @project
-  remote_client = 'SSH'
 
   steps %{
-    * Connect to the instance named #{@instance.name} in project #{@project} via #{remote_client}
+    * Connect to the instance named #{@instance.name} in project #{@project} via SSH
   }
 end
 
@@ -713,6 +712,19 @@ TestCase /^An instance created based on the image (.+) is accessible via (.+)$/ 
     * Fill in the Password field with #{ bob_password }
     * Click the Login button
 
+    * Click the Settings link
+    * Click the Create Keypair button
+    * Current page should have the Create Keypair form
+    * Fill in the Keypair Name field with #{ test_keypair_name }
+    * Click the Create Keypair Confirmation button
+
+    * Current page should have the Keypair form
+    * Write the contents of the Keypair Private Key field to file #{ test_keypair_name }.pem
+    * Close the Keypair form
+
+    * The keypairs table should have 1 row
+    * The keypairs table should include the text #{ test_keypair_name }
+
     * Click the Projects link
     * Click the #{ test_project_name } project
 
@@ -720,6 +732,7 @@ TestCase /^An instance created based on the image (.+) is accessible via (.+)$/ 
     * Current page should have the new instance form
     * Click the #{ image_name } image
     * Fill in the server name field with #{ test_instance_name }
+    * Choose the item with text #{ test_keypair_name } in the keypair dropdown
     * Check the 1st item in the security groups checklist
     * Fill in the server password field with #{ test_instance_password }
     * Click the create instance button

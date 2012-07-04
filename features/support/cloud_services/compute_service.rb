@@ -36,10 +36,14 @@ class ComputeService < BaseCloudService
 
   def create_instance_in_project(project, attributes={})
     set_tenant project
-    attributes[:name]   ||= Faker::Name.name
-    attributes[:password]   ||= 'password'
-    attributes[:image]  ||= service.images[0].id
-    attributes[:flavor] ||= service.flavors[0].id
+
+    # Get smallest-sized flavor
+    min_flavor = service.flavors.select { |f| f.disk > 0 }.min { |f, g| f.vcpus <=> g.vcpus }
+
+    attributes[:name]     ||= Faker::Name.name
+    attributes[:password] ||= test_instance_password
+    attributes[:image]    ||= service.images[0].id
+    attributes[:flavor]   ||= min_flavor.id
 
     if service.list_servers.body['servers'].none? { |s| s['name'] == attributes[:name] }
       service.create_server(
@@ -208,6 +212,18 @@ class ComputeService < BaseCloudService
 
       return attached_volumes.count
     end
+  end
+
+  def ensure_keypair_exists(key_name)
+    set_tenant 'admin'
+
+    keypair = service.key_pairs.create( name: key_name )
+    File.open("#{ key_name }.pem", 'w') do |f|
+      f.puts keypair.private_key
+    end
+  rescue => e
+    raise "Couldn't create keypair '#{ key_name }'! The error returned " +
+          "was #{ e.inspect }."
   end
 
   def ensure_project_floating_ip_count(project, desired_count, instance=nil)
@@ -603,7 +619,6 @@ class ComputeService < BaseCloudService
     end
     if reload
       addresses.reload
-      flavors.reload
       instances.reload
     end
   end

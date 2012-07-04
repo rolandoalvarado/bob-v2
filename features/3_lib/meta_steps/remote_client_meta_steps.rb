@@ -10,7 +10,7 @@ Then /^Connect to (.+) instance with floating IP (.+) via (.+)$/ do |image_name,
     when 'RDP'
       %x{ rdesktop #{ ip_address } -u #{ username } -p #{ password } }
     when 'SSH'
-      Net::SSH.start(ip_address, username, password: password, port: 2222, timeout: 10) do |ssh|
+      Net::SSH.start(ip_address, username, password: password, port: 22, timeout: 10) do |ssh|
         # Test connection and automatically close
       end
     end
@@ -37,7 +37,7 @@ Then /^Connect to instance with floating IP (.+) via (.+)$/ do |floating_ip, rem
       username   = ServerConfigFile.username(image_name)
       password   = ServerConfigFile.password(image_name)
 
-      Net::SSH.start(ip_address, username, password: password, port: 2222, timeout: 10) do |ssh|
+      Net::SSH.start(ip_address, username, password: password, port: 22, timeout: 10) do |ssh|
         # Test connection and automatically close
       end
     end
@@ -59,7 +59,7 @@ Then /^Fail connecting to (.+) instance with floating IP (.+) via (.+)$/ do |ima
     when 'RDP'
       %x{ rdesktop #{ ip_address } -u #{ username } -p #{ password } }
     when 'SSH'
-      Net::SSH.start(ip_address, username, password: password, port: 2222, timeout: 10) do |ssh|
+      Net::SSH.start(ip_address, username, password: password, port: 22, timeout: 10) do |ssh|
         # Test connection and automatically close
       end
     end
@@ -86,7 +86,7 @@ Then /^Fail connecting to instance with floating IP (.+) via (.+)$/ do |floating
       username   = ServerConfigFile.username(image_name)
       password   = ServerConfigFile.password(image_name)
 
-      Net::SSH.start(ip_address, username, password: password, port: 2222, timeout: 10) do |ssh|
+      Net::SSH.start(ip_address, username, password: password, port: 22, timeout: 10) do |ssh|
         # Test connection and automatically close
       end
     end
@@ -120,8 +120,12 @@ Step /^A new device file should have been created on the instance named (.+) in 
   delta_time       = ((Time.now - @time_started) / 60).ceil
   device_file_list = []
 
+  private_key_filename = "#{ test_keypair_name }.pem"
+  raise "Couldn't find private key file '#{ private_key_filename }'" unless File.exists?(private_key_filename)
+  options = { port: 22, timeout: 30, keys: [ File.expand_path(private_key_filename) ] }
+
   begin
-    Net::SSH.start(ip_address, username, password: 'password', port: 2222, timeout: 60) do |ssh|
+    Net::SSH.start(ip_address, username, options) do |ssh|
       # Get a list of all device /dev/vd* files modified/created from x minutes ago
       device_file_list = ssh.exec!("find /dev/vd* -mmin -#{ delta_time }").split
     end
@@ -136,7 +140,7 @@ Step /^A new device file should have been created on the instance named (.+) in 
 end
 
 
-Step /^Connect to the instance named (.+) in project (.+) via (.+)$/ do |instance_name, project_name, remote_client|
+Step /^Connect to the instance named (.+) in project (.+) via (SSH|RDP)$/ do |instance_name, project_name, remote_client|
   row        = @current_page.associated_floating_ip_row( name: instance_name )
   ip_address = row.find('.public-ip').text
   raise "No public IP found for instance!" if ip_address.empty?
@@ -153,7 +157,11 @@ Step /^Connect to the instance named (.+) in project (.+) via (.+)$/ do |instanc
   image_name = image.name
 
   username = ServerConfigFile.username(image_name)
-  password = ServerConfigFile.password(image_name)
 
-  remote_client_connection( remote_client, ip_address, username, password: password )
+  remote_client_connection( remote_client, ip_address, username )
+end
+
+
+Step /^Ensure that a keypair named (.+) exists$/ do |keypair_name|
+  ComputeService.session.ensure_keypair_exists keypair_name
 end

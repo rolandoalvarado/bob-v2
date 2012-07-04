@@ -8,8 +8,7 @@ Feature: Connect to an Instance
 
     Scenarios:
       | Image Name                           | Remote Client |
-      | 32Bit TTY                            | SSH           |
-      | 64Bit CentOS 5.8                     | SSH           |
+      | 64Bit CentOS 5.8 (v1.0.0)            | SSH           |
       | 64Bit CentOS 6.2                     | SSH           |
       | 64Bit Ubuntu 10.04                   | SSH           |
       | 64Bit Ubuntu 12.04                   | SSH           |
