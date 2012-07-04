@@ -110,15 +110,6 @@ configure openstack_options, OPENSTACK_TENANT  , "tenant name for #{openstack_op
 @config[CAPYBARA_DRIVER] = @options[CAPYBARA_DRIVER] || @config[CAPYBARA_DRIVER] || 'selenium'
 configure @config, CAPYBARA_DRIVER  , "capybara driver? (#{ available_capybara_drivers })"
 
-keypair_options = @config[KEYPAIR_OPTIONS] ||= {}
-
-keypair_options[KEYPAIR_NAME] = @options[KEYPAIR_NAME] || keypair_options[KEYPAIR_NAME] || File.basename(File.expand_path('~'))
-configure keypair_options, KEYPAIR_NAME, "keypair name? "
-
-keypair_options[KEYPAIR_PATH] = @options[KEYPAIR_PATH] || keypair_options[KEYPAIR_PATH] || File.expand_path('~/.ssh/id_rsa.pub')
-configure keypair_options, KEYPAIR_PATH, "path to public key? "
-keypair_options[KEYPAIR_PATH] = File.expand_path(keypair_options[KEYPAIR_PATH])
-
 
 puts "Writing #{config_path} with contents:"
 puts @config.to_yaml

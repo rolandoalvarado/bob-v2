@@ -20,9 +20,6 @@ module CloudConfiguration
   OPENSTACK_API_KEY    = :openstack_api_key
   OPENSTACK_TENANT     = :openstack_tenant
   CAPYBARA_DRIVER      = :capybara_driver
-  KEYPAIR_OPTIONS      = :keypair_options
-  KEYPAIR_NAME         = :keypair_name
-  KEYPAIR_PATH         = :keypair_path
   UNIQUE_HELPER_VALUES = :unique_helper_options
   ALPHA                = :alpha
   NUMERIC              = :numeric
@@ -45,14 +42,6 @@ module CloudConfiguration
 
     def self.capybara_driver
       self.instance[CAPYBARA_DRIVER].to_sym
-    end
-
-    def self.keypair_name
-      self.instance[KEYPAIR_OPTIONS][KEYPAIR_NAME]
-    end
-
-    def self.keypair_path
-      self.instance[KEYPAIR_OPTIONS][KEYPAIR_PATH]
     end
 
     def self.unique_alpha
