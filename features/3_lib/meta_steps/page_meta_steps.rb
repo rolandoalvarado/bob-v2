@@ -407,6 +407,11 @@ Then /^Set port to the (.+) field with (.+)$/ do |port_name,port_number|
   end
 end
 
+Step /^Store the private key for keypair (.+)$/i do |key_name|
+  key_value = @current_page.keypair_private_key_field.value
+  ComputeService.session.private_keys[key_name] = key_value
+end
+
 Then /^The (.+) form should be visible$/ do |form_name|
   form_name = form_name.split.join('_').downcase
   unless @current_page.send("has_#{ form_name }_form?")
@@ -503,6 +508,15 @@ Step /^(?:A|The) floating IP should be associated to instance (.+)$/ do |instanc
   sleeping(1).seconds.between_tries.failing_after(15).tries do
     unless @current_page.has_associated_floating_ip_row?( name: instance_name )
       raise "Couldn't find a floating IP to be associated to instance #{ instance_name }!"
+    end
+  end
+end
+
+
+Step /^(?:A|The) floating IP should not be associated to instance (.+)$/ do |instance_name|
+  sleeping(1).seconds.between_tries.failing_after(15).tries do
+    if @current_page.has_associated_floating_ip_row?( name: instance_name )
+      raise "Found a floating IP to be associated to instance #{ instance_name }!"
     end
   end
 end
@@ -823,7 +837,8 @@ end
 Step /^Write the contents of the (.+) field to file (.+)$/i do |field_name, filename|
   field_name = field_name.split.join('_').downcase
   field      = @current_page.send("#{ field_name }_field")
-  File.open('filename', 'w') do |file|
-    file.puts field.text
+
+  File.open(filename.to_s, 'w') do |file|
+    file.puts field.value
   end
 end

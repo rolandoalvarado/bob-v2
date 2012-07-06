@@ -28,6 +28,7 @@ class ProjectPage < SecurePage
   field     'password',                           '#password'
   row       'instance',                           '#instances-template .table-list #instance-item-<id>'
   form      'resize instance',                    '#resize-instance-modal'
+  form      'instance password',                  '#instance-password-modal'
   element 'project name',                         "td.project-details[title='<name>']"
   #==========================
   # Edit Quota Elements
