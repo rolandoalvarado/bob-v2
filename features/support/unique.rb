@@ -61,8 +61,12 @@ module Unique
   def self.volume_name(value = '', length = 16)
     self.string_with_whitespace(value, length)
   end
-  
+
   def self.instance_name(value = '', length = 16)
+    self.string_with_whitespace(value, length)
+  end
+
+  def self.keypair_name(value = '', length = 16)
     self.string_with_whitespace(value, length)
   end
 end

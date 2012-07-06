@@ -771,6 +771,7 @@ TestCase /^An instance created based on the image (.+) is accessible via (.+)$/ 
     * Ensure that a project named #{ test_project_name } exists
     * Ensure that the project named #{ test_project_name } has 0 active instances
     * Ensure that the user #{ bob_username } has a role of Member in the project #{ test_project_name }
+    * Ensure that the user with credentials #{ bob_username }/#{ bob_password } has a keypair named #{ test_keypair_name }
     * Ensure that a security group rule exists for project #{ test_project_name }
     * Ensure that an instance named #{ test_instance_name } does not have any floating IPs
   }
@@ -786,19 +787,6 @@ TestCase /^An instance created based on the image (.+) is accessible via (.+)$/ 
     * Fill in the Username field with #{ bob_username }
     * Fill in the Password field with #{ bob_password }
     * Click the Login button
-
-    * Click the Settings link
-    * Click the Create Keypair button
-    * Current page should have the Create Keypair form
-    * Fill in the Keypair Name field with #{ test_keypair_name }
-    * Click the Create Keypair Confirmation button
-
-    * Current page should have the Keypair form
-    * Store the private key for keypair #{ test_keypair_name }
-    * Close the Keypair form
-
-    * The keypairs table should have 1 row
-    * The keypairs table should include the text #{ test_keypair_name }
 
     * Click the Projects link
     * Click the #{ test_project_name } project
@@ -840,6 +828,7 @@ TestCase /^An instance is publicly accessible via its assigned floating IP$/ do
     * Ensure that a project named #{ test_project_name } exists
     * Ensure that the project named #{ test_project_name } has an instance named #{ test_instance_name }
     * Ensure that the user #{ bob_username } has a role of Member in the project #{ test_project_name }
+    * Ensure that the user with credentials #{ bob_username }/#{ bob_password } has a keypair named #{ test_keypair_name }
     * Ensure that a security group rule exists for project #{ test_project_name }
     * Ensure that an instance named #{ test_instance_name } does not have any floating IPs
   }
@@ -855,19 +844,6 @@ TestCase /^An instance is publicly accessible via its assigned floating IP$/ do
     * Fill in the Username field with #{ bob_username }
     * Fill in the Password field with #{ bob_password }
     * Click the Login button
-
-    * Click the Settings link
-    * Click the Create Keypair button
-    * Current page should have the Create Keypair form
-    * Fill in the Keypair Name field with #{ test_keypair_name }
-    * Click the Create Keypair Confirmation button
-
-    * Current page should have the Keypair form
-    * Store the private key for keypair #{ test_keypair_name }
-    * Close the Keypair form
-
-    * The keypairs table should have 1 row
-    * The keypairs table should include the text #{ test_keypair_name }
 
     * Click the Projects link
     * Click the #{ test_project_name } project

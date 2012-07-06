@@ -227,12 +227,23 @@ class ComputeService < BaseCloudService
     end
   end
 
-  def ensure_keypair_exists(key_name)
-    set_tenant 'admin'
+  def ensure_keypair_exists(key_name, username='', password='')
+    # Keypairs are user-scoped, thus the need to login to the compute service
+    # with the current user's credentials.
+    unless username.blank? || password.blank?
+      credentials = ConfigFile.cloud_credentials.merge(
+        openstack_username: username, openstack_api_key: password)
+      user_service = Fog::Compute.new(credentials)
+    else
+      user_service = service
+    end
 
-    keypair = service.key_pairs.create( name: key_name )
-    File.open("#{ key_name }.pem", 'w') do |f|
-      f.puts keypair.private_key
+    user_service.set_tenant 'admin'
+    keypairs = user_service.key_pairs.reload
+
+    unless keypairs.find { |keypair| keypair.name == key_name }
+      keypair = keypairs.create( name: key_name )
+      private_keys[keypair.name] = keypair.private_key
     end
   rescue => e
     raise "Couldn't create keypair '#{ key_name }'! The error returned " +
