@@ -70,9 +70,15 @@ Given /^I have a role of (.+) in the project$/ do |role_name|
     raise "No project was defined. You might need to add '* A project exists in the system' " +
           "in the feature file."
   end
+  
+  user_attrs       = CloudObjectBuilder.attributes_for(
+                       :user,
+                       :name => Unique.username('bob')
+                     )
 
   identity_service = IdentityService.session
-  user             = @current_user
+  #user             = @current_user
+  user             = identity_service.ensure_user_exists(user_attrs)
   identity_service.revoke_all_user_roles(user, @project)
 
   # Ensure user has the following role in the project
@@ -86,7 +92,7 @@ Given /^I have a role of (.+) in the project$/ do |role_name|
     end
 
     begin
-      role.add_to_user(user,@project)
+      role.add_to_user(user, @project)
     rescue Fog::Identity::OpenStack::NotFound => e
       raise "Couldn't add #{ user.name } to #{ @project.name } as #{ role.name }"
     end
