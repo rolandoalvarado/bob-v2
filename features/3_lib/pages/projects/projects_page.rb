@@ -1,6 +1,6 @@
 require_relative '../secure_page'
 
-class ProjectsPage < WebClientPage
+class ProjectsPage < SecurePage
   path '/projects'
 
   button  'create project',                '#new-project'

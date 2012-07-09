@@ -7,16 +7,19 @@ def remote_client_connection(protocol, ip_address, username, options = {})
             "The error returned was: #{ result }"
     end
   when 'SSH'
-    options.merge!( port: 22, timeout: 120 )
+    private_key = ComputeService.session.private_keys[test_keypair_name]
+    raise "Couldn't find private key for keypair '#{ test_keypair_name }'!" unless private_key
+    options.merge!( port: 22, timeout: 30, key_data: [ private_key ] )
+
     begin
-      Net::SSH.start(ip_address, username, options) do |ssh|
-        # Test connection and automatically close
-        result = ssh.exec!("ls -l")
-        puts result
-      end
-    rescue Exception => e
+      Net::SSH.start(ip_address, username, options)
+    rescue => e
       raise "The instance is not publicly accessible on #{ ip_address } via SSH. " +
-            "The error returned was: #{ e.message }"
+            "The error returned was: #{ e.inspect }"
     end
   end
+end
+
+def test_keypair_name
+  'bob'
 end

@@ -209,6 +209,11 @@ Then /^Click the (.+) image$/ do |image_name|
   @current_page.image_element( name: image_name.strip ).click
 end
 
+Step /^Close the (.+) form$/i do |form_name|
+  form_name = form_name.split.join('_').downcase
+  @current_page.send("#{ form_name }_form").find('.close').click
+end
+
 Then /^Current page should be the (.+) page$/i do |page_name|
   @current_page = eval("#{ page_name.downcase.capitalize }Page").new
   unless @current_page.has_expected_path?
@@ -402,6 +407,11 @@ Then /^Set port to the (.+) field with (.+)$/ do |port_name,port_number|
   end
 end
 
+Step /^Store the private key for keypair (.+)$/i do |key_name|
+  key_value = @current_page.keypair_private_key_field.value
+  ComputeService.session.private_keys[key_name] = key_value
+end
+
 Then /^The (.+) form should be visible$/ do |form_name|
   form_name = form_name.split.join('_').downcase
   unless @current_page.send("has_#{ form_name }_form?")
@@ -503,6 +513,15 @@ Step /^(?:A|The) floating IP should be associated to instance (.+)$/ do |instanc
 end
 
 
+Step /^(?:A|The) floating IP should not be associated to instance (.+)$/ do |instance_name|
+  sleeping(1).seconds.between_tries.failing_after(15).tries do
+    if @current_page.has_associated_floating_ip_row?( name: instance_name )
+      raise "Found a floating IP to be associated to instance #{ instance_name }!"
+    end
+  end
+end
+
+
 Then /^The instance (.+) should be performing task (.+)$/ do |instance_id, task|
   sleeping(1).seconds.between_tries.failing_after(15).tries do
     unless @current_page.instance_row( id: instance_id ).find('.task').text.include?(task)
@@ -548,13 +567,16 @@ Then /^The instance ((?:(?!named )).+) should be (?:in|of) (.+) status$/ do |ins
 end
 
 
-Step /^The instance named (.+) should be (?:in|of) (.+) status$/ do |instance_name, status|
+Step /^The instance named (.+) should be (?:in|of) (.+) status$/ do |instance_name, expected_status|
   # TODO To prevent conflict with other instance steps, temporarily forgo changing the selector,
   # and instead finding it directly from the page object.
   selector = "//*[@id='instances-list']//*[contains(@class, 'name') and contains(text(), \"#{ instance_name }\")]/.."
   row      = @current_page.find_by_xpath(selector)
-  unless row.find('.status').has_content?(status.upcase.gsub(' ', '_'))
-    raise "Instance #{ instance_name } is not or took too long to become #{ status }."
+
+  actual_status = row.find('.status').text.strip
+  unless actual_status == expected_status.upcase.gsub(' ', '_')
+    raise "Instance #{ instance_name } is not or took too long to become #{ expected_status }. " +
+          "Current status is #{ actual_status }."
   end
 end
 
@@ -811,6 +833,15 @@ Then /^Visit the (.+) page$/ do |page_name|
   @current_page.visit
 end
 
-Then /Wait (.+) second(?:s|)/i  do |wait_secs|
+Then /^Wait (.+) second(?:s|)/i  do |wait_secs|
   sleep(wait_secs.to_i)  
+end
+
+Step /^Write the contents of the (.+) field to file (.+)$/i do |field_name, filename|
+  field_name = field_name.split.join('_').downcase
+  field      = @current_page.send("#{ field_name }_field")
+
+  File.open(filename.to_s, 'w') do |file|
+    file.puts field.value
+  end
 end

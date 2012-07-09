@@ -647,10 +647,9 @@ end
 Then /^the instance is publicly accessible via that floating IP$/ do
   compute_service = ComputeService.session
   compute_service.ensure_security_group_rule @project
-  remote_client = 'SSH'
 
   steps %{
-    * Connect to the instance named #{@instance.name} in project #{@project} via #{remote_client}
+    * Connect to the instance named #{@instance.name} in project #{@project} via SSH
   }
 end
 
@@ -690,6 +689,81 @@ Then /^the instance should be active$/ do
   }
 end
 
+TestCase /^A user with a role of (.+) in the project can assign a floating IP to an instance$/i do |role_name|
+
+  Preconditions %{
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that the project named #{ test_project_name } has an instance named #{ test_instance_name }
+    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the project #{ test_project_name }
+    * Ensure that a security group rule exists for project #{ test_project_name }
+    * Ensure that an instance named #{ test_instance_name } does not have any floating IPs
+  }
+
+  Cleanup %{
+    * Register the project named #{ test_project_name } for deletion at exit
+    * Register the user named #{ bob_username } for deletion at exit
+  }
+
+  Script %{
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ bob_username }
+    * Fill in the Password field with #{ bob_password }
+    * Click the Login button
+
+    * Click the Projects link
+    * Click the #{ test_project_name } project
+
+    * Click the Access Security tab
+    * Click the New Floating IP Allocation button
+    * Current page should have the New Floating IP Allocation form
+    * Choose the item with text #{ test_instance_name } in the Instance dropdown
+    * Click the Create Floating IP Allocation button
+
+    * The Floating IPs table should have 1 row
+    * The Floating IP should be associated to instance #{ test_instance_name }
+  }
+
+end
+
+TestCase /^A user with a role of (.+) in the project cannot assign a floating IP to an instance$/i do |role_name|
+
+  Preconditions %{
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that the project named #{ test_project_name } has an instance named #{ test_instance_name }
+    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the project #{ test_project_name }
+    * Ensure that a security group rule exists for project #{ test_project_name }
+    * Ensure that an instance named #{ test_instance_name } does not have any floating IPs
+  }
+
+  Cleanup %{
+    * Register the project named #{ test_project_name } for deletion at exit
+    * Register the user named #{ bob_username } for deletion at exit
+  }
+
+  Script %{
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ bob_username }
+    * Fill in the Password field with #{ bob_password }
+    * Click the Login button
+
+    * Click the Projects link
+    * Click the #{ test_project_name } project
+
+    * Click the Access Security tab
+    * Click the New Floating IP Allocation button
+    * Current page should have the New Floating IP Allocation form
+    * The Instance dropdown should not have the item with text #{ test_instance_name }
+    * Click the Create Floating IP Allocation button
+
+    * The Floating IPs table should have 1 row
+    * The Floating IP should not be associated to instance #{ test_instance_name }
+  }
+end
+
 TestCase /^An instance created based on the image (.+) is accessible via (.+)$/ do |image_name, remote_client|
 
   Preconditions %{
@@ -697,6 +771,7 @@ TestCase /^An instance created based on the image (.+) is accessible via (.+)$/ 
     * Ensure that a project named #{ test_project_name } exists
     * Ensure that the project named #{ test_project_name } has 0 active instances
     * Ensure that the user #{ bob_username } has a role of Member in the project #{ test_project_name }
+    * Ensure that the user with credentials #{ bob_username }/#{ bob_password } has a keypair named #{ test_keypair_name }
     * Ensure that a security group rule exists for project #{ test_project_name }
     * Ensure that an instance named #{ test_instance_name } does not have any floating IPs
   }
@@ -720,9 +795,13 @@ TestCase /^An instance created based on the image (.+) is accessible via (.+)$/ 
     * Current page should have the new instance form
     * Click the #{ image_name } image
     * Fill in the server name field with #{ test_instance_name }
+    * Choose the item with text #{ test_keypair_name } in the keypair dropdown
     * Check the 1st item in the security groups checklist
     * Fill in the server password field with #{ test_instance_password }
     * Click the create instance button
+
+    * Current page should have the instance password form
+    * Close the instance password form
 
     * The instances table should have 1 row
     * The instances table should include the text #{ test_instance_name }
@@ -738,6 +817,47 @@ TestCase /^An instance created based on the image (.+) is accessible via (.+)$/ 
     * The floating IP should be associated to instance #{ test_instance_name }
 
     * Connect to the instance named #{ test_instance_name } in project #{ test_project_name } via #{ remote_client }
+  }
+
+end
+
+TestCase /^An instance is publicly accessible via its assigned floating IP$/ do
+
+  Preconditions %{
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that the project named #{ test_project_name } has an instance named #{ test_instance_name }
+    * Ensure that the user #{ bob_username } has a role of Member in the project #{ test_project_name }
+    * Ensure that the user with credentials #{ bob_username }/#{ bob_password } has a keypair named #{ test_keypair_name }
+    * Ensure that a security group rule exists for project #{ test_project_name }
+    * Ensure that an instance named #{ test_instance_name } does not have any floating IPs
+  }
+
+  Cleanup %{
+    * Register the project named #{ test_project_name } for deletion at exit
+    * Register the user named #{ bob_username } for deletion at exit
+  }
+
+  Script %{
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ bob_username }
+    * Fill in the Password field with #{ bob_password }
+    * Click the Login button
+
+    * Click the Projects link
+    * Click the #{ test_project_name } project
+
+    * Click the access security tab
+    * Click the new floating IP allocation button
+    * Current page should have the new floating IP allocation form
+    * Choose the item with text #{ test_instance_name } in the instance dropdown
+    * Click the create floating IP allocation button
+
+    * The floating IPs table should have 1 row
+    * The floating IP should be associated to instance #{ test_instance_name }
+
+    * Connect to the instance named #{ test_instance_name } in project #{ test_project_name } via SSH
   }
 
 end

@@ -1,6 +1,6 @@
 require_relative '../secure_page'
 
-class ProjectPage < WebClientPage
+class ProjectPage < SecurePage
   path '/projects'
 
   button    'close',                              '.close'
@@ -24,9 +24,11 @@ class ProjectPage < WebClientPage
   option    'image',                              xpath: '//div[@class="instance-item clearfix"]/label[text()="<name>"]'
   checkbox  'security group',                     xpath: "//input[@name='securityGroupCheckbox' and @value='<name>']"
   option    'keypair',                            xpath: '//select[@id="keypair"]/option[@value="<name>"]'
+  dropdown  'keypair',                            '#keypair'
   field     'password',                           '#password'
   row       'instance',                           '#instances-template .table-list #instance-item-<id>'
   form      'resize instance',                    '#resize-instance-modal'
+  form      'instance password',                  '#instance-password-modal'
   element 'project name',                         "td.project-details[title='<name>']"
   #==========================
   # Edit Quota Elements
