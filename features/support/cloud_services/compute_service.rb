@@ -2,44 +2,80 @@ require_relative 'base_cloud_service'
 
 class ComputeService < BaseCloudService
 
-  attr_reader :addresses, :flavors, :instances, :security_groups, :current_project
+  attr_reader :addresses, :flavors, :instances, :security_groups, :volumes, :current_project
+  attr_accessor :private_keys
 
   def initialize
     initialize_service Compute
     @addresses = service.addresses
     @flavors   = service.flavors
     @instances = service.servers
+    @volumes   = service.volumes
     @security_groups = service.security_groups
+
+    @private_keys = {}
   end
 
   def attach_volume_to_instance_in_project(project, instance, volume)
     set_tenant project, false
-    service.attach_volume(volume['id'], instance.id, '/dev/vdz')
-    set_tenant 'admin'
-  rescue
-    raise "Couldn't attach volume #{ volume['display_name'] } to instance #{ instance.name }!"
+    volume      = volumes.find { |v| v.id == volume['id'].to_i }
+    device_name = "/dev/vd#{ ('a'..'z').to_a.sample(2).join }"
+
+    begin
+      service.attach_volume(volume.id, instance.id, device_name)
+    rescue => e
+      raise "Couldn't attach volume #{ volume.name } to instance #{ instance.name }! " +
+            "The error returned was: #{ e.inspect }"
+    end
+
+    sleeping(1).seconds.between_tries.failing_after(30).tries do
+      volumes.reload
+      volume = volumes.get(volume.id)
+      unless volume.attachments.any? { |a| a['serverId'] == instance.id }
+        raise "Couldn't ensure that instance #{ instance.name } has attached volume #{ volume.name }!"
+      end
+    end
   end
 
   def create_instance_in_project(project, attributes={})
     set_tenant project
-    attributes[:name]   ||= Faker::Name.name
-    attributes[:image]  ||= service.images[0].id
-    attributes[:flavor] ||= service.flavors[0].id
+
+    # Get smallest-sized flavor
+    min_flavor = service.flavors.select { |f| f.disk > 0 }.min { |f, g| f.vcpus <=> g.vcpus }
+
+    attributes[:name]     ||= Faker::Name.name
+    attributes[:password] ||= test_instance_password || '123qwe'
+    attributes[:image]    ||= service.images[0].id
+    attributes[:flavor]   ||= min_flavor.id
 
     if service.list_servers.body['servers'].none? { |s| s['name'] == attributes[:name] }
-      service.create_server(
-        attributes[:name],
-        attributes[:image],
-        attributes[:flavor],
-        {
-          'tenant_id'      => project.id,
-          'security_group' => service.security_groups[0].id,
-          'user_id'        => service.current_user['id']
-        }
-      )
+      begin
+        service.create_server(
+          attributes[:name],
+          attributes[:image],
+          attributes[:flavor],
+          {
+            'tenant_id'      => project.id,
+            'key_name'       => service.key_pairs[0] && service.key_pairs[0].name,
+            'security_group' => service.security_groups[0].id,
+            'user_id'        => service.current_user['id']
+          }
+        )
+      rescue => e
+        raise "Couldn't initialize instance in #{ project.name }. " +
+              "The error returned was: #{ e.inspect }"
+      end
     end
 
-    service.servers.find { |s| s.name == attributes[:name] }
+    sleeping(1).seconds.between_tries.failing_after(15).tries do
+      instance = find_instance_by_name(project, attributes[:name])
+      unless instance.state == 'ACTIVE'
+        raise "Instance #{ instance.name } took too long to become active. " +
+              "Instance is currently #{ instance.state.downcase }."
+      else
+        return instance
+      end
+    end
   end
 
   def create_volume(attributes = {})
@@ -55,6 +91,19 @@ class ComputeService < BaseCloudService
   def delete_instance_in_project(project, instance)
     set_tenant project
 
+    if instance.state !~ /ACTIVE|ERROR/
+      case instance.state
+      when 'SUSPENDED'
+        service.resume_server(instance.id)
+      when 'PAUSED'
+        service.unpause_server(instance.id)
+      end
+
+      sleeping(1).seconds.between_tries.failing_after(60).tries do
+        raise "Some instances took too long to be ready for deletion." if instance.state !~ /ACTIVE|ERROR/
+      end
+    end
+
     associated_addresses = addresses.select { |a| a.instance_id == instance.id }
     associated_addresses.each do |address|
       service.disassociate_address(address.instance_id, address.ip)
@@ -68,8 +117,9 @@ class ComputeService < BaseCloudService
     end
 
     service.delete_server(instance.id)
-  rescue
-    raise "Couldn't delete instance #{ instance.name } in #{ project.name }"
+  rescue => e
+    raise "Couldn't delete instance #{ instance.name } in #{ project.name }. " +
+          "The error returned was: #{ e.inspect }."
   end
 
   def delete_instances_in_project(project)
@@ -87,19 +137,34 @@ class ComputeService < BaseCloudService
     if project_instances
       project_instances.each do |instance|
         deleted_instances << { name: instance.name, id: instance.id }
-
-        # Detach any attached volumes
-        attachments = attached_volumes.select{ |v| v.attachments.any?{ |a| a['serverId'] == instance.id } }
-        attachments.each do |attachment|
-          service.detach_volume(instance.id, attachment.id)
-          sleep(0.5)
-        end
-
-        service.delete_server(instance.id)
+        delete_instance_in_project(project, instance)
       end
     end
 
     deleted_instances
+  end
+
+  def detach_volume_from_instance_in_project(project, instance, volume)
+    set_tenant project
+    volume = volumes.find { |v| v.id == volume['id'].to_i }
+
+    # Check if volume is attached to the instance
+    if volume.attachments.any? { |a| a['serverId'] == instance.id }
+      begin
+        service.detach_volume(instance.id, volume.id)
+      rescue => e
+        raise "Couldn't detach volume #{ volume.name } from instance #{ instance.name }! " +
+              "The error returned was: #{ e.inspect }"
+      end
+    end
+
+    sleeping(1).seconds.between_tries.failing_after(30).tries do
+      volumes.reload
+      volume = volumes.get(volume.id)
+      if volume.attachments.any? { |a| a['serverId'] == instance.id }
+        raise "Couldn't ensure that instance #{ instance.name } has no attached volume #{ volume.name }!"
+      end
+    end
   end
 
   def release_addresses_from_project(project)
@@ -162,10 +227,33 @@ class ComputeService < BaseCloudService
     end
   end
 
-  def ensure_project_floating_ip_count(project, desired_count, instance=nil)
-    service.set_tenant project
+  def ensure_keypair_exists(key_name, username='', password='')
+    # Keypairs are user-scoped, thus the need to login to the compute service
+    # with the current user's credentials.
+    unless username.blank? || password.blank?
+      credentials = ConfigFile.cloud_credentials.merge(
+        openstack_username: username, openstack_api_key: password)
+      user_service = Fog::Compute.new(credentials)
+    else
+      user_service = service
+    end
 
-    keep_trying do
+    user_service.set_tenant 'admin'
+    keypairs = user_service.key_pairs.reload
+
+    unless keypairs.find { |keypair| keypair.name == key_name }
+      keypair = keypairs.create( name: key_name )
+      private_keys[keypair.name] = keypair.private_key
+    end
+  rescue => e
+    raise "Couldn't create keypair '#{ key_name }'! The error returned " +
+          "was #{ e.inspect }."
+  end
+
+  def ensure_project_floating_ip_count(project, desired_count, instance=nil)
+    set_tenant project
+
+    sleeping(1).seconds.between_tries.failing_after(60).tries do
       addresses = service.addresses
       actual_count = addresses.count
 
@@ -189,9 +277,9 @@ class ComputeService < BaseCloudService
       end
 
       # Floating IPs should usually be associated to an instance
-      if instance
+      unless instance.nil? && instance.id.blank?
         desired_count.times do |n|
-          if addresses[n]
+          if addresses[n] && !addresses[n].ip.blank?
             service.associate_address(instance.id, addresses[n].ip)
             sleep(0.5)
           end
@@ -199,17 +287,60 @@ class ComputeService < BaseCloudService
       end
 
       addresses.reload
-      addresses = addresses.select { |a| a.instance_id == instance.id } if instance
+      addresses = addresses.select { |a| a.instance_id == instance.id } unless instance.nil? && instance.id.blank?
       if addresses.length != desired_count
         raise "Couldn't ensure that #{ project.name } has #{ desired_count } " +
               "floating IPs. Current number of floating IPs is #{ addresses.length }."
       end
 
-      if addresses.count == 1
-        addresses.first
-      elsif addresses.count > 1
-        addresses
+      return addresses.count
+    end
+  end
+
+  def ensure_project_does_not_have_floating_ip(project, desired_count, instance)
+    set_tenant project
+
+    sleeping(1).seconds.between_tries.failing_after(60).tries do
+      addresses = service.addresses
+      actual_count = addresses.count
+
+      if desired_count > actual_count
+
+        how_many = desired_count - actual_count
+        how_many.times do |n|
+          service.allocate_address
+          sleep(0.5)
+        end
+        addresses.reload
+
+
+      elsif desired_count < addresses.length
+
+        while addresses.length > desired_count
+          addresses.reload
+          addresses[0].destroy rescue nil
+        end
+
       end
+
+      # Floating IPs should usually be associated to an instance
+      unless instance.nil? && instance.id.blank?
+        desired_count.times do |n|
+          if addresses[n] && !addresses[n].ip.blank?
+            service.associate_address(instance.id, addresses[n].ip)
+            sleep(0.5)
+          end
+        end
+      end
+
+      addresses.reload
+      addresses = addresses.select { |a| a.instance_id == instance.id } unless instance.nil? && instance.id.blank?
+      if addresses.length != desired_count
+        raise "Couldn't ensure that #{ project.name } has #{ desired_count } " +
+              "floating IPs. Current number of floating IPs is #{ addresses.length }."
+      end
+
+      return addresses.count
     end
   end
 
@@ -222,7 +353,7 @@ class ComputeService < BaseCloudService
     # This block will keep running until it stops raising an error, or until
     # the max number of tries is reached. In the last try, whatever error is
     # raised by the block is thrown.
-    sleeping(1).seconds.between_tries.failing_after(30).tries do
+    sleeping(1).seconds.between_tries.failing_after(60).tries do
       instances.reload
 
       non_active_instances  = instances.select{ |i| i.state !~ /^ACTIVE|ERROR$/}
@@ -286,6 +417,8 @@ class ComputeService < BaseCloudService
     # This block will keep running until it stops raising an error, or until
     # the max number of tries is reached. In the last try, whatever error is
     # raised by the block is thrown.
+    # 60 tries is needed for rebooting instances so please don't change it.
+    # Since instance reboot will take a while.
     sleeping(1).seconds.between_tries.failing_after(60).tries do
       instances.reload
 
@@ -295,7 +428,11 @@ class ComputeService < BaseCloudService
         # Cannot pause without any active instances so we need to ensure active instance count
         active_instances = instances.select{ |i| i.state =~ /^ACTIVE$/ }
         if active_instances.count < desired_count - paused_instances.count
-          ensure_active_instance_count(project, desired_count - paused_instances.count, false)
+          (desired_count - paused_instances.count).times do
+            create_instance_in_project(project)
+            sleep(0.5)
+          end
+          raise_ensure_active_instance_count_error "The compute service doesn't seem to be responding to my 'launch instance' requests.", (desired_count - paused_instances.count)
 
           # Reload list of active instances
           instances.reload
@@ -339,7 +476,11 @@ class ComputeService < BaseCloudService
         # Cannot suspend without any active instances so we need to ensure active instance count
         active_instances = instances.select{ |i| i.state =~ /^ACTIVE$/ }
         if active_instances.count < desired_count - suspended_instances.count
-          ensure_active_instance_count(project, desired_count - suspended_instances.count, false)
+          (desired_count - suspended_instances.count).times do
+            create_instance_in_project(project)
+            sleep(0.5)
+          end
+          raise_ensure_active_instance_count_error "The compute service doesn't seem to be responding to my 'launch instance' requests.", (desired_count - suspended_instances.count)
 
           # Reload list of active instances
           instances.reload
@@ -399,7 +540,7 @@ class ComputeService < BaseCloudService
     end
   end
 
-  def ensure_security_group_rule(project, ip_protocol='tcp', from_port=2222, to_port=2222, cidr='0.0.0.0/0')
+  def ensure_security_group_rule(project, ip_protocol='tcp', from_port=22, to_port=22, cidr='0.0.0.0/0')
     service.set_tenant project
     security_group = service.security_groups.first
     parent_group_id = security_group.id
@@ -411,10 +552,10 @@ class ComputeService < BaseCloudService
 
     service.create_security_group_rule(parent_group_id, ip_protocol, from_port, to_port, cidr)
   rescue => e
-    raise "#{ JSON.parse(e.response.body)['badRequest']['message'] }"
+    raise "Couldn't ensure security group rule exists! The error returned was #{ e.inspect }"
   end
 
-  def ensure_security_group_rule_exist(project, ip_protocol='tcp', from_port=2222, to_port=2222, cidr='0.0.0.0/0')
+  def ensure_security_group_rule_exist(project, ip_protocol='tcp', from_port=22, to_port=22, cidr='0.0.0.0/0')
     service.set_tenant project
     security_group = service.security_groups.first
     parent_group_id = security_group.id
@@ -427,7 +568,7 @@ class ComputeService < BaseCloudService
     service.create_security_group_rule(parent_group_id, ip_protocol, from_port, to_port, cidr)
 
   rescue => e
-    raise "#test{ JSON.parse(e.response.body)['badRequest']['message'] }"
+    raise "Couldn't ensure security group rule exists! The error returned was #{ e.inspect }"
   end
 
   def create_security_group(project, attributes)
@@ -502,7 +643,6 @@ class ComputeService < BaseCloudService
     end
     if reload
       addresses.reload
-      flavors.reload
       instances.reload
     end
   end
@@ -567,7 +707,6 @@ class ComputeService < BaseCloudService
   def find_instance_by_name(project, name)
     service.set_tenant project
     instance = service.servers.find_by_name(name)
-    service.set_tenant 'admin'
     instance
   end
 
@@ -581,9 +720,7 @@ class ComputeService < BaseCloudService
   def get_project_instances(project)
     service.set_tenant project
     instances.reload
-    i = instances
-    service.set_tenant 'admin'
-    i
+    instances
   end
 
   def set_tenant(project, reload = true)
@@ -595,6 +732,7 @@ class ComputeService < BaseCloudService
       addresses.reload
       flavors.reload
       instances.reload
+      volumes.reload
     end
   end
 

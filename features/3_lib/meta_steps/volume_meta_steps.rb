@@ -41,8 +41,24 @@ Step /^Ensure that the project named (.+) has a volume named (.+)$/ do |project_
   project = IdentityService.session.find_project_by_name(project_name)
   raise "#{ project_name } couldn't be found!" unless project
 
-  VolumeService.session.create_volume_in_project(project, :name => volume_name)
+  VolumeService.session.create_volume_in_project(project, name: volume_name)
+  volume = VolumeService.session.find_volume_by_name(project, volume_name)
+  raise "Volume #{ volume_name } couldn't be found!" unless volume
 end
+
+
+Step /^Ensure that the project named (.+) has an available volume named (.+)$/ do |project_name, volume_name|
+  project = IdentityService.session.find_project_by_name(project_name)
+  raise "#{ project_name } couldn't be found!" unless project
+
+  VolumeService.session.create_volume_in_project(project, name: volume_name)
+  if volume = VolumeService.session.find_volume_by_name(project, volume_name)
+    raise "Volume #{ volume_name } was found but is not available!" if volume['status'] != 'available'
+  else
+    raise "Volume #{ volume_name } couldn't be found!"
+  end
+end
+
 
 Step /^Ensure that the volume named (.+) is attached to the (\d+)(?:st|nd|rd|th) instace of the project named (.+)$/ do |volume_name, nth_instance, project_name|
   index = nth_instance.to_i - 1
@@ -52,7 +68,35 @@ Step /^Ensure that the volume named (.+) is attached to the (\d+)(?:st|nd|rd|th)
   instance = ComputeService.session.get_project_instances(project)[index]
 
   volume = VolumeService.session.find_volume_by_name(project, volume_name)
-  rase "Volume #{ volume_name } couldn't be found!" if volume.nil?
+  raise "Volume #{ volume_name } couldn't be found!" if volume.nil?
 
   ComputeService.session.attach_volume_to_instance_in_project project, instance, volume
+end
+
+
+Step /^Ensure that the volume named (.+) is attached to the instance named (.+) in the project (.+)$/ do |volume_name, instance_name, project_name|
+  project = IdentityService.session.find_project_by_name(project_name)
+  raise "Project #{ project_name } couldn't be found!" unless project
+
+  instance = ComputeService.session.find_instance_by_name(project, instance_name)
+  raise "Instance #{ instance_name } couldn't be found!" unless instance
+
+  volume = VolumeService.session.find_volume_by_name(project, volume_name)
+  raise "Volume #{ volume_name } couldn't be found!" unless volume
+
+  ComputeService.session.attach_volume_to_instance_in_project project, instance, volume
+end
+
+
+Step /^Ensure that the volume named (.+) is not attached to the instance named (.+) in the project (.+)$/ do |volume_name, instance_name, project_name|
+  project = IdentityService.session.find_project_by_name(project_name)
+  raise "Project #{ project_name } couldn't be found!" unless project
+
+  instance = ComputeService.session.find_instance_by_name(project, instance_name)
+  raise "Instance #{ instance_name } couldn't be found!" unless instance
+
+  volume = VolumeService.session.find_volume_by_name(project, volume_name)
+  raise "Volume #{ volume_name } couldn't be found!" unless volume
+
+  ComputeService.session.detach_volume_from_instance_in_project project, instance, volume
 end

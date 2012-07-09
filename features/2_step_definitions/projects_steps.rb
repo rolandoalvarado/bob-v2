@@ -25,10 +25,18 @@ Given /^At least (\d+) images? should be available for use in the project$/ do |
   end
 end
 
-Given /^The project has (\d+) active instances?$/ do |number_of_instances|
+Given /^The project has (\d+) (active|paused|suspended) instances?$/ do |number_of_instances, status|
   number_of_instances = number_of_instances.to_i
   compute_service     = ComputeService.session
-  @instance           = compute_service.ensure_active_instance_count(@project, number_of_instances)
+  compute_service.send("ensure_#{ status }_instance_count", @project, number_of_instances)
+
+  compute_service.set_tenant @project
+  instances = compute_service.instances
+  if number_of_instances == 1
+    @instance = instances.find { |i| i.state == status.upcase }
+  else
+    @instance = instances.select { |i| i.state == status.upcase }
+  end
 end
 
 Given /^The project has (\d+) available volumes?$/ do |number_of_volumes|
@@ -37,21 +45,9 @@ Given /^The project has (\d+) available volumes?$/ do |number_of_volumes|
   total_volumes     = volume_service.ensure_volume_count(@project, number_of_volumes)
 end
 
-Given /^The project has (\d+) paused instances?$/ do |number_of_instances|
-  number_of_instances = number_of_instances.to_i
-  compute_service     = ComputeService.session
-  total_instances     = compute_service.ensure_paused_instance_count(@project, number_of_instances)
-end
-
-Given /^The project has (\d+) suspended instances?$/ do |number_of_instances|
-  number_of_instances = number_of_instances.to_i
-  compute_service     = ComputeService.session
-  total_instances     = compute_service.ensure_suspended_instance_count(@project, number_of_instances)
-end
-
 Given /^[Tt]he project does not have any floating IPs$/ do
   compute_service = ComputeService.session
-  compute_service.ensure_project_floating_ip_count(@project, 0)
+  compute_service.ensure_project_does_not_have_floating_ip(@project, 0, @instance)
 end
 
 Given /^The project has more than (\d+) instance flavors?$/ do |number_of_flavors|
@@ -65,7 +61,6 @@ Given /^The project has more than (\d+) instance flavors?$/ do |number_of_flavor
 end
 
 Given /^I have a role of (.+) in the project$/ do |role_name|
-
   if @project.nil?
     raise "No project was defined. You might need to add '* A project exists in the system' " +
           "in the feature file."
@@ -77,8 +72,9 @@ Given /^I have a role of (.+) in the project$/ do |role_name|
                      )
 
   identity_service = IdentityService.session
-  #user             = @current_user
   user             = identity_service.ensure_user_exists(user_attrs)
+  EnvironmentCleaner.register(:user, user.id)
+
   identity_service.revoke_all_user_roles(user, @project)
 
   # Ensure user has the following role in the project
@@ -86,7 +82,7 @@ Given /^I have a role of (.+) in the project$/ do |role_name|
     role = identity_service.roles.find_by_name(RoleNameDictionary.db_name(role_name))
 
     if role.nil?
-      raise "Role #{ role_name } couldn't be found. Make sure it's defined in " +
+        raise "Role #{ role_name } couldn't be found. Make sure it's defined in " +
         "features/support/role_name_dictionary.rb and that it exists in " +
         "#{ ConfigFile.web_client_url }."
     end
@@ -98,10 +94,9 @@ Given /^I have a role of (.+) in the project$/ do |role_name|
     end
   end
 
+  # Make variable(s) available for use in succeeding steps
   @current_user = user
-
 end
-
 
 Given /^I am authorized to create projects$/ do
   steps %{
@@ -141,7 +136,7 @@ end
 When /^I create a project with attributes (.*), (.*)$/ do |name, desc|
   attrs = CloudObjectBuilder.attributes_for(
             :project,
-            :name        => name.downcase == '(none)' ? name : Unique.name(name),
+            :name        => name.downcase == '(none)' ? name : Unique.project_name(name),
             :description => desc
           )
 
@@ -171,14 +166,7 @@ When /^I create a project with attributes (.*), (.*)$/ do |name, desc|
   @project_attrs = attrs
 end
 
-When /^I edit the project.s attributes to (.*), (.*)$/ do |name, desc|
-
-  attrs = CloudObjectBuilder.attributes_for(
-            :project,
-            :name        => name.downcase == '(none)' ? name : Unique.name(name),
-            :description => desc
-          )
-
+When /^I (.*) edit the project's attributes to (.*), (.*)$/i do |can_or_cannot, name, desc|
   steps %{
     * Click the logout button if currently logged in
 
@@ -189,25 +177,38 @@ When /^I edit the project.s attributes to (.*), (.*)$/ do |name, desc|
 
     * Visit the projects page
 
-    * Edit the #{@project.name} project
-    * Fill in the project name field with #{ attrs.name }
-    * Fill in the project description field with #{ attrs.description }
-    * Click the modify project button
-  }
+    * Edit the #{@project} project
+  } 
 
-  # Register created project for post-test deletion
-  created_project = IdentityService.session.find_project_by_name(attrs.name)
-  EnvironmentCleaner.register(:project, created_project.id) if created_project
+  if name.downcase == "(none)"
+    step "Clear the project name field"
+  else 
+    step "Fill in the project name field with #{ name }"
+  end
 
-  # Make the project name available to subsequent steps
-  @project_attrs = attrs
+  if desc.downcase == "(none)"
+    step "Clear the project description field"
+  else 
+    step "Fill in the project description field with #{ desc }"
+  end
 
+    step "Click the modify project button"
+
+  if can_or_cannot.downcase == "can" 
+    step "The #{name} project should be visible"
+    @project.save
+  else
+    if ( !@current_page.has_project_name_error_span? && 
+         !@current_page.has_project_description_error_span? )
+         raise "The project should not have been created, but it seems that it was."
+    end
+  end
 end
 
 When /^I create a project$/ do
   attrs = CloudObjectBuilder.attributes_for(
             :project,
-            :name => Unique.name('project')
+            :name => Unique.project_name('project')
           )
 
   IdentityService.session.ensure_project_does_not_exist(attrs)
@@ -285,8 +286,9 @@ end
 Then /^I Can Create a project$/ do
   attrs = CloudObjectBuilder.attributes_for(
             :project,
-            :name => Unique.name('projext_x')
+            :name => Unique.project_name('newproject')
           )
+
   IdentityService.session.ensure_project_does_not_exist(attrs)
 
   steps %{
@@ -314,10 +316,13 @@ Then /^I Can Create a project$/ do
 
   # Make project attributes available to subsequent steps
   @project_attrs = attrs
+
 end
 
 Then /^I can grant project membership to (.+)$/i do |username|
-
+  
+  user = @user
+  
   steps %{
 
     * Click the logout button if currently logged in
@@ -334,10 +339,9 @@ Then /^I can grant project membership to (.+)$/i do |username|
     * Click the add collaborator button
     * Click the collaborators tab
     * Click the add collaborator button
-    * Select Collaborator #{username}
-    * Click the add collaborator action button
-    * The collaborators table should include the text #{ username }
-
+    * Fill in the email field with #{ user.email }
+    * Click the add collaborator button
+    * Current page should have the new collaborator
   }
 
 end
@@ -353,10 +357,7 @@ Then /^I cannot grant project membership to (.+)$/i do |username|
     * Click the login button
 
     * Visit the projects page
-    * The #{ (@project || @project_attrs).name  } project should be visible
-    * Click the #{ (@project || @project_attrs).name } project
-
-    * The collaborators tab should be disabled
+    * The #{ (@project || @project_attrs).name } project should not be visible
    }
 
 end
@@ -414,26 +415,6 @@ Then /^I can delete (?:that|the) project$/i do
 
 end
 
-Then /^I cannot delete (?:that|the) project$/i do
-  steps %{
-    * Click the logout button if currently logged in
-    * Visit the login page
-    * Fill in the username field with #{ @current_user.name }
-    * Fill in the password field with #{ @current_user.password }
-    * Click the login button
-
-    * Visit the projects page
-    * The #{ (@project || @project_attrs).name } project should be visible
-
-  }
-
-  # Deleting row in the page is asynchronous. So script has to wait 5 seconds.
-
-  if ( @current_page.has_delete_project_link?(name: (@project || @project_attrs).name) )
-    raise "The project delete link should not have been created, but it seems that it was."
-  end
-
-end
 
 Then /^I failed to delete (?:that|the) project$/i do
   steps %{
@@ -457,7 +438,6 @@ end
 
 Then /^I can edit (?:that|the) project$/i do
   steps %{
-
     * Click the logout button if currently logged in
     * Visit the login page
     * Fill in the username field with #{ @current_user.name }
@@ -468,30 +448,16 @@ Then /^I can edit (?:that|the) project$/i do
     * The #{ (@project || @project_attrs).name } project should be visible
 
     * Edit the #{ (@project || @project_attrs).name } project
-    * Fill in the project description field with "editting project"
+    * Fill in the project name field with editting project
     * Click the modify project button
+
+    * The editting project project should be visible
   }
 
+  # restore project name
+  @project.save
 end
 
-
-Then /^I [Cc]annot [Ee]dit (?:that|the) project$/ do
-
-  steps %{
-    * Click the logout button if currently logged in
-    * Visit the login page
-    * Fill in the username field with #{ @current_user.name }
-    * Fill in the password field with #{ @current_user.password }
-    * Click the login button
-
-    * Visit the projects page
-    * The #{ (@project || @project_attrs).name } project should be visible
-    * The edit project link should be disabled with #{(@project || @project_attrs).name}
-  }
-
-#  @current_page.has_disabled_edit_project_link?(name: (@project || @project_attrs).name)
-
-end
 
 Then /^Arya Stark cannot view that project$/ do
   user_attrs       = CloudObjectBuilder.attributes_for(
@@ -521,8 +487,8 @@ Then /^(?:She|He) can view the project$/ do
     * Click the logout button if currently logged in
 
     * Visit the login page
-    * Fill in the username field with #{ @user.name }
-    * Fill in the password field with #{ @user.password }
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
     * Click the login button
 
     * Visit the projects page
@@ -547,20 +513,6 @@ Then /^the project will be Not Created$/ do
   end
 end
 
-Then /^the project will be [Uu]pdated$/ do
-  steps %{
-    * Visit the projects page
-    * The #{ @project_attrs.name } project should be visible
-  }
-end
-
-Then /^the project will be Not Updated$/ do
-  # current_page should still have a new project form
-  # new project form should have the error message "This field is required".
-  if ( !@current_page.has_project_name_error_span? && !@current_page.has_project_description_error_span? )
-    raise "The project should not have been created, but it seems that it was."
-  end
-end
 
 Then /^the project and all its resources will be deleted$/ do
   pending # express the regexp above with the code you wish you had
@@ -571,36 +523,39 @@ end
 
 TestCase /^A user with a role of (.+) in a project can edit the instance quota of the project$/i do |role_name|
   
-  username      = Unique.username('bob')
-  password      = '123qwe'
-  project_name  = Unique.project_name('test')
-  instance_name = Unique.instance_name('test')
-  volume_name   = Unique.volume_name('test')
+  floating_ips  = 10
+  volumes       = 10
+  cores         = 20
 
   Preconditions %{
-    * Ensure that a user with username #{ username } and password #{ password } exists
-    * Ensure that a project named #{ project_name } exists
-    * Ensure that the user #{ username } has a role of #{ role_name } in the project #{ project_name }
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the project #{ test_project_name }
   }
 
   Cleanup %{
-    * Register the project named #{ project_name } for deletion at exit
-    * Register the user named #{ username } for deletion at exit
+    * Register the project named #{ test_project_name } for deletion at exit
+    * Register the user named #{ bob_username } for deletion at exit
   }
 
   Script %{
 
     * Click the Logout button if currently logged in
     * Visit the Login page
-    * Fill in the Username field with #{ username }
-    * Fill in the Password field with #{ password }
+    * Fill in the Username field with #{ bob_username }
+    * Fill in the Password field with #{ bob_password }
     * Click the Login button
 
     * Click the Projects link
-    * Click the #{ project_name } project
-    * Wait 5 seconds
+    * Click the #{ test_project_name } project
+    * Wait 10 seconds
     * Click the quota modify button
-    * The Modify Quota message should be visible
+    * Current page should have the modify quota form
+    * Fill in the floating ips quota edit field with #{ floating_ips }
+    * Fill in the volumes quota edit field with #{ volumes }
+    * Fill in the cores quota edit field with #{ cores }
+    * Click the save quota edit button
+    * Quota Values should be updated with #{ floating_ips } , #{ volumes } and #{ cores }
   }
 
 
@@ -609,17 +564,47 @@ end
 
 TestCase /^A user with a role of (.+) in a project cannot edit the instance quota of the project$/i do |role_name| 
   
+  floating_ips  = 10
+  volumes       = 10
+  cores         = 20
+
+  Preconditions %{
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that the user #{ bob_username } has a role of Member in the system
+    * Ensure that the user #{ bob_username } has a role of #{role_name} in the project #{ test_project_name }
+  }
+
+  Cleanup %{
+    * Register the project named #{ test_project_name } for deletion at exit
+    * Register the user named #{ bob_username } for deletion at exit
+  }
+  
+  Script %{
+
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ bob_username }
+    * Fill in the Password field with #{ bob_password }
+    * Click the Login button
+
+    * Click the Projects link
+    * Click the #{ test_project_name } project
+    * Wait 10 seconds
+    * The quota modify link should be disabled
+  }
+
+end
+
+Then /^I [Cc]annot [Ee]dit (?:that|the) project$/ do
   username      = Unique.username('bob')
   password      = '123qwe'
-  project_name  = Unique.project_name('test')
-  instance_name = Unique.instance_name('test')
-  volume_name   = Unique.volume_name('test')
+  project_name  = Unique.project_name('project')
 
   Preconditions %{
     * Ensure that a user with username #{ username } and password #{ password } exists
     * Ensure that a project named #{ project_name } exists
     * Ensure that the user #{ username } has a role of Member in the system
-    * Ensure that the user #{ username } has a role of #{role_name} in the project #{ project_name }
   }
 
   Cleanup %{
@@ -635,34 +620,28 @@ TestCase /^A user with a role of (.+) in a project cannot edit the instance quot
     * Fill in the Password field with #{ password }
     * Click the Login button
 
-    * Click the Projects link
-    * Click the #{ project_name } project
-
-    * Wait 5 seconds
-    * The quota modify button should be disabled
+    * Visit the projects page
+    * The #{ project_name } project should not be visible
   }
-
 end
 
 
-TestCase /^Project can be updated the quota of the project with (.+) , (.+) and (.+)$/i do |floating_ips,volumes,cores|
+TestCase /^I cannot delete (?:that|the) project$/i do
   username      = Unique.username('bob')
   password      = '123qwe'
-  project_name  = Unique.project_name('test')
-  instance_name = Unique.instance_name('test')
-  volume_name   = Unique.volume_name('test')
+  project_name  = Unique.project_name('project')
 
   Preconditions %{
     * Ensure that a user with username #{ username } and password #{ password } exists
     * Ensure that a project named #{ project_name } exists
-    * Ensure that the user #{ username } has a role of Project Manager in the project #{ project_name } 
+    * Ensure that the user #{ username } has a role of Member in the system
   }
 
   Cleanup %{
     * Register the project named #{ project_name } for deletion at exit
     * Register the user named #{ username } for deletion at exit
   }
-
+  
   Script %{
 
     * Click the Logout button if currently logged in
@@ -671,15 +650,42 @@ TestCase /^Project can be updated the quota of the project with (.+) , (.+) and 
     * Fill in the Password field with #{ password }
     * Click the Login button
 
+    * Visit the projects page
+    * The #{ project_name } project should not be visible
+  }
+end
+
+
+
+TestCase /^Project can be updated the quota of the project with (.+) , (.+) and (.+)$/i do |floating_ips,volumes,cores|
+
+  Preconditions %{
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that the user #{ bob_username } has a role of Project Manager in the project #{ test_project_name } 
+  }
+
+  Cleanup %{
+    * Register the project named #{ test_project_name } for deletion at exit
+    * Register the user named #{ bob_username } for deletion at exit
+  }
+
+  Script %{
+
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ bob_username }
+    * Fill in the Password field with #{ bob_password }
+    * Click the Login button
+
     * Click the Projects link
-    * Click the #{ project_name } project
-    * Wait 5 seconds
+    * Click the #{ test_project_name } project
+    * Wait 10 seconds
     * Click the quota modify button
 
     * Fill in the floating ips quota edit field with #{ floating_ips }
     * Fill in the volumes quota edit field with #{ volumes }
     * Fill in the cores quota edit field with #{ cores }
-    
     * Click the save quota edit button
 
     * Quota Values should be updated with #{ floating_ips } , #{ volumes } and #{ cores }
@@ -690,34 +696,28 @@ end
 
 TestCase /^Project cannot be updated the quota of the project with (.+) , (.+) and (.+)$/i do |floating_ips,volumes,cores|
 
-  username      = Unique.username('bob')
-  password      = '123qwe'
-  project_name  = Unique.project_name('test')
-  instance_name = Unique.instance_name('test')
-  volume_name   = Unique.volume_name('test')
-
   Preconditions %{
-    * Ensure that a user with username #{ username } and password #{ password } exists
-    * Ensure that a project named #{ project_name } exists
-    * Ensure that the user #{ username } has a role of Project Manager in the project #{ project_name }
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that the user #{ bob_username } has a role of Project Manager in the project #{ test_project_name }
   }
 
   Cleanup %{
-    * Register the project named #{ project_name } for deletion at exit
-    * Register the user named #{ username } for deletion at exit
+    * Register the project named #{ test_project_name } for deletion at exit
+    * Register the user named #{ bob_username } for deletion at exit
   }
 
   Script %{
 
     * Click the Logout button if currently logged in
     * Visit the Login page
-    * Fill in the Username field with #{ username }
-    * Fill in the Password field with #{ password }
+    * Fill in the Username field with #{ bob_username }
+    * Fill in the Password field with #{ bob_password }
     * Click the Login button
 
     * Click the Projects link
-    * Click the #{ project_name } project
-    * Wait 5 seconds
+    * Click the #{ test_project_name } project
+    * Wait 10 seconds
     * Click the quota modify button
 
     * Fill in the floating ips quota edit field with #{ floating_ips }
@@ -725,8 +725,9 @@ TestCase /^Project cannot be updated the quota of the project with (.+) , (.+) a
     * Fill in the cores quota edit field with #{ cores }
     
     * Click the save quota edit button
-    * A quota edit error element should be visible
+    * A quota edit dialog show error
   }
 
 end
+
 

@@ -47,13 +47,30 @@ end
 
 
 Then /^Choose the item with text (.+) in the (.+) dropdown$/ do |item_text, dropdown_name|
-  dropdown_name = dropdown_name.split.join('_').downcase
-  if item = @current_page.send("#{ dropdown_name }_dropdown_items").find { |d| d.text == item_text }
+  dropdown_name  = dropdown_name.split.join('_').downcase
+  dropdown_items = @current_page.send("#{ dropdown_name }_dropdown_items")
+
+  item = case item_text.downcase
+         when '(none)'
+           dropdown_items.find { |d| d.value.blank? }
+         when '(any)'
+           dropdown_items[1]
+         else
+           dropdown_items.find { |d| d.text == item_text }
+         end
+
+  if item
     item.click
   else
     raise "Couldn't find the dropdown option '#{ item_text }'."
   end
 end
+
+Then /^Clear the (.+) field$/i do |field_name|
+  field_name = field_name.split.join('_').downcase
+  @current_page.send("#{ field_name }_field").set ""
+end
+
 
 Then /^Click the context menu button for user (.+)$/ do |username|
   username = Unique.username(username)
@@ -126,6 +143,11 @@ Then /^Click the (.+) button for security group (.+)$/ do |button_name, security
   @current_page.send("#{ button_name }_button", id: security_group_id).click
 end
 
+Step /^Click the (delete|disable|edit) button for user (.+)$/ do |button_name, user_id|
+  button_name = button_name.split.join('_').downcase
+  @current_page.send("#{ button_name }_button", id: user_id).click
+end
+
 Then /^Click the (.+) button for volume snapshot named (.+)$/ do |button_name, snapshot_name|
   button_name = button_name.split.join('_').downcase
   @current_page.send("#{ button_name }_button", name: snapshot_name).click
@@ -159,7 +181,7 @@ Then /^Click the row for security group with id (.+)$/i do |security_group_id|
   @current_page.security_group_link(id: security_group_id).click
 end
 
-Step /^Click the context menu button of the volume named (.+)$/ do |volume_name|
+Step /^Click the context menu button of the volume named (.+)$/i do |volume_name|
   VolumeService.session.reload_volumes
   volume = VolumeService.session.volumes.find { |v| v['display_name'] == volume_name }
 
@@ -168,12 +190,11 @@ Step /^Click the context menu button of the volume named (.+)$/ do |volume_name|
   @current_page.volume_context_menu_button(:id => volume['id']).click
 end
 
-Step /^Click the (attach|delete|detach) button of the volume named (.+)$/ do |button_name, volume_name|
-  volume = VolumeService.session.volumes.find { |v| v['display_name'] == volume_name }
+Step /^Click the (attach|delete|detach) button of the volume named (.+)$/i do |button_name, volume_name|
+  volume = VolumeService.session.volumes.find { |v| v['display_name'] == volume_name && v['status'] == 'available' }
+  raise "Couldn't find an available volume named '#{ volume_name }'" unless volume
 
-  raise "Couldn't find a volume named '#{ volume_name }'" unless volume
-
-  button_name = button_name.split.join('_')
+  button_name = button_name.split.join('_').downcase
   @current_page.send("#{ button_name }_volume_button", id: volume['id']).click
 end
 
@@ -188,6 +209,11 @@ Then /^Click the (.+) image$/ do |image_name|
   @current_page.image_element( name: image_name.strip ).click
 end
 
+Step /^Close the (.+) form$/i do |form_name|
+  form_name = form_name.split.join('_').downcase
+  @current_page.send("#{ form_name }_form").find('.close').click
+end
+
 Then /^Current page should be the (.+) page$/i do |page_name|
   @current_page = eval("#{ page_name.downcase.capitalize }Page").new
   unless @current_page.has_expected_path?
@@ -196,7 +222,7 @@ Then /^Current page should be the (.+) page$/i do |page_name|
 end
 
 
-Then /^Current page should have the (.+) (button|field|form|tile)$/ do |name, type|
+Then /^Current page should(?:| still) have the (.+) (button|field|form|tile)$/ do |name, type|
   name = name.split.join('_').downcase
   unless @current_page.send("has_#{ name }_#{type}?")
     raise "Current page doesn't have a #{ name } #{ type }"
@@ -232,6 +258,21 @@ Then /^Current page should have the security groups$/ do
   end
 end
 
+
+Then /^Current page should have the new collaborator$/ do
+  unless @current_page.has_collaborator_element?
+    raise "Current page doesn't have collaborator."
+  end
+end
+
+
+Then /^Current page should have the users$/ do
+  unless @current_page.has_users_element?
+    raise "Current page doesn't have users."
+  end
+end
+
+
 Then /^Current page should have the new security group rule$/ do
   unless @current_page.has_security_groups_element?
     raise "Current page doesn't have security groups."
@@ -256,17 +297,31 @@ Then /^Current page should have the (.+) security group$/ do |security_group|
   end
 end
 
-Then /^Drag the instance flavor slider to a different flavor$/ do
-  @current_page.execute_script %{
+Then /^Drag the(?:| instance) flavor slider to a different flavor$/ do
+  @current_page.session.execute_script %{
     var slider = $('#flavor-slider'),
-      value = slider.slider('option', 'value'),
-      min = slider.slider('option', 'min'),
-      max = slider.slider('option', 'max');
+      value = parseInt(slider.slider('option', 'value')),
+      min = parseInt(slider.slider('option', 'min'));
 
-    // change value to min or max
-    if(value > min) { slider.slider('option', 'value', min); }
-    else if(value < max) { slider.slider('option', 'value', max); }
+    if(value == min) { value = value + 1; }
+    else if(value > min) { value = min; }
+    slider.slider('option', 'value', value);
+    slider.trigger('slide', { 'value': value });
   }
+end
+
+Then /^Drag the(?:| instance) flavor slider to the (.+)$/ do |flavor|
+  flavors = %w[ m1.small m1.medium m1.large m1.xlarge ]
+
+  if flavor.downcase != '(any)'
+    value = flavors.index(flavor)
+
+    @current_page.session.execute_script %{
+      var slider = $('#flavor-slider');
+      slider.slider('option', 'value', #{ value });
+      slider.trigger('slide', { 'value': #{ value } });
+    }
+  end
 end
 
 
@@ -283,11 +338,11 @@ Then /^Fill in the (.+) field with (.+)$/ do |field_name, value|
 end
 
 
-Then /^Select OS image (.+) item from the images radiolist$/ do |imagename|
- if imagename == "(Any)"
+Then /^Select OS image (.+) item from the images radiolist$/ do |image_name|
+ if image_name == "(Any)"
    step "Choose the 1st item in the images radiolist"
  else
-   pending
+   step "Click the #{ image_name } image"
  end
 end
 
@@ -320,11 +375,13 @@ Then /^Select instance count (.+)$/ do |count|
  end
 end
 
-Then /^Select Security Group (.+) item from the security group checklist$/ do |security_group|
+Then /^Select Security Group (.+) item from the security group checklist$/i do |security_group|
  if security_group.downcase == "(any)"
    #nothing
- elsif security_groupy.downcase == "(none)"
-   #nothing
+ elsif security_group.downcase == "(none)"
+   steps %{
+     * Uncheck all items in the security groups checklist
+   }
  else
    pending
  end
@@ -350,10 +407,23 @@ Then /^Set port to the (.+) field with (.+)$/ do |port_name,port_number|
   end
 end
 
+Step /^Store the private key for keypair (.+)$/i do |key_name|
+  key_value = @current_page.keypair_private_key_field.value
+  ComputeService.session.private_keys[key_name] = key_value
+end
+
 Then /^The (.+) form should be visible$/ do |form_name|
   form_name = form_name.split.join('_').downcase
   unless @current_page.send("has_#{ form_name }_form?")
     raise "The '#{ form_name.gsub('_',' ') }' form should be visible, but it's not."
+  end
+end
+
+
+Then /^The (.+) form has an error message$/ do |form_name|
+  name = form_name.split.join('_').downcase
+  if @current_page.send("has_no_#{ name }_error_message?")
+    raise "Expected the #{ form_name } form to have an error message, but none was found."
   end
 end
 
@@ -397,6 +467,13 @@ Then /^The (.+) button should be disabled$/ do |button_name|
   end
 end
 
+Then /^The (.+) dropdown should not have the item with text (.+)$/ do |dropdown_name, item_text|
+  dropdown_name = dropdown_name.split.join('_').downcase
+  if @current_page.send("#{ dropdown_name }_dropdown_items").find { |d| d.text == item_text }
+    raise "Expected to not find the dropdown option '#{ item_text }'."
+  end
+end
+
 Then /^The (.+) link should be disabled$/ do |link_name|
   link_name = link_name.split.join('_').downcase
   unless @current_page.send("has_disabled_#{ link_name }_link?")
@@ -436,6 +513,24 @@ Step /^(?:A|The) floating IP should be associated to instance (.+)$/ do |instanc
 end
 
 
+Step /^(?:A|The) floating IP should not be associated to instance (.+)$/ do |instance_name|
+  sleeping(1).seconds.between_tries.failing_after(15).tries do
+    if @current_page.has_associated_floating_ip_row?( name: instance_name )
+      raise "Found a floating IP to be associated to instance #{ instance_name }!"
+    end
+  end
+end
+
+
+Then /^The instance (.+) should be performing task (.+)$/ do |instance_id, task|
+  sleeping(1).seconds.between_tries.failing_after(15).tries do
+    unless @current_page.instance_row( id: instance_id ).find('.task').text.include?(task)
+      raise "Instance #{ instance_id } is not shown as performing task #{ task }."
+    end
+  end
+end
+
+
 Then /^The instance (.+) should be shown as rebooting$/ do |instance_id|
   sleeping(1).seconds.between_tries.failing_after(15).tries do
     unless @current_page.instance_row( id: instance_id ).find('.task').text.include?('rebooting')
@@ -466,19 +561,22 @@ end
 Then /^The instance ((?:(?!named )).+) should be (?:in|of) (.+) status$/ do |instance_id, status|
   sleeping(1).seconds.between_tries.failing_after(15).tries do
     unless @current_page.instance_row( id: instance_id ).find('.status').has_content?(status.upcase.gsub(' ', '_'))
-      raise "Instance #{ instance_id } does not have #{ status } status."
+      raise "Instance #{ instance_id } does not have or took to long to become #{ status } status."
     end
   end
 end
 
 
-Step /^The instance named (.+) should be (?:in|of) (.+) status$/ do |instance_name, status|
+Step /^The instance named (.+) should be (?:in|of) (.+) status$/ do |instance_name, expected_status|
   # TODO To prevent conflict with other instance steps, temporarily forgo changing the selector,
   # and instead finding it directly from the page object.
   selector = "//*[@id='instances-list']//*[contains(@class, 'name') and contains(text(), \"#{ instance_name }\")]/.."
   row      = @current_page.find_by_xpath(selector)
-  unless row.find('.status').has_content?(status.upcase.gsub(' ', '_'))
-    raise "Instance #{ instance_name } is not #{ status }."
+
+  actual_status = row.find('.status').text.strip
+  unless actual_status == expected_status.upcase.gsub(' ', '_')
+    raise "Instance #{ instance_name } is not or took too long to become #{ expected_status }. " +
+          "Current status is #{ actual_status }."
   end
 end
 
@@ -510,10 +608,24 @@ Step /^Click the (.+) button for the user named (.+)$/ do |button_name, username
   @current_page.send("#{ button_name }_user_button", name: username).click
 end
 
+Then /^The volume named (.+) should be (?:in|of) (.+) status$/ do |volume_name, status|
+  VolumeService.session.reload_volumes
+  volume = VolumeService.session.volumes.find { |v| v['display_name'] == volume_name }
+  raise "Couldn't find a volume named '#{ volume_name }'" unless volume
+
+  status.downcase!
+  sleeping(1).seconds.between_tries.failing_after(15).tries do
+    volume_row    = @current_page.volume_row( id: volume['id'] ).find('.volume-status')
+    volume_status = volume_row.text.to_s.strip.downcase
+    unless volume_status == status
+      raise "Volume #{ volume_name } took to long to become #{ status }."
+    end
+  end
+end
+
 Then /^The volume named (.+) should be attached to the instance named (.+)$/ do |volume_name, instance_name|
   VolumeService.session.reload_volumes
   volume = VolumeService.session.volumes.find { |v| v['display_name'] == volume_name }
-
   raise "Couldn't find a volume named '#{ volume_name }'" unless volume
 
   sleeping(1).seconds.between_tries.failing_after(15).tries do
@@ -521,9 +633,10 @@ Then /^The volume named (.+) should be attached to the instance named (.+)$/ do 
       raise "Could not find row for the volume named #{ volume_name }!"
     end
 
-    attachment = @current_page.volume_row(id: volume['id']).find('.attachments a').text()
+    attachment = @current_page.volume_row(id: volume['id']).find('.attachments').text.to_s.strip
     if attachment != instance_name
-      raise "Expected volume #{ volume_name } to be attached to instance #{ instance_name }, but it's not."
+      raise "Expected volume #{ volume_name } to be attached to instance #{ instance_name }, " +
+            "but it's not."
     end
   end
 end
@@ -539,7 +652,7 @@ Then /^The volume named (.+) should not be attached to the instance named (.+)$/
       raise "Could not find row for the volume named #{ volume_name }!"
     end
 
-    attachment = @current_page.volume_row(id: volume['id']).find('.attachments a').text()
+    attachment = @current_page.volume_row(id: volume['id']).find('.attachments').text.to_s.strip
     if attachment == instance_name
       raise "Expected volume #{ volume_name } to not be attached to instance #{ instance_name }, but it is."
     end
@@ -559,6 +672,13 @@ Then /^The (.+) link should not be visible$/ do |link_name|
   link_name = link_name.split.join('_').downcase
   if @current_page.send("has_#{ link_name }_link?")
     raise "The '#{ link_name.gsub('_',' ') }' link should not be visible, but it is."
+  end
+end
+
+Step /^The (.+) button should not be visible$/ do |button_name|
+  button_name = button_name.split.join('_').downcase
+  if @current_page.send("has_#{ button_name }_button?")
+    raise "The '#{ button_name.gsub('_',' ') }' button should not be visible, but it is."
   end
 end
 
@@ -601,7 +721,8 @@ end
 
 
 Then /^The (.+) project should be visible$/ do |project_name|
-  unless @current_page.has_project_name_element?( name: project_name )
+  if !@current_page.has_project_name_element?( name: project_name ) &&
+     !@current_page.has_project_name_title_element?( name: project_name )
     raise "The project '#{ project_name }' should be visible, but it's not."
   end
 end
@@ -652,8 +773,8 @@ Then /^The (.+) table should have (\d+) (?:row|rows)$/ do |table_name, num_rows|
 end
 
 
-Then /^The (.+) table's last row should include the text (.+)$/ do |table_name, text|
-  sleeping(1).seconds.between_tries.failing_after(5).tries do
+Step /^The (.+) table's last row should include the text (.+)$/ do |table_name, text|
+  sleeping(1).seconds.between_tries.failing_after(20).tries do
     table_name = table_name.split.join('_').downcase
     table_rows = @current_page.send("#{ table_name }_table").all('tbody tr')
     unless table_rows.last.has_content?(text)
@@ -662,6 +783,24 @@ Then /^The (.+) table's last row should include the text (.+)$/ do |table_name, 
   end
 end
 
+
+Then /^The (.+) table's last row should not include the text (.+)$/ do |table_name, text|
+  sleeping(1).seconds.between_tries.failing_after(5).tries do
+    table_name = table_name.split.join('_').downcase
+    table_rows = @current_page.send("#{ table_name }_table").all('tbody tr')
+    unless table_rows.last.has_no_content?(text)
+      raise "Found the text '#{ text }' in the last row of the #{ table_name } table."
+    end
+  end
+end
+
+Then /^Uncheck all items in the (.+) checklist$/ do |list_name|
+  list_name = list_name.split.join('_').downcase
+  checklist = @current_page.send("#{ list_name }_checklist_items")
+  checklist.each do |checkbox|
+    checkbox.click if checkbox.checked?
+  end
+end
 
 Then /^Uncheck the (\d+)(?:st|nd|rd|th) item in the (.+) checklist$/ do |item_number, list_name|
   list_name = list_name.split.join('_').downcase
@@ -672,6 +811,12 @@ end
 Then /^Uncheck the (.+) checkbox$/ do |checkbox_name|
   checkbox_name = checkbox_name.split.join('_').downcase
   checkbox = @current_page.send("#{ checkbox_name }_checkbox")
+  checkbox.click if checkbox.checked?
+end
+
+Then /^Uncheck the (.+) checkbox with value (.+)$/ do |checkbox_name, value|
+  checkbox_name = checkbox_name.split.join('_').downcase
+  checkbox = @current_page.send("#{ checkbox_name }_checkbox", name: value)
   checkbox.click if checkbox.checked?
 end
 
@@ -688,6 +833,15 @@ Then /^Visit the (.+) page$/ do |page_name|
   @current_page.visit
 end
 
-Then /Wait (.+) second(?:s|)/i  do |wait_secs|
+Then /^Wait (.+) second(?:s|)/i  do |wait_secs|
   sleep(wait_secs.to_i)  
+end
+
+Step /^Write the contents of the (.+) field to file (.+)$/i do |field_name, filename|
+  field_name = field_name.split.join('_').downcase
+  field      = @current_page.send("#{ field_name }_field")
+
+  File.open(filename.to_s, 'w') do |file|
+    file.puts field.value
+  end
 end

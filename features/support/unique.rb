@@ -31,7 +31,7 @@ module Unique
   end
 
   def self.username(value = '', length = 16)
-    self.string_without_whitespace(value, length)
+    "#{ value }#{ self.alpha }"[0, length - 1]
   end
 
   def self.user_name(value = '', length = 16)
@@ -59,6 +59,14 @@ module Unique
   end
 
   def self.volume_name(value = '', length = 16)
+    self.string_with_whitespace(value, length)
+  end
+
+  def self.instance_name(value = '', length = 16)
+    self.string_with_whitespace(value, length)
+  end
+
+  def self.keypair_name(value = '', length = 16)
     self.string_with_whitespace(value, length)
   end
 end

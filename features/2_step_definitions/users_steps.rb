@@ -38,9 +38,8 @@ Given /^A user named (.+) exists in the system$/ do |user_name|
                        :user,
                        :name => Unique.username(user_name)
                      )
-  identity_service = IdentityService.session
 
-  user             = identity_service.ensure_user_exists(user_attrs)
+  user             = IdentityService.session.ensure_user_exists(user_attrs)
 
   if user.nil? or user.id.empty?
     raise "User couldn't be initialized!"
@@ -84,7 +83,6 @@ When /^I delete the user (.+)$/ do |username|
     * Click the login button
 
     * Click the users link
-    * Current page should be the users page
     * Click the context menu button for user #{ username }
     * Click the delete user link for user #{ username }
     * Click the confirm user deletion button
@@ -117,14 +115,14 @@ end
 
 Then /^I can create a user$/i do
   new_user = CloudObjectBuilder.attributes_for(:user, :name => Unique.username('new'))
-  me       = @me
+  me       = @current_user
 
   steps %{
     * Register the user named #{ new_user.name } for deletion at exit
 
     * Ensure that a user with username #{ new_user.name } does not exist
     * Ensure that a test project is available for use
-    * Ensure that I have a role of Project Manager in the test project
+    * Ensure that I have a role of Project Manager in the named project
 
     * Click the Logout button if currently logged in
     * Visit the Login page
@@ -133,7 +131,6 @@ Then /^I can create a user$/i do
     * Click the Login button
 
     * Click the Users link
-    * Current page should be the Users page
     * Click the New User button
     * Fill in the Username field with #{ new_user.name }
     * Fill in the Email field with #{ new_user.email }
@@ -141,13 +138,13 @@ Then /^I can create a user$/i do
     * Choose the 2nd item in the Primary Project dropdown
     * Choose the item with text Project Manager in the Role dropdown
     * Click the Create User button
-    * The New User form should not be visible
+    * The New User form should be visible
     * The #{ new_user.name } user row should be visible
   }
 end
 
 Then /^I cannot create a user$/i do
-  me = @me
+  me = @current_user
 
   steps %{
     * Click the Logout button if currently logged in
@@ -177,14 +174,14 @@ Then /^I can create a user with attributes (.+), (.+), (.+), (.+), and (.+)$/i d
                            end
 
   role = (is_pm_or_not == "Yes" ? "Project Manager" : "Member")
-  me       = @me
+  me       = @current_user
 
   steps %{
     * Register the user named #{ new_user.name } for deletion at exit
 
     * Ensure that a user with username #{ new_user.name } does not exist
     * Ensure that a test project is available for use
-    * Ensure that I have a role of Project Manager in the test project
+    * Ensure that I have a role of Project Manager in the named project
 
     * Click the Logout button if currently logged in
     * Visit the Login page
@@ -193,7 +190,6 @@ Then /^I can create a user with attributes (.+), (.+), (.+), (.+), and (.+)$/i d
     * Click the Login button
 
     * Click the Users link
-    * Current page should be the Users page
     * Click the New User button
     * Fill in the Username field with #{ new_user.name }
     * Fill in the Email field with #{ new_user.email }
@@ -222,14 +218,14 @@ Then /^I cannot create a user with attributes (.+), (.+), (.+), (.+), and (.+)$/
                            end
 
   role = (is_pm_or_not == "Yes" ? "Project Manager" : "Member")
-  me       = @me
+  me       = @current_user
 
   steps %{
     * Register the user named #{ new_user.name } for deletion at exit
 
     * Ensure that a user with username #{ new_user.name } does not exist
     * Ensure that a test project is available for use
-    * Ensure that I have a role of Project Manager in the test project
+    * Ensure that I have a role of Project Manager in the named project
 
     * Click the Logout button if currently logged in
     * Visit the Login page
@@ -238,7 +234,6 @@ Then /^I cannot create a user with attributes (.+), (.+), (.+), (.+), and (.+)$/
     * Click the Login button
 
     * Click the Users link
-    * Current page should be the Users page
     * Click the New User button
     * Fill in the Username field with #{ new_user.name }
     * Fill in the Email field with #{ new_user.email }
@@ -262,7 +257,6 @@ Then /^I [Cc]an [Dd]elete (?:that|the) user (.+)$/ do |username|
     * Click the login button
 
     * Click the users link
-    * Current page should be the users page
     * Click the context menu button for user #{ username }
     * Click the delete user link for user #{ username }
     * Click the confirm user deletion button
@@ -284,17 +278,25 @@ end
 
 
 Then /^I can edit a user$/i do
-  existing_user = CloudObjectBuilder.attributes_for(:user, :name => Unique.username('existing'))
-  new_attrs     = CloudObjectBuilder.attributes_for(:user, :name => Unique.username('updated'))
-  me            = @me
+  existing_user = CloudObjectBuilder.attributes_for(:user, :name => Unique.username('existing'), :password => '123qwe')
+  new_attrs     = CloudObjectBuilder.attributes_for(
+                    :user,
+                    :name     => ( Unique.username('NewUser') ),
+                    :email    => ( Unique.email('NewEmail@mail.com') ),
+                    :password => '123qwe'
+                  )
+
+  IdentityService.session.ensure_user_does_not_exist(new_attrs)
+  @existing_user = IdentityService.session.ensure_user_exists(existing_user)
+  me = @current_user
 
   steps %{
     * Register the user named #{ existing_user.name } for deletion at exit
     * Register the user named #{ new_attrs.name } for deletion at exit
 
-    * Ensure that a user with username #{ existing_user.name } and password 123qwe exists
+    * Ensure that a user with username #{ existing_user.name } and password #{ existing_user.password } exists
     * Ensure that a test project is available for use
-    * Ensure that I have a role of Project Manager in the test project
+    * Ensure that I have a role of Project Manager in the named project
 
     * Click the Logout button if currently logged in
     * Visit the Login page
@@ -303,8 +305,7 @@ Then /^I can edit a user$/i do
     * Click the Login button
 
     * Click the Users link
-    * Current page should be the Users page
-    * Click the link for user with username #{ existing_user.name }
+    * Click the Edit button for the user named #{ @existing_user.name }
     * Fill in the Username field with #{ new_attrs.name }
     * Fill in the Email field with #{ new_attrs.email }
     * Choose the 2nd item in the Primary Project dropdown
@@ -316,7 +317,7 @@ end
 
 
 Then /^I can update a user with attributes (.+), (.+), (.+), (.+), and (.+)$/i do |username, email, password, primary_project, is_pm_or_not|
-  existing_user = CloudObjectBuilder.attributes_for(:user, :name => Unique.username('existing'))
+  existing_user = CloudObjectBuilder.attributes_for(:user, :name => Unique.username('existing'), :password => '123qwe')
   new_attrs     = CloudObjectBuilder.attributes_for(
                     :user,
                     :name     => ( username.downcase == "(none)" ? username : Unique.username(username) ),
@@ -331,16 +332,19 @@ Then /^I can update a user with attributes (.+), (.+), (.+), (.+), and (.+)$/i d
                            end
 
   role = (is_pm_or_not == "Yes" ? "Project Manager" : "Member")
-  me = @me
+
+  IdentityService.session.ensure_user_does_not_exist(new_attrs)
+  @existing_user = IdentityService.session.ensure_user_exists(existing_user)
+  me = @current_user
 
   steps %{
     * Register the user named #{ existing_user.name } for deletion at exit
     * Register the user named #{ new_attrs.name } for deletion at exit
 
-    * Ensure that a user with username #{ existing_user.name } and password 123qwe exists
+    * Ensure that a user with username #{ existing_user.name } and password #{ existing_user.password } exists
     * Ensure that a user with username #{ new_attrs.name } does not exist
     * Ensure that a test project is available for use
-    * Ensure that I have a role of Project Manager in the test project
+    * Ensure that I have a role of Project Manager in the named project
 
     * Click the Logout button if currently logged in
     * Visit the Login page
@@ -349,8 +353,7 @@ Then /^I can update a user with attributes (.+), (.+), (.+), (.+), and (.+)$/i d
     * Click the Login button
 
     * Click the Users link
-    * Current page should be the Users page
-    * Click the link for user with username #{ existing_user.name }
+    * Click the Edit button for the user named #{ @existing_user.name }
     * Fill in the Username field with #{ new_attrs.name }
     * Fill in the Email field with #{ new_attrs.email }
     * Fill in the Password field with #{ new_attrs.password }
@@ -364,7 +367,7 @@ end
 
 
 Then /^I cannot edit a user$/i do
-  me = @me
+  me = @current_user
 
   steps %{
     * Click the Logout button if currently logged in
@@ -395,7 +398,9 @@ Then /^I cannot update a user with attributes (.+), (.+), (.+), (.+), and (.+)$/
                            end
 
   role = (is_pm_or_not == "Yes" ? "Project Manager" : "Member")
-  me = @me
+
+  @existing_user = IdentityService.session.ensure_user_exists(existing_user)
+  me = @current_user
 
   steps %{
     * Register the user named #{ existing_user.name } for deletion at exit
@@ -404,7 +409,7 @@ Then /^I cannot update a user with attributes (.+), (.+), (.+), (.+), and (.+)$/
     * Ensure that a user with username #{ existing_user.name } and password 123qwe exists
     * Ensure that a user with username #{ new_attrs.name } does not exist
     * Ensure that a test project is available for use
-    * Ensure that I have a role of Project Manager in the test project
+    * Ensure that I have a role of Project Manager in the named project
 
     * Click the Logout button if currently logged in
     * Visit the Login page
@@ -413,8 +418,7 @@ Then /^I cannot update a user with attributes (.+), (.+), (.+), (.+), and (.+)$/
     * Click the Login button
 
     * Click the Users link
-    * Current page should be the Users page
-    * Click the link for user with username #{ existing_user.name }
+    * Click the Edit button for the user named #{ @existing_user.name }
     * Fill in the Username field with #{ new_attrs.name }
     * Fill in the Email field with #{ new_attrs.email }
     * Fill in the Password field with #{ new_attrs.password }
@@ -427,11 +431,10 @@ Then /^I cannot update a user with attributes (.+), (.+), (.+), (.+), and (.+)$/
 end
 
 
-TestCase /^A user with a role of (.+) in the system can change user permissions$/i do |role_name|
+TestCase /^A user with a role of (System Admin|\(None\)) in the system can change user permissions$/i do |role_name|
 
   pm_username     = Unique.username('pm')
   member_username = Unique.username('member')
-  password        = '123qwe'
   project_name    = Unique.project_name('test')
 
   Preconditions %{
@@ -439,9 +442,62 @@ TestCase /^A user with a role of (.+) in the system can change user permissions$
     * Ensure that the user #{ bob_username } has a role of #{ role_name } in the system
 
     * Ensure that a project named #{ project_name } exists
-    * Ensure that another user with username #{ pm_username } and password #{ password } exists
+    * Ensure that another user with username #{ pm_username } and password #{ bob_password } exists
     * Ensure that the user #{ pm_username } has a role of Project Manager in the project #{ project_name }
-    * Ensure that another user with username #{ member_username } and password #{ password } exists
+    * Ensure that another user with username #{ member_username } and password #{ bob_password } exists
+    * Ensure that the user #{ member_username } has a role of Member in the project #{ project_name }
+  }
+
+  Cleanup %{
+    * Register the project named #{ project_name } for deletion at exit
+    * Register the user named #{ bob_username } for deletion at exit
+    * Register the user named #{ pm_username } for deletion at exit
+    * Register the user named #{ member_username } for deletion at exit
+  }
+
+  Script %{
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ bob_username }
+    * Fill in the Password field with #{ bob_password }
+    * Click the Login button
+
+    * Click the Users link
+
+    * Click the Edit button for the user named #{ pm_username }
+    * Current page should have the Edit User form
+
+    * Choose the item with text Member in the Role dropdown
+    * Click the Update User button
+
+    * The item with text Member should be default in the Role dropdown
+
+    * Click the Edit button for the user named #{ member_username }
+    * Current page should have the Edit User form
+
+    * Choose the item with text Project Manager in the Role dropdown
+    * Click the Update User button
+
+    * The item with text Project Manager should be default in the Role dropdown
+  }
+
+end
+
+
+TestCase /^A user with a role of (Project Manager|Member) in the system can change user permissions$/i do |role_name|
+
+  pm_username     = Unique.username('pm')
+  member_username = Unique.username('member')
+  project_name    = Unique.project_name('test')
+
+  Preconditions %{
+    * Ensure that a project named #{ project_name } exists
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the project #{ project_name }
+
+    * Ensure that another user with username #{ pm_username } and password #{ bob_password } exists
+    * Ensure that the user #{ pm_username } has a role of Project Manager in the project #{ project_name }
+    * Ensure that another user with username #{ member_username } and password #{ bob_password } exists
     * Ensure that the user #{ member_username } has a role of Member in the project #{ project_name }
   }
 
@@ -512,4 +568,151 @@ TestCase /^A user with a role of (.+) in the system cannot change user permissio
     * The Users link should not be visible
   }
 
+end
+
+
+TestCase /^A user with a role of (.+) in the system can create a user$/i do |role_name|
+
+  user         = CloudObjectBuilder.attributes_for(:user, :name => Unique.username('test'))
+
+  Preconditions %{
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the system
+    * Ensure that a user with username #{ user.name } does not exist
+  }
+
+  Cleanup %{
+    * Register the project named #{ test_project_name } for deletion at exit
+    * Register the user named #{ bob_username } for deletion at exit
+    * Register the user named #{ user.name } for deletion at exit
+  }
+
+  Script %{
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ bob_username }
+    * Fill in the Password field with #{ bob_password }
+    * Click the Login button
+
+    * Click the Users link
+    * Click the New User button
+    * Fill in the Username field with #{ user.name }
+    * Fill in the Email field with #{ user.email }
+    * Fill in the Password field with #{ user.password }
+    * Choose the item with text #{ test_project_name } in the Primary Project dropdown
+    * Choose the item with text Project Manager in the Role dropdown
+    * Click the Create User button
+    * The New User form should be visible
+    * The #{ user.name } user row should be visible
+  }
+
+end
+
+
+TestCase /^A user with a role of (.+) in the system cannot create a user$/i do |role_name|
+
+  Preconditions %{
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the system
+  }
+
+  Cleanup %{
+    * Register the user named #{ bob_username } for deletion at exit
+  }
+
+  Script %{
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ bob_username }
+    * Fill in the Password field with #{ bob_password }
+    * Click the Login button
+
+    * The Users link should not be visible
+  }
+
+end
+
+
+TestCase /^An authorized user can create a user with attributes (.+), (.+), (.+), (.+), and (.+)$/i do |username, email, password, primary_project, role|
+  user = CloudObjectBuilder.attributes_for(
+           :user,
+           :name     => Unique.username(username),
+           :email    => Unique.email(email),
+           :password => password
+         )
+
+  Preconditions %{
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that the user #{ bob_username } has a role of Project Manager in the project #{ test_project_name }
+    * Ensure that a user with username #{ user.name } does not exist
+  }
+
+  Cleanup %{
+    * Register the project named #{ test_project_name } for deletion at exit
+    * Register the user named #{ bob_username } for deletion at exit
+    * Register the user named #{ user.name } for deletion at exit
+  }
+
+  Script %{
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ bob_username }
+    * Fill in the Password field with #{ bob_password }
+    * Click the Login button
+
+    * Click the Users link
+    * Click the New User button
+    * Fill in the Username field with #{ user.name }
+    * Fill in the Email field with #{ user.email }
+    * Fill in the Password field with #{ user.password }
+    * Choose the item with text #{ primary_project } in the Primary Project dropdown
+    * Choose the item with text #{ role } in the Role dropdown
+    * Click the Create User button
+    * The New User form should not be visible
+    * The #{ user.name } user row should be visible
+  }
+end
+
+
+TestCase /^An authorized user cannot create a user with attributes (.+), (.+), (.+), (.+), and (.+)$/i do |username, email, password, primary_project, role|
+  user = CloudObjectBuilder.attributes_for(
+           :user,
+           :name     => ( username.downcase != '(none)' ? Unique.username(username) : username ),
+           :email    => ( email.downcase != '(none)' ? Unique.email(email) : email ),
+           :password => password
+         )
+
+  Preconditions %{
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that the user #{ bob_username } has a role of Project Manager in the project #{ test_project_name }
+    * Ensure that a user with username #{ user.name } does not exist
+  }
+
+  Cleanup %{
+    * Register the project named #{ test_project_name } for deletion at exit
+    * Register the user named #{ bob_username } for deletion at exit
+    * Register the user named #{ user.name } for deletion at exit
+  }
+
+  Script %{
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ bob_username }
+    * Fill in the Password field with #{ bob_password }
+    * Click the Login button
+
+    * Click the Users link
+    * Click the New User button
+    * Fill in the Username field with #{ user.name }
+    * Fill in the Email field with #{ user.email }
+    * Fill in the Password field with #{ user.password }
+    * Choose the item with text #{ primary_project } in the Primary Project dropdown
+    * Choose the item with text #{ role } in the Role dropdown
+    * Click the Create User button
+    * The New User form should be visible
+    * A New User Form Error Message element should be visible
+  }
 end

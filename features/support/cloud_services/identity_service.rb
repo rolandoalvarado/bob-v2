@@ -43,6 +43,8 @@ class IdentityService < BaseCloudService
   end
 
   def delete_tenant(tenant)
+    tenants.reload
+    tenant = tenants.find_by_name(tenant.name)
     users = tenant.users
     users.reload.each do |user|
       revoke_all_user_roles(user, tenant)
@@ -146,7 +148,7 @@ class IdentityService < BaseCloudService
   end
 
   def ensure_user_exists(attributes)
-    user = users.find_by_name(attributes[:name])
+    user = find_user_by_name(attributes[:name])
     if user
       user.update(attributes)
     else
@@ -157,7 +159,7 @@ class IdentityService < BaseCloudService
   end
 
   def find_user_by_name(name)
-    users.reload.find_by_name(name)
+    users.find_by_name(name)
   end
 
   def find_tenant_by_name(name)

@@ -27,4 +27,4 @@ Feature: Resume an Instance
   Scenario: Resume an Instance
     Given I am authorized to resume instances in the project
      When I resume the instance in the project
-     Then I can connect to that instance via SSH
+     Then the instance should be active

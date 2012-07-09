@@ -1,4 +1,4 @@
-@jira-DPBLOG-7
+@jira-DPBLOG-7 @format-v2
 Feature: Log Out
 
   Scenario:

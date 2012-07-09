@@ -11,23 +11,18 @@ Feature: Assign a Floating IP to an Instance
   dynamically added to a running virtual instance. OpenStack Compute uses
   Network Address Translation (NAT) to assign floating IPs to virtual instances.
 
-  Background:
-    * A project exists in the system
-    * The project has 1 active instance
-    * The project does not have any floating IPs
-
-
   @permissions
   Scenario Outline: Check User Permissions
-    Given I have a role of <Role> in the project
-     Then I <Can or Cannot Assign> a floating IP to an instance in the project
+    * A user with a role of <Role> in the project <Can or Cannot Assign> a floating IP to an instance
 
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Assign |
         | Member          | Can Assign           |
         | Project Manager | Can Assign           |
 
+      Scenarios: Unauthorized Roles
+        | Role            | Can or Cannot Assign |
+        | (None)          | Cannot Assign        |
+
   Scenario: Assign Floating IP
-    Given I am authorized to assign floating IPs to instances in the project
-     When I assign a floating IP to the instance
-     Then the instance is publicly accessible via that floating IP
+    * An instance is publicly accessible via its assigned floating IP
