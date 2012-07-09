@@ -10,7 +10,7 @@ def remote_client_connection(protocol, ip_address, username, options = {})
     options.merge!( port: 22, timeout: 120 )
     begin
       Net::SSH.start(ip_address, username, options) do |ssh|
-        # Test connection and automatically close
+        # Test connection and execute command.
         result = ssh.exec!("ls -l")
         puts result
       end
