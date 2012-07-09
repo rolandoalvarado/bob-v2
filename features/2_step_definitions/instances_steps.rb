@@ -359,7 +359,8 @@ end
 Then /^I [Cc]an [Cc]reate an instance in the project$/ do
 
   instance_name = Unique.name('Instance')
-
+  ComputeService.session.create_instance_in_project(@project, name: instance_name)
+  
   steps %{
     * Click the logout button if currently logged in
 
