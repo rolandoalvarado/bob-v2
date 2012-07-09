@@ -44,7 +44,7 @@ class ComputeService < BaseCloudService
     min_flavor = service.flavors.select { |f| f.disk > 0 }.min { |f, g| f.vcpus <=> g.vcpus }
 
     attributes[:name]     ||= Faker::Name.name
-    attributes[:password] ||= test_instance_password
+    attributes[:password] ||= test_instance_password || '123qwe'
     attributes[:image]    ||= service.images[0].id
     attributes[:flavor]   ||= min_flavor.id
 

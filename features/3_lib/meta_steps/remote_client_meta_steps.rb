@@ -167,5 +167,5 @@ Step /^Ensure that a keypair named (.+) exists$/ do |keypair_name|
 end
 
 Step /^Ensure that the user with credentials (.+)\/(.+) has a keypair named (.+)$/ do |username, password, key_name|
-  ComputeService.session.ensure_keypair_exists(keypair_name, username, password)
+  ComputeService.session.ensure_keypair_exists(key_name, username, password)
 end
