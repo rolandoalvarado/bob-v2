@@ -19,14 +19,24 @@ Step /^Ensure that the project named (.+) has an instance named (.+)$/ do |proje
 end
 
 
-Step /^Ensure that the project named (.+) has (?:a|an) (active|paused|suspended) instance named (.+)$/ do |project_name, status, instance_name|
+Step /^Ensure that the project named (.+) has an instance with name (.+) and keypair (.+)$/ do |project_name, instance_name, key_name|
+  project = IdentityService.session.find_project_by_name(project_name)
+  raise "#{ project_name } couldn't be found!" unless project
+
+  ComputeService.session.create_instance_in_project(project, name: instance_name, key_name: key_name)
+  instance = ComputeService.session.find_instance_by_name(project, instance_name)
+  raise "Instance #{ instance_name } couldn't be found!" unless instance
+end
+
+
+Step /^Ensure that the project named (.+) has (?:a|an) active instance named (.+)$/ do |project_name, instance_name|
   project = IdentityService.session.find_project_by_name(project_name)
   raise "#{ project_name } couldn't be found!" unless project
 
   ComputeService.session.create_instance_in_project(project, name: instance_name)
 
   if instance = ComputeService.session.find_instance_by_name(project, instance_name)
-    raise "Instance #{ instance_name } was found, but is not #{ status }!" unless instance.state == status.upcase
+    raise "Instance #{ instance_name } was found, but is not active!" unless instance.state == 'ACTIVE'
   else
     raise "Instance #{ instance_name } couldn't be found!"
   end
