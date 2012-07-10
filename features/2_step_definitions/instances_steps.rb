@@ -124,8 +124,7 @@ end
 When /^I create an instance with attributes (.+), (.+), (.+), (.+) and (.+)$/ do |image,name,flavor,keypair,security_group |
   compute_service = ComputeService.session
   compute_service.set_tenant @project
-  @instance_count = compute_service.instances.count
-
+   
   steps %{
     * Click the logout button if currently logged in
 
@@ -146,9 +145,14 @@ When /^I create an instance with attributes (.+), (.+), (.+), (.+) and (.+)$/ do
     * Select keypair #{ keypair } item from the keypair dropdown
     * Select Security Group #{ security_group } item from the security group checklist
     * Click the create instance button
+    * Wait 30 seconds
+    
   }
 
-  @instance = ComputeService.session.find_instance_by_name(@project, name)
+  instance_name = Unique.name(name)
+  @instance = compute_service.create_instance_in_project(@project, name: instance_name)
+  
+  @instance_count =  compute_service.instances.count
 end
 
 When /^I soft reboot the instance$/ do
@@ -378,6 +382,8 @@ Then /^I [Cc]an [Cc]reate an instance in the project$/ do
     * Fill in the server name field with #{ instance_name }
     * Check the 1st item in the security groups checklist
     * Click the create instance button
+    * Wait 30 seconds
+    * Click the close instance dialogue button
 
     * The instances table should include the text #{ instance_name }
   }
@@ -662,7 +668,12 @@ Then /^the instance should be resized$/i do
 end
 
 Then /^the instance will be created$/i do
+  #compute_service = ComputeService.session
+  #compute_service.set_tenant @project
+  #@instance_count = compute_service.instances.count
+  
   steps %{
+    * Wait 10 seconds
     * The instances table should have #{ @instance_count + 1 } rows
     * The instance #{ @instance.id } should be in active status
   }
