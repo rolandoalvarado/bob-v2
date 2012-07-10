@@ -16,7 +16,7 @@ class ProjectPage < SecurePage
   message   'new instance error',                 '#new-instance-modal .error'
   radiolist 'images',                             '#instances-list'
   field     'server name',                        '#server-name'
-  field     'server password',                        '#password'
+  field     'server password',                    '#password'
   checklist 'security groups',                    xpath: "//input[@name='securityGroupCheckbox']/../../.."
   button    'create instance',                    '#create-instance'
   table     'instances',                          '#instances-template .table-list'
@@ -29,7 +29,8 @@ class ProjectPage < SecurePage
   row       'instance',                           '#instances-template .table-list #instance-item-<id>'
   form      'resize instance',                    '#resize-instance-modal'
   form      'instance password',                  '#instance-password-modal'
-  element 'project name',                         "td.project-details[title='<name>']"
+  element   'project name',                       "td.project-details[title='<name>']"
+  button    'close instance dialogue',            "#instance-password-modal a.btn"
   #==========================
   # Edit Quota Elements
   #==========================
