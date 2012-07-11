@@ -67,7 +67,7 @@ class ComputeService < BaseCloudService
       end
     end
 
-    sleeping(1).seconds.between_tries.failing_after(20).tries do
+    sleeping(1).seconds.between_tries.failing_after(120).tries do
       instance = find_instance_by_name(project, attributes[:name])
       unless instance.state == 'ACTIVE'
         raise "Instance #{ instance.name } took too long to become active. " +
