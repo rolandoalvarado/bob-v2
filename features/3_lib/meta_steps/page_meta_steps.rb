@@ -756,7 +756,7 @@ end
 
 
 Then /^The (.+) table should have (\d+) (?:row|rows)$/ do |table_name, num_rows|
-  sleeping(1).seconds.between_tries.failing_after(30).tries do
+  sleeping(1).seconds.between_tries.failing_after(60).tries do
     table_name      = table_name.split.join('_').downcase
     table           = @current_page.send("#{ table_name }_table")
     actual_num_rows = if table.has_no_css_selector?('td.empty-table')
