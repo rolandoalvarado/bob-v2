@@ -19,19 +19,6 @@ Step /^Ensure that the project named (.+) has an instance named (.+)$/ do |proje
 end
 
 
-Step /^Ensure that the project named (.+) has an active instance named (.+)$/ do |project_name, instance_name|
-  project = IdentityService.session.find_project_by_name(project_name)
-  raise "#{ project_name } couldn't be found!" unless project
-
-  ComputeService.session.create_instance_in_project(project, name: instance_name)
-  if instance = ComputeService.session.find_instance_by_name(project, instance_name)
-    raise "Instance #{ instance_name } was found but is not active!" unless instance.state != 'ACTIVE'
-  else
-    raise "Instance #{ instance_name } couldn't be found!"
-  end
-end
-
-
 Step /^Ensure that the project named (.+) has (?:a|an) (active|paused|suspended) instance named (.+)$/ do |project_name, status, instance_name|
   project = IdentityService.session.find_project_by_name(project_name)
   raise "#{ project_name } couldn't be found!" unless project
@@ -59,4 +46,3 @@ Step /^Ensure that an instance named (.+) does not have any floating IPs$/ do |i
   compute_service = ComputeService.session
   compute_service.ensure_project_does_not_have_floating_ip(@named_project, 0, instance)
 end
-

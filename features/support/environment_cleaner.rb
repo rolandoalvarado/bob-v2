@@ -79,35 +79,48 @@ class EnvironmentCleaner
       puts "  #{ project.name }..."
 
       begin
-        puts "    Releasing addresses..."
-        released_addresses = @compute_service.release_addresses_from_project(project)
-        released_addresses.each do |address|
-          puts "     RELEASED: #{ address[:ip] } (id: #{ address[:id] })"
+        @compute_service.set_tenant project
+        @volume_service.set_tenant project
+
+        if @compute_service.addresses.count > 0
+          puts "    Releasing addresses..."
+          released_addresses = @compute_service.release_addresses_from_project(project)
+          released_addresses.each do |address|
+            puts "     RELEASED: #{ address[:ip] } (id: #{ address[:id] })"
+          end
         end
 
-        puts "    Deleting instances..."
-        deleted_instances = @compute_service.delete_instances_in_project(project)
-        deleted_instances.each do |instance|
-          puts "      DELETED: #{ instance[:name] } (id: #{ instance[:id] })"
+        if @compute_service.instances.count > 0
+          puts "    Deleting instances..."
+          deleted_instances = @compute_service.delete_instances_in_project(project)
+          deleted_instances.each do |instance|
+            puts "      DELETED: #{ instance[:name] } (id: #{ instance[:id] })"
+          end
         end
 
-        puts "    Deleting volume snapshots..."
-        deleted_volume_snapshots = @volume_service.delete_volume_snapshots_in_project(project)
-        deleted_volume_snapshots.each do |snapshot|
-          puts "      DELETED: #{ snapshot[:name] } (id: #{ snapshot[:id] })"
+        if @volume_service.snapshots.count > 0
+          puts "    Deleting volume snapshots..."
+          deleted_volume_snapshots = @volume_service.delete_volume_snapshots_in_project(project)
+          deleted_volume_snapshots.each do |snapshot|
+            puts "      DELETED: #{ snapshot[:name] } (id: #{ snapshot[:id] })"
+          end
         end
 
-        puts "    Deleting volumes..."
-        deleted_volumes = @volume_service.delete_volumes_in_project(project)
-        deleted_volumes.each do |volume|
-          puts "      DELETED: #{ volume[:name] } (id: #{ volume[:id] })"
+        if @volume_service.volumes.count > 0
+          puts "    Deleting volumes..."
+          deleted_volumes = @volume_service.delete_volumes_in_project(project)
+          deleted_volumes.each do |volume|
+            puts "      DELETED: #{ volume[:name] } (id: #{ volume[:id] })"
+          end
         end
 
-        puts "    Revoking memberships..."
-        project.users.reload.each do |user|
-          next if user.name == "admin"
-          @identity_service.revoke_all_user_roles(user, project)
-          puts "      Revoke: #{ user.name } (id: #{ user.id })"
+        if project.users.reload.count > 0
+          puts "    Revoking memberships..."
+          project.users.reload.each do |user|
+            next if user.name == "admin"
+            @identity_service.revoke_all_user_roles(user, project)
+            puts "     REVOKED: #{ user.name } (id: #{ user.id })"
+          end
         end
 
         puts "    Deleting #{ project.name }..."

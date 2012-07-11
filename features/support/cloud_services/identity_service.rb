@@ -148,7 +148,7 @@ class IdentityService < BaseCloudService
   end
 
   def ensure_user_exists(attributes)
-    user = users.find_by_name(attributes[:name])
+    user = find_user_by_name(attributes[:name])
     if user
       user.update(attributes)
     else
@@ -159,7 +159,7 @@ class IdentityService < BaseCloudService
   end
 
   def find_user_by_name(name)
-    users.reload.find_by_name(name)
+    users.find_by_name(name)
   end
 
   def find_tenant_by_name(name)

@@ -83,7 +83,6 @@ When /^I delete the user (.+)$/ do |username|
     * Click the login button
 
     * Click the users link
-    * Current page should be the users page
     * Click the context menu button for user #{ username }
     * Click the delete user link for user #{ username }
     * Click the confirm user deletion button
@@ -132,7 +131,6 @@ Then /^I can create a user$/i do
     * Click the Login button
 
     * Click the Users link
-    * Current page should be the Users page
     * Click the New User button
     * Fill in the Username field with #{ new_user.name }
     * Fill in the Email field with #{ new_user.email }
@@ -192,7 +190,6 @@ Then /^I can create a user with attributes (.+), (.+), (.+), (.+), and (.+)$/i d
     * Click the Login button
 
     * Click the Users link
-    * Current page should be the Users page
     * Click the New User button
     * Fill in the Username field with #{ new_user.name }
     * Fill in the Email field with #{ new_user.email }
@@ -237,7 +234,6 @@ Then /^I cannot create a user with attributes (.+), (.+), (.+), (.+), and (.+)$/
     * Click the Login button
 
     * Click the Users link
-    * Current page should be the Users page
     * Click the New User button
     * Fill in the Username field with #{ new_user.name }
     * Fill in the Email field with #{ new_user.email }
@@ -261,7 +257,6 @@ Then /^I [Cc]an [Dd]elete (?:that|the) user (.+)$/ do |username|
     * Click the login button
 
     * Click the users link
-    * Current page should be the users page
     * Click the context menu button for user #{ username }
     * Click the delete user link for user #{ username }
     * Click the confirm user deletion button
@@ -286,8 +281,8 @@ Then /^I can edit a user$/i do
   existing_user = CloudObjectBuilder.attributes_for(:user, :name => Unique.username('existing'), :password => '123qwe')
   new_attrs     = CloudObjectBuilder.attributes_for(
                     :user,
-                    :name     => ( Unique.username('new_user') ),
-                    :email    => ( Unique.email('new_email@mail.com') ),
+                    :name     => ( Unique.username('NewUser') ),
+                    :email    => ( Unique.email('NewEmail@mail.com') ),
                     :password => '123qwe'
                   )
 
@@ -310,7 +305,6 @@ Then /^I can edit a user$/i do
     * Click the Login button
 
     * Click the Users link
-    * Current page should be the Users page
     * Click the Edit button for the user named #{ @existing_user.name }
     * Fill in the Username field with #{ new_attrs.name }
     * Fill in the Email field with #{ new_attrs.email }
@@ -359,7 +353,6 @@ Then /^I can update a user with attributes (.+), (.+), (.+), (.+), and (.+)$/i d
     * Click the Login button
 
     * Click the Users link
-    * Current page should be the Users page
     * Click the Edit button for the user named #{ @existing_user.name }
     * Fill in the Username field with #{ new_attrs.name }
     * Fill in the Email field with #{ new_attrs.email }
@@ -425,8 +418,7 @@ Then /^I cannot update a user with attributes (.+), (.+), (.+), (.+), and (.+)$/
     * Click the Login button
 
     * Click the Users link
-    * Current page should be the Users page
-    * Click the Edit button for the user named #{ @existing_user.id }
+    * Click the Edit button for the user named #{ @existing_user.name }
     * Fill in the Username field with #{ new_attrs.name }
     * Fill in the Email field with #{ new_attrs.email }
     * Fill in the Password field with #{ new_attrs.password }
@@ -576,4 +568,151 @@ TestCase /^A user with a role of (.+) in the system cannot change user permissio
     * The Users link should not be visible
   }
 
+end
+
+
+TestCase /^A user with a role of (.+) in the system can create a user$/i do |role_name|
+
+  user         = CloudObjectBuilder.attributes_for(:user, :name => Unique.username('test'))
+
+  Preconditions %{
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the system
+    * Ensure that a user with username #{ user.name } does not exist
+  }
+
+  Cleanup %{
+    * Register the project named #{ test_project_name } for deletion at exit
+    * Register the user named #{ bob_username } for deletion at exit
+    * Register the user named #{ user.name } for deletion at exit
+  }
+
+  Script %{
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ bob_username }
+    * Fill in the Password field with #{ bob_password }
+    * Click the Login button
+
+    * Click the Users link
+    * Click the New User button
+    * Fill in the Username field with #{ user.name }
+    * Fill in the Email field with #{ user.email }
+    * Fill in the Password field with #{ user.password }
+    * Choose the item with text #{ test_project_name } in the Primary Project dropdown
+    * Choose the item with text Project Manager in the Role dropdown
+    * Click the Create User button
+    * The New User form should be visible
+    * The #{ user.name } user row should be visible
+  }
+
+end
+
+
+TestCase /^A user with a role of (.+) in the system cannot create a user$/i do |role_name|
+
+  Preconditions %{
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the system
+  }
+
+  Cleanup %{
+    * Register the user named #{ bob_username } for deletion at exit
+  }
+
+  Script %{
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ bob_username }
+    * Fill in the Password field with #{ bob_password }
+    * Click the Login button
+
+    * The Users link should not be visible
+  }
+
+end
+
+
+TestCase /^An authorized user can create a user with attributes (.+), (.+), (.+), (.+), and (.+)$/i do |username, email, password, primary_project, role|
+  user = CloudObjectBuilder.attributes_for(
+           :user,
+           :name     => Unique.username(username),
+           :email    => Unique.email(email),
+           :password => password
+         )
+
+  Preconditions %{
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that the user #{ bob_username } has a role of Project Manager in the project #{ test_project_name }
+    * Ensure that a user with username #{ user.name } does not exist
+  }
+
+  Cleanup %{
+    * Register the project named #{ test_project_name } for deletion at exit
+    * Register the user named #{ bob_username } for deletion at exit
+    * Register the user named #{ user.name } for deletion at exit
+  }
+
+  Script %{
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ bob_username }
+    * Fill in the Password field with #{ bob_password }
+    * Click the Login button
+
+    * Click the Users link
+    * Click the New User button
+    * Fill in the Username field with #{ user.name }
+    * Fill in the Email field with #{ user.email }
+    * Fill in the Password field with #{ user.password }
+    * Choose the item with text #{ primary_project } in the Primary Project dropdown
+    * Choose the item with text #{ role } in the Role dropdown
+    * Click the Create User button
+    * The New User form should not be visible
+    * The #{ user.name } user row should be visible
+  }
+end
+
+
+TestCase /^An authorized user cannot create a user with attributes (.+), (.+), (.+), (.+), and (.+)$/i do |username, email, password, primary_project, role|
+  user = CloudObjectBuilder.attributes_for(
+           :user,
+           :name     => ( username.downcase != '(none)' ? Unique.username(username) : username ),
+           :email    => ( email.downcase != '(none)' ? Unique.email(email) : email ),
+           :password => password
+         )
+
+  Preconditions %{
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that the user #{ bob_username } has a role of Project Manager in the project #{ test_project_name }
+    * Ensure that a user with username #{ user.name } does not exist
+  }
+
+  Cleanup %{
+    * Register the project named #{ test_project_name } for deletion at exit
+    * Register the user named #{ bob_username } for deletion at exit
+    * Register the user named #{ user.name } for deletion at exit
+  }
+
+  Script %{
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ bob_username }
+    * Fill in the Password field with #{ bob_password }
+    * Click the Login button
+
+    * Click the Users link
+    * Click the New User button
+    * Fill in the Username field with #{ user.name }
+    * Fill in the Email field with #{ user.email }
+    * Fill in the Password field with #{ user.password }
+    * Choose the item with text #{ primary_project } in the Primary Project dropdown
+    * Choose the item with text #{ role } in the Role dropdown
+    * Click the Create User button
+    * The New User form should be visible
+    * A New User Form Error Message element should be visible
+  }
 end

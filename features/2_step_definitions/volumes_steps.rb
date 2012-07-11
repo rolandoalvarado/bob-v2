@@ -316,10 +316,11 @@ TestCase /^A user with a role of (.+) in a project can delete any of its volumes
 
     * Click the Projects link
     * Click the #{ test_project_name } project
-    * Click the context menu button of the volume named #{ test_volume_name }
-    * Click the delete button of the volume named #{ test_volume_name }
-    * Click the volume delete confirmation button
-    * The volumes table should have 0 rows
+
+    * Click the Context Menu button of the volume named #{ test_volume_name }
+    * Click the Delete button of the volume named #{ test_volume_name }
+    * Click the Volume Delete confirmation button
+    * The Volumes table should have 0 rows
   }
 
 end
@@ -462,10 +463,12 @@ TestCase /^Volumes that are attached to an instance will be accessible from the 
   Preconditions %{
     * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
     * Ensure that a project named #{ test_project_name } exists
+    * Ensure that the user #{ bob_username } has a role of Member in the project #{ test_project_name }
+    * Ensure that the user with credentials #{ bob_username }/#{ bob_password } has a keypair named #{ test_keypair_name }
+    * Ensure that a security group rule exists for project #{ test_project_name }
     * Ensure that the project named #{ test_project_name } has an instance named #{ test_instance_name }
     * Ensure that the project named #{ test_project_name } has a volume named #{ test_volume_name }
     * Ensure that the volume named #{ test_volume_name } is not attached to the instance named #{ test_instance_name } in the project #{ test_project_name }
-    * Ensure that the user #{ bob_username } has a role of Member in the project #{ test_project_name }
   }
 
   Cleanup %{
