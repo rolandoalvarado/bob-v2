@@ -31,6 +31,7 @@ class ProjectPage < SecurePage
   form      'instance password',                  '#instance-password-modal'
   element   'project name',                       "td.project-details[title='<name>']"
   button    'close instance dialogue',            "#instance-password-modal a.btn"
+  button    'cancel create instance',             "#new-instance-modal a.btn"
   #==========================
   # Edit Quota Elements
   #==========================

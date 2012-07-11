@@ -171,7 +171,7 @@ class IdentityService < BaseCloudService
       tenant.revoke_user_role(user.id, role['id'])
     end
 
-    sleeping(1).seconds.between_tries.failing_after(15).tries do
+    sleeping(1).seconds.between_tries.failing_after(30).tries do
       raise "Roles for user #{ user.name } on tenant #{ tenant.name } took too long to revoke!" if user.roles(tenant.id).length > 0
     end
   end

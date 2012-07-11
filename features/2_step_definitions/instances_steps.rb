@@ -124,6 +124,10 @@ end
 When /^I create an instance with attributes (.+), (.+), (.+), (.+) and (.+)$/ do |image,name,flavor,keypair,security_group |
   compute_service = ComputeService.session
   compute_service.set_tenant @project
+
+  instance_name     = Unique.name(name)
+  @created_instance = compute_service.create_instance_in_project(@project, name: instance_name) 
+  @instance         = compute_service.ensure_project_instance_is_active(@project, @created_instance.name)
    
   steps %{
     * Click the logout button if currently logged in
@@ -145,14 +149,8 @@ When /^I create an instance with attributes (.+), (.+), (.+), (.+) and (.+)$/ do
     * Select keypair #{ keypair } item from the keypair dropdown
     * Select Security Group #{ security_group } item from the security group checklist
     * Click the create instance button
-    * Wait 30 seconds
-    
   }
-
-  instance_name = Unique.name(name)
-  @instance = compute_service.create_instance_in_project(@project, name: instance_name)
-  
-  @instance_count =  compute_service.instances.count
+ 
 end
 
 When /^I soft reboot the instance$/ do
@@ -361,10 +359,11 @@ Then /^I cannot connect to that instance via (.+)/ do |remote_client|
 end
 
 Then /^I [Cc]an [Cc]reate an instance in the project$/ do
-
+  compute_service = ComputeService.session
   instance_name = Unique.name('Instance')
-  ComputeService.session.create_instance_in_project(@project, name: instance_name)
-  
+  @created_instance = compute_service.create_instance_in_project(@project, name: instance_name) 
+  compute_service.ensure_project_instance_is_active(@project, @created_instance.name)
+
   steps %{
     * Click the logout button if currently logged in
 
@@ -382,10 +381,12 @@ Then /^I [Cc]an [Cc]reate an instance in the project$/ do
     * Fill in the server name field with #{ instance_name }
     * Check the 1st item in the security groups checklist
     * Click the create instance button
-    * Wait 30 seconds
-    * Click the close instance dialogue button
+   
+    * Current page should have the instance password form
+    * Close the instance password form
 
     * The instances table should include the text #{ instance_name }
+    * The instance named #{ instance_name } should be in active status
   }
 end
 
@@ -668,14 +669,11 @@ Then /^the instance should be resized$/i do
 end
 
 Then /^the instance will be created$/i do
-  #compute_service = ComputeService.session
-  #compute_service.set_tenant @project
-  #@instance_count = compute_service.instances.count
   
   steps %{
-    * Wait 10 seconds
-    * The instances table should have #{ @instance_count + 1 } rows
-    * The instance #{ @instance.id } should be in active status
+    * Wait 30 seconds
+    * The instances table should include the text #{ @instance.name }
+    * The instance named #{ @instance.name } should be in active status
   }
 end
 
@@ -683,8 +681,8 @@ Then /^the instance will be not created$/i do
   steps %{
     * Current page should still have the new instance form
     * The new instance form has an error message
-    * Click the close button
-    * The instances table should have #{ @instance_count } rows
+    * Click the cancel create instance button
+    * The instances table should not include the text #{ @instance.name }
   }
 end
 
