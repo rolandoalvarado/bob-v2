@@ -50,6 +50,7 @@ module CloudConfiguration
         self.instance[WAIT][SHORT] = 1
         self.instance.save
       end
+      self.instance[WAIT][SHORT]
     end
 
     def self.wait_long
@@ -58,6 +59,7 @@ module CloudConfiguration
         self.instance[WAIT][LONG] = 10
         self.instance.save
       end
+      self.instance[WAIT][LONG]
     end
 
     def self.repeat_short
@@ -66,6 +68,7 @@ module CloudConfiguration
         self.instance[REPEAT][SHORT] = 30
         self.instance.save
       end
+      self.instance[REPEAT][SHORT]
     end
 
     def self.repeat_long
@@ -74,6 +77,7 @@ module CloudConfiguration
         self.instance[REPEAT][LONG] = 60
         self.instance.save
       end
+      self.instance[REPEAT][LONG]
     end
 
     def self.capybara_driver
