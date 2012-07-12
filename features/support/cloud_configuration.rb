@@ -45,6 +45,7 @@ module CloudConfiguration
     end
 
     def self.wait_short
+      self.instance.ensure_repeat_and_wait_key
       unless self.instance[WAIT][SHORT]
         self.instance[WAIT][SHORT] = 1
         self.instance.save
@@ -52,6 +53,7 @@ module CloudConfiguration
     end
 
     def self.wait_long
+      self.instance.ensure_repeat_and_wait_key
       unless self.instance[WAIT][LONG]
         self.instance[WAIT][LONG] = 10
         self.instance.save
@@ -59,6 +61,7 @@ module CloudConfiguration
     end
 
     def self.repeat_short
+      self.instance.ensure_repeat_and_wait_key
       unless self.instance[REPEAT][SHORT]
         self.instance[REPEAT][SHORT] = 30
         self.instance.save
@@ -66,6 +69,7 @@ module CloudConfiguration
     end
 
     def self.repeat_long
+      self.instance.ensure_repeat_and_wait_key
       unless self.instance[REPEAT][LONG]
         self.instance[REPEAT][LONG] = 60
         self.instance.save
@@ -99,8 +103,6 @@ module CloudConfiguration
     def initialize
       if File.exists?(PATH)
         @config = YAML.load_file( File.open(PATH, 'r+') )
-        @config[REPEAT] ||= {}
-        @config[WAIT] ||= {}
       else
         raise "ERROR: #{PATH} does not exist. Please execute run/configurator to configure mCloud Features."
       end
@@ -118,6 +120,11 @@ module CloudConfiguration
 
     def ensure_unique_helper_key
       @config[UNIQUE_HELPER_VALUES] ||= {}
+    end
+
+    def ensure_repeat_and_wait_key
+      @config[REPEAT] ||= {}
+      @config[WAIT] ||= {}
     end
 
   end # class ConfigFile
