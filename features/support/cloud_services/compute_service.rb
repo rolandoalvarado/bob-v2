@@ -253,7 +253,7 @@ class ComputeService < BaseCloudService
   def ensure_project_floating_ip_count(project, desired_count, instance=nil)
     set_tenant project
 
-    sleeping(1).seconds.between_tries.failing_after(60).tries do
+    sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_long).tries do
       addresses = service.addresses
       actual_count = addresses.count
 
@@ -300,7 +300,7 @@ class ComputeService < BaseCloudService
   def ensure_project_does_not_have_floating_ip(project, desired_count, instance)
     set_tenant project
 
-    sleeping(1).seconds.between_tries.failing_after(60).tries do
+    sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_long).tries do
       addresses = service.addresses
       actual_count = addresses.count
 
@@ -353,7 +353,8 @@ class ComputeService < BaseCloudService
     # This block will keep running until it stops raising an error, or until
     # the max number of tries is reached. In the last try, whatever error is
     # raised by the block is thrown.
-    sleeping(1).seconds.between_tries.failing_after(60).tries do
+
+    sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_long).tries do
       instances.reload
 
       non_active_instances  = instances.select{ |i| i.state !~ /^ACTIVE|ERROR$/}
@@ -419,7 +420,7 @@ class ComputeService < BaseCloudService
     # raised by the block is thrown.
     # 60 tries is needed for rebooting instances so please don't change it.
     # Since instance reboot will take a while.
-    sleeping(1).seconds.between_tries.failing_after(60).tries do
+    sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_long).tries do
       instances.reload
 
       paused_instances = instances.select{ |i| i.state =~ /^PAUSED$/ }
@@ -467,7 +468,7 @@ class ComputeService < BaseCloudService
     # This block will keep running until it stops raising an error, or until
     # the max number of tries is reached. In the last try, whatever error is
     # raised by the block is thrown.
-    sleeping(1).seconds.between_tries.failing_after(60).tries do
+    sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_long).tries do
       instances.reload
 
       suspended_instances = instances.select{ |i| i.state =~ /^SUSPENDED$/ }

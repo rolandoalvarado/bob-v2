@@ -72,7 +72,6 @@ module CloudConfiguration
       end
     end
 
-
     def self.capybara_driver
       self.instance[CAPYBARA_DRIVER].to_sym
     end
