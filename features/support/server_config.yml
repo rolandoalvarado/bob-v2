@@ -14,3 +14,7 @@ TTY:
 'Windows':
   username: Administrator
   password: s3l3ct10n
+  
+'RAW Image Test':
+  username: root
+  password: s3l3ct10n  
