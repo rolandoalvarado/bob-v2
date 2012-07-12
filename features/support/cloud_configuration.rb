@@ -23,6 +23,10 @@ module CloudConfiguration
   UNIQUE_HELPER_VALUES = :unique_helper_options
   ALPHA                = :alpha
   NUMERIC              = :numeric
+  REPEAT               = :repeat
+  WAIT                 = :wait
+  SHORT                = :short
+  LONG                 = :long
 
   class ConfigFile
     include Singleton
@@ -39,6 +43,35 @@ module CloudConfiguration
     def self.web_client_url
       self.instance[WEB_CLIENT_HOST]
     end
+
+    def self.wait_short
+      unless self.instance[WAIT][SHORT]
+        self.instance[WAIT][SHORT] = 1
+        self.instance.save
+      end
+    end
+
+    def self.wait_long
+      unless self.instance[WAIT][LONG]
+        self.instance[WAIT][LONG] = 10
+        self.instance.save
+      end
+    end
+
+    def self.repeat_short
+      unless self.instance[REPEAT][SHORT]
+        self.instance[REPEAT][SHORT] = 30
+        self.instance.save
+      end
+    end
+
+    def self.repeat_long
+      unless self.instance[REPEAT][LONG]
+        self.instance[REPEAT][LONG] = 60
+        self.instance.save
+      end
+    end
+
 
     def self.capybara_driver
       self.instance[CAPYBARA_DRIVER].to_sym
