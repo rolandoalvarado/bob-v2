@@ -1,7 +1,7 @@
 require_relative '../secure_page'
 
 # The page that is displayed when clicking the users link
-class UsersPage < WebClientPage
+class UsersPage < SecurePage
   path '/users'
 
   button  'New User',                     "#new-user"

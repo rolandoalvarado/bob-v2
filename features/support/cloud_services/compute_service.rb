@@ -3,6 +3,7 @@ require_relative 'base_cloud_service'
 class ComputeService < BaseCloudService
 
   attr_reader :addresses, :flavors, :instances, :security_groups, :volumes, :current_project
+  attr_accessor :private_keys
 
   def initialize
     initialize_service Compute
@@ -11,6 +12,8 @@ class ComputeService < BaseCloudService
     @instances = service.servers
     @volumes   = service.volumes
     @security_groups = service.security_groups
+
+    @private_keys = {}
   end
 
   def attach_volume_to_instance_in_project(project, instance, volume)
@@ -36,29 +39,43 @@ class ComputeService < BaseCloudService
 
   def create_instance_in_project(project, attributes={})
     set_tenant project
-    attributes[:name]   ||= Faker::Name.name
-    attributes[:password]   ||= 'password'
-    attributes[:image]  ||= service.images[0].id
-    attributes[:flavor] ||= service.flavors[0].id
+
+    # Get smallest-sized flavor
+    min_flavor = service.flavors.select { |f| f.disk > 0 }.min { |f, g| f.vcpus <=> g.vcpus }
+
+    attributes[:name]     ||= Faker::Name.name
+    attributes[:password] ||= test_instance_password || '123qwe'
+    attributes[:image]    ||= service.images[0].id
+    attributes[:flavor]   ||= min_flavor.id
 
     if service.list_servers.body['servers'].none? { |s| s['name'] == attributes[:name] }
-      service.create_server(
-        attributes[:name],
-        attributes[:image],
-        attributes[:flavor],
-        {
-          'tenant_id'      => project.id,
-          'key_name'       => service.key_pairs[0] && service.key_pairs[0].name,
-          'security_group' => service.security_groups[0].id,
-          'user_id'        => service.current_user['id']
-        }
-      )
+      begin
+        service.create_server(
+          attributes[:name],
+          attributes[:image],
+          attributes[:flavor],
+          {
+            'tenant_id'      => project.id,
+            'key_name'       => service.key_pairs[0] && service.key_pairs[0].name,
+            'security_group' => service.security_groups[0].id,
+            'user_id'        => service.current_user['id']
+          }
+        )
+      rescue => e
+        raise "Couldn't initialize instance in #{ project.name }. " +
+              "The error returned was: #{ e.inspect }"
+      end
     end
 
-    find_instance_by_name project, attributes[:name]
-  rescue => e
-    raise "Couldn't initialize instance in #{ project.name }. " +
-          "The error returned was: #{ e.inspect }"
+    sleeping(1).seconds.between_tries.failing_after(120).tries do
+      instance = find_instance_by_name(project, attributes[:name])
+      unless instance.state == 'ACTIVE'
+        raise "Instance #{ instance.name } took too long to become active. " +
+              "Instance is currently #{ instance.state.downcase }."
+      else
+        return instance
+      end
+    end
   end
 
   def create_volume(attributes = {})
@@ -208,6 +225,29 @@ class ComputeService < BaseCloudService
 
       return attached_volumes.count
     end
+  end
+
+  def ensure_keypair_exists(key_name, username='', password='')
+    # Keypairs are user-scoped, thus the need to login to the compute service
+    # with the current user's credentials.
+    unless username.blank? || password.blank?
+      credentials = ConfigFile.cloud_credentials.merge(
+        openstack_username: username, openstack_api_key: password)
+      user_service = Fog::Compute.new(credentials)
+    else
+      user_service = service
+    end
+
+    user_service.set_tenant 'admin'
+    keypairs = user_service.key_pairs.reload
+
+    unless keypairs.find { |keypair| keypair.name == key_name }
+      keypair = keypairs.create( name: key_name )
+      private_keys[keypair.name] = keypair.private_key
+    end
+  rescue => e
+    raise "Couldn't create keypair '#{ key_name }'! The error returned " +
+          "was #{ e.inspect }."
   end
 
   def ensure_project_floating_ip_count(project, desired_count, instance=nil)
@@ -500,7 +540,7 @@ class ComputeService < BaseCloudService
     end
   end
 
-  def ensure_security_group_rule(project, ip_protocol='tcp', from_port=2222, to_port=2222, cidr='0.0.0.0/0')
+  def ensure_security_group_rule(project, ip_protocol='tcp', from_port=22, to_port=22, cidr='0.0.0.0/0')
     service.set_tenant project
     security_group = service.security_groups.first
     parent_group_id = security_group.id
@@ -512,10 +552,10 @@ class ComputeService < BaseCloudService
 
     service.create_security_group_rule(parent_group_id, ip_protocol, from_port, to_port, cidr)
   rescue => e
-    raise "#{ JSON.parse(e.response.body)['badRequest']['message'] }"
+    raise "Couldn't ensure security group rule exists! The error returned was #{ e.inspect }"
   end
 
-  def ensure_security_group_rule_exist(project, ip_protocol='tcp', from_port=2222, to_port=2222, cidr='0.0.0.0/0')
+  def ensure_security_group_rule_exist(project, ip_protocol='tcp', from_port=22, to_port=22, cidr='0.0.0.0/0')
     service.set_tenant project
     security_group = service.security_groups.first
     parent_group_id = security_group.id
@@ -528,7 +568,7 @@ class ComputeService < BaseCloudService
     service.create_security_group_rule(parent_group_id, ip_protocol, from_port, to_port, cidr)
 
   rescue => e
-    raise "#test{ JSON.parse(e.response.body)['badRequest']['message'] }"
+    raise "Couldn't ensure security group rule exists! The error returned was #{ e.inspect }"
   end
 
   def create_security_group(project, attributes)
@@ -603,7 +643,6 @@ class ComputeService < BaseCloudService
     end
     if reload
       addresses.reload
-      flavors.reload
       instances.reload
     end
   end
