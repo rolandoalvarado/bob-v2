@@ -23,6 +23,10 @@ module CloudConfiguration
   UNIQUE_HELPER_VALUES = :unique_helper_options
   ALPHA                = :alpha
   NUMERIC              = :numeric
+  REPEAT               = :repeat
+  WAIT                 = :wait
+  SHORT                = :short
+  LONG                 = :long
 
   class ConfigFile
     include Singleton
@@ -38,6 +42,42 @@ module CloudConfiguration
 
     def self.web_client_url
       self.instance[WEB_CLIENT_HOST]
+    end
+
+    def self.wait_short
+      self.instance.ensure_repeat_and_wait_key
+      unless self.instance[WAIT][SHORT]
+        self.instance[WAIT][SHORT] = 1
+        self.instance.save
+      end
+      self.instance[WAIT][SHORT]
+    end
+
+    def self.wait_long
+      self.instance.ensure_repeat_and_wait_key
+      unless self.instance[WAIT][LONG]
+        self.instance[WAIT][LONG] = 10
+        self.instance.save
+      end
+      self.instance[WAIT][LONG]
+    end
+
+    def self.repeat_short
+      self.instance.ensure_repeat_and_wait_key
+      unless self.instance[REPEAT][SHORT]
+        self.instance[REPEAT][SHORT] = 30
+        self.instance.save
+      end
+      self.instance[REPEAT][SHORT]
+    end
+
+    def self.repeat_long
+      self.instance.ensure_repeat_and_wait_key
+      unless self.instance[REPEAT][LONG]
+        self.instance[REPEAT][LONG] = 60
+        self.instance.save
+      end
+      self.instance[REPEAT][LONG]
     end
 
     def self.capybara_driver
@@ -84,6 +124,11 @@ module CloudConfiguration
 
     def ensure_unique_helper_key
       @config[UNIQUE_HELPER_VALUES] ||= {}
+    end
+
+    def ensure_repeat_and_wait_key
+      @config[REPEAT] ||= {}
+      @config[WAIT] ||= {}
     end
 
   end # class ConfigFile
