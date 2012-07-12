@@ -45,7 +45,7 @@ module CloudConfiguration
     end
 
     def self.wait_short
-      unless self.instance[WAIT][SHORT]
+      unless self.instance[WAIT] && self.instance[WAIT][SHORT]
         self.instance[WAIT][SHORT] = 1
         self.instance.save
       end
@@ -99,6 +99,8 @@ module CloudConfiguration
     def initialize
       if File.exists?(PATH)
         @config = YAML.load_file( File.open(PATH, 'r+') )
+        @config[REPEAT] ||= {}
+        @config[WAIT] ||= {}
       else
         raise "ERROR: #{PATH} does not exist. Please execute run/configurator to configure mCloud Features."
       end
