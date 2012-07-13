@@ -122,12 +122,6 @@ When /^I hard reboot the instance$/ do
 end
 
 When /^I create an instance with attributes (.+), (.+), (.+), (.+) and (.+)$/ do |image,name,flavor,keypair,security_group |
-  compute_service = ComputeService.session
-  compute_service.set_tenant @project
-
-  instance_name     = Unique.name(name)
-  @created_instance = compute_service.create_instance_in_project(@project, name: instance_name) 
-  @instance         = compute_service.ensure_project_instance_is_active(@project, @created_instance.name)
    
   steps %{
     * Click the logout button if currently logged in
@@ -150,7 +144,8 @@ When /^I create an instance with attributes (.+), (.+), (.+), (.+) and (.+)$/ do
     * Select Security Group #{ security_group } item from the security group checklist
     * Click the create instance button
   }
- 
+  
+  @instance_name  = name
 end
 
 When /^I soft reboot the instance$/ do
@@ -360,11 +355,8 @@ Then /^I cannot connect to that instance via (.+)/ do |remote_client|
 end
 
 Then /^I [Cc]an [Cc]reate an instance in the project$/ do
-  compute_service = ComputeService.session
   instance_name = Unique.name('Instance')
-  @created_instance = compute_service.create_instance_in_project(@project, name: instance_name) 
-  compute_service.ensure_project_instance_is_active(@project, @created_instance.name)
-
+  
   steps %{
     * Click the logout button if currently logged in
 
@@ -386,6 +378,7 @@ Then /^I [Cc]an [Cc]reate an instance in the project$/ do
     * Current page should have the instance password form
     * Close the instance password form
 
+    * Wait 90 seconds
     * The instances table should include the text #{ instance_name }
     * The instance named #{ instance_name } should be in active status
   }
@@ -670,11 +663,13 @@ Then /^the instance should be resized$/i do
 end
 
 Then /^the instance will be created$/i do
-  
   steps %{
-    * Wait 30 seconds
-    * The instances table should include the text #{ @instance.name }
-    * The instance named #{ @instance.name } should be in active status
+    * Current page should have the instance password form
+    * Close the instance password form
+  
+    * Wait 120 seconds
+    * The instances table should include the text #{ @instance_name }
+    * The instance named #{ @instance_name } should be in active status
   }
 end
 
@@ -683,7 +678,7 @@ Then /^the instance will be not created$/i do
     * Current page should still have the new instance form
     * The new instance form has an error message
     * Click the cancel create instance button
-    * The instances table should not include the text #{ @instance.name }
+    * The instances table should not include the text #{ @instance_name }
   }
 end
 
