@@ -12,7 +12,9 @@ def remote_client_connection(protocol, ip_address, username, options = {})
     options.merge!( port: 22, timeout: 30, key_data: [ private_key ] )
 
     begin
-      Net::SSH.start(ip_address, username, options)
+      sleeping(1).seconds.between_tries.failing_after(1200).tries do
+        Net::SSH.start(ip_address, username, options)
+      end
     rescue => e
       raise "The instance is not publicly accessible on #{ ip_address } via SSH. " +
             "The error returned was: #{ e.inspect }"
