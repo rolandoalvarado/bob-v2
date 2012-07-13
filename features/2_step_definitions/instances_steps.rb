@@ -821,9 +821,9 @@ TestCase /^An instance is publicly accessible via its assigned floating IP$/ do
   Preconditions %{
     * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
     * Ensure that a project named #{ test_project_name } exists
-    * Ensure that the project named #{ test_project_name } has an instance named #{ test_instance_name }
     * Ensure that the user #{ bob_username } has a role of Member in the project #{ test_project_name }
     * Ensure that the user with credentials #{ bob_username }/#{ bob_password } has a keypair named #{ test_keypair_name }
+    * Ensure that the project named #{ test_project_name } has an instance with name #{ test_instance_name } and keypair #{ test_keypair_name }
     * Ensure that a security group rule exists for project #{ test_project_name }
     * Ensure that an instance named #{ test_instance_name } does not have any floating IPs
   }
@@ -843,6 +843,8 @@ TestCase /^An instance is publicly accessible via its assigned floating IP$/ do
     * Click the Projects link
     * Click the #{ test_project_name } project
 
+    * The instance named #{ test_instance_name } should be in active status
+
     * Click the access security tab
     * Click the new floating IP allocation button
     * Current page should have the new floating IP allocation form
@@ -852,6 +854,7 @@ TestCase /^An instance is publicly accessible via its assigned floating IP$/ do
     * The Floating IPs table should have 1 row
     * The Floating IP should be associated to instance #{ test_instance_name }
 
+    * Wait for 5 minutes for floating IP to be associated to the instance
     * Connect to the instance named #{ test_instance_name } in project #{ test_project_name } via SSH
   }
 

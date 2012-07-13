@@ -7,6 +7,7 @@ class ComputeService < BaseCloudService
 
   def initialize
     initialize_service Compute
+
     @addresses = service.addresses
     @flavors   = service.flavors
     @instances = service.servers
@@ -47,6 +48,7 @@ class ComputeService < BaseCloudService
     attributes[:password] ||= test_instance_password || '123qwe'
     attributes[:image]    ||= service.images[0].id
     attributes[:flavor]   ||= min_flavor.id
+    attributes[:key_name] ||= service.key_pairs[0] && service.key_pairs[0].name
 
     if service.list_servers.body['servers'].none? { |s| s['name'] == attributes[:name] }
       begin
@@ -56,7 +58,7 @@ class ComputeService < BaseCloudService
           attributes[:flavor],
           {
             'tenant_id'      => project.id,
-            'key_name'       => service.key_pairs[0] && service.key_pairs[0].name,
+            'key_name'       => attributes[:key_name],
             'security_group' => service.security_groups[0].id,
             'user_id'        => service.current_user['id']
           }
@@ -238,13 +240,21 @@ class ComputeService < BaseCloudService
       user_service = service
     end
 
-    user_service.set_tenant 'admin'
     keypairs = user_service.key_pairs.reload
-
-    unless keypairs.find { |keypair| keypair.name == key_name }
-      keypair = keypairs.create( name: key_name )
-      private_keys[keypair.name] = keypair.private_key
+    if keypair = keypairs.find { |keypair| keypair.name == key_name }
+      keypair.destroy
     end
+    response = user_service.create_key_pair(key_name)
+    private_keys[key_name] = response.body['keypair']['private_key']
+    public_key = response.body['keypair']['public_key']
+
+    keypairs = service.key_pairs.reload
+    if keypair = keypairs.find { |keypair| keypair.name == key_name }
+      keypair.destroy
+    end
+    service.create_key_pair(key_name, public_key)
+
+    return keypairs.reload.find { |keypair| keypair.name == key_name }
   rescue => e
     raise "Couldn't create keypair '#{ key_name }'! The error returned " +
           "was #{ e.inspect }."
@@ -720,11 +730,21 @@ class ComputeService < BaseCloudService
       service.set_tenant(project)
     end
     if reload
-      addresses.reload
-      flavors.reload
-      instances.reload
-      volumes.reload
+      @addresses = service.addresses
+      @flavors   = service.flavors
+      @instances = service.servers
+      @volumes   = service.volumes
     end
+  end
+
+  def set_tenant!(project)
+    @current_project = project
+    service.set_tenant(project)
+
+    @addresses = service.addresses
+    @flavors   = service.flavors
+    @instances = service.servers
+    @volumes   = service.volumes
   end
 
   private

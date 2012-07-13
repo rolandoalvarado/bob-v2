@@ -513,7 +513,7 @@ Step /^(?:A|The) Floating IP should be associated to instance (.+)$/ do |instanc
 end
 
 
-Step /^(?:A|The) floating IP should not be associated to instance (.+)$/ do |instance_name|
+Step /^(?:A|The) floating IP should not be associated to instance (.+)$/i do |instance_name|
   sleeping(1).seconds.between_tries.failing_after(15).tries do
     if @current_page.has_associated_floating_ip_row?( name: instance_name )
       raise "Found a floating IP to be associated to instance #{ instance_name }!"
@@ -834,7 +834,11 @@ Then /^Visit the (.+) page$/ do |page_name|
 end
 
 Then /^Wait (.+) second(?:s|)/i  do |wait_secs|
-  sleep(wait_secs.to_i)  
+  sleep(wait_secs.to_i)
+end
+
+Then /^Wait for (\d+) (?:minute|minutes).*$/ do |number_of_minutes|
+  sleep(60 * number_of_minutes.to_i)
 end
 
 Step /^Write the contents of the (.+) field to file (.+)$/i do |field_name, filename|
