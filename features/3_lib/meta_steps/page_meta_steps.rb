@@ -504,7 +504,7 @@ Then /^The (.+) user row should be visible$/ do |username|
 end
 
 
-Step /^(?:A|The) floating IP should be associated to instance (.+)$/i do |instance_name|
+Step /^(?:A|The) Floating IP should be associated to instance (.+)$/ do |instance_name|
   sleeping(1).seconds.between_tries.failing_after(15).tries do
     unless @current_page.has_associated_floating_ip_row?( name: instance_name )
       raise "Couldn't find a floating IP to be associated to instance #{ instance_name }!"

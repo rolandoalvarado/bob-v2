@@ -284,6 +284,7 @@ Then /^I [Cc]an [Aa]ssign a floating IP to an instance in the project$/ do
     * Click the access security tab
     * Click the new floating IP allocation button
     * Current page should have the new floating IP allocation form
+    * Wait 60 seconds
     * Choose the 1st item in the pool dropdown
     * Choose the 2nd item in the instance dropdown
     * Click the create floating IP allocation button
@@ -720,6 +721,7 @@ TestCase /^A user with a role of (.+) in the project can assign a floating IP to
     * Click the Projects link
     * Click the #{ test_project_name } project
 
+    * Wait 90 seconds
     * Click the Access Security tab
     * Click the New Floating IP Allocation button
     * Current page should have the New Floating IP Allocation form
@@ -735,16 +737,13 @@ end
 TestCase /^A user with a role of (.+) in the project cannot assign a floating IP to an instance$/i do |role_name|
 
   Preconditions %{
-    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists 
     * Ensure that a project named #{ test_project_name } exists
     * Ensure that the project named #{ test_project_name } has an instance named #{ test_instance_name }
     * Ensure that the user #{ bob_username } has a role of #{ role_name } in the project #{ test_project_name }
-    * Ensure that a security group rule exists for project #{ test_project_name }
-    * Ensure that an instance named #{ test_instance_name } does not have any floating IPs
   }
 
   Cleanup %{
-    * Register the project named #{ test_project_name } for deletion at exit
     * Register the user named #{ bob_username } for deletion at exit
   }
 
@@ -809,8 +808,8 @@ TestCase /^An instance created based on the image (.+) is accessible via (.+)$/ 
     * Choose the item with text #{ test_instance_name } in the instance dropdown
     * Click the create floating IP allocation button
 
-    * The floating IPs table should have 1 row
-    * The floating IP should be associated to instance #{ test_instance_name }
+    * The Floating IPs table should have 1 row
+    * The Floating IP should be associated to instance #{ test_instance_name }
 
     * Connect to the instance named #{ test_instance_name } in project #{ test_project_name } via #{ remote_client }
   }
@@ -852,8 +851,8 @@ TestCase /^An instance is publicly accessible via its assigned floating IP$/ do
     * Choose the item with text #{ test_instance_name } in the instance dropdown
     * Click the create floating IP allocation button
 
-    * The floating IPs table should have 1 row
-    * The floating IP should be associated to instance #{ test_instance_name }
+    * The Floating IPs table should have 1 row
+    * The Floating IP should be associated to instance #{ test_instance_name }
 
     * Wait for 5 minutes for floating IP to be associated to the instance
     * Connect to the instance named #{ test_instance_name } in project #{ test_project_name } via SSH

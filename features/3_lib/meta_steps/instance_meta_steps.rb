@@ -14,8 +14,10 @@ Step /^Ensure that the project named (.+) has an instance named (.+)$/ do |proje
   raise "#{ project_name } couldn't be found!" unless project
 
   ComputeService.session.create_instance_in_project(project, name: instance_name)
-  instance = ComputeService.session.find_instance_by_name(project, instance_name)
-  raise "Instance #{ instance_name } couldn't be found!" unless instance
+  sleeping(1).seconds.between_tries.failing_after(30).tries do
+    instance = ComputeService.session.find_instance_by_name(project, instance_name)
+    raise "Instance #{ instance_name } couldn't be found!" unless instance
+  end
 end
 
 

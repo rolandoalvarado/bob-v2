@@ -584,19 +584,14 @@ class ComputeService < BaseCloudService
 
   def create_security_group(project, attributes)
     service.set_tenant project
-    security_group = service.security_groups
-    new_security_group = security_group.find_by_name(attributes[:name])
-      if new_security_group
-         #raise "Security Group #{attributes[:name]} is already exists."
-         new_security_group.destroy
-         security_group = security_group.new(attributes)
-         security_group.save
-         security_group
-      else
-         security_group = security_group.new(attributes)
-         security_group.save
-         security_group
-      end
+    security_groups = service.security_groups
+    
+    find_security_group = security_groups.find_by_name(attributes[:name])
+    find_security_group.destroy if find_security_group
+      
+    security_group = security_groups.new(attributes)
+    security_group.save
+    security_group
   end
 
   def delete_security_group(security_group)
@@ -605,15 +600,11 @@ class ComputeService < BaseCloudService
 
   def ensure_security_group_exists(project, attributes)
     service.set_tenant project
-    security_group = service.security_groups.find_by_name(attributes[:name]) rescue nil
+    find_security_group = service.security_groups.find_by_name(attributes[:name]) rescue nil
    
-    if security_group
-      security_group.destroy
-      new_security_group = create_security_group(project, attributes)
-    else
-      new_security_group = create_security_group(project, attributes)
-    end
-    security_group = new_security_group
+    find_security_group.destroy if find_security_group
+    
+    security_group = create_security_group(project, attributes)
   end
 
   def ensure_project_security_group_count(project, desired_count)
@@ -634,17 +625,19 @@ class ComputeService < BaseCloudService
 
   def ensure_security_group_does_not_exist(project, attributes)
     service.set_tenant project
-    security_group = service.security_groups
-    if security_group = security_groups.find_by_name(attributes[:name])
-      delete_security_group(security_group)
+    
+    security_groups = service.security_groups
+    
+    if find_security_group = security_groups.find_by_name(attributes[:name])
+      delete_security_group(find_security_group)
     end
   end
 
   def find_security_group_by_name(project, name)
     service.set_tenant project
-    security_group = service.security_groups
-    security_group.find_by_name(name)
-    security_group
+    security_groups = service.security_groups
+    security_groups.find_by_name(name)
+    security_groups
   end
 
   def set_tenant(project, reload = true)
@@ -660,19 +653,14 @@ class ComputeService < BaseCloudService
 
   def create_security_group(project, attributes)
     service.set_tenant project
-    security_group = service.security_groups
-    new_security_group = security_group.find_by_name(attributes[:name])
-      if new_security_group
-         #raise "Security Group #{attributes[:name]} is already exists."
-         new_security_group.destroy
-         security_group = security_group.new(attributes)
-         security_group.save
-         security_group
-      else
-         security_group = security_group.new(attributes)
-         security_group.save
-         security_group
-      end
+    security_groups = service.security_groups
+    find_security_group = security_groups.find_by_name(attributes[:name])
+    
+    find_security_group.destroy if find_security_group
+         
+    security_group = security_groups.new(attributes)
+    security_group.save
+    security_group
   end
 
   def delete_security_group(security_group)
@@ -681,8 +669,9 @@ class ComputeService < BaseCloudService
 
   def ensure_security_group_exists(project, attributes)
     service.set_tenant project
-    security_group = service.security_groups
-    find_security_group = security_group.find_by_name(attributes[:name]) rescue nil
+    security_groups = service.security_groups
+    find_security_group = security_groups.find_by_name(attributes[:name]) rescue nil
+    
     if find_security_group
       security_group = find_security_group
     else
@@ -709,7 +698,8 @@ class ComputeService < BaseCloudService
 
   def ensure_security_group_does_not_exist(project, attributes)
     service.set_tenant project
-    security_group = service.security_groups
+    security_groups = service.security_groups
+    
     if security_group = security_groups.find_by_name(attributes[:name])
       delete_security_group(security_group)
     end
@@ -723,9 +713,9 @@ class ComputeService < BaseCloudService
 
   def find_security_group_by_name(project, name)
     service.set_tenant project
-    security_group = service.security_groups
-    security_group.find_by_name(name)
-    security_group
+    security_groups = service.security_groups
+    security_groups.find_by_name(name)
+    security_groups
   end
 
   def get_project_instances(project)
