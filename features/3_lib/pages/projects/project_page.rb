@@ -105,7 +105,7 @@ class ProjectPage < SecurePage
   field     'volume name',                        '#name'
   field     'volume description',                 '#textarea'
   field     'volume size',                        '#appendedInput'
-  button    'create volume',                      '#save-volume'
+  button    'create volume',                      '#create-volume'
   table     'volumes',                            '#volume-list tbody'
 
   button    'delete volume',                      '#volume-item-<id> a[data-action="delete-volume"]'
