@@ -410,14 +410,14 @@ Then /^Set instance name field with (.+)$/ do |instance_name|
 end
 
 
-Then /^Set port to the (.+) field with (.+)$/ do |port_name,port_number|
-
-  if port_number.downcase == "(random)"
-    port_number = (rand(65534) + 1).to_s
-  end
-  if port_number.downcase != "(none)"
-    step "Fill in the #{port_name} field with #{port_number}"
-  end
+Then /^Set the ((?:from|to) port) field to (.+)$/ do |field_name, port_number|
+  field_name = field_name.downcase.split.join('_')
+  value = case port_number.downcase
+          when '(random)' then (rand(65534) + 1).to_s
+          when '(none)'   then ''
+          else port_number
+          end
+  @current_page.send("#{ field_name }_field").set(value)
 end
 
 Step /^Store the private key for keypair (.+)$/i do |key_name|

@@ -147,15 +147,15 @@ end
 When /^I add the following rule: (.+), (.+), (.+), (\d+\.\d+\.\d+\.\d+(?:|\/\d+)|\(None\)|\(Random\))$/ do |protocol, from_port, to_port, cidr|
 
   compute_service = ComputeService.session
- 
+
   attrs           = CloudObjectBuilder.attributes_for(
-                    :security_group, 
-                    :name => Unique.name('Web Servers'), 
+                    :security_group,
+                    :name => Unique.name('Web Servers'),
                     :description => 'Web Servers Security Group'
                   )
 
   security_group  = compute_service.ensure_security_group_exists(@project, attrs)
-  
+
   steps %{
     * Click the logout button if currently logged in
 
@@ -172,10 +172,14 @@ When /^I add the following rule: (.+), (.+), (.+), (\d+\.\d+\.\d+\.\d+(?:|\/\d+)
 
     * Click the edit security group button for security group #{ security_group.id }
     * Current page should have the security group rules form
-    * Choose the 1st item in the ip protocol dropdown
-    * Set port to the from port field with #{from_port}
-    * Set port to the to port field with #{to_port}
-    * Fill in the CIDR field with #{cidr}
+
+    * Click the new security group rule button
+    * Current page should have the new security group rule form
+    * Choose the item with text Custom in the service dropdown
+    * Choose the item with text #{ protocol } in the ip protocol dropdown
+    * Set the from port field to #{ from_port }
+    * Set the to port field to #{ to_port }
+    * Fill in the CIDR field with #{ cidr }
     * Click the add security group rule button
   }
 
@@ -435,18 +439,19 @@ end
 
 Then /^the rules will be Added$/ do
   steps %{
-    * Current page should have the new rules    
+    * Current page should have the new rules
   }
 end
 
 Then /^the rule will be [Aa]dded$/ do
   steps %{
-    * Current page should have the new security group rule    
+    * Current page should have the new security group rule
   }
 end
 
 Then /^the rule will be [Nn]ot [Aa]dded$/ do
   steps %{
-    * A security group form error message element should be visible
+    * The add security group rule button should be disabled
+    * Current page should still have the new security group rule form
   }
 end

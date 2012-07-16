@@ -98,7 +98,7 @@ end
 Step /^Ensure that a user exists in the project$/ do
   user_attrs       = CloudObjectBuilder.attributes_for(
                        :user,
-                       :name => Unique.username('roland')
+                       :name => bob_username
                      )
   identity_service = IdentityService.session
 
