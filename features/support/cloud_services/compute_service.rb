@@ -560,8 +560,16 @@ class ComputeService < BaseCloudService
     security_group.rules.each do |r|
       service.delete_security_group_rule(r['id'])
     end
-
+    
+    #Create Rule for SSH
     service.create_security_group_rule(parent_group_id, ip_protocol, from_port, to_port, cidr)
+    
+    #Create Rule for ICMP, needed for accessing ssh using Public ip.
+    icmp_protocol = 'icmp'
+    icmp_from_port = -1
+    icmp_to_port = -1
+    icmp_cidr = '0.0.0.0/0'
+    service.create_security_group_rule(parent_group_id, icmp_protocol, icmp_from_port, icmp_to_port, icmp_cidr)
   rescue => e
     raise "Couldn't ensure security group rule exists! The error returned was #{ e.inspect }"
   end
