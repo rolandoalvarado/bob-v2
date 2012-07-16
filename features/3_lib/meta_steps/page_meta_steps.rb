@@ -161,8 +161,14 @@ end
 
 Step /^Double\-click on the tile element for project (.+)$/ do |project_name|
   project_name.strip!
-  @current_page.tile_element( name: project_name ).click
-  @current_page = ProjectPage.new
+  tile = @current_page.tile_element( name: project_name )
+  @current_page.session.driver.browser.mouse.double_click(tile.native)
+end
+
+Step /^Double\-click on the tile element for instance (.+)$/ do |instance_name|
+  instance_name.strip!
+  tile = @current_page.tile_element( name: instance_name )
+  @current_page.session.driver.browser.mouse.double_click(tile.native)
 end
 
 Then /^Click the (.+) tab$/ do |tab_name|
@@ -288,6 +294,13 @@ end
 Step /^Current page should display project details in the sidebar$/ do
   unless @current_page.has_project_element?
     raise "Current page doesn't have the #{project_name} details."
+  end
+end
+
+Then /^Current page should have the (.+) graph$/ do |graph_name|
+  graph_name = graph_name.to_s.downcase.split.join('_')
+  unless @current_page.send(:"has_#{ graph_name }_graph?")
+    raise "Current page doesn't have the #{ graph_name } graph."
   end
 end
 
