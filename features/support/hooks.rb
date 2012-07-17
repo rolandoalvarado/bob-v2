@@ -12,10 +12,16 @@ AfterConfiguration do |config|
 end
 
 After do |scenario|
-  if defined?(page) && page.driver.respond_to?('browser')
+  page = Capybara.current_session
+
+  case Capybara.current_driver
+  when :selenium
     page.driver.browser.save_screenshot(File.join(tmp_screenshots_dir, "scenario.#{__id__}.png"))
-    embed(File.join(tmp_screenshots_dir, "scenario.#{__id__}.png"), "image/png", "Screenshot")
+  when :webkit
+    page.driver.render(File.join(tmp_screenshots_dir, "scenario.#{__id__}.png"))
   end
+
+  embed(File.join(tmp_screenshots_dir, "scenario.#{__id__}.png"), "image/png", "Screenshot")
 end
 
 Around do |scenario, block|

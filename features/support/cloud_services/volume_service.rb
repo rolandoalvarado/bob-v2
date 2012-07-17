@@ -41,7 +41,6 @@ class VolumeService < BaseCloudService
     if volumes.none? { |v| v['display_name'] == attrs.name }
       service.create_volume(attrs.name, attrs.description, attrs.size)
     end
-    set_tenant 'admin'
   end
 
   def delete_volumes_in_project(project)
@@ -109,9 +108,7 @@ class VolumeService < BaseCloudService
 
   def find_volume_by_name(project, name)
     service.set_tenant project
-    volume = service.list_volumes.body['volumes'].find { |v| v['display_name'] == name }
-    service.set_tenant 'admin'
-    volume
+    service.list_volumes.body['volumes'].find { |v| v['display_name'] == name }
   end
 
   def reload_snapshots

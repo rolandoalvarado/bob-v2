@@ -1,6 +1,6 @@
 require_relative '../secure_page'
 
-class ProjectPage < WebClientPage
+class ProjectPage < SecurePage
   path '/projects'
 
   button    'close',                              '.close'
@@ -16,6 +16,7 @@ class ProjectPage < WebClientPage
   message   'new instance error',                 '#new-instance-modal .error'
   radiolist 'images',                             '#instances-list'
   field     'server name',                        '#server-name'
+  field     'server password',                    '#password'
   checklist 'security groups',                    xpath: "//input[@name='securityGroupCheckbox']/../../.."
   button    'create instance',                    '#create-instance'
   table     'instances',                          '#instances-template .table-list'
@@ -23,10 +24,14 @@ class ProjectPage < WebClientPage
   option    'image',                              xpath: '//div[@class="instance-item clearfix"]/label[text()="<name>"]'
   checkbox  'security group',                     xpath: "//input[@name='securityGroupCheckbox' and @value='<name>']"
   option    'keypair',                            xpath: '//select[@id="keypair"]/option[@value="<name>"]'
+  dropdown  'keypair',                            '#keypair'
   field     'password',                           '#password'
   row       'instance',                           '#instances-template .table-list #instance-item-<id>'
   form      'resize instance',                    '#resize-instance-modal'
-  element 'project name',                         "td.project-details[title='<name>']"
+  form      'instance password',                  '#instance-password-modal'
+  element   'project name',                       "td.project-details[title='<name>']"
+  button    'close instance dialogue',            "#instance-password-modal a.btn"
+  button    'cancel create instance',             "#new-instance-modal a.btn"
   #==========================
   # Edit Quota Elements
   #==========================
@@ -58,12 +63,12 @@ class ProjectPage < WebClientPage
   button    'Context Menu',                       xpath: "//tr[@id='security-item-<id>']/..//a[@class='dropdown-toggle']"
   form      'new security',                       "#new-security-group-modal"
   form      'security group rules',               "#security-group-rules-modal"
+  form      'new security group rule',            '#new-security-group-rule-form'
   link      'delete security group',              "#security-item-<id> .delete-security-group"
   link      'edit security group',                "#security-item-<id> .edit-security-rules"
   link      'security group',                     "#security-item-<id> .edit-security-rules"
   element   'security groups',                    "#security-groups-list"
   tab       'access security',                    ".nav-tabs .access-and-security a"
-  
 
   #Elements in the New Security form
   field     'security group name',                "#new-security-name"
@@ -73,22 +78,24 @@ class ProjectPage < WebClientPage
   span      'new security group form error',      "span.error[for='new-security-name'], span.error[for='new-security-description']"
   element   'security group form error message',  "#security-group-rules-form .error"
 
-  dropdown  'ip protocol',                        "#ip-protocol"
-  field     'from port', xpath:                   '//form[@id="security-group-rules-form"]//input[@id="from-port"]'
-  field     'to port', xpath:                     '//form[@id="security-group-rules-form"]//input[@id="to-port"]'
-  field     'CIDR',    xpath:                     '//form[@id="security-group-rules-form"]//input[@id="cidr"]'
+  button    'new security group rule',            '#show-new-security-rule-form'
+  dropdown  'service',                            '#service'
+  dropdown  'ip protocol',                        '#ip-protocol'
+  field     'from port',                          '#from-port'
+  field     'to port',                            '#to-port'
+  field     'CIDR',                               '#cidr-select'
   button    'add security group rule',            '#save-security-group-rule'
-  button    'close security group rule',          xpath: '//*[@id="security-group-rules-modal"]/div[3]/a' 
-  field     'list ip protocol',                   '#security-group-rules-list div.ip-protocoll'  
-  field     'list from port',                     '#security-group-rules-list div.from-port'   
-  field     'list to port',                       '#security-group-rules-list div.to-port'   
-  field     'list cidr',                          '#security-group-rules-list div.cidr'   
+  button    'disabled add security group rule',   '#save-security-group-rule.disabled'
+  field     'list ip protocol',                   '#security-group-rules-list div.ip-protocol'
+  field     'list from port',                     '#security-group-rules-list div.from-port'
+  field     'list to port',                       '#security-group-rules-list div.to-port'
+  field     'list cidr',                          '#security-group-rules-list div.cidr'
 
   # The following buttons appear with the confirmation dialog that appears
   # when you click the delete security group.
   button  'confirm security group deletion',      "a.okay"
   button  'cancel security group deletion',       "a.cancel"
-  
+
   #==========================
   # Volume-related elements
   #==========================
@@ -100,8 +107,8 @@ class ProjectPage < WebClientPage
   field     'volume name',                        '#name'
   field     'volume description',                 '#textarea'
   field     'volume size',                        '#appendedInput'
-  button    'create volume',                      '#save-volume'
-  table     'volumes',                            '#volume-list tbody'
+  button    'create volume',                      '#create-volume'
+  table     'volumes',                            '#volume-list'
 
 # Type      Name                                  Selector
   button    'volume menu',                        '#volume-item-<id> .dropdown-toggle'

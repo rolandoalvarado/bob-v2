@@ -14,7 +14,7 @@ module TemplateHelpers
   def asset_tags(prefix = '')
     tags = ""
     ['javascripts', 'stylesheets'].each do |asset_type|
-      Dir.open(File.join(@report_dir, asset_type)).entries.each do |asset_file_name|
+      Dir.open(File.join(@report_dir, asset_type)).entries.sort{|a, b| a <=> b }.each do |asset_file_name|
         next if /^\..*$/ =~ asset_file_name
         case asset_type
         when 'img'

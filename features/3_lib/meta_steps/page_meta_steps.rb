@@ -47,8 +47,19 @@ end
 
 
 Then /^Choose the item with text (.+) in the (.+) dropdown$/ do |item_text, dropdown_name|
-  dropdown_name = dropdown_name.split.join('_').downcase
-  if item = @current_page.send("#{ dropdown_name }_dropdown_items").find { |d| d.text == item_text }
+  dropdown_name  = dropdown_name.split.join('_').downcase
+  dropdown_items = @current_page.send("#{ dropdown_name }_dropdown_items")
+
+  item = case item_text.downcase
+         when '(none)'
+           dropdown_items.find { |d| d.value.blank? }
+         when '(any)'
+           dropdown_items[1]
+         else
+           dropdown_items.find { |d| d.text == item_text }
+         end
+
+  if item
     item.click
   else
     raise "Couldn't find the dropdown option '#{ item_text }'."
@@ -132,7 +143,7 @@ Then /^Click the (.+) button for security group (.+)$/ do |button_name, security
   @current_page.send("#{ button_name }_button", id: security_group_id).click
 end
 
-Step /^Click the (.+) button for user (.+)$/ do |button_name, user_id|
+Step /^Click the (delete|disable|edit) button for user (.+)$/ do |button_name, user_id|
   button_name = button_name.split.join('_').downcase
   @current_page.send("#{ button_name }_button", id: user_id).click
 end
@@ -150,8 +161,14 @@ end
 
 Step /^Double\-click on the tile element for project (.+)$/ do |project_name|
   project_name.strip!
-  @current_page.tile_element( name: project_name ).click
-  @current_page = ProjectPage.new
+  tile = @current_page.tile_element( name: project_name )
+  @current_page.session.driver.browser.mouse.double_click(tile.native)
+end
+
+Step /^Double\-click on the tile element for instance (.+)$/ do |instance_name|
+  instance_name.strip!
+  tile = @current_page.tile_element( name: instance_name )
+  @current_page.session.driver.browser.mouse.double_click(tile.native)
 end
 
 Then /^Click the (.+) tab$/ do |tab_name|
@@ -170,7 +187,7 @@ Then /^Click the row for security group with id (.+)$/i do |security_group_id|
   @current_page.security_group_link(id: security_group_id).click
 end
 
-Step /^Click the context menu button of the volume named (.+)$/ do |volume_name|
+Step /^Click the context menu button of the volume named (.+)$/i do |volume_name|
   VolumeService.session.reload_volumes
   volume = VolumeService.session.volumes.find { |v| v['display_name'] == volume_name }
 
@@ -179,11 +196,11 @@ Step /^Click the context menu button of the volume named (.+)$/ do |volume_name|
   @current_page.volume_context_menu_button(:id => volume['id']).click
 end
 
-Step /^Click the (attach|delete|detach) button of the volume named (.+)$/ do |button_name, volume_name|
-  volume = VolumeService.session.volumes.find { |v| v['display_name'] == volume_name }
-  raise "Couldn't find a volume named '#{ volume_name }'" unless volume
+Step /^Click the (attach|delete|detach) button of the volume named (.+)$/i do |button_name, volume_name|
+  volume = VolumeService.session.volumes.find { |v| v['display_name'] == volume_name && v['status'] == 'available' }
+  raise "Couldn't find an available volume named '#{ volume_name }'" unless volume
 
-  button_name = button_name.split.join('_')
+  button_name = button_name.split.join('_').downcase
   @current_page.send("#{ button_name }_volume_button", id: volume['id']).click
 end
 
@@ -196,6 +213,11 @@ end
 
 Then /^Click the (.+) image$/ do |image_name|
   @current_page.image_element( name: image_name.strip ).click
+end
+
+Step /^Close the (.+) form$/i do |form_name|
+  form_name = form_name.split.join('_').downcase
+  @current_page.send("#{ form_name }_form").find('.close').click
 end
 
 Then /^Current page should be the (.+) page$/i do |page_name|
@@ -272,6 +294,13 @@ end
 Step /^Current page should display project details in the sidebar$/ do
   unless @current_page.has_project_element?
     raise "Current page doesn't have the #{project_name} details."
+  end
+end
+
+Then /^Current page should have the (.+) graph$/ do |graph_name|
+  graph_name = graph_name.to_s.downcase.split.join('_')
+  unless @current_page.send(:"has_#{ graph_name }_graph?")
+    raise "Current page doesn't have the #{ graph_name } graph."
   end
 end
 
@@ -381,14 +410,19 @@ Then /^Set instance name field with (.+)$/ do |instance_name|
 end
 
 
-Then /^Set port to the (.+) field with (.+)$/ do |port_name,port_number|
+Then /^Set the ((?:from|to) port) field to (.+)$/ do |field_name, port_number|
+  field_name = field_name.downcase.split.join('_')
+  value = case port_number.downcase
+          when '(random)' then (rand(65534) + 1).to_s
+          when '(none)'   then ''
+          else port_number
+          end
+  @current_page.send("#{ field_name }_field").set(value)
+end
 
-  if port_number.downcase == "(random)"
-    port_number = (rand(65534) + 1).to_s
-  end
-  if port_number.downcase != "(none)"
-    step "Fill in the #{port_name} field with #{port_number}"
-  end
+Step /^Store the private key for keypair (.+)$/i do |key_name|
+  key_value = @current_page.keypair_private_key_field.value
+  ComputeService.session.private_keys[key_name] = key_value
 end
 
 Then /^The (.+) form should be visible$/ do |form_name|
@@ -483,10 +517,19 @@ Then /^The (.+) user row should be visible$/ do |username|
 end
 
 
-Step /^(?:A|The) floating IP should be associated to instance (.+)$/ do |instance_name|
+Step /^(?:A|The) Floating IP should be associated to instance (.+)$/ do |instance_name|
   sleeping(1).seconds.between_tries.failing_after(15).tries do
     unless @current_page.has_associated_floating_ip_row?( name: instance_name )
       raise "Couldn't find a floating IP to be associated to instance #{ instance_name }!"
+    end
+  end
+end
+
+
+Step /^(?:A|The) floating IP should not be associated to instance (.+)$/i do |instance_name|
+  sleeping(1).seconds.between_tries.failing_after(15).tries do
+    if @current_page.has_associated_floating_ip_row?( name: instance_name )
+      raise "Found a floating IP to be associated to instance #{ instance_name }!"
     end
   end
 end
@@ -537,13 +580,16 @@ Then /^The instance ((?:(?!named )).+) should be (?:in|of) (.+) status$/ do |ins
 end
 
 
-Step /^The instance named (.+) should be (?:in|of) (.+) status$/ do |instance_name, status|
+Step /^The instance named (.+) should be (?:in|of) (.+) status$/ do |instance_name, expected_status|
   # TODO To prevent conflict with other instance steps, temporarily forgo changing the selector,
   # and instead finding it directly from the page object.
   selector = "//*[@id='instances-list']//*[contains(@class, 'name') and contains(text(), \"#{ instance_name }\")]/.."
   row      = @current_page.find_by_xpath(selector)
-  unless row.find('.status').has_content?(status.upcase.gsub(' ', '_'))
-    raise "Instance #{ instance_name } is not or took too long to become #{ status }."
+
+  actual_status = row.find('.status').text.strip
+  unless actual_status == expected_status.upcase.gsub(' ', '_')
+    raise "Instance #{ instance_name } is not or took too long to become #{ expected_status }. " +
+          "Current status is #{ actual_status }."
   end
 end
 
@@ -573,6 +619,21 @@ end
 Step /^Click the (.+) button for the user named (.+)$/ do |button_name, username|
   button_name = button_name.split.join('_').downcase
   @current_page.send("#{ button_name }_user_button", name: username).click
+end
+
+Then /^The volume named (.+) should be (?:in|of) (.+) status$/ do |volume_name, status|
+  VolumeService.session.reload_volumes
+  volume = VolumeService.session.volumes.find { |v| v['display_name'] == volume_name }
+  raise "Couldn't find a volume named '#{ volume_name }'" unless volume
+
+  status.downcase!
+  sleeping(1).seconds.between_tries.failing_after(15).tries do
+    volume_row    = @current_page.volume_row( id: volume['id'] ).find('.volume-status')
+    volume_status = volume_row.text.to_s.strip.downcase
+    unless volume_status == status
+      raise "Volume #{ volume_name } took to long to become #{ status }."
+    end
+  end
 end
 
 Then /^The volume named (.+) should be attached to the instance named (.+)$/ do |volume_name, instance_name|
@@ -708,7 +769,7 @@ end
 
 
 Then /^The (.+) table should have (\d+) (?:row|rows)$/ do |table_name, num_rows|
-  sleeping(1).seconds.between_tries.failing_after(30).tries do
+  sleeping(1).seconds.between_tries.failing_after(60).tries do
     table_name      = table_name.split.join('_').downcase
     table           = @current_page.send("#{ table_name }_table")
     actual_num_rows = if table.has_no_css_selector?('td.empty-table')
@@ -725,7 +786,7 @@ Then /^The (.+) table should have (\d+) (?:row|rows)$/ do |table_name, num_rows|
 end
 
 
-Then /^The (.+) table's last row should include the text (.+)$/ do |table_name, text|
+Step /^The (.+) table's last row should include the text (.+)$/ do |table_name, text|
   sleeping(1).seconds.between_tries.failing_after(20).tries do
     table_name = table_name.split.join('_').downcase
     table_rows = @current_page.send("#{ table_name }_table").all('tbody tr')
@@ -734,6 +795,7 @@ Then /^The (.+) table's last row should include the text (.+)$/ do |table_name, 
     end
   end
 end
+
 
 Then /^The (.+) table's last row should not include the text (.+)$/ do |table_name, text|
   sleeping(1).seconds.between_tries.failing_after(5).tries do
@@ -784,6 +846,19 @@ Then /^Visit the (.+) page$/ do |page_name|
   @current_page.visit
 end
 
-Then /Wait (.+) second(?:s|)/i  do |wait_secs|
-  sleep(wait_secs.to_i)  
+Then /^Wait (.+) second(?:s|)/i  do |wait_secs|
+  sleep(wait_secs.to_i)
+end
+
+Then /^Wait for (\d+) (?:minute|minutes).*$/ do |number_of_minutes|
+  sleep(60 * number_of_minutes.to_i)
+end
+
+Step /^Write the contents of the (.+) field to file (.+)$/i do |field_name, filename|
+  field_name = field_name.split.join('_').downcase
+  field      = @current_page.send("#{ field_name }_field")
+
+  File.open(filename.to_s, 'w') do |file|
+    file.puts field.value
+  end
 end
