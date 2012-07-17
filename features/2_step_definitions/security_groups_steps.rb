@@ -110,15 +110,15 @@ end
 When /^I edit the Web Servers security group with the following rule: (.+), (.+), (.+), (\d+\.\d+\.\d+\.\d+(?:|\/\d+)|\(None\)|\(Random\))$/ do |protocol, from_port, to_port, cidr|
 
   compute_service = ComputeService.session
- 
+
   attrs           = CloudObjectBuilder.attributes_for(
-                    :security_group, 
-                    :name => Unique.name('Web Servers'), 
+                    :security_group,
+                    :name => Unique.name('Web Servers'),
                     :description => 'Web Servers Security Group'
                   )
 
   security_group  = compute_service.ensure_security_group_exists(@project, attrs)
-  
+
   steps %{
     * Click the logout button if currently logged in
 
@@ -135,10 +135,14 @@ When /^I edit the Web Servers security group with the following rule: (.+), (.+)
 
     * Click the edit security group button for security group #{ security_group.id }
     * Current page should have the security group rules form
-    * Choose the 1st item in the ip protocol dropdown
-    * Set port to the from port field with #{from_port}
-    * Set port to the to port field with #{to_port}
-    * Fill in the CIDR field with #{cidr}
+
+    * Click the new security group rule button
+    * Current page should have the new security group rule form
+    * Choose the item with text Custom in the service dropdown
+    * Choose the item with text #{ protocol } in the ip protocol dropdown
+    * Set the from port field to #{ from_port }
+    * Set the to port field to #{ to_port }
+    * Fill in the CIDR field with #{ cidr }
     * Click the add security group rule button
   }
 
@@ -211,7 +215,7 @@ Then /^I [Cc]an [Cc]reate a security group in the project$/ do
     * Current page should have the new security form
     * Fill in the security group name field with #{security_group.name}
     * Fill in the security group description field with #{security_group.description}
-    * Click the create security button    
+    * Click the create security button
     * Current page should have the new #{security_group.name} security group
     * The #{security_group.name} security group row should be visible
   }
@@ -221,17 +225,12 @@ Then /^I [Cc]an [Ee]dit a security group in the project$/ do
   compute_service = ComputeService.session
 
   attrs           = CloudObjectBuilder.attributes_for(
-                    :security_group, 
-                    :name => Unique.name('Web Servers'), 
+                    :security_group,
+                    :name => Unique.name('Web Servers'),
                     :description => 'Web Servers Security Group'
                   )
 
   security_group  = compute_service.ensure_security_group_exists(@project, attrs)
-  
-  # Assign response values to local variables.
-  from_port = "(Random)"
-  to_port = "(Random)"
-  cidr = "0.0.0.0/25"
 
   steps %{
     * Click the logout button if currently logged in
@@ -249,11 +248,17 @@ Then /^I [Cc]an [Ee]dit a security group in the project$/ do
 
     * Click the edit security group button for security group #{ security_group.id }
     * Current page should have the security group rules form
-    * Choose the 1st item in the ip protocol dropdown
-    * Set port to the from port field with #{from_port}
-    * Set port to the to port field with #{to_port}
-    * Fill in the CIDR field with #{cidr}
+
+    * Click the new security group rule button
+    * Current page should have the new security group rule form
+    * Choose the item with text Custom in the service dropdown
+    * Choose the item with text (Any) in the ip protocol dropdown
+    * Set the from port field to (Random)
+    * Set the to port field to (Random)
+    * Fill in the CIDR field with 0.0.0.0/25
     * Click the add security group rule button
+
+    * Current page should have the new security group rule
   }
 end
 
