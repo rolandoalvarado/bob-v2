@@ -30,12 +30,12 @@ Feature: View Instance Statistics
         | Role            | Can or Cannot View |
         | (None)          | Cannot View        |
 
-  @wip
+  @jira-MCF-8-stats
   Scenario Outline:
     * Statistics for <Resource Type> should be visible from the Monitoring page
 
       Scenarios:
         | Resource Type |
-        | RAM           |
-        | CPU           |
-        | Disk          |
+        | CPU Usage     |
+        | Network Usage |
+        | Block Usage   |

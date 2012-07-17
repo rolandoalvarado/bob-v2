@@ -161,8 +161,14 @@ end
 
 Step /^Double\-click on the tile element for project (.+)$/ do |project_name|
   project_name.strip!
-  @current_page.tile_element( name: project_name ).click
-  @current_page = ProjectPage.new
+  tile = @current_page.tile_element( name: project_name )
+  @current_page.session.driver.browser.mouse.double_click(tile.native)
+end
+
+Step /^Double\-click on the tile element for instance (.+)$/ do |instance_name|
+  instance_name.strip!
+  tile = @current_page.tile_element( name: instance_name )
+  @current_page.session.driver.browser.mouse.double_click(tile.native)
 end
 
 Then /^Click the (.+) tab$/ do |tab_name|
@@ -291,6 +297,13 @@ Step /^Current page should display project details in the sidebar$/ do
   end
 end
 
+Then /^Current page should have the (.+) graph$/ do |graph_name|
+  graph_name = graph_name.to_s.downcase.split.join('_')
+  unless @current_page.send(:"has_#{ graph_name }_graph?")
+    raise "Current page doesn't have the #{ graph_name } graph."
+  end
+end
+
 Then /^Current page should have the (.+) security group$/ do |security_group|
   unless @current_page.has_security_groups_element?
     raise "Current page doesn't have the #{security_group} security group."
@@ -397,14 +410,14 @@ Then /^Set instance name field with (.+)$/ do |instance_name|
 end
 
 
-Then /^Set port to the (.+) field with (.+)$/ do |port_name,port_number|
-
-  if port_number.downcase == "(random)"
-    port_number = (rand(65534) + 1).to_s
-  end
-  if port_number.downcase != "(none)"
-    step "Fill in the #{port_name} field with #{port_number}"
-  end
+Then /^Set the ((?:from|to) port) field to (.+)$/ do |field_name, port_number|
+  field_name = field_name.downcase.split.join('_')
+  value = case port_number.downcase
+          when '(random)' then (rand(65534) + 1).to_s
+          when '(none)'   then ''
+          else port_number
+          end
+  @current_page.send("#{ field_name }_field").set(value)
 end
 
 Step /^Store the private key for keypair (.+)$/i do |key_name|
@@ -504,7 +517,7 @@ Then /^The (.+) user row should be visible$/ do |username|
 end
 
 
-Step /^(?:A|The) floating IP should be associated to instance (.+)$/ do |instance_name|
+Step /^(?:A|The) Floating IP should be associated to instance (.+)$/ do |instance_name|
   sleeping(1).seconds.between_tries.failing_after(15).tries do
     unless @current_page.has_associated_floating_ip_row?( name: instance_name )
       raise "Couldn't find a floating IP to be associated to instance #{ instance_name }!"
@@ -513,7 +526,7 @@ Step /^(?:A|The) floating IP should be associated to instance (.+)$/ do |instanc
 end
 
 
-Step /^(?:A|The) floating IP should not be associated to instance (.+)$/ do |instance_name|
+Step /^(?:A|The) floating IP should not be associated to instance (.+)$/i do |instance_name|
   sleeping(1).seconds.between_tries.failing_after(15).tries do
     if @current_page.has_associated_floating_ip_row?( name: instance_name )
       raise "Found a floating IP to be associated to instance #{ instance_name }!"
@@ -834,7 +847,11 @@ Then /^Visit the (.+) page$/ do |page_name|
 end
 
 Then /^Wait (.+) second(?:s|)/i  do |wait_secs|
-  sleep(wait_secs.to_i)  
+  sleep(wait_secs.to_i)
+end
+
+Then /^Wait for (\d+) (?:minute|minutes).*$/ do |number_of_minutes|
+  sleep(60 * number_of_minutes.to_i)
 end
 
 Step /^Write the contents of the (.+) field to file (.+)$/i do |field_name, filename|

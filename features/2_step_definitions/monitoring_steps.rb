@@ -41,6 +41,32 @@ TestCase /^A user with a role of (\(None\)) in a project cannot view the statist
   }
 end
 
-TestCase /^Statistics for (.+) should be visible from the Monitoring page$/ do |resource_type|
-  raise "Not yet implemented by mCloud Dashboard"
+TestCase /^Statistics for (.+) should be visible from the Monitoring page$/i do |resource_type|
+  Preconditions %{
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that the project named #{ test_project_name } has an instance named #{ test_instance_name }
+    * Ensure that the user #{ bob_username } has a role of Member in the project #{ test_project_name }
+  }
+
+  Cleanup %{
+    * Register the project named #{ test_project_name } for deletion at exit
+    * Register the user named #{ bob_username } for deletion at exit
+  }
+
+  Script %{
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ bob_username }
+    * Fill in the Password field with #{ bob_password }
+    * Click the Login button
+
+    * Click the Monitoring link
+    * Current page should be the Monitoring page
+    * The #{ test_project_name } project tile should be visible
+    * Double-click on the tile element for project #{ test_project_name }
+    * Double-click on the tile element for instance #{ test_instance_name }
+
+    * Current page should have the #{ resource_type } graph
+  }
 end
