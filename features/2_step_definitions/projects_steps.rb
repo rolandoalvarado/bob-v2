@@ -32,7 +32,7 @@ Given /^The project has (\d+) (active|paused|suspended) instances?$/ do |number_
 
   compute_service.set_tenant @project
   instances = compute_service.instances
-  
+
   if number_of_instances == 1
     @instance = instances.find { |i| i.state == status.upcase }
   else
