@@ -56,7 +56,6 @@ Feature: Create a Security Group
     When I add the following rule: <Protocol>, <From Port>, <To Port>, <CIDR>
     Then the rule will be <Added or Not>
 
-
       Scenarios: Valid Rules
         | Protocol | From Port | To Port  | CIDR        | Added or Not |
         | TCP      | (Random)  | (Random) | 0.0.0.0/25  | Added        |
