@@ -515,7 +515,6 @@ end
 Then /^I [Cc]an [Ss]uspend (?:an|the) instance(?:| in the project)$/ do
   compute_service = ComputeService.session
   compute_service.set_tenant @project
-  @instance       = compute_service.instances.find { |i| i.state == 'ACTIVE' }
 
   steps %{
     * Click the logout button if currently logged in
