@@ -46,10 +46,10 @@ class ComputeService < BaseCloudService
 
     attributes[:name]     ||= Faker::Name.name
     attributes[:password] ||= test_instance_password || '123qwe'
-    attributes[:image]    ||= service.images[0].id
+    attributes[:image]    ||= service.images[5].id || service.images[2].id
     attributes[:flavor]   ||= min_flavor.id
     attributes[:key_name] ||= service.key_pairs[0] && service.key_pairs[0].name
-
+    
     if service.list_servers.body['servers'].none? { |s| s['name'] == attributes[:name] }
       begin
         service.create_server(
