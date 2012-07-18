@@ -159,16 +159,39 @@ Then /^Click the (.+) project$/ do |project_name|
   @current_page = ProjectPage.new
 end
 
-Step /^Double\-click on the tile element for project (.+)$/ do |project_name|
+Step /^Click on the tile for project (.+)$/ do |project_name|
   project_name.strip!
-  tile = @current_page.tile_element( name: project_name )
-  @current_page.session.driver.browser.mouse.double_click(tile.native)
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+    unless @current_page.has_tile_element?( name: project_name )
+      raise "Couldn't find tile for project #{ project_name }!"
+    else
+      @current_page.tile_element( name: project_name ).click
+    end
+  end
 end
 
-Step /^Double\-click on the tile element for instance (.+)$/ do |instance_name|
+Step /^Double\-click on the tile for project (.+)$/ do |project_name|
+  project_name.strip!
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+    unless @current_page.has_tile_element?( name: project_name )
+      raise "Couldn't find tile for project #{ project_name }!"
+    else
+      tile = @current_page.tile_element( name: project_name )
+      @current_page.session.driver.browser.mouse.double_click(tile.native)
+    end
+  end
+end
+
+Step /^Double\-click on the tile for instance (.+)$/ do |instance_name|
   instance_name.strip!
-  tile = @current_page.tile_element( name: instance_name )
-  @current_page.session.driver.browser.mouse.double_click(tile.native)
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+    unless @current_page.has_tile_element?( name: instance_name )
+      raise "Couldn't find tile for instance #{ instance_name }!"
+    else
+      tile = @current_page.tile_element( name: instance_name )
+      @current_page.session.driver.browser.mouse.double_click(tile.native)
+    end
+  end
 end
 
 Then /^Click the (.+) tab$/ do |tab_name|
@@ -734,8 +757,7 @@ end
 
 
 Then /^The (.+) project should be visible$/ do |project_name|
-  if !@current_page.has_project_name_element?( name: project_name ) &&
-     !@current_page.has_project_name_title_element?( name: project_name )
+  unless @current_page.has_project_row?( name: project_name )
     raise "The project '#{ project_name }' should be visible, but it's not."
   end
 end
@@ -748,8 +770,8 @@ end
 
 
 Step /^The (.+) project tile should be visible$/ do |project_name|
-  unless @current_page.has_project_name_element?( name: project_name )
-    raise "The project '#{ project_name }' should be visible, but it's not."
+  unless @current_page.has_tile_element?( name: project_name )
+    raise "The tile for project '#{ project_name }' should be visible, but it's not."
   end
 end
 

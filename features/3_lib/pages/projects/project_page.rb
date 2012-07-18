@@ -29,7 +29,6 @@ class ProjectPage < SecurePage
   row       'instance',                           '#instances-template .table-list #instance-item-<id>'
   form      'resize instance',                    '#resize-instance-modal'
   form      'instance password',                  '#instance-password-modal'
-  element   'project name',                       "td.project-details[title='<name>']"
   button    'close instance dialogue',            "#instance-password-modal a.btn"
   button    'cancel create instance',             "#new-instance-modal a.btn"
   #==========================
