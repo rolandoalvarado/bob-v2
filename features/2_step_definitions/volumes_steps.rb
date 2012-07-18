@@ -430,7 +430,6 @@ TestCase /^Volumes that are attached to an instance cannot be deleted$/i do
     * Ensure that a project named #{ test_project_name } exists
     * Ensure that the project named #{ test_project_name } has an instance named #{ test_instance_name }
     * Ensure that the project named #{ test_project_name } has an available volume named #{ test_volume_name }
-    * Ensure that the volume named #{ test_volume_name } is attached to the instance named #{ test_instance_name } in the project #{ test_project_name }
     * Ensure that the user #{ bob_username } has a role of Project Manager in the project #{ test_project_name }
 
   }
@@ -449,8 +448,8 @@ TestCase /^Volumes that are attached to an instance cannot be deleted$/i do
 
     * Click the Projects link
     * Click the #{ test_project_name } project
-
     * Click the context menu button of the volume named #{ test_volume_name }
+    * Click the delete button of the volume named #{ test_volume_name }
     * The delete button of the volume named #{ test_volume_name } should not be visible
   }
 
