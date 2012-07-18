@@ -184,6 +184,7 @@ When /^I resize the instance to a different flavor$/ do
     * Visit the projects page
     * Click the #{ @project.name } project
 
+    * Wait 90 seconds
     * Click the instance menu button for instance #{ @instance.id }
     * Click the resize instance button for instance #{ @instance.id }
     * Current page should have the resize instance form
@@ -459,7 +460,7 @@ end
 Then /^I [Cc]an [Rr]esize (?:that|the) instance$/ do
   compute_service = ComputeService.session
   compute_service.set_tenant @project
-  instance        = compute_service.instances.find { |i| i.state == 'ACTIVE' }
+  instance        = @instance
   old_flavor      = compute_service.flavors.find { |f| f.id == instance.flavor['id'].to_s }
 
   steps %{
@@ -473,6 +474,7 @@ Then /^I [Cc]an [Rr]esize (?:that|the) instance$/ do
     * Visit the projects page
     * Click the #{ @project.name } project
 
+    * Wait 90 seconds
     * Click the instance menu button for instance #{ instance.id }
     * Click the resize instance button for instance #{ instance.id }
     * Current page should have the resize instance form
