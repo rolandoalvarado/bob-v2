@@ -533,8 +533,12 @@ Then /^I [Cc]an [Ss]uspend (?:an|the) instance(?:| in the project)$/ do
     * Click the instance menu button for instance #{ @instance.id }
     * Click the suspend instance button for instance #{ @instance.id }
 
+    * Wait 90 seconds
     * The instance #{ @instance.id } should be in suspended status
   }
+  
+  @paused_instance = @instance
+  
 end
 
 Then /^I [Cc]an [Uu]npause (?:that|the) instance$/ do
