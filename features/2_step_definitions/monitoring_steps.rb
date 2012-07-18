@@ -2,7 +2,7 @@ TestCase /^A user with a role of (.+) in a project can view the statistics of it
   Preconditions %{
     * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
     * Ensure that a project named #{ test_project_name } exists
-    * Ensure that the project named #{ test_project_name } has an instance
+    * Ensure that the project named #{ test_project_name } has an instance named #{ test_instance_name }
     * Ensure that the user #{ bob_username } has a role of #{ role_name } in the project #{ test_project_name }
   }
 
@@ -16,7 +16,7 @@ TestCase /^A user with a role of (.+) in a project can view the statistics of it
     * Click the Monitoring link
     * Current page should be the Monitoring page
     * The #{test_project_name} project tile should be visible
-    * Double-click on the tile element for project #{ test_project_name }
+    * Click on the tile for project #{ test_project_name }
     * The #{ test_project_name } project details should be visible in the sidebar
   }
 end
@@ -64,8 +64,8 @@ TestCase /^Statistics for (.+) should be visible from the Monitoring page$/i do 
     * Click the Monitoring link
     * Current page should be the Monitoring page
     * The #{ test_project_name } project tile should be visible
-    * Double-click on the tile element for project #{ test_project_name }
-    * Double-click on the tile element for instance #{ test_instance_name }
+    * Double-click on the tile for project #{ test_project_name }
+    * Double-click on the tile for instance #{ test_instance_name }
 
     * Current page should have the #{ resource_type } graph
   }
