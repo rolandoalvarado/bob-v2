@@ -92,9 +92,13 @@ class EnvironmentCleaner
 
         if @compute_service.instances.count > 0
           puts "    Deleting instances..."
-          deleted_instances = @compute_service.delete_instances_in_project(project)
-          deleted_instances.each do |instance|
-            puts "      DELETED: #{ instance[:name] } (id: #{ instance[:id] })"
+          # Needed when an instance is doing hard reboot. 
+          # Wait until an instance become in active state.
+          sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_long).tries do
+            deleted_instances = @compute_service.delete_instances_in_project(project)
+            deleted_instances.each do |instance|
+              puts "      DELETED: #{ instance[:name] } (id: #{ instance[:id] })"
+            end
           end
         end
 
