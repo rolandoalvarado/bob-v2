@@ -427,6 +427,9 @@ Then /^I [Cc]an [Pp]ause the instances?(?:| in the project)$/ do
 
     * The instance #{ @instance.id } should be of paused status
   }
+  
+  @paused_instance = @instance
+  
 end
 
 Then /^I [Cc]an [Rr]eboot an instance in the project$/ do
@@ -623,12 +626,7 @@ Then /^I cannot assign a floating IP to (?:that|the) instance$/ do
     * Click the new floating IP allocation button
     * Current page should have the new floating IP allocation form
 
-    * The instance dropdown should not have the item with text #{ @instance.name }
-
-    * Click the create floating IP allocation button
-
-    * The floating IPs table should have #{ addresses.count + 1 } rows
-    * The floating IPs table's last row should not include the text #{ @instance.name }
+    * The instance dropdown should not have the item with text #{ @paused_instance.name }
   }
 end
 
