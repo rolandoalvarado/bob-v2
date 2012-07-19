@@ -540,7 +540,7 @@ Then /^The (.+) user row should be visible$/ do |username|
 end
 
 
-Step /^(?:A|The) floating IP should be associated to instance (.+)$/i do |instance_name|
+Step /^(?:A|The) Floating IP should be associated to instance (.+)$/ do |instance_name|
   sleeping(1).seconds.between_tries.failing_after(15).tries do
     unless @current_page.has_associated_floating_ip_row?( name: instance_name )
       raise "Couldn't find a floating IP to be associated to instance #{ instance_name }!"
@@ -687,30 +687,6 @@ Then /^The volume named (.+) should not be attached to the instance named (.+)$/
   end
 end
 
-Step /^The volume named (.+) should be attached to the instance named (.+) in project (.+)$/ do |volume_name, instance_name, project_name|
-  project = IdentityService.session.find_tenant_by_name(project_name)
-  raise "Couldn't find a project named '#{ project_name }'" unless project
-
-  instance = ComputeService.session.find_instance_by_name(project, instance_name)
-  raise "Couldn't find an instance named '#{ instance_name }'" unless instance
-
-  VolumeService.session.reload_volumes
-  volume = VolumeService.session.volumes.find { |v| v['display_name'] == volume_name }
-  raise "Couldn't find a volume named '#{ volume_name }'" unless volume
-
-  sleeping(1).seconds.between_tries.failing_after(15).tries do
-    unless @current_page.has_volume_row?(id: volume['id'])
-      raise "Could not find row for the volume named #{ volume_name }!"
-    end
-
-    attachment_id = @current_page.volume_row(id: volume['id']).find('.attachments')[:title]
-    if attachment_id != instance.id
-      raise "Expected volume #{ volume_name } to be attached to instance #{ instance_name }, " +
-            "but it's not."
-    end
-  end
-end
-
 Step /^The volume named (.+) should not be attached to the instance named (.+) in project (.+)$/ do |volume_name, instance_name, project_name|
   project = IdentityService.session.find_tenant_by_name(project_name)
   raise "Couldn't find a project named '#{ project_name }'" unless project
@@ -797,7 +773,7 @@ end
 
 
 Then /^The (.+) project should be visible$/ do |project_name|
-  unless @current_page.has_project_row?( name: project_name )
+  unless @current_page.has_project_link?( name: project_name )
     raise "The project '#{ project_name }' should be visible, but it's not."
   end
 end
@@ -824,7 +800,7 @@ end
 
 
 Then /^The (.+) project should not be visible$/ do |project_name|
-  if @current_page.has_project_link?( name: project_name )
+  if @current_page.has_project_row?( name: project_name )
     raise "The project '#{ project_name }' should not be visible, but it is."
   end
 end
