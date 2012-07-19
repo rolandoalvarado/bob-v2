@@ -540,7 +540,7 @@ Then /^The (.+) user row should be visible$/ do |username|
 end
 
 
-Step /^(?:A|The) Floating IP should be associated to instance (.+)$/ do |instance_name|
+Step /^(?:A|The) floating IP should be associated to instance (.+)$/i do |instance_name|
   sleeping(1).seconds.between_tries.failing_after(15).tries do
     unless @current_page.has_associated_floating_ip_row?( name: instance_name )
       raise "Couldn't find a floating IP to be associated to instance #{ instance_name }!"
@@ -682,6 +682,54 @@ Then /^The volume named (.+) should not be attached to the instance named (.+)$/
 
     attachment = @current_page.volume_row(id: volume['id']).find('.attachments').text.to_s.strip
     if attachment == instance_name
+      raise "Expected volume #{ volume_name } to not be attached to instance #{ instance_name }, but it is."
+    end
+  end
+end
+
+Step /^The volume named (.+) should be attached to the instance named (.+) in project (.+)$/ do |volume_name, instance_name, project_name|
+  project = IdentityService.session.find_tenant_by_name(project_name)
+  raise "Couldn't find a project named '#{ project_name }'" unless project
+
+  instance = ComputeService.session.find_instance_by_name(project, instance_name)
+  raise "Couldn't find an instance named '#{ instance_name }'" unless instance
+
+  VolumeService.session.reload_volumes
+  volume = VolumeService.session.volumes.find { |v| v['display_name'] == volume_name }
+  raise "Couldn't find a volume named '#{ volume_name }'" unless volume
+
+  sleeping(1).seconds.between_tries.failing_after(15).tries do
+    unless @current_page.has_volume_row?(id: volume['id'])
+      raise "Could not find row for the volume named #{ volume_name }!"
+    end
+
+    attachment_id = @current_page.volume_row(id: volume['id']).find('.attachments')[:title]
+    if attachment_id != instance.id
+      raise "Expected volume #{ volume_name } to be attached to instance #{ instance_name }, " +
+            "but it's not."
+    end
+  end
+end
+
+Step /^The volume named (.+) should not be attached to the instance named (.+) in project (.+)$/ do |volume_name, instance_name, project_name|
+  project = IdentityService.session.find_tenant_by_name(project_name)
+  raise "Couldn't find a project named '#{ project_name }'" unless project
+
+  instance = ComputeService.session.find_instance_by_name(project, instance_name)
+  raise "Couldn't find an instance named '#{ instance_name }'" unless instance
+
+  VolumeService.session.reload_volumes
+  volume = VolumeService.session.volumes.find { |v| v['display_name'] == volume_name }
+
+  raise "Couldn't find a volume named '#{ volume_name }'" unless volume
+
+  sleeping(1).seconds.between_tries.failing_after(15).tries do
+    unless @current_page.has_volume_row?(id: volume['id'])
+      raise "Could not find row for the volume named #{ volume_name }!"
+    end
+
+    attachment_id = @current_page.volume_row(id: volume['id']).find('.attachments')[:title]
+    if attachment_id == instance.id
       raise "Expected volume #{ volume_name } to not be attached to instance #{ instance_name }, but it is."
     end
   end

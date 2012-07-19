@@ -260,8 +260,11 @@ TestCase /^A user with a role of (.+) in a project can attach any of its volumes
   Preconditions %{
     * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
     * Ensure that a project named #{ test_project_name } exists
+    * Ensure that the user with credentials #{ bob_username }/#{ bob_password } has a keypair named #{ test_keypair_name }
+    * Ensure that a security group rule exists for project #{ test_project_name }
     * Ensure that the project named #{ test_project_name } has an instance named #{ test_instance_name }
     * Ensure that the project named #{ test_project_name } has a volume named #{ test_volume_name }
+    * Ensure that an instance named #{ test_instance_name } does not have any floating IPs
     * Ensure that the volume named #{ test_volume_name } is not attached to the instance named #{ test_instance_name } in the project #{ test_project_name }
     * Ensure that the user #{ bob_username } has a role of #{ role_name } in the project #{ test_project_name }
   }
@@ -287,7 +290,7 @@ TestCase /^A user with a role of (.+) in a project can attach any of its volumes
     * Choose the item with text #{ test_instance_name } in the attachable instance dropdown
     * Click the volume attach confirmation button
 
-    * The volume named #{ test_volume_name } should be attached to the instance named #{ test_instance_name }
+    * The volume named #{ test_volume_name } should be attached to the instance named #{ test_instance_name } in project #{ test_project_name }
   }
 
 end
@@ -361,7 +364,7 @@ TestCase /^A user with a role of (.+) in a project can detach any of its volumes
     * Click the detach button of the volume named #{ test_volume_name }
     * Click the volume detach confirmation button
 
-    * The volume named #{ test_volume_name } should not be attached to the instance named #{ test_instance_name }
+    * The volume named #{ test_volume_name } should not be attached to the instance named #{ test_instance_name } in project #{ test_project_name }
   }
 
 end
