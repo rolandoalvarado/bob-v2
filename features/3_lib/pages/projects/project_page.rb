@@ -3,6 +3,8 @@ require_relative '../secure_page'
 class ProjectPage < SecurePage
   path '/projects'
 
+  link     'project',                        xpath:  "//*[@id='projects-list']//td[normalize-space(text())='<name>']/.."
+  
   button    'close',                              '.close'
 
   tab       'instances and volumes',              '.nav-tabs .instances-and-volumes a'

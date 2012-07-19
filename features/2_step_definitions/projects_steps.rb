@@ -450,13 +450,12 @@ Then /^I can edit (?:that|the) project$/i do
 
     * Edit the #{ (@project || @project_attrs).name } project
     * Fill in the project name field with editting project
+    * Fill in the project description field with project description
     * Click the modify project button
 
     * The editting project project should be visible
   }
 
-  # restore project name
-  @project.save
 end
 
 
