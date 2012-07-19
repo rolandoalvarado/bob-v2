@@ -90,7 +90,7 @@ class ComputeService < BaseCloudService
 
     # Delete any error or shutoff instances first
     error_instances    = instances.select { |i| i.state =~ /^ERROR|SHUTOFF$/ }
-    inactive_instances = instances.select { |i| i.state =~ /^ACTIVE|ERROR|SHUTOFF$/ }
+    inactive_instances = instances.select { |i| i.state !~ /^ACTIVE|ERROR|SHUTOFF$/ } # Changed from =~ to !~
 
     error_instances.each do |instance|
       instance.destroy

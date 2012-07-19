@@ -128,7 +128,9 @@ class EnvironmentCleaner
         end
 
         puts "    Deleting #{ project.name }..."
-        @identity_service.delete_project(project)
+        sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+          @identity_service.delete_project(project)
+        end
       rescue Exception => e
         puts "\033[0;33m  ERROR: #{ project.name } could not be deleted. The error returned was: " +
              e.inspect + "\033[m"
