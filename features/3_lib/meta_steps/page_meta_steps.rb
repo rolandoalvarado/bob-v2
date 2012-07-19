@@ -687,6 +687,30 @@ Then /^The volume named (.+) should not be attached to the instance named (.+)$/
   end
 end
 
+Step /^The volume named (.+) should not be attached to the instance named (.+) in project (.+)$/ do |volume_name, instance_name, project_name|
+  project = IdentityService.session.find_tenant_by_name(project_name)
+  raise "Couldn't find a project named '#{ project_name }'" unless project
+
+  instance = ComputeService.session.find_instance_by_name(project, instance_name)
+  raise "Couldn't find an instance named '#{ instance_name }'" unless instance
+
+  VolumeService.session.reload_volumes
+  volume = VolumeService.session.volumes.find { |v| v['display_name'] == volume_name }
+
+  raise "Couldn't find a volume named '#{ volume_name }'" unless volume
+
+  sleeping(1).seconds.between_tries.failing_after(15).tries do
+    unless @current_page.has_volume_row?(id: volume['id'])
+      raise "Could not find row for the volume named #{ volume_name }!"
+    end
+
+    attachment_id = @current_page.volume_row(id: volume['id']).find('.attachments')[:title]
+    if attachment_id == instance.id
+      raise "Expected volume #{ volume_name } to not be attached to instance #{ instance_name }, but it is."
+    end
+  end
+end
+
 
 Then /^The (.+) link should be visible$/ do |link_name|
   link_name = link_name.split.join('_').downcase
