@@ -161,30 +161,36 @@ end
 
 Step /^Click on the tile for project (.+)$/ do |project_name|
   project_name.strip!
-  unless @current_page.has_tile_element?( name: project_name )
-    raise "Couldn't find tile for project #{ project_name }!"
-  else
-    @current_page.tile_element( name: project_name ).click
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+    unless @current_page.has_tile_element?( name: project_name )
+      raise "Couldn't find tile for project #{ project_name }!"
+    else
+      @current_page.tile_element( name: project_name ).click
+    end
   end
 end
 
 Step /^Double\-click on the tile for project (.+)$/ do |project_name|
   project_name.strip!
-  unless @current_page.has_tile_element?( name: project_name )
-    raise "Couldn't find tile for project #{ project_name }!"
-  else
-    tile = @current_page.tile_element( name: project_name )
-    @current_page.session.driver.browser.mouse.double_click(tile.native)
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+    unless @current_page.has_tile_element?( name: project_name )
+      raise "Couldn't find tile for project #{ project_name }!"
+    else
+      tile = @current_page.tile_element( name: project_name )
+      @current_page.session.driver.browser.mouse.double_click(tile.native)
+    end
   end
 end
 
 Step /^Double\-click on the tile for instance (.+)$/ do |instance_name|
   instance_name.strip!
-  unless @current_page.has_tile_element?( name: instance_name )
-    raise "Couldn't find tile for instance #{ instance_name }!"
-  else
-    tile = @current_page.tile_element( name: instance_name )
-    @current_page.session.driver.browser.mouse.double_click(tile.native)
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+    unless @current_page.has_tile_element?( name: instance_name )
+      raise "Couldn't find tile for instance #{ instance_name }!"
+    else
+      tile = @current_page.tile_element( name: instance_name )
+      @current_page.session.driver.browser.mouse.double_click(tile.native)
+    end
   end
 end
 
@@ -535,29 +541,37 @@ end
 
 
 Step /^(?:A|The) Floating IP should be associated to instance (.+)$/ do |instance_name|
-  unless @current_page.has_associated_floating_ip_row?( name: instance_name )
-    raise "Couldn't find a floating IP to be associated to instance #{ instance_name }!"
+  sleeping(1).seconds.between_tries.failing_after(15).tries do
+    unless @current_page.has_associated_floating_ip_row?( name: instance_name )
+      raise "Couldn't find a floating IP to be associated to instance #{ instance_name }!"
+    end
   end
 end
 
 
 Step /^(?:A|The) floating IP should not be associated to instance (.+)$/i do |instance_name|
-  if @current_page.has_associated_floating_ip_row?( name: instance_name )
-    raise "Found a floating IP to be associated to instance #{ instance_name }!"
+  sleeping(1).seconds.between_tries.failing_after(15).tries do
+    if @current_page.has_associated_floating_ip_row?( name: instance_name )
+      raise "Found a floating IP to be associated to instance #{ instance_name }!"
+    end
   end
 end
 
 
 Then /^The instance (.+) should be performing task (.+)$/ do |instance_id, task|
-  unless @current_page.instance_row( id: instance_id ).find('.task').text.include?(task)
-    raise "Instance #{ instance_id } is not shown as performing task #{ task }."
+  sleeping(1).seconds.between_tries.failing_after(15).tries do
+    unless @current_page.instance_row( id: instance_id ).find('.task').text.include?(task)
+      raise "Instance #{ instance_id } is not shown as performing task #{ task }."
+    end
   end
 end
 
 
 Then /^The instance (.+) should be shown as rebooting$/ do |instance_id|
-  unless @current_page.instance_row( id: instance_id ).find('.task').text.include?('rebooting')
-    raise "Instance #{ instance_id } is not shown as rebooting."
+  sleeping(1).seconds.between_tries.failing_after(15).tries do
+    unless @current_page.instance_row( id: instance_id ).find('.task').text.include?('rebooting')
+      raise "Instance #{ instance_id } is not shown as rebooting."
+    end
   end
 end
 
@@ -628,10 +642,12 @@ Then /^The volume named (.+) should be (?:in|of) (.+) status$/ do |volume_name, 
   raise "Couldn't find a volume named '#{ volume_name }'" unless volume
 
   status.downcase!
-  volume_row    = @current_page.volume_row( id: volume['id'] ).find('.volume-status')
-  volume_status = volume_row.text.to_s.strip.downcase
-  unless volume_status == status
-    raise "Volume #{ volume_name } took to long to become #{ status }."
+  sleeping(1).seconds.between_tries.failing_after(15).tries do
+    volume_row    = @current_page.volume_row( id: volume['id'] ).find('.volume-status')
+    volume_status = volume_row.text.to_s.strip.downcase
+    unless volume_status == status
+      raise "Volume #{ volume_name } took to long to become #{ status }."
+    end
   end
 end
 
@@ -640,6 +656,7 @@ Then /^The volume named (.+) should be attached to the instance named (.+)$/ do 
   volume = VolumeService.session.volumes.find { |v| v['display_name'] == volume_name }
   raise "Couldn't find a volume named '#{ volume_name }'" unless volume
 
+  sleeping(1).seconds.between_tries.failing_after(15).tries do
     unless @current_page.has_volume_row?(id: volume['id'])
       raise "Could not find row for the volume named #{ volume_name }!"
     end
@@ -649,6 +666,7 @@ Then /^The volume named (.+) should be attached to the instance named (.+)$/ do 
       raise "Expected volume #{ volume_name } to be attached to instance #{ instance_name }, " +
             "but it's not."
     end
+  end
 end
 
 Then /^The volume named (.+) should not be attached to the instance named (.+)$/ do |volume_name, instance_name|
@@ -657,6 +675,7 @@ Then /^The volume named (.+) should not be attached to the instance named (.+)$/
 
   raise "Couldn't find a volume named '#{ volume_name }'" unless volume
 
+  sleeping(1).seconds.between_tries.failing_after(15).tries do
     unless @current_page.has_volume_row?(id: volume['id'])
       raise "Could not find row for the volume named #{ volume_name }!"
     end
@@ -665,6 +684,7 @@ Then /^The volume named (.+) should not be attached to the instance named (.+)$/
     if attachment == instance_name
       raise "Expected volume #{ volume_name } to not be attached to instance #{ instance_name }, but it is."
     end
+  end
 end
 
 
@@ -763,35 +783,37 @@ end
 
 
 Then /^The (.+) table should have (\d+) (?:row|rows)$/ do |table_name, num_rows|
-    table_name      = table_name.split.join('_').downcase
-    table           = @current_page.send("#{ table_name }_table")
-    actual_num_rows = if table.has_no_css_selector?('td.empty-table')
-                        table.has_css_selector?('tbody tr') ? table.all('tbody tr').count : table.all('tr').count
-                      else
-                        0
-                      end
-    num_rows        = num_rows.to_i
+  table_name      = table_name.split.join('_').downcase
+  table           = @current_page.send("#{ table_name }_table")
+  actual_num_rows = if table.has_no_css_selector?('td.empty-table')
+                      table.has_css_selector?('tbody tr') ? table.all('tbody tr').count : table.all('tr').count
+                    else
+                      0
+                    end
+  num_rows        = num_rows.to_i
 
-    if actual_num_rows != num_rows
-      raise "Expected #{ num_rows } rows in the #{ table_name } table, but counted #{ actual_num_rows }."
-    end
+  if actual_num_rows != num_rows
+    raise "Expected #{ num_rows } rows in the #{ table_name } table, but counted #{ actual_num_rows }."
+  end
 end
 
 
 Step /^The (.+) table's last row should include the text (.+)$/ do |table_name, text|
-    table_name = table_name.split.join('_').downcase
-    table_rows = @current_page.send("#{ table_name }_table").all('tbody tr')
-    unless table_rows.last.has_content?(text)
-      raise "Couldn't find the text '#{ text }' in the last row of the #{ table_name } table."
-    end
+  table_name = table_name.split.join('_').downcase
+  table_rows = @current_page.send("#{ table_name }_table").all('tbody tr')
+  unless table_rows.last.has_content?(text)
+    raise "Couldn't find the text '#{ text }' in the last row of the #{ table_name } table."
+  end
 end
 
 
 Then /^The (.+) table's last row should not include the text (.+)$/ do |table_name, text|
-  table_name = table_name.split.join('_').downcase
-  table_rows = @current_page.send("#{ table_name }_table").all('tbody tr')
-  unless table_rows.last.has_no_content?(text)
-    raise "Found the text '#{ text }' in the last row of the #{ table_name } table."
+  sleeping(1).seconds.between_tries.failing_after(5).tries do
+    table_name = table_name.split.join('_').downcase
+    table_rows = @current_page.send("#{ table_name }_table").all('tbody tr')
+    unless table_rows.last.has_no_content?(text)
+      raise "Found the text '#{ text }' in the last row of the #{ table_name } table."
+    end
   end
 end
 
