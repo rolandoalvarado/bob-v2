@@ -411,7 +411,7 @@ Then /^I can delete (?:that|the) project$/i do
   project =  IdentityService.session.tenants.find_by_name((@project || @project_attrs).name)
 
   if project != nil && project.id != nil
-     raise "Project #{ project.name } should be deleted. but it is"
+     raise "Project #{ project.name } should be deleted. but it's not"
   end
 
 end
