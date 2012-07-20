@@ -149,7 +149,8 @@ Then /^I [Cc]an [Cc]reate a volume in the project$/ do
     * Fill in the volume description field with #{ attrs.description }
     * Fill in the volume size field with #{ attrs[:size] }
     * Click the create volume button
-    * The volumes table should include the text #{ attrs.name }
+
+    * The volumes table should have a row for the volume named #{ attrs.name }
   }
 
   @volume_attrs = attrs
@@ -244,7 +245,7 @@ end
 
 Then /^the volume will be [Cc]reated$/ do
   steps %{
-    * The volumes table should include the text #{ @volume_attrs.name }
+    * The volumes table should have a row for the volume named #{ @volume_attrs.name }
   }
 end
 

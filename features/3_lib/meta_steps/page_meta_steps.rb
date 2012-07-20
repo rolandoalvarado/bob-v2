@@ -841,6 +841,17 @@ Then /^The (.+) table's last row should not include the text (.+)$/ do |table_na
   end
 end
 
+Then /^The volumes table should have a row for the volume named (.+)$/ do |volume_name|
+  VolumeService.session.reload_volumes
+  volume = VolumeService.session.volumes.find { |v| v['display_name'] == volume_name }
+  raise "Couldn't find a volume named '#{ volume_name }'" unless volume
+
+  unless @current_page.has_volume_row?( id: volume['id'] )
+    raise "Expected to find a row for volume #{ volume_name } in the " +
+          "volumes table, but couldn't find it."
+  end
+end
+
 Then /^Uncheck all items in the (.+) checklist$/ do |list_name|
   list_name = list_name.split.join('_').downcase
   checklist = @current_page.send("#{ list_name }_checklist_items")
