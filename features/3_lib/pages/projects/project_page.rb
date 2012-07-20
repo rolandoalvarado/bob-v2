@@ -129,7 +129,7 @@ class ProjectPage < SecurePage
   table     'volume snapshots',                   '#volume-snapshot-list'
 
 # Type      Name                                  Selector
-  span      'new volume form error',              'span.error[for="name"], span.error[for="appendedInput"]'
+  message   'new volume form error',              'span.error[for="name"], span.error[for="appendedInput"]'
 
 # Type      Name                                  Selector
   button    'attach volume',                      '#volume-item-<id> .attach'
