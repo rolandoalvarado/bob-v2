@@ -12,8 +12,7 @@ class ProjectsPage < SecurePage
   span    'new project description error', "span.error[for='new-project-description']"
 
   # To click on a project link, use ProjectsPage#project_link( name: NAME_OF_PROJECT ).click
-  #row     'project',                        xpath:  "//td.project-details[@title='<name>']/.."
-  row     'project',                        xpath:  "//*[@id='projects-list']//td[normalize-space(text())='<name>']/.."
+  row     'project',                        xpath:  "//td[@title='<name>']/"
   link    'project',                        xpath:  "//td[@title='<name>']/..//a[@class='view-project']"
   link    'edit project',                   xpath:  "//td[@title='<name>']/..//a[@class='edit-project']"
   link    'disabled edit project',          xpath:  "//td[@title='<name>']/..//a[@class='edit-project disabled'][@disabled='disabled']"

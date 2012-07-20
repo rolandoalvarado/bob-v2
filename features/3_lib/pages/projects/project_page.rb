@@ -3,7 +3,10 @@ require_relative '../secure_page'
 class ProjectPage < SecurePage
   path '/projects'
 
-  link     'project',                        xpath:  "//*[@id='projects-list']//td[normalize-space(text())='<name>']/.."
+  # For Project
+  link      'project',                            xpath:  "//*[@id='projects-list']//td[normalize-space(text())='<name>']/.."
+  message   'update project',                     '#alert-template .alert-success'
+  row       'project',                            xpath:  "//td[@title='<name>']/"
   
   button    'close',                              '.close'
 
