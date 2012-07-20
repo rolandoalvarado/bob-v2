@@ -431,25 +431,24 @@ Then /^I cannot update a user with attributes (.+), (.+), (.+), (.+), and (.+)$/
 end
 
 
-TestCase /^A user with a role of (System Admin|\(None\)) in the system can change user permissions$/i do |role_name|
+TestCase /^A user with a role of System Admin in the system can change user permissions$/i do
 
   pm_username     = Unique.username('pm')
   member_username = Unique.username('member')
-  project_name    = Unique.project_name('test')
 
   Preconditions %{
     * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
-    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the system
+    * Ensure that the user #{ bob_username } has a role of System Admin in the system
 
-    * Ensure that a project named #{ project_name } exists
+    * Ensure that a project named #{ test_project_name } exists
     * Ensure that another user with username #{ pm_username } and password #{ bob_password } exists
-    * Ensure that the user #{ pm_username } has a role of Project Manager in the project #{ project_name }
+    * Ensure that the user #{ pm_username } has a role of Project Manager in the project #{ test_project_name }
     * Ensure that another user with username #{ member_username } and password #{ bob_password } exists
-    * Ensure that the user #{ member_username } has a role of Member in the project #{ project_name }
+    * Ensure that the user #{ member_username } has a role of Member in the project #{ test_project_name }
   }
 
   Cleanup %{
-    * Register the project named #{ project_name } for deletion at exit
+    * Register the project named #{ test_project_name } for deletion at exit
     * Register the user named #{ bob_username } for deletion at exit
     * Register the user named #{ pm_username } for deletion at exit
     * Register the user named #{ member_username } for deletion at exit
@@ -488,21 +487,20 @@ TestCase /^A user with a role of (Project Manager|Member) in the system can chan
 
   pm_username     = Unique.username('pm')
   member_username = Unique.username('member')
-  project_name    = Unique.project_name('test')
 
   Preconditions %{
-    * Ensure that a project named #{ project_name } exists
+    * Ensure that a project named #{ test_project_name } exists
     * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
-    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the project #{ project_name }
+    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the project #{ test_project_name }
 
     * Ensure that another user with username #{ pm_username } and password #{ bob_password } exists
-    * Ensure that the user #{ pm_username } has a role of Project Manager in the project #{ project_name }
+    * Ensure that the user #{ pm_username } has a role of Project Manager in the project #{ test_project_name }
     * Ensure that another user with username #{ member_username } and password #{ bob_password } exists
-    * Ensure that the user #{ member_username } has a role of Member in the project #{ project_name }
+    * Ensure that the user #{ member_username } has a role of Member in the project #{ test_project_name }
   }
 
   Cleanup %{
-    * Register the project named #{ project_name } for deletion at exit
+    * Register the project named #{ test_project_name } for deletion at exit
     * Register the user named #{ bob_username } for deletion at exit
     * Register the user named #{ pm_username } for deletion at exit
     * Register the user named #{ member_username } for deletion at exit
@@ -537,23 +535,21 @@ TestCase /^A user with a role of (Project Manager|Member) in the system can chan
 end
 
 
-TestCase /^A user with a role of (.+) in the system cannot change user permissions$/i do |role_name|
+TestCase /^A user with a role of \(None\) in the system cannot change user permissions$/i do
 
   username      = Unique.username('test')
-  password      = '123qwe'
-  project_name  = Unique.project_name('test')
 
   Preconditions %{
     * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
-    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the system
+    * Ensure that the user #{ bob_username } has a role of (None) in the system
 
-    * Ensure that a project named #{ project_name } exists
-    * Ensure that another user with username #{ username } and password #{ password } exists
-    * Ensure that the user #{ username } has a role of Member in the project #{ project_name }
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that another user with username #{ username } and password #{ bob_password } exists
+    * Ensure that the user #{ username } has a role of Member in the project #{ test_project_name }
   }
 
   Cleanup %{
-    * Register the project named #{ project_name } for deletion at exit
+    * Register the project named #{ test_project_name } for deletion at exit
     * Register the user named #{ bob_username } for deletion at exit
     * Register the user named #{ username } for deletion at exit
   }

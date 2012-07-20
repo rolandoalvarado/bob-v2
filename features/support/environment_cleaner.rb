@@ -47,7 +47,7 @@ class EnvironmentCleaner
 
     if object_types.include?(object_type)
       registry[object_type] ||= []
-      registry[object_type] << options
+      registry[object_type] << options unless registry[object_type].include?(options)
     else
       raise "Unknown cloud object type #{ object_type }. Recognized types are " +
             "#{ object_types.join(', ') }."

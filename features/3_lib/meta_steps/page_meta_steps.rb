@@ -734,6 +734,12 @@ Step /^The (.+) button should not be visible$/ do |button_name|
   end
 end
 
+Step /^The Context Menu button for the user named (.+) should not be visible$/i do |username|
+  if @current_page.send("has_context_menu_button?", name: username)
+    raise "The context menu button for user #{ username } should not be visible, but it is."
+  end
+end
+
 Then /^The (.+) message should be visible$/ do |message_name|
   message_name = message_name.split.join('_').downcase
   unless @current_page.send("has_#{ message_name }_message?")
