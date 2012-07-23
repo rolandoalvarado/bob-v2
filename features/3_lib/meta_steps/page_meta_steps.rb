@@ -591,8 +591,10 @@ end
 
 
 Then /^The instance ((?:(?!named )).+) should be (?:in|of) (.+) status$/ do |instance_id, status|
-  unless @current_page.instance_row( id: instance_id ).find('.status').has_content?(status.upcase.gsub(' ', '_'))
-    raise "Instance #{ instance_id } does not have or took to long to become #{ status } status."
+  sleeping(1).seconds.between_tries.failing_after(20).tries do
+    unless @current_page.instance_row( id: instance_id ).find('.status').has_content?(status.upcase.gsub(' ', '_'))
+      raise "Instance #{ instance_id } does not have or took to long to become #{ status } status."
+    end
   end
 end
 
