@@ -213,8 +213,6 @@ When /^I create a project$/ do
             :name => Unique.project_name('project')
           )
 
-  IdentityService.session.ensure_project_does_not_exist(attrs)
-
   steps %{
     * Click the logout button if currently logged in
 
@@ -279,19 +277,19 @@ Then /^I Cannot Create a project$/ do
     * Fill in the password field with #{ @current_user.password }
     * Click the login button
 
+    * Wait 30 seconds
     * Visit the projects page
     * The create project button should be disabled
   }
+  
 end
 
 
 Then /^I Can Create a project$/ do
   attrs = CloudObjectBuilder.attributes_for(
             :project,
-            :name => Unique.project_name('newproject')
+            :name => Unique.project_name('project')
           )
-
-  IdentityService.session.ensure_project_does_not_exist(attrs)
 
   steps %{
     * Click the logout button if currently logged in

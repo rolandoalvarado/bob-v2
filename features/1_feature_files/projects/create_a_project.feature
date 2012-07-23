@@ -22,10 +22,11 @@ Feature: Create a Project
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Create |
         | System Admin    | Can Create           |
+        | Project Manager | Can Create           |
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Create |
-        | User            | Cannot Create        |
+        | Member          | Cannot Create        |
 
   @jira-MCF-4-CAP
   Scenario Outline: Create a Project
