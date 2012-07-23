@@ -14,13 +14,15 @@ Feature: Delete a project
     Given I have a role of <Role> in the project
      Then I <Can or Cannot Delete> the project
 
-      Scenarios: Authorized Roles
+     Scenarios: Authorized Roles
         | Role            | System Admin or User | Can or Cannot Delete |
+        | Project Manager | System Admin         | Can Delete           |
         | Member          | System Admin         | Can Delete           |
-
+  
       Scenarios: Unauthorized Roles
         | Role            | System Admin or User | Can or Cannot Delete |
         | Member          | User                 | Cannot Delete        |
+        | Project Manager | User                 | Cannot Delete        |
 
   Scenario: Delete a Project with resource
     Given I am authorized to delete the project

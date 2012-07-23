@@ -23,7 +23,6 @@ Feature: Edit a Project
       Scenarios: Unauthorized Roles
         | Role            | System Admin or User | Can or Cannot Edit |
         | Member          | User                 | Cannot Edit        |
-        | Project Manager | User                 | Cannot Edit        |
 
   @jira-MCF-26-EAP
   Scenario Outline: Edit a Project

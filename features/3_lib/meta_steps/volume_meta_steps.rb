@@ -41,8 +41,7 @@ Step /^Ensure that the project named (.+) has a volume named (.+)$/ do |project_
   project = IdentityService.session.find_project_by_name(project_name)
   raise "#{ project_name } couldn't be found!" unless project
 
-  VolumeService.session.create_volume_in_project(project, name: volume_name)
-  volume = VolumeService.session.find_volume_by_name(project, volume_name)
+  volume = VolumeService.session.create_volume_in_project(project, name: volume_name)
   raise "Volume #{ volume_name } couldn't be found!" unless volume
 end
 

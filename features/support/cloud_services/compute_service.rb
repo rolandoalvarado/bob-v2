@@ -32,7 +32,7 @@ class ComputeService < BaseCloudService
     sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
       volumes.reload
       volume = volumes.get(volume.id)
-      unless volume.attachments.any? { |a| a['serverId'] == instance.id }
+      unless volume.attachments.any? { |a| a['server_id'] == instance.id }
         raise "Couldn't ensure that instance #{ instance.name } has attached volume #{ volume.name }!"
       end
     end
@@ -90,7 +90,7 @@ class ComputeService < BaseCloudService
 
     # Delete any error or shutoff instances first
     error_instances    = instances.select { |i| i.state =~ /^ERROR|SHUTOFF$/ }
-    inactive_instances = instances.select { |i| i.state =~ /^ACTIVE|ERROR|SHUTOFF$/ }
+    inactive_instances = instances.select { |i| i.state !~ /^ACTIVE|ERROR|SHUTOFF$/ } # Changed from =~ to !~
 
     error_instances.each do |instance|
       instance.destroy
@@ -165,7 +165,7 @@ class ComputeService < BaseCloudService
     volume = volumes.find { |v| v.id == volume['id'].to_i }
 
     # Check if volume is attached to the instance
-    if volume.attachments.any? { |a| a['serverId'] == instance.id }
+    if volume.attachments.any? { |a| a['server_id'] == instance.id }
       begin
         service.detach_volume(instance.id, volume.id)
       rescue => e
@@ -177,7 +177,7 @@ class ComputeService < BaseCloudService
     sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
       volumes.reload
       volume = volumes.get(volume.id)
-      if volume.attachments.any? { |a| a['serverId'] == instance.id }
+      if volume.attachments.any? { |a| a['server_id'] == instance.id }
         raise "Couldn't ensure that instance #{ instance.name } has no attached volume #{ volume.name }!"
       end
     end
@@ -217,7 +217,7 @@ class ComputeService < BaseCloudService
       volumes.reload
       raise "Requires #{ desired_count } volumes. Only #{ volumes.count } volumes exist!" if desired_count > volumes.count
 
-      attached_volumes     = volumes.select{ |v| v.attachments.any?{ |a| a['serverId'] == instance.id } }
+      attached_volumes     = volumes.select{ |v| v.attachments.any?{ |a| a['server_id'] == instance.id } }
       non_attached_volumes = volumes.select{ |v| v.attachments.first.empty? }
       if desired_count > attached_volumes.count
         (desired_count - attached_volumes.count).times do |i|
@@ -232,7 +232,7 @@ class ComputeService < BaseCloudService
       end
 
       volumes.reload
-      attached_volumes = volumes.select{ |v| v.attachments.any?{ |a| a['serverId'] == instance.id } }
+      attached_volumes = volumes.select{ |v| v.attachments.any?{ |a| a['server_id'] == instance.id } }
       if strict && desired_count != attached_volumes.count
         raise "Couldn't ensure instance #{ instance.name } has #{ desired_count } attached volumes."
       elsif !strict && desired_count > attached_volumes.count
@@ -723,7 +723,7 @@ class ComputeService < BaseCloudService
       sleep(ConfigFile.wait_short)
     end
 
-    attached_volumes = service.volumes.select { |v| v.attachments.any? { |a| a['serverId'] == instance.id } }
+    attached_volumes = service.volumes.select { |v| v.attachments.any? { |a| a['server_id'] == instance.id } }
     attached_volumes.each do |volume|
       volume.detach
       sleep(ConfigFile.wait_short)

@@ -46,7 +46,7 @@ Feature: Create an Instance
 
       Scenarios: Specific Images
         | Image                                | Name        | Flavor | Keypair | Security Group | Created or Not |
-        | 64Bit CentOS 5.8 (v1.0.0)            | My Server   | (Any)  | (Any)   | (Any)          | Created        |
+        | 64Bit CentOS 5.8 (v1.0.1)            | My Server   | (Any)  | (Any)   | (Any)          | Created        |
         | 64Bit CentOS 6.2                     | My Server   | (Any)  | (Any)   | (Any)          | Created        |
         | 64Bit Ubuntu 10.04                   | My Server   | (Any)  | (Any)   | (Any)          | Created        |
         | 64Bit Ubuntu 12.04                   | My Server   | (Any)  | (Any)   | (Any)          | Created        |
