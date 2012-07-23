@@ -182,7 +182,7 @@ Then /^I [Cc]an [Cc]reate a snapshot of the volume$/ do
     * Click the create volume snapshot button
 
     * Click the snapshots tab
-    * The volume snapshots table should include the text #{ snapshot.name }
+    * The volume snapshots table should have a row for the volume snapshot named #{ snapshot.name }
   }
 end
 
@@ -206,7 +206,8 @@ Then /^I [Cc]an [Dd]elete a snapshot of the volume$/ do
     * Click the volume snapshot menu button for volume snapshot named #{ snapshot['display_name'] }
     * Click the delete volume snapshot button for volume snapshot named #{ snapshot['display_name'] }
     * Click the confirm volume snapshot deletion button
-    * The volume snapshots table should not include the text #{ snapshot['display_name'] }
+
+    * The volume snapshots table should not have a row for the volume snapshot named #{ snapshot['display_name'] }
   }
 end
 
