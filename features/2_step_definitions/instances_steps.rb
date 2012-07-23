@@ -540,8 +540,6 @@ Then /^I [Cc]an [Ss]uspend (?:an|the) instance(?:| in the project)$/ do
 end
 
 Then /^I [Cc]an [Uu]npause (?:that|the) instance$/ do
-  compute_service = ComputeService.session
-  compute_service.set_tenant @project
 
   steps %{
     * Click the logout button if currently logged in
@@ -559,6 +557,7 @@ Then /^I [Cc]an [Uu]npause (?:that|the) instance$/ do
 
     * The instance #{ @instance.id } should be in active status
   }
+  
 end
 
 Then /^I [Cc]an [Vv]iew console output of the instance$/ do
