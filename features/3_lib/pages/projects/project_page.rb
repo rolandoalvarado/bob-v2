@@ -3,6 +3,11 @@ require_relative '../secure_page'
 class ProjectPage < SecurePage
   path '/projects'
 
+  # For Project
+  link      'project',                            xpath:  "//*[@id='projects-list']//td[normalize-space(text())='<name>']/.."
+  message   'update project',                     '#alert-template .alert-success'
+  row       'project',                            xpath:  "//td[@title='<name>']/"
+  
   button    'close',                              '.close'
 
   tab       'instances and volumes',              '.nav-tabs .instances-and-volumes a'
@@ -29,7 +34,6 @@ class ProjectPage < SecurePage
   row       'instance',                           '#instances-template .table-list #instance-item-<id>'
   form      'resize instance',                    '#resize-instance-modal'
   form      'instance password',                  '#instance-password-modal'
-  element   'project name',                       "td.project-details[title='<name>']"
   button    'close instance dialogue',            "#instance-password-modal a.btn"
   button    'cancel create instance',             "#new-instance-modal a.btn"
   #==========================
@@ -122,13 +126,14 @@ class ProjectPage < SecurePage
   tab       'snapshots',                          '.nav-tabs .snapshots a'
 
 # Type      Name                                  Selector
-  button    'volume snapshot menu',               xpath: "//*[@id='volume-snapshot-list']//td[contains(@class, 'name') and normalize-space(text())=\"<name>\"]/..//*[@class='dropdown-toggle']"
-  button    'delete volume snapshot',             xpath: "//*[@id='volume-snapshot-list']//td[contains(@class, 'name') and normalize-space(text())=\"<name>\"]/..//*[@class='delete-snapshot']"
+  button    'volume snapshot menu',               xpath: "//*[@id='volume-snapshot-list']//td[@class='name' and @title=\"<name>\"]/..//*[@class='dropdown-toggle']"
+  button    'delete volume snapshot',             xpath: "//*[@id='volume-snapshot-list']//td[@class='name' and @title=\"<name>\"]/..//*[@class='delete-snapshot']"
   button    'confirm volume snapshot deletion',   '#alert-template .okay'
   table     'volume snapshots',                   '#volume-snapshot-list'
+  row       'volume snapshot',                    xpath: "//*[@id='volume-snapshot-list']//td[@class='name' and @title=\"<name>\"]/.."
 
 # Type      Name                                  Selector
-  span      'new volume form error',              'span.error[for="name"], span.error[for="appendedInput"]'
+  message   'new volume form error',              'span.error[for="name"], span.error[for="appendedInput"]'
 
 # Type      Name                                  Selector
   button    'attach volume',                      '#volume-item-<id> .attach'

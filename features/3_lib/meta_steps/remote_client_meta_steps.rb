@@ -122,10 +122,9 @@ Step /^A new device file should have been created on the instance named (.+) in 
 
   private_key = ComputeService.session.private_keys[test_keypair_name]
   raise "Couldn't find private key for keypair '#{ test_keypair_name }'!" unless private_key
-  options.merge!( port: 22, timeout: 30, key_data: [ private_key ] )
 
   begin
-    Net::SSH.start(ip_address, username, options) do |ssh|
+    Net::SSH.start(ip_address, username, port: 22, timeout: 30, key_data: [ private_key ]) do |ssh|
       # Get a list of all device /dev/vd* files modified/created from x minutes ago
       device_file_list = ssh.exec!("find /dev/vd* -mmin -#{ delta_time }").split
     end
@@ -135,7 +134,7 @@ Step /^A new device file should have been created on the instance named (.+) in 
     end
   rescue => e
     raise "Cannot fetch list of device files from #{ ip_address }. " +
-          "The error returned was: #{ e.message }"
+          "The error returned was: #{ e.inspect }"
   end
 end
 

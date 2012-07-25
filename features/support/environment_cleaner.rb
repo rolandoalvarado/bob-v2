@@ -47,7 +47,7 @@ class EnvironmentCleaner
 
     if object_types.include?(object_type)
       registry[object_type] ||= []
-      registry[object_type] << options
+      registry[object_type] << options unless registry[object_type].include?(options)
     else
       raise "Unknown cloud object type #{ object_type }. Recognized types are " +
             "#{ object_types.join(', ') }."
@@ -92,9 +92,13 @@ class EnvironmentCleaner
 
         if @compute_service.instances.count > 0
           puts "    Deleting instances..."
-          deleted_instances = @compute_service.delete_instances_in_project(project)
-          deleted_instances.each do |instance|
-            puts "      DELETED: #{ instance[:name] } (id: #{ instance[:id] })"
+          # Needed when an instance is doing hard reboot. 
+          # Wait until an instance become in active state.
+          sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_long).tries do
+            deleted_instances = @compute_service.delete_instances_in_project(project)
+            deleted_instances.each do |instance|
+              puts "      DELETED: #{ instance[:name] } (id: #{ instance[:id] })"
+            end
           end
         end
 
@@ -124,7 +128,9 @@ class EnvironmentCleaner
         end
 
         puts "    Deleting #{ project.name }..."
-        @identity_service.delete_project(project)
+        sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+          @identity_service.delete_project(project)
+        end
       rescue Exception => e
         puts "\033[0;33m  ERROR: #{ project.name } could not be deleted. The error returned was: " +
              e.inspect + "\033[m"

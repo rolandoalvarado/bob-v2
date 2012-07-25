@@ -184,6 +184,7 @@ When /^I resize the instance to a different flavor$/ do
     * Visit the projects page
     * Click the #{ @project.name } project
 
+    * Wait 90 seconds
     * Click the instance menu button for instance #{ @instance.id }
     * Click the resize instance button for instance #{ @instance.id }
     * Current page should have the resize instance form
@@ -407,10 +408,7 @@ Then /^I [Cc]an [Dd]elete an instance in the project$/ do
 end
 
 Then /^I [Cc]an [Pp]ause the instances?(?:| in the project)$/ do
-  compute_service = ComputeService.session
-  compute_service.set_tenant @project
-  @instance       = compute_service.instances.find { |i| i.state == 'ACTIVE' }
-
+  
   steps %{
     * Click the logout button if currently logged in
 
@@ -427,6 +425,7 @@ Then /^I [Cc]an [Pp]ause the instances?(?:| in the project)$/ do
 
     * The instance #{ @instance.id } should be of paused status
   }
+   
 end
 
 Then /^I [Cc]an [Rr]eboot an instance in the project$/ do
@@ -456,7 +455,7 @@ end
 Then /^I [Cc]an [Rr]esize (?:that|the) instance$/ do
   compute_service = ComputeService.session
   compute_service.set_tenant @project
-  instance        = compute_service.instances.find { |i| i.state == 'ACTIVE' }
+  instance        = @instance
   old_flavor      = compute_service.flavors.find { |f| f.id == instance.flavor['id'].to_s }
 
   steps %{
@@ -470,6 +469,7 @@ Then /^I [Cc]an [Rr]esize (?:that|the) instance$/ do
     * Visit the projects page
     * Click the #{ @project.name } project
 
+    * Wait 90 seconds
     * Click the instance menu button for instance #{ instance.id }
     * Click the resize instance button for instance #{ instance.id }
     * Current page should have the resize instance form
@@ -508,6 +508,7 @@ Then /^I [Cc]an [Rr]esume the instance$/ do
     * Click the instance menu button for instance #{ instance.id }
     * Click the resume instance button for instance #{ instance.id }
 
+    * Wait 60 seconds
     * The instance #{ instance.id } should be of active status
   }
 end
@@ -515,7 +516,6 @@ end
 Then /^I [Cc]an [Ss]uspend (?:an|the) instance(?:| in the project)$/ do
   compute_service = ComputeService.session
   compute_service.set_tenant @project
-  @instance       = compute_service.instances.find { |i| i.state == 'ACTIVE' }
 
   steps %{
     * Click the logout button if currently logged in
@@ -531,13 +531,15 @@ Then /^I [Cc]an [Ss]uspend (?:an|the) instance(?:| in the project)$/ do
     * Click the instance menu button for instance #{ @instance.id }
     * Click the suspend instance button for instance #{ @instance.id }
 
+    * Wait 90 seconds
     * The instance #{ @instance.id } should be in suspended status
   }
+  
+  @paused_instance = @instance
+  
 end
 
 Then /^I [Cc]an [Uu]npause (?:that|the) instance$/ do
-  compute_service = ComputeService.session
-  compute_service.set_tenant @project
 
   steps %{
     * Click the logout button if currently logged in
@@ -555,6 +557,7 @@ Then /^I [Cc]an [Uu]npause (?:that|the) instance$/ do
 
     * The instance #{ @instance.id } should be in active status
   }
+  
 end
 
 Then /^I [Cc]an [Vv]iew console output of the instance$/ do
@@ -604,10 +607,6 @@ Then /^I [Cc]an [Vv]iew the instance's web-based VNC console$/ do
 end
 
 Then /^I cannot assign a floating IP to (?:that|the) instance$/ do
-  compute_service = ComputeService.session
-  compute_service.set_tenant @project
-  addresses       = compute_service.addresses
-
   steps %{
     * Click the logout button if currently logged in
 
@@ -624,11 +623,6 @@ Then /^I cannot assign a floating IP to (?:that|the) instance$/ do
     * Current page should have the new floating IP allocation form
 
     * The instance dropdown should not have the item with text #{ @instance.name }
-
-    * Click the create floating IP allocation button
-
-    * The floating IPs table should have #{ addresses.count + 1 } rows
-    * The floating IPs table's last row should not include the text #{ @instance.name }
   }
 end
 

@@ -38,8 +38,45 @@ class VolumeService < BaseCloudService
   def create_volume_in_project(project, attributes)
     attrs = CloudObjectBuilder.attributes_for(:volume, attributes)
     set_tenant project
-    if volumes.none? { |v| v['display_name'] == attrs.name }
+    volume = volumes.find { |v| v['display_name'] == attrs.name }
+
+    unless volume
+      # Create volume if it does not exist yet
       service.create_volume(attrs.name, attrs.description, attrs.size)
+    else
+      # Detach volumes from all instances
+      attachments = volume['attachments'].select { |a| !a.empty? }
+      attachments.each do |attachment|
+        # Volume service does not have its own detach volume function
+        compute_service = ComputeService.session.service
+        compute_service.detach_volume(attachment['server_id'], attachment['id'])
+        sleep(ConfigFile.wait_short)
+      end
+
+      sleeping(ConfigFile.wait_long).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+        volume = volumes.find { |v| v['display_name'] == attrs.name }
+        attachment_count = volume['attachments'].count { |a| !a.empty? }
+        raise "Couldn't detach volume #{ volume['display_name'] }!" unless attachment_count == 0
+      end
+
+      # If volume is in error state, recreate volume
+      if volume['status'] == 'error_deleting'
+        service.delete_volume(volume['id'])
+        sleep(ConfigFile.wait_long) # Avoid delete and create at the same time just to be safe :)
+        service.create_volume(attrs.name, attrs.description, attrs.size)
+      end
+    end
+
+    # Check until volume status is available
+    sleeping(ConfigFile.wait_long).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+      reload_volumes
+      volume = volumes.find { |v| v['display_name'] == attrs.name }
+      unless volume['status'] == 'available'
+        raise "Volume #{ volume['display_name'] } took too long to become available! " +
+              "Volume is currently #{ volume['status'] }."
+      else
+        return volume
+      end
     end
   end
 

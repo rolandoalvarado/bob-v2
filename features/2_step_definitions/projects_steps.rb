@@ -32,7 +32,7 @@ Given /^The project has (\d+) (active|paused|suspended) instances?$/ do |number_
 
   compute_service.set_tenant @project
   instances = compute_service.instances
-  
+
   if number_of_instances == 1
     @instance = instances.find { |i| i.state == status.upcase }
   else
@@ -195,7 +195,8 @@ When /^I (.*) edit the project's attributes to (.*), (.*)$/i do |can_or_cannot, 
 
     step "Click the modify project button"
 
-  if can_or_cannot.downcase == "can" 
+  if can_or_cannot.downcase == "can"
+    step "Visit the projects page"
     step "The #{name} project should be visible"
     @project.save
   else
@@ -211,8 +212,6 @@ When /^I create a project$/ do
             :project,
             :name => Unique.project_name('project')
           )
-
-  IdentityService.session.ensure_project_does_not_exist(attrs)
 
   steps %{
     * Click the logout button if currently logged in
@@ -278,19 +277,19 @@ Then /^I Cannot Create a project$/ do
     * Fill in the password field with #{ @current_user.password }
     * Click the login button
 
+    * Wait 30 seconds
     * Visit the projects page
     * The create project button should be disabled
   }
+  
 end
 
 
 Then /^I Can Create a project$/ do
   attrs = CloudObjectBuilder.attributes_for(
             :project,
-            :name => Unique.project_name('newproject')
+            :name => Unique.project_name('project')
           )
-
-  IdentityService.session.ensure_project_does_not_exist(attrs)
 
   steps %{
     * Click the logout button if currently logged in
@@ -411,7 +410,7 @@ Then /^I can delete (?:that|the) project$/i do
   project =  IdentityService.session.tenants.find_by_name((@project || @project_attrs).name)
 
   if project != nil && project.id != nil
-     raise "Project #{ project.name } should be deleted. but it is"
+     raise "Project #{ project.name } should be deleted. but it's not"
   end
 
 end
@@ -438,6 +437,10 @@ Then /^I failed to delete (?:that|the) project$/i do
 end
 
 Then /^I can edit (?:that|the) project$/i do
+  
+  project_name = "Edited Project"
+  project_description = "Edited Project Description"
+  
   steps %{
     * Click the logout button if currently logged in
     * Visit the login page
@@ -449,14 +452,18 @@ Then /^I can edit (?:that|the) project$/i do
     * The #{ (@project || @project_attrs).name } project should be visible
 
     * Edit the #{ (@project || @project_attrs).name } project
-    * Fill in the project name field with editting project
+    * Fill in the project name field with #{ project_name }
+    * Fill in the project description field with #{ project_description }
     * Click the modify project button
-
-    * The editting project project should be visible
+    
+    * Visit the projects page
+    * The #{ project_name } project should be visible
   }
+  
+  # Register created project for post-test deletion
+  edited_project = IdentityService.session.find_project_by_name(project_name)
+  EnvironmentCleaner.register(:project, edited_project.id) if edited_project
 
-  # restore project name
-  @project.save
 end
 
 

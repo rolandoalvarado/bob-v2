@@ -32,7 +32,7 @@ class ComputeService < BaseCloudService
     sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
       volumes.reload
       volume = volumes.get(volume.id)
-      unless volume.attachments.any? { |a| a['serverId'] == instance.id }
+      unless volume.attachments.any? { |a| a['server_id'] == instance.id }
         raise "Couldn't ensure that instance #{ instance.name } has attached volume #{ volume.name }!"
       end
     end
@@ -46,10 +46,10 @@ class ComputeService < BaseCloudService
 
     attributes[:name]     ||= Faker::Name.name
     attributes[:password] ||= test_instance_password || '123qwe'
-    attributes[:image]    ||= service.images[0].id
+    attributes[:image]    ||= service.images[5].id || service.images[2].id
     attributes[:flavor]   ||= min_flavor.id
     attributes[:key_name] ||= service.key_pairs[0] && service.key_pairs[0].name
-
+    
     if service.list_servers.body['servers'].none? { |s| s['name'] == attributes[:name] }
       begin
         service.create_server(
@@ -71,13 +71,47 @@ class ComputeService < BaseCloudService
 
     sleeping(ConfigFile.wait_long).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
       instance = find_instance_by_name(project, attributes[:name])
-      unless instance.state == 'ACTIVE'
+      if instance.state =~ /ERROR|SHUTOFF/
+        break # No use retrying if instance is in error state
+      elsif instance.state != 'ACTIVE'
         raise "Instance #{ instance.name } took too long to become active. " +
-              "Instance is currently #{ instance.state.downcase }."
+              "Instance is currently #{ instance.state }."
       else
         return instance
       end
     end
+
+    raise "Instance #{ instance.name } is in #{ instance.state } status." if instance.state =~ /ERROR|SHUTOFF/
+  end
+
+  def create_instances_in_project(project, desired_count)
+    service.set_tenant project
+    instances.reload
+
+    # Delete any error or shutoff instances first
+    error_instances    = instances.select { |i| i.state =~ /^ERROR|SHUTOFF$/ }
+    inactive_instances = instances.select { |i| i.state !~ /^ACTIVE|ERROR|SHUTOFF$/ } # Changed from =~ to !~
+
+    error_instances.each do |instance|
+      instance.destroy
+      sleep(ConfigFile.wait_short) # Don't send too many requests at once
+    end
+
+    inactive_instances.each do |instance|
+      activate_instance(instance)
+    end
+
+    active_instances = instances.reload.select{ |i| i.state == 'ACTIVE' }
+    if active_instances.count < desired_count
+      desired_count.times do
+        create_instance_in_project(project)
+        sleep(ConfigFile.wait_short)
+      end
+
+      active_instances = instances.reload.select{ |i| i.state =~ /^ACTIVE$/ }
+    end
+
+    active_instances
   end
 
   def create_volume(attributes = {})
@@ -93,35 +127,15 @@ class ComputeService < BaseCloudService
   def delete_instance_in_project(project, instance)
     set_tenant project
 
-    if instance.state !~ /ACTIVE|ERROR/
-      case instance.state
-      when 'SUSPENDED'
-        service.resume_server(instance.id)
-      when 'PAUSED'
-        service.unpause_server(instance.id)
-      end
+    activate_instance(instance)
+    remove_attached_instance_resources(instance)
 
-      sleeping(ConfigFile.wait_long).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
-        raise "Some instances took too long to be ready for deletion." if instance.state !~ /ACTIVE|ERROR/
-      end
+    begin
+      instance.destroy
+    rescue => e
+      raise "Couldn't delete instance #{ instance.name } in #{ project.name }. " +
+            "The error returned was: #{ e.inspect }."
     end
-
-    associated_addresses = addresses.select { |a| a.instance_id == instance.id }
-    associated_addresses.each do |address|
-      service.disassociate_address(address.instance_id, address.ip)
-      sleep(ConfigFile.wait_short)
-    end
-
-    attached_volumes = service.volumes.select { |v| v.attachments.any? { |a| a['serverId'] == instance.id } }
-    attached_volumes.each do |volume|
-      service.detach_volume(instance.id, volume.id)
-      sleep(ConfigFile.wait_short)
-    end
-
-    service.delete_server(instance.id)
-  rescue => e
-    raise "Couldn't delete instance #{ instance.name } in #{ project.name }. " +
-          "The error returned was: #{ e.inspect }."
   end
 
   def delete_instances_in_project(project)
@@ -151,7 +165,7 @@ class ComputeService < BaseCloudService
     volume = volumes.find { |v| v.id == volume['id'].to_i }
 
     # Check if volume is attached to the instance
-    if volume.attachments.any? { |a| a['serverId'] == instance.id }
+    if volume.attachments.any? { |a| a['server_id'] == instance.id }
       begin
         service.detach_volume(instance.id, volume.id)
       rescue => e
@@ -163,7 +177,7 @@ class ComputeService < BaseCloudService
     sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
       volumes.reload
       volume = volumes.get(volume.id)
-      if volume.attachments.any? { |a| a['serverId'] == instance.id }
+      if volume.attachments.any? { |a| a['server_id'] == instance.id }
         raise "Couldn't ensure that instance #{ instance.name } has no attached volume #{ volume.name }!"
       end
     end
@@ -203,7 +217,7 @@ class ComputeService < BaseCloudService
       volumes.reload
       raise "Requires #{ desired_count } volumes. Only #{ volumes.count } volumes exist!" if desired_count > volumes.count
 
-      attached_volumes     = volumes.select{ |v| v.attachments.any?{ |a| a['serverId'] == instance.id } }
+      attached_volumes     = volumes.select{ |v| v.attachments.any?{ |a| a['server_id'] == instance.id } }
       non_attached_volumes = volumes.select{ |v| v.attachments.first.empty? }
       if desired_count > attached_volumes.count
         (desired_count - attached_volumes.count).times do |i|
@@ -218,7 +232,7 @@ class ComputeService < BaseCloudService
       end
 
       volumes.reload
-      attached_volumes = volumes.select{ |v| v.attachments.any?{ |a| a['serverId'] == instance.id } }
+      attached_volumes = volumes.select{ |v| v.attachments.any?{ |a| a['server_id'] == instance.id } }
       if strict && desired_count != attached_volumes.count
         raise "Couldn't ensure instance #{ instance.name } has #{ desired_count } attached volumes."
       elsif !strict && desired_count > attached_volumes.count
@@ -354,167 +368,16 @@ class ComputeService < BaseCloudService
     end
   end
 
-  # Ensures that there are `desired_count` number of instances in the project
-  # Set `strict` to false if you don't mind having more than `desired_count`
-  # number of instances in the project.
   def ensure_active_instance_count(project, desired_count, strict = true)
-    service.set_tenant project
-
-    # This block will keep running until it stops raising an error, or until
-    # the max number of tries is reached. In the last try, whatever error is
-    # raised by the block is thrown.
-
-    sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_long).tries do
-      instances.reload
-
-      non_active_instances  = instances.select{ |i| i.state !~ /^ACTIVE|ERROR$/}
-      instances_with_errors = instances.select{ |i| i.state =~ /^ERROR$/}
-
-      # Do pre-checks
-      if non_active_instances.count > 0
-        # Check if there are any suspended or paused instances,
-        # and reactivate them
-        non_active_instances.each do |instance|
-          case instance.state
-          when 'SUSPENDED'
-            service.resume_server(instance.id)
-          when 'PAUSED'
-            service.unpause_server(instance.id)
-          end
-          sleep(ConfigFile.wait_short)
-        end
-
-        # Check if any/all of the instances above have successfully activated
-        instances.reload
-        active_instances = instances.select { |i| i.state == 'ACTIVE' }
-        if active_instances.count < desired_count
-          raise_ensure_active_instance_count_error "Some instances took too long to transition to a specific state.", desired_count
-        end
-      elsif instances_with_errors.count > 0
-        # We have to remove instances that have errors because they also
-        # occuppy slots in the quota, preventing us from firing up more
-        # instances.
-        instances_with_errors.each do |instance|
-          delete_instance_in_project(project, instance)
-        end
-        raise_ensure_active_instance_count_error "Some instances that have errors took too long to delete.", desired_count
-      end
-
-      # At this point, we should be guaranteed that all instances are ACTIVE
-
-      if desired_count > instances.count
-        (desired_count - instances.count).times do
-          create_instance_in_project(project)
-          sleep(ConfigFile.wait_short)      # Don't send too many requests at once
-        end
-        raise_ensure_active_instance_count_error "The compute service doesn't seem to be responding to my 'launch instance' requests.", desired_count
-      elsif strict && desired_count < instances.count
-        (instances.count - desired_count).times do |i|
-          delete_instance_in_project(project, instances[i])
-        end
-        raise_ensure_active_instance_count_error "Some extra instances took to long to delete.", desired_count
-      end
-    end # sleeping(x).seconds.between_tries.failing_after(y).tries
-
-    instances.count
+    ensure_instance_count(project, :active, desired_count, strict)
   end
 
-  # Ensures that there are `desired_count` number of instances in the project
-  # Set `strict` to false if you don't mind having more than `desired_count`
-  # number of instances in the project.
   def ensure_paused_instance_count(project, desired_count, strict = true)
-    service.set_tenant project
-
-    # This block will keep running until it stops raising an error, or until
-    # the max number of tries is reached. In the last try, whatever error is
-    # raised by the block is thrown.
-    # 60 tries is needed for rebooting instances so please don't change it.
-    # Since instance reboot will take a while.
-    sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_long).tries do
-      instances.reload
-
-      paused_instances = instances.select{ |i| i.state =~ /^PAUSED$/ }
-
-      if desired_count > paused_instances.count
-        # Cannot pause without any active instances so we need to ensure active instance count
-        active_instances = instances.select{ |i| i.state =~ /^ACTIVE$/ }
-        if active_instances.count < desired_count - paused_instances.count
-          (desired_count - paused_instances.count).times do
-            create_instance_in_project(project)
-            sleep(ConfigFile.wait_short)
-          end
-          raise_ensure_active_instance_count_error "The compute service doesn't seem to be responding to my 'launch instance' requests.", (desired_count - paused_instances.count)
-
-          # Reload list of active instances
-          instances.reload
-          active_instances = instances.select{ |i| i.state =~ /^ACTIVE$/ }
-        end
-
-        (desired_count - paused_instances.count).times do |i|
-          service.pause_server(active_instances[i].id)
-          sleep(ConfigFile.wait_short)      # Don't send too many requests at once
-        end
-
-        raise_ensure_paused_instance_count_error "Some instances took to long to pause.", desired_count
-      elsif strict && desired_count < paused_instances.count
-        (paused_instances.count - desired_count).times do |i|
-          service.unpause_server(paused_instances[i].id)
-          sleep(ConfigFile.wait_short)      # Don't send too many requests at once
-        end
-
-        raise_ensure_paused_instance_count_error "Some extra instances took to long to unpause.", desired_count
-      end
-    end # sleeping(x).seconds.between_tries.failing_after(y).tries
-
-    instances.length
+    ensure_instance_count(project, :paused, desired_count, strict)
   end
 
-  # Ensures that there are `desired_count` number of instances in the project
-  # Set `strict` to false if you don't mind having more than `desired_count`
-  # number of instances in the project.
   def ensure_suspended_instance_count(project, desired_count, strict = true)
-    service.set_tenant project
-
-    # This block will keep running until it stops raising an error, or until
-    # the max number of tries is reached. In the last try, whatever error is
-    # raised by the block is thrown.
-    sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_long).tries do
-      instances.reload
-
-      suspended_instances = instances.select{ |i| i.state =~ /^SUSPENDED$/ }
-
-      if desired_count > suspended_instances.count
-        # Cannot suspend without any active instances so we need to ensure active instance count
-        active_instances = instances.select{ |i| i.state =~ /^ACTIVE$/ }
-        if active_instances.count < desired_count - suspended_instances.count
-          (desired_count - suspended_instances.count).times do
-            create_instance_in_project(project)
-            sleep(ConfigFile.wait_short)
-          end
-          raise_ensure_active_instance_count_error "The compute service doesn't seem to be responding to my 'launch instance' requests.", (desired_count - suspended_instances.count)
-
-          # Reload list of active instances
-          instances.reload
-          active_instances = instances.select{ |i| i.state =~ /^ACTIVE$/ }
-        end
-
-        (desired_count - suspended_instances.count).times do |i|
-          service.suspend_server(active_instances[i].id)
-          sleep(ConfigFile.wait_short)      # Don't send too many requests at once
-        end
-
-        raise_ensure_suspended_instance_count_error "Some instances took to long to suspend.", desired_count
-      elsif strict && desired_count < suspended_instances.count
-        (suspended_instances.count - desired_count).times do |i|
-          service.resume_server(suspended_instances[i].id)
-          sleep(ConfigFile.wait_short)      # Don't send too many requests at once
-        end
-
-        raise_ensure_suspended_instance_count_error "Some extra instances took to long to resume.", desired_count
-      end
-    end # sleeping(x).seconds.between_tries.failing_after(y).tries
-
-    instances.length
+    ensure_instance_count(project, :suspended, desired_count, strict)
   end
 
   def ensure_project_instance_is_active(project, name)
@@ -560,10 +423,10 @@ class ComputeService < BaseCloudService
     security_group.rules.each do |r|
       service.delete_security_group_rule(r['id'])
     end
-    
+
     #Create Rule for SSH
     service.create_security_group_rule(parent_group_id, ip_protocol, from_port, to_port, cidr)
-    
+
     #Create Rule for ICMP, needed for accessing ssh using Public ip.
     icmp_protocol = 'icmp'
     icmp_from_port = -1
@@ -593,10 +456,10 @@ class ComputeService < BaseCloudService
   def create_security_group(project, attributes)
     service.set_tenant project
     security_groups = service.security_groups
-    
+
     find_security_group = security_groups.find_by_name(attributes[:name])
     find_security_group.destroy if find_security_group
-      
+
     security_group = security_groups.new(attributes)
     security_group.save
     security_group
@@ -609,9 +472,9 @@ class ComputeService < BaseCloudService
   def ensure_security_group_exists(project, attributes)
     service.set_tenant project
     find_security_group = service.security_groups.find_by_name(attributes[:name]) rescue nil
-   
+
     find_security_group.destroy if find_security_group
-    
+
     security_group = create_security_group(project, attributes)
   end
 
@@ -633,9 +496,9 @@ class ComputeService < BaseCloudService
 
   def ensure_security_group_does_not_exist(project, attributes)
     service.set_tenant project
-    
+
     security_groups = service.security_groups
-    
+
     if find_security_group = security_groups.find_by_name(attributes[:name])
       delete_security_group(find_security_group)
     end
@@ -663,9 +526,9 @@ class ComputeService < BaseCloudService
     service.set_tenant project
     security_groups = service.security_groups
     find_security_group = security_groups.find_by_name(attributes[:name])
-    
+
     find_security_group.destroy if find_security_group
-         
+
     security_group = security_groups.new(attributes)
     security_group.save
     security_group
@@ -679,7 +542,7 @@ class ComputeService < BaseCloudService
     service.set_tenant project
     security_groups = service.security_groups
     find_security_group = security_groups.find_by_name(attributes[:name]) rescue nil
-    
+
     if find_security_group
       security_group = find_security_group
     else
@@ -707,7 +570,7 @@ class ComputeService < BaseCloudService
   def ensure_security_group_does_not_exist(project, attributes)
     service.set_tenant project
     security_groups = service.security_groups
-    
+
     if security_group = security_groups.find_by_name(attributes[:name])
       delete_security_group(security_group)
     end
@@ -757,6 +620,26 @@ class ComputeService < BaseCloudService
 
   private
 
+  def activate_instance(instance)
+    case instance.state
+    when 'SUSPENDED'
+      service.resume_server(instance.id)
+    when 'PAUSED'
+      service.unpause_server(instance.id)
+    when 'VERIFY_RESIZE'
+      service.revert_resized_server(instance.id)
+    end
+
+    sleeping(ConfigFile.wait_long).seconds.between_tries.failing_after(ConfigFile.repeat_long).tries do
+      unless instance.state == 'ACTIVE'
+        raise "Instance #{ instance.name } took too long to become active. " +
+              "Instance is currently #{ instance.state }."
+      end
+    end
+
+    true
+  end
+
   def check_building_project_instance_progress(instances, expected_count)
     keep_trying(wait: 5.seconds) do
       count = instances.count { |i| i.state == 'ACTIVE' }
@@ -765,6 +648,57 @@ class ComputeService < BaseCloudService
               "Expected #{ expected_count } building instances to be active."
       end
     end
+  end
+
+  # Ensures that there are `desired_count` number of instances in the project
+  # Set `strict` to false if you don't mind having more than `desired_count`
+  # number of instances in the project.
+  def ensure_instance_count(project, status, desired_count, strict = true)
+    status = status.to_s.upcase
+    service.set_tenant project
+
+    # This block will keep running until it stops raising an error, or until
+    # the max number of tries is reached. In the last try, whatever error is
+    # raised by the block is thrown.
+    # 60 tries is needed for rebooting instances so please don't change it.
+    # Since instance reboot will take a while.
+    sleeping(ConfigFile.wait_long).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+
+      status_instances = instances.reload.select { |i| i.state == status }
+      delta_count      = (desired_count - status_instances.count).abs
+
+      if desired_count > status_instances.count
+        active_instances = create_instances_in_project(project, delta_count)
+
+        delta_count.times do |i|
+          case status
+          when 'PAUSED'
+            service.pause_server(active_instances[i].id)
+          when 'SUSPENDED'
+            service.suspend_server(active_instances[i].id)
+          end
+          sleep(ConfigFile.wait_short)
+        end
+      elsif strict && desired_count < status_instances.count
+        delta_count.times do |i|
+          delete_instance_in_project(project, status_instances[i])
+        end
+      end
+
+      actual_count = instances.reload.select{ |i| i.state == status }.count
+      if strict && desired_count != actual_count
+        raise "Couldn't ensure that the project #{ project.name } has " +
+              "#{ desired_count } #{ status.downcase } instances! " +
+              "Current count is #{ actual_count }."
+      elsif !strict && desired_count < actual_count
+        raise "Couldn't ensure that the project #{ project.name } has at least " +
+              "#{ desired_count } #{ status.downcase } instances! " +
+              "Current count is #{ actual_count }."
+      else
+        return actual_count
+      end
+
+    end # sleeping(x).seconds.between_tries.failing_after(y).tries
   end
 
   def raise_ensure_active_instance_count_error(message, desired_count)
@@ -780,6 +714,22 @@ class ComputeService < BaseCloudService
   def raise_ensure_suspended_instance_count_error(message, desired_count)
     raise "ERROR: Couldn't ensure #{ desired_count } suspended instances in project. " +
           message
+  end
+
+  def remove_attached_instance_resources(instance)
+    associated_addresses = addresses.select { |a| a.instance_id == instance.id }
+    associated_addresses.each do |address|
+      instance.disassociate_address(address.ip)
+      sleep(ConfigFile.wait_short)
+    end
+
+    attached_volumes = service.volumes.select { |v| v.attachments.any? { |a| a['server_id'] == instance.id } }
+    attached_volumes.each do |volume|
+      volume.detach
+      sleep(ConfigFile.wait_short)
+    end
+
+    true
   end
 
 end

@@ -149,7 +149,8 @@ Then /^I [Cc]an [Cc]reate a volume in the project$/ do
     * Fill in the volume description field with #{ attrs.description }
     * Fill in the volume size field with #{ attrs[:size] }
     * Click the create volume button
-    * The volumes table should include the text #{ attrs.name }
+
+    * The volumes table should have a row for the volume named #{ attrs.name }
   }
 
   @volume_attrs = attrs
@@ -181,7 +182,7 @@ Then /^I [Cc]an [Cc]reate a snapshot of the volume$/ do
     * Click the create volume snapshot button
 
     * Click the snapshots tab
-    * The volume snapshots table should include the text #{ snapshot.name }
+    * The volume snapshots table should have a row for the volume snapshot named #{ snapshot.name }
   }
 end
 
@@ -205,7 +206,8 @@ Then /^I [Cc]an [Dd]elete a snapshot of the volume$/ do
     * Click the volume snapshot menu button for volume snapshot named #{ snapshot['display_name'] }
     * Click the delete volume snapshot button for volume snapshot named #{ snapshot['display_name'] }
     * Click the confirm volume snapshot deletion button
-    * The volume snapshots table should not include the text #{ snapshot['display_name'] }
+
+    * The volume snapshots table should not have a row for the volume snapshot named #{ snapshot['display_name'] }
   }
 end
 
@@ -244,7 +246,7 @@ end
 
 Then /^the volume will be [Cc]reated$/ do
   steps %{
-    * The volumes table should include the text #{ @volume_attrs.name }
+    * The volumes table should have a row for the volume named #{ @volume_attrs.name }
   }
 end
 
@@ -260,8 +262,11 @@ TestCase /^A user with a role of (.+) in a project can attach any of its volumes
   Preconditions %{
     * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
     * Ensure that a project named #{ test_project_name } exists
+    * Ensure that the user with credentials #{ bob_username }/#{ bob_password } has a keypair named #{ test_keypair_name }
+    * Ensure that a security group rule exists for project #{ test_project_name }
     * Ensure that the project named #{ test_project_name } has an instance named #{ test_instance_name }
     * Ensure that the project named #{ test_project_name } has a volume named #{ test_volume_name }
+    * Ensure that an instance named #{ test_instance_name } does not have any floating IPs
     * Ensure that the volume named #{ test_volume_name } is not attached to the instance named #{ test_instance_name } in the project #{ test_project_name }
     * Ensure that the user #{ bob_username } has a role of #{ role_name } in the project #{ test_project_name }
   }
@@ -287,7 +292,7 @@ TestCase /^A user with a role of (.+) in a project can attach any of its volumes
     * Choose the item with text #{ test_instance_name } in the attachable instance dropdown
     * Click the volume attach confirmation button
 
-    * The volume named #{ test_volume_name } should be attached to the instance named #{ test_instance_name }
+    * The volume named #{ test_volume_name } should be attached to the instance named #{ test_instance_name } in project #{ test_project_name }
   }
 
 end
@@ -361,7 +366,7 @@ TestCase /^A user with a role of (.+) in a project can detach any of its volumes
     * Click the detach button of the volume named #{ test_volume_name }
     * Click the volume detach confirmation button
 
-    * The volume named #{ test_volume_name } should not be attached to the instance named #{ test_instance_name }
+    * The volume named #{ test_volume_name } should not be attached to the instance named #{ test_instance_name } in project #{ test_project_name }
   }
 
 end

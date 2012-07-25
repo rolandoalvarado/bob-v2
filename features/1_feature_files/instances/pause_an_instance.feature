@@ -24,5 +24,5 @@ Feature: Pause an Instance
 
   Scenario: Pause an Instance
     Given I am authorized to pause instances in the project
-     Then I can pause the instance in the project
+     Then I Can Pause the instance in the project
       And I cannot assign a floating IP to that instance
