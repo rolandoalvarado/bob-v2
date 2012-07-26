@@ -630,7 +630,7 @@ class ComputeService < BaseCloudService
       service.revert_resized_server(instance.id)
     end
 
-    sleeping(ConfigFile.wait_long).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+    sleeping(ConfigFile.wait_long).seconds.between_tries.failing_after(ConfigFile.repeat_long).tries do
       unless instance.state == 'ACTIVE'
         raise "Instance #{ instance.name } took too long to become active. " +
               "Instance is currently #{ instance.state }."
