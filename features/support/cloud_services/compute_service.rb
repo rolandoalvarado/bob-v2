@@ -153,7 +153,9 @@ class ComputeService < BaseCloudService
     if project_instances
       project_instances.each do |instance|
         deleted_instances << { name: instance.name, id: instance.id }
-        delete_instance_in_project(project, instance)
+        sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+          delete_instance_in_project(project, instance)
+        end
       end
     end
 
@@ -630,12 +632,12 @@ class ComputeService < BaseCloudService
       service.revert_resized_server(instance.id)
     end
 
-    sleeping(ConfigFile.wait_long).seconds.between_tries.failing_after(ConfigFile.repeat_long).tries do
-      unless instance.state == 'ACTIVE'
-        raise "Instance #{ instance.name } took too long to become active. " +
-              "Instance is currently #{ instance.state }."
-      end
-    end
+#    sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+#      unless instance.state == 'ACTIVE'
+#        raise "Instance #{ instance.name } took too long to become active. " +
+#              "Instance is currently #{ instance.state }."
+#      end
+#    end
 
     true
   end
