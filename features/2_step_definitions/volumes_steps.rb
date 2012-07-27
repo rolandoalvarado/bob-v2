@@ -256,6 +256,42 @@ Then /^the volume will be [Nn]ot [Cc]reated$/ do
   }
 end
 
+Then /^I [Cc]an [Cc]reate a clone of the volume snapshot$/ do
+  attrs = CloudObjectBuilder.attributes_for(:volume)
+  volume_service = VolumeService.session
+  volume_service.set_tenant @project
+  snapshot       = volume_service.snapshots.last
+
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * Click the #{ @project.name } project
+
+    * Wait 1 second
+
+    * Click the snapshots tab
+    * Click the clone volume snapshot button for volume snapshot named #{ snapshot["display_name"] }
+    * Current page should have the new volume form
+    * Fill in the volume name field with #{ attrs.name }
+    * Fill in the volume description field with #{ attrs.description }
+    * Fill in the volume size field with #{ attrs[:size] }
+    * Click the create volume button
+
+    * Wait 1 second
+
+    * Click the volumes tab
+    * The volumes table should have a row for the volume named #{ attrs.name }
+    * Remove the verified clone with the name #{ attrs.name } of the project #{ @project.name }
+  }
+end
+
+
 
 TestCase /^A user with a role of (.+) in a project can attach any of its volumes$/i do |role_name|
 
