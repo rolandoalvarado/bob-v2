@@ -54,7 +54,8 @@ class VolumeService < BaseCloudService
       end
 
       sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_long).tries do
-        volume = volumes.find { |v| v['display_name'] == attrs.name }
+        reload_volumes
+        volume = @volumes.find { |v| v['display_name'] == attrs.name }
         attachment_count = volume['attachments'].count { |a| !a.empty? }
         raise "Couldn't detach volume #{ volume['display_name'] }!" unless attachment_count == 0
       end
@@ -70,7 +71,7 @@ class VolumeService < BaseCloudService
     # Check until volume status is available
     sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_long).tries do
       reload_volumes
-      volume = volumes.find { |v| v['display_name'] == attrs.name }
+      volume = @volumes.find { |v| v['display_name'] == attrs.name }
       unless volume['status'] == 'available'
         raise "Volume #{ volume['display_name'] } took too long to become available! " +
               "Volume is currently #{ volume['status'] }."
