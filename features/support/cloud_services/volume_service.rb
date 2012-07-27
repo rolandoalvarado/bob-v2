@@ -13,7 +13,7 @@ class VolumeService < BaseCloudService
   def assert_volume_count(project, desired_count)
     set_tenant(project)
 
-    if volumes.count != desired_count
+    if @volumes.count != desired_count
       raise "Couldn't ensure that #{ project.name } has #{ desired_count } " +
         "volumes. Current number of volumes is #{ volumes.length }."
     end
@@ -38,7 +38,7 @@ class VolumeService < BaseCloudService
   def create_volume_in_project(project, attributes)
     attrs = CloudObjectBuilder.attributes_for(:volume, attributes)
     set_tenant project
-    volume = volumes.find { |v| v['display_name'] == attrs.name }
+    volume = @volumes.find { |v| v['display_name'] == attrs.name }
 
     unless volume
       # Create volume if it does not exist yet
@@ -53,7 +53,7 @@ class VolumeService < BaseCloudService
         sleep(ConfigFile.wait_short)
       end
 
-      sleeping(ConfigFile.wait_long).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+      sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_long).tries do
         volume = volumes.find { |v| v['display_name'] == attrs.name }
         attachment_count = volume['attachments'].count { |a| !a.empty? }
         raise "Couldn't detach volume #{ volume['display_name'] }!" unless attachment_count == 0
@@ -68,7 +68,7 @@ class VolumeService < BaseCloudService
     end
 
     # Check until volume status is available
-    sleeping(ConfigFile.wait_long).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+    sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_long).tries do
       reload_volumes
       volume = volumes.find { |v| v['display_name'] == attrs.name }
       unless volume['status'] == 'available'
@@ -80,14 +80,26 @@ class VolumeService < BaseCloudService
     end
   end
 
+  def delete_volume_in_project(project, volume)
+    set_tenant project, false
+    sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_long).tries do
+      reload_volumes
+      volume = volumes.find { |v| v['id'] == volume['id'] }
+      if volume['status'] !~ /available|error/
+        raise "Volume #{ volume['display_name'] } took too long to be ready for deletion. " +
+              "Volume is currently #{ volume['status'] }."
+      end
+    end
+    service.delete_volume(volume['id'])
+  end
+
   def delete_volumes_in_project(project)
     deleted_volumes = []
     set_tenant project
 
     volumes.each do |volume|
-      next if volume['status'] !~ /available|error/
       deleted_volumes << { name: volume['display_name'], id: volume['id'] }
-      service.delete_volume(volume['id'])
+      delete_volume_in_project(project, volume)
     end
 
     set_tenant 'admin'
