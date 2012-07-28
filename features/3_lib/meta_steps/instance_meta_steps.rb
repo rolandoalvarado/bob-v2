@@ -13,11 +13,8 @@ Step /^Ensure that the project named (.+) has an instance named (.+)$/ do |proje
   project = IdentityService.session.find_project_by_name(project_name)
   raise "#{ project_name } couldn't be found!" unless project
 
-  ComputeService.session.create_instance_in_project(project, name: instance_name)
-  sleeping(ConfigFile.wait_long).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
-    instance = ComputeService.session.find_instance_by_name(project, instance_name)
-    raise "Instance #{ instance_name } couldn't be found!" unless instance
-  end
+  instance = ComputeService.session.create_instance_in_project(project, name: instance_name)
+  raise "Instance #{ instance_name } couldn't be found!" unless instance
 end
 
 

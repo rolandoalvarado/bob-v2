@@ -2,7 +2,8 @@ require_relative 'base_cloud_service'
 
 class ComputeService < BaseCloudService
 
-  attr_reader :addresses, :flavors, :instances, :security_groups, :volumes, :current_project
+  attr_reader :addresses, :flavors, :instances, :security_groups, :volumes, :current_project,
+    :images, :key_pairs
   attr_accessor :private_keys
 
   def initialize
@@ -13,6 +14,11 @@ class ComputeService < BaseCloudService
     @instances = service.servers
     @volumes   = service.volumes
     @security_groups = service.security_groups
+    @images = service.images
+    @key_pairs = service.key_pairs
+
+    # Get smallest-sized flavor
+    @min_flavor = flavors.select { |f| f.disk > 0 }.min { |f, g| f.vcpus <=> g.vcpus }
 
     @private_keys = {}
   end
@@ -41,36 +47,36 @@ class ComputeService < BaseCloudService
   def create_instance_in_project(project, attributes={})
     set_tenant project
 
-    # Get smallest-sized flavor
-    min_flavor = service.flavors.select { |f| f.disk > 0 }.min { |f, g| f.vcpus <=> g.vcpus }
-
     attributes[:name]     ||= Faker::Name.name
     attributes[:password] ||= test_instance_password || '123qwe'
-    attributes[:image]    ||= service.images[5].id || service.images[2].id
-    attributes[:flavor]   ||= min_flavor.id
-    attributes[:key_name] ||= service.key_pairs[0] && service.key_pairs[0].name
-    
-    if service.list_servers.body['servers'].none? { |s| s['name'] == attributes[:name] }
+    attributes[:image]    ||= @images[5].id || @images[2].id
+    attributes[:flavor]   ||= @min_flavor.id
+    attributes[:key_name] ||= @key_pairs[0] && @key_pairs[0].name
+
+    instance = @instances.find { |i| i.name == attributes[:name] }
+
+    unless instance
       begin
-        service.create_server(
+        response = service.create_server(
           attributes[:name],
           attributes[:image],
           attributes[:flavor],
           {
             'tenant_id'      => project.id,
             'key_name'       => attributes[:key_name],
-            'security_group' => service.security_groups[0].id,
+            'security_group' => @security_groups[0].id,
             'user_id'        => service.current_user['id']
           }
         )
+        instance = @instances.reload.get(response.body['server']['id'])
       rescue => e
         raise "Couldn't initialize instance in #{ project.name }. " +
               "The error returned was: #{ e.inspect }"
       end
     end
 
-    sleeping(ConfigFile.wait_long).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
-      instance = find_instance_by_name(project, attributes[:name])
+    sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_long).tries do
+      instance.reload
       if instance.state =~ /ERROR|SHUTOFF/
         break # No use retrying if instance is in error state
       elsif instance.state != 'ACTIVE'
@@ -86,29 +92,32 @@ class ComputeService < BaseCloudService
 
   def create_instances_in_project(project, desired_count)
     service.set_tenant project
-    instances.reload
+    @instances.reload
 
-    # Delete any error or shutoff instances first
-    error_instances    = instances.select { |i| i.state =~ /^ERROR|SHUTOFF$/ }
-    inactive_instances = instances.select { |i| i.state !~ /^ACTIVE|ERROR|SHUTOFF$/ } # Changed from =~ to !~
+    active_instances = []
+    if @instances.count > 0
+      # Delete any error or shutoff instances first
+      error_instances    = @instances.select { |i| i.state =~ /^ERROR|SHUTOFF$/ }
+      inactive_instances = @instances.select { |i| i.state !~ /^ACTIVE|ERROR|SHUTOFF$/ }
 
-    error_instances.each do |instance|
-      instance.destroy
-      sleep(ConfigFile.wait_short) # Don't send too many requests at once
+      error_instances.each do |instance|
+        instance.destroy
+        sleep(ConfigFile.wait_short) # Don't send too many requests at once
+      end
+
+      inactive_instances.each do |instance|
+        activate_instance(instance)
+      end
+
+      active_instances = @instances.reload.select{ |i| i.state == 'ACTIVE' }
     end
 
-    inactive_instances.each do |instance|
-      activate_instance(instance)
-    end
-
-    active_instances = instances.reload.select{ |i| i.state == 'ACTIVE' }
     if active_instances.count < desired_count
       desired_count.times do
         create_instance_in_project(project)
-        sleep(ConfigFile.wait_short)
       end
 
-      active_instances = instances.reload.select{ |i| i.state =~ /^ACTIVE$/ }
+      active_instances = @instances.reload.select{ |i| i.state == 'ACTIVE' }
     end
 
     active_instances
@@ -579,22 +588,18 @@ class ComputeService < BaseCloudService
   end
 
   def find_instance_by_name(project, name)
-    service.set_tenant project
-    instance = service.servers.find_by_name(name)
-    instance
+    set_tenant project, false
+    @instances.reload.find_by_name(name)
   end
 
   def find_security_group_by_name(project, name)
-    service.set_tenant project
-    security_groups = service.security_groups
-    security_groups.find_by_name(name)
-    security_groups
+    set_tenant project, false
+    @security_groups.reload.find_by_name(name)
   end
 
   def get_project_instances(project)
-    service.set_tenant project
-    instances.reload
-    instances
+    set_tenant project, false
+    @instances.reload
   end
 
   def set_tenant(project, reload = true)
@@ -603,10 +608,9 @@ class ComputeService < BaseCloudService
       service.set_tenant(project)
     end
     if reload
-      @addresses = service.addresses
-      @flavors   = service.flavors
-      @instances = service.servers
-      @volumes   = service.volumes
+      @addresses.reload
+      @instances.reload
+      @volumes.reload
     end
   end
 
@@ -614,10 +618,9 @@ class ComputeService < BaseCloudService
     @current_project = project
     service.set_tenant(project)
 
-    @addresses = service.addresses
-    @flavors   = service.flavors
-    @instances = service.servers
-    @volumes   = service.volumes
+    @addresses.reload
+    @instances.reload
+    @volumes.reload
   end
 
   private
@@ -635,16 +638,6 @@ class ComputeService < BaseCloudService
     true
   end
 
-  def check_building_project_instance_progress(instances, expected_count)
-    keep_trying(wait: 5.seconds) do
-      count = instances.count { |i| i.state == 'ACTIVE' }
-      if count < expected_count
-        raise "Instances are taking too long to build! " +
-              "Expected #{ expected_count } building instances to be active."
-      end
-    end
-  end
-
   # Ensures that there are `desired_count` number of instances in the project
   # Set `strict` to false if you don't mind having more than `desired_count`
   # number of instances in the project.
@@ -657,7 +650,7 @@ class ComputeService < BaseCloudService
     # raised by the block is thrown.
     # 60 tries is needed for rebooting instances so please don't change it.
     # Since instance reboot will take a while.
-    sleeping(ConfigFile.wait_long).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+    sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_long).tries do
 
       status_instances = instances.reload.select { |i| i.state == status }
       delta_count      = (desired_count - status_instances.count).abs
