@@ -50,7 +50,6 @@ Feature: Create an Instance
         | 64Bit CentOS 6.2                     | My Server   | (Any)  | (Any)   | (Any)          | Created        |
         | 64Bit Ubuntu 10.04                   | My Server   | (Any)  | (Any)   | (Any)          | Created        |
         | 64Bit Ubuntu 12.04                   | My Server   | (Any)  | (Any)   | (Any)          | Created        |
-        | 64Bit Windows 2008 R2 Enterprise SP1 | My Server   | (Any)  | (Any)   | (Any)          | Created        |
 
       Scenarios: Specific Flavors
         | Image  | Name        | Flavor    | Keypair | Security Group | Created or Not |
