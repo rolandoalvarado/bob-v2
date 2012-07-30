@@ -49,7 +49,6 @@ end
 
 Given /^The project has an instance that is a member of the (.+) security group$/ do |security_group|
   steps %{
-    * Ensure that the a project has an instance
     * Ensure that the instance is a member of the #{security_group} security group
   }
 end
@@ -130,6 +129,8 @@ When /^I edit the Web Servers security group with the following rule: (.+), (.+)
     * Visit the projects page
     * Click the #{ @project.name } project
 
+    * Wait 2 seconds
+
     * Click the access security tab
     * Current page should have the security groups
 
@@ -171,6 +172,8 @@ When /^I add the following rule: (.+), (.+), (.+), (\d+\.\d+\.\d+\.\d+(?:|\/\d+)
     * Visit the projects page
     * Click the #{ @project.name } project
 
+    * Wait 2 seconds
+
     * Click the access security tab
     * Current page should have the security groups
 
@@ -210,12 +213,17 @@ Then /^I [Cc]an [Cc]reate a security group in the project$/ do
     * Visit the projects page
     * Click the #{ @project.name } project
 
+    * Wait 2 seconds
+
     * Click the access security tab
     * Click the new security group button
     * Current page should have the new security form
     * Fill in the security group name field with #{security_group.name}
     * Fill in the security group description field with #{security_group.description}
     * Click the create security button
+
+    * Wait 1 second
+
     * Current page should have the new #{security_group.name} security group
     * The #{security_group.name} security group row should be visible
   }
@@ -242,6 +250,8 @@ Then /^I [Cc]an [Ee]dit a security group in the project$/ do
 
     * Visit the projects page
     * Click the #{ @project.name } project
+
+    * Wait 2 seconds
 
     * Click the access security tab
     * Current page should have the security groups
@@ -273,6 +283,8 @@ Then /^I [Cc]an Delete the Web Servers security group in the project$/ do
 
     * Visit the projects page
     * Click the #{ @project.name } project
+
+    * Wait 2 seconds
 
     * Click the access security tab
     * Click the context menu button for security group #{ @new_security_group.id }
@@ -324,10 +336,16 @@ Then /^I Cannot Delete the Web Servers security group in the project$/ do
   }
 end
 
-Then /^I Cannot Delete the Web Servers security group$/ do
+Then /^I Cannot Delete the (.+) security group$/ do |sec_group|
+  compute_service = ComputeService.session
+  compute_service.set_tenant(@project)
+  security_groups = compute_service.security_groups
+  security_groups.each do |sg|
+    if(sg.name.match Regexp.new(sec_group))
+      @delete_security_group = sg
+    end
+  end
 
-  IdentityService.session.delete_project(@project)
-  
   steps %{
     * Click the logout button if currently logged in
 
@@ -337,7 +355,15 @@ Then /^I Cannot Delete the Web Servers security group$/ do
     * Click the login button
 
     * Visit the projects page
-    * The #{ @project.name } project should not be visible
+    * Click the #{ @project.name } project
+
+    * Wait 2 seconds
+
+    * Click the access security tab
+    * Click the context menu button for security group #{ @delete_security_group.id }
+    * Click the delete security group button for security group #{ @delete_security_group.id }
+    * Click the confirm security group deletion button
+    * The #{@delete_security_group.name} security group row should be visible
   }
 end
 
@@ -345,6 +371,9 @@ Then /^the security group will be [Cc]reated$/ do
   steps %{
     * Visit the projects page
     * Click the #{ @project.name } project
+
+    * Wait 2 seconds
+
     * Click the access security tab
     * Current page should have the new security group
   }
@@ -354,6 +383,7 @@ Then /^the security group will be [Nn]ot [Cc]reated$/ do
   steps %{
     * Visit the projects page
     * Click the #{ @project.name } project
+
     * Click the access security tab
     * Current page should not have the new security group
   }
@@ -363,6 +393,9 @@ Then /^The (.+) security group should be visible$/ do |security_group|
   steps %{
     * Visit the projects page
     * Click the #{ @project.name } project
+
+    * Wait 2 seconds
+
     * Click the access security tab
     * Current page should have the new #{security_group.name} security group
   }
@@ -401,12 +434,17 @@ Then /^the security group with attributes (.+), (.+) will be [Cc]reated$/ do |na
     * Visit the projects page
     * Click the #{ @project.name } project
 
+    * Wait 2 seconds
+
     * Click the access security tab
     * Click the new security group button
     * Current page should have the new security form
     * Fill in the security group name field with #{security_group.name}
     * Fill in the security group description field with #{security_group.description}
-    * Click the create security button    
+    * Click the create security button
+
+    * Wait 1 second
+
     * Current page should have the new #{security_group.name} security group
     * The #{security_group.name} security group row should be visible
   }
@@ -431,12 +469,17 @@ Then /^the security group with attributes (.+), (.+) will be [Nn]ot [Cc]reated$/
     * Visit the projects page
     * Click the #{ @project.name } project
 
+    * Wait 2 seconds
+
     * Click the access security tab
     * Click the new security group button
     * Current page should have the new security form
     * Fill in the security group name field with #{name}
     * Fill in the security group description field with #{description}
-    * Click the create security button    
+    * Click the create security button
+
+    * Wait 1 second
+
     * The new security form should be visible
     * The new security group form error message should be visible
   }

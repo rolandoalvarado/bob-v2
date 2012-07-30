@@ -12,12 +12,12 @@ Feature: Delete a Security Group
   Background:
     * A project exists in the system
     * The project has 2 security groups named default, and Web Servers
-    * The project has an instance that is a member of the default security group
     * Ensure that a user exists in the project
 
   @permissions
   Scenario Outline: Check User Permissions
     Given I have a role of <Role> in the project
+      And the instance is a member of the default security group
      Then I <Can or Cannot Delete> the Web Servers security group in the project
 
       Scenarios: Authorized Roles

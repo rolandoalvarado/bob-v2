@@ -43,11 +43,11 @@ Feature: Create a Security Group
       Scenarios: Valid Values
         | Name             | Description              | Created or Not Created  |
         | Database Servers | Only port 443 is allowed | Created                 |
-        | Database Servers | (None)                   | Created                 |
 
       Scenarios: Invalid Values
-        | Name             | Description              | Created or Not Created  | Reason              |
-        | (None)           | Only port 443 is allowed | Not Created             | Name can't be empty |
+        | Name             | Description              | Created or Not Created  | Reason                     |
+        | (None)           | Only port 443 is allowed | Not Created             | Name can't be empty        |
+        | Database Servers | (None)                   | Not Created             | Description can't be empty |
 
   @jira-MCF-32-ardc
   Scenario Outline: Add a Rule

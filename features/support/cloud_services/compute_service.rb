@@ -47,11 +47,22 @@ class ComputeService < BaseCloudService
   def create_instance_in_project(project, attributes={})
     set_tenant project
 
-    attributes[:name]     ||= Faker::Name.name
-    attributes[:password] ||= test_instance_password || '123qwe'
-    attributes[:image]    ||= @images.sample.id
-    attributes[:flavor]   ||= @min_flavor.id
-    attributes[:key_name] ||= @key_pairs[0] && @key_pairs[0].name
+    attributes[:name]           ||= Faker::Name.name
+    attributes[:password]       ||= test_instance_password || '123qwe'
+    attributes[:image]          ||= @images[0].id || @images[2].id || @images[5].id
+    attributes[:flavor]         ||= @min_flavor.id
+    attributes[:key_name]       ||= @key_pairs[0] && @key_pairs[0].name
+
+    if(attributes[:security_group])
+      security_groups = service.security_groups
+      security_groups.each do |sg|
+        if(sg.name.match Regexp.new(attributes[:security_group]))
+          @security_group_array = [{ :name => sg.name }]
+        end
+      end
+    else
+      @security_group_array = [{ :name => @security_groups[0].name }]
+    end
 
     instance = @instances.find { |i| i.name == attributes[:name] }
 
@@ -62,10 +73,10 @@ class ComputeService < BaseCloudService
           attributes[:image],
           attributes[:flavor],
           {
-            'tenant_id'      => project.id,
-            'key_name'       => attributes[:key_name],
-            'security_group' => @security_groups[0].id,
-            'user_id'        => service.current_user['id']
+            'tenant_id'       => project.id,
+            'key_name'        => attributes[:key_name],
+            'security_groups' => @security_group_array,
+            'user_id'         => service.current_user['id']
           }
         )
         instance = @instances.reload.get(response.body['server']['id'])
@@ -90,7 +101,7 @@ class ComputeService < BaseCloudService
     raise "Instance #{ instance.name } is in #{ instance.state } status." if instance.state =~ /ERROR|SHUTOFF/
   end
 
-  def create_instances_in_project(project, desired_count)
+  def create_instances_in_project(project, desired_count, attributes = {})
     service.set_tenant project
     @instances.reload
 
@@ -114,7 +125,7 @@ class ComputeService < BaseCloudService
 
     if active_instances.count < desired_count
       desired_count.times do
-        create_instance_in_project(project)
+        create_instance_in_project(project, attributes)
       end
 
       active_instances = @instances.reload.select{ |i| i.state == 'ACTIVE' }
@@ -379,8 +390,8 @@ class ComputeService < BaseCloudService
     end
   end
 
-  def ensure_active_instance_count(project, desired_count, strict = true)
-    ensure_instance_count(project, :active, desired_count, strict)
+  def ensure_active_instance_count(project, desired_count, strict = true, attributes = {})
+    ensure_instance_count(project, :active, desired_count, strict, attributes)
   end
 
   def ensure_paused_instance_count(project, desired_count, strict = true)
@@ -641,7 +652,7 @@ class ComputeService < BaseCloudService
   # Ensures that there are `desired_count` number of instances in the project
   # Set `strict` to false if you don't mind having more than `desired_count`
   # number of instances in the project.
-  def ensure_instance_count(project, status, desired_count, strict = true)
+  def ensure_instance_count(project, status, desired_count, strict = true, attributes = {})
     status = status.to_s.upcase
     service.set_tenant project
 
@@ -656,7 +667,7 @@ class ComputeService < BaseCloudService
       delta_count      = (desired_count - status_instances.count).abs
 
       if desired_count > status_instances.count
-        active_instances = create_instances_in_project(project, delta_count)
+        active_instances = create_instances_in_project(project, delta_count, attributes)
 
         delta_count.times do |i|
           case status
