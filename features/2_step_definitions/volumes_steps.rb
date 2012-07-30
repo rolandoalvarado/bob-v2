@@ -181,6 +181,8 @@ Then /^I [Cc]an [Cc]reate a snapshot of the volume$/ do
     * Fill in the volume snapshot description field with #{ snapshot.description }
     * Click the create volume snapshot button
 
+    * Wait 1 second
+
     * Click the snapshots tab
     * The volume snapshots table should have a row for the volume snapshot named #{ snapshot.name }
   }
