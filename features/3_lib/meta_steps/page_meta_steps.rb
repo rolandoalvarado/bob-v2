@@ -96,10 +96,12 @@ end
 
 Then /^Click the (.+) button$/ do |button_name|
   button_name = button_name.split.join('_').downcase
-  @current_page.send("#{ button_name }_button").click
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+    @current_page.send("#{ button_name }_button").click
 
-  if button_name == 'login'
-    @current_page = SecurePage.new
+    if button_name == 'login'
+      @current_page = SecurePage.new
+    end
   end
 end
 
