@@ -99,3 +99,10 @@ Step /^Ensure that the volume named (.+) is not attached to the instance named (
 
   ComputeService.session.detach_volume_from_instance_in_project project, instance, volume
 end
+
+Step /^Remove the verified clone with the name (.+) of the project (.+)$/ do |volume_name, project|
+  volume = VolumeService.session.find_volume_by_name(project, volume_name)
+  raise "Volume #{ volume_name } couldn't be found!" unless volume
+
+  VolumeService.session.service.delete_volume(volume['id'])
+end

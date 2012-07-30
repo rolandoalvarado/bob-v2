@@ -113,6 +113,7 @@ class ProjectPage < SecurePage
   field     'volume size',                        '#appendedInput'
   button    'create volume',                      '#create-volume'
   table     'volumes',                            '#volume-list'
+  tab       'volumes',                            '.nav-tabs .instances-and-volumes a'
 
 # Type      Name                                  Selector
   button    'volume menu',                        '#volume-item-<id> .dropdown-toggle'
@@ -131,6 +132,7 @@ class ProjectPage < SecurePage
   button    'confirm volume snapshot deletion',   '#alert-template .okay'
   table     'volume snapshots',                   '#volume-snapshot-list'
   row       'volume snapshot',                    xpath: "//*[@id='volume-snapshot-list']//td[@class='name' and @title=\"<name>\"]/.."
+  button    'clone volume snapshot',              '.clone-snapshot'
 
 # Type      Name                                  Selector
   message   'new volume form error',              'span.error[for="name"], span.error[for="appendedInput"]'
