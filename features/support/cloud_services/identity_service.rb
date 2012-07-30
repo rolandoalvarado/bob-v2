@@ -139,8 +139,9 @@ class IdentityService < BaseCloudService
     tenant.grant_user_role(admin_user.id, member_role.id)
 
     # Remove instances and volumes if exist.
-    #ComputeService.session.delete_instances_in_project(tenant)
-    #VolumeService.session.delete_volumes_in_project(tenant)
+    ComputeService.session.delete_instances_in_project(tenant)
+    VolumeService.session.delete_volume_snapshots_in_project(tenant)
+    VolumeService.session.delete_volumes_in_project(tenant)
 
     tenant
   end

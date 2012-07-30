@@ -181,6 +181,8 @@ Then /^I [Cc]an [Cc]reate a snapshot of the volume$/ do
     * Fill in the volume snapshot description field with #{ snapshot.description }
     * Click the create volume snapshot button
 
+    * Wait 1 second
+
     * Click the snapshots tab
     * The volume snapshots table should have a row for the volume snapshot named #{ snapshot.name }
   }
@@ -256,6 +258,42 @@ Then /^the volume will be [Nn]ot [Cc]reated$/ do
   }
 end
 
+Then /^I [Cc]an [Cc]reate a clone of the volume snapshot$/ do
+  attrs = CloudObjectBuilder.attributes_for(:volume)
+  volume_service = VolumeService.session
+  volume_service.set_tenant @project
+  snapshot       = volume_service.snapshots.last
+
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Visit the projects page
+    * Click the #{ @project.name } project
+
+    * Wait 1 second
+
+    * Click the snapshots tab
+    * Click the clone volume snapshot button for volume snapshot named #{ snapshot["display_name"] }
+    * Current page should have the new volume form
+    * Fill in the volume name field with #{ attrs.name }
+    * Fill in the volume description field with #{ attrs.description }
+    * Fill in the volume size field with #{ attrs[:size] }
+    * Click the create volume button
+
+    * Wait 1 second
+
+    * Click the volumes tab
+    * The volumes table should have a row for the volume named #{ attrs.name }
+    * Remove the verified clone with the name #{ attrs.name } of the project #{ @project.name }
+  }
+end
+
+
 
 TestCase /^A user with a role of (.+) in a project can attach any of its volumes$/i do |role_name|
 
@@ -292,7 +330,8 @@ TestCase /^A user with a role of (.+) in a project can attach any of its volumes
     * Choose the item with text #{ test_instance_name } in the attachable instance dropdown
     * Click the volume attach confirmation button
 
-    * The volume named #{ test_volume_name } should be attached to the instance named #{ test_instance_name } in project #{ test_project_name }
+    * Wait for volume to finish attaching
+    * The volume named #{ test_volume_name } should be attached to the instance named #{ test_instance_name }
   }
 
 end
@@ -377,6 +416,7 @@ TestCase /^A user with a role of (.+) in a project cannot attach any of its volu
   Preconditions %{
     * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
     * Ensure that a project named #{ test_project_name } exists
+    * Ensure that the project named #{ test_project_name } has an instance named #{ test_instance_name }
     * Ensure that the project named #{ test_project_name } has a volume named #{ test_volume_name }
     * Ensure that the volume named #{ test_volume_name } is not attached to the instance named #{ test_instance_name } in the project #{ test_project_name }
     * Ensure that the user #{ bob_username } has a role of #{ role_name } in the project #{ test_project_name }
