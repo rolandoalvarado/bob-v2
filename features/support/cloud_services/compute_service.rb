@@ -14,7 +14,7 @@ class ComputeService < BaseCloudService
     @instances = service.servers
     @volumes   = service.volumes
     @security_groups = service.security_groups
-    @images = service.images
+    @images = ImageService.session.get_bootable_images
     @key_pairs = service.key_pairs
 
     # Get smallest-sized flavor
@@ -49,7 +49,7 @@ class ComputeService < BaseCloudService
 
     attributes[:name]     ||= Faker::Name.name
     attributes[:password] ||= test_instance_password || '123qwe'
-    attributes[:image]    ||= @images[5].id || @images[2].id
+    attributes[:image]    ||= @images.sample.id
     attributes[:flavor]   ||= @min_flavor.id
     attributes[:key_name] ||= @key_pairs[0] && @key_pairs[0].name
 
@@ -137,7 +137,7 @@ class ComputeService < BaseCloudService
     set_tenant project
 
     activate_instance(instance)
-    remove_attached_instance_resources(instance)
+    remove_attached_instance_resources(project, instance)
 
     begin
       instance.destroy
@@ -704,8 +704,9 @@ class ComputeService < BaseCloudService
           message
   end
 
-  def remove_attached_instance_resources(instance)
-    associated_addresses = addresses.select { |a| a.instance_id == instance.id }
+  def remove_attached_instance_resources(project, instance)
+    service.set_tenant project
+    associated_addresses = service.addresses.select { |a| a.instance_id == instance.id }
     associated_addresses.each do |address|
       instance.disassociate_address(address.ip)
       sleep(ConfigFile.wait_short)
