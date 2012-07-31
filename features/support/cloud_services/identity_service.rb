@@ -106,12 +106,24 @@ class IdentityService < BaseCloudService
     end
   end
 
-  def ensure_tenant_exists(attributes)
+  def ensure_tenant_exists(attributes, clear = false)
     attributes        = CloudObjectBuilder.attributes_for(:tenant, attributes)
     attributes[:name] = Unique.project_name(attributes[:name])
 
     tenant = tenants.find_by_name(attributes[:name])
-    tenant = create_tenant(attributes) unless tenant
+
+    if tenant
+      tenant.update(attributes)
+
+      # Remove instances and volumes if exist.
+      if clear
+        ComputeService.session.delete_instances_in_project(tenant)
+        VolumeService.session.delete_volume_snapshots_in_project(tenant)
+        VolumeService.session.delete_volumes_in_project(tenant)
+      end
+    else
+      tenant = create_tenant(attributes)
+    end
 
     # Make ConfigFile.admin_username an admin of the tenant. This is so that we
     # can manipulate it as needed. Turns out the 'admin' role in Keystone is
@@ -132,11 +144,6 @@ class IdentityService < BaseCloudService
     manager_role = response.body['roles'].find {|r| r['name'] == RoleNameDictionary.db_name('Project Manager') }
     tenant.revoke_user_role(admin_user.id, manager_role['id']) if manager_role
     tenant.grant_user_role(admin_user.id, member_role.id)
-
-    # Remove instances and volumes if exist.
-    ComputeService.session.delete_instances_in_project(tenant)
-    VolumeService.session.delete_volume_snapshots_in_project(tenant)
-    VolumeService.session.delete_volumes_in_project(tenant)
 
     tenant
   end

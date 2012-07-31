@@ -47,6 +47,10 @@ class ComputeService < BaseCloudService
   def create_instance_in_project(project, attributes={})
     set_tenant project
 
+    if attributes[:flavor].is_a? String
+      attributes[:flavor] = flavor_from_name(attributes[:flavor])
+    end
+
     attributes[:name]           ||= Faker::Name.name
     attributes[:password]       ||= test_instance_password || '123qwe'
     attributes[:image]          ||= @images[0].id || @images[2].id || @images[5].id
@@ -93,10 +97,17 @@ class ComputeService < BaseCloudService
               "Instance is currently in #{ instance.state } status."
       elsif instance.state =~ /ACTIVE/
         return instance
+      else
+        activate_instance(instance)
+        if instance.state !~ /ERROR|SHUTOFF/
+          raise "Instance #{ instance.name } is still in #{ instance.state } status."
+        else
+          break
+        end
       end
     end
 
-    raise "Instance #{ instance.name } is in #{ instance.state } status."
+    raise "Instance #{ instance.name } is still in #{ instance.state } status."
   end
 
   def create_instances_in_project(project, desired_count, attributes = {})
@@ -392,8 +403,8 @@ class ComputeService < BaseCloudService
     ensure_instance_count(project, :active, desired_count, strict, attributes)
   end
 
-  def ensure_paused_instance_count(project, desired_count, strict = true, attributes = {})
-    ensure_instance_count(project, :paused, desired_count, strict, attributes)
+  def ensure_paused_instance_count(project, desired_count, strict = true)
+    ensure_instance_count(project, :paused, desired_count, strict)
   end
 
   def ensure_suspended_instance_count(project, desired_count, strict = true)
@@ -703,6 +714,12 @@ class ComputeService < BaseCloudService
       end
 
     end # sleeping(x).seconds.between_tries.failing_after(y).tries
+  end
+
+  def flavor_from_name(name)
+    return unless @flavors
+    flavor = @flavors.find { |f| f.name == name }
+    flavor.id
   end
 
   def raise_ensure_active_instance_count_error(message, desired_count)
