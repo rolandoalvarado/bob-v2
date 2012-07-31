@@ -59,8 +59,8 @@ class IdentityService < BaseCloudService
     attributes[:tenant_id] = test_tenant.id
     user = users.new(attributes)
     user.save
-    admin_role = roles.find_by_name(RoleNameDictionary.db_name('System Admin'))
-    test_tenant.grant_user_role(user.id, admin_role.id)
+    member_role = roles.find_by_name(RoleNameDictionary.db_name('Member'))
+    test_tenant.grant_user_role(user.id, member_role.id)
     user
   end
 
