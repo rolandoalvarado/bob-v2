@@ -1,4 +1,4 @@
-@jira-DPBLOG-10 @jira-MCF-27 @format_v2
+@jira-DPBLOG-10 @jira-MCF-27 @format_v2 @projects
 Feature: Edit a Project's Instance Quota
   As a project manager, I want to set the instance quota (aka maximum
   number of instances) in my project, so that I can control my project's
@@ -10,7 +10,7 @@ Feature: Edit a Project's Instance Quota
   out that he's over the quota after all.
 
   June 5th: new mcloud has only 3 quota values. Floating IPs, Volumes and Cores
-  So I create scenario only for them. 
+  So I create scenario only for them.
 
   @permissions @jira-MCF-27-CUP
   Scenario Outline: Check User Permissions
@@ -29,14 +29,14 @@ Feature: Edit a Project's Instance Quota
     * Project <Updated or Not> the quota of the project with <Floating IPs> , <Volumes> and <Cores>
 
       Scenarios: Valid New Quota
-        | Floating IPs | Volumes | Cores | Updated or Not | 
-        | 10           | 10      | 10    | can be updated | 
-        | 15           | 1       | 1     | can be updated | 
-        | 1            | 20      | 1     | can be updated | 
-        | -1           | -1      | -1    | can be updated | 
+        | Floating IPs | Volumes | Cores | Updated or Not |
+        | 10           | 10      | 10    | can be updated |
+        | 15           | 1       | 1     | can be updated |
+        | 1            | 20      | 1     | can be updated |
+        | -1           | -1      | -1    | can be updated |
 
       Scenarios: Invalid New Quota
-        | Floating IPs | Volumes | Cores | Updated or Not   | Result                       | 
+        | Floating IPs | Volumes | Cores | Updated or Not   | Result                       |
         | ABCD         | 0      | 0     | cannot be updated | Floating IP should be numeric|
         | 0            | ABCD   | 0     | cannot be updated | Volumes should be numeric    |
         | 0            | 0      | ABCD  | cannot be updated | Cores should be numeric      |

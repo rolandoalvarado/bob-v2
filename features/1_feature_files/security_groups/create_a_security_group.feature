@@ -1,4 +1,4 @@
-@jira-MCF-32
+@jira-MCF-32 @security_groups
 Feature: Create a Security Group
   As an authorized user, I want to create a security group so that I can
   control the incoming network traffic for one or more instances.

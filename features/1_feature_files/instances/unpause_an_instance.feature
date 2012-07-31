@@ -1,4 +1,4 @@
-@jira-MCF-22
+@jira-MCF-22 @instances
 Feature: Unpause a Paused Instance
   As a user, I want to unpause a paused instance so that I can use it again after
   I'm done doing any maintenance work on it.

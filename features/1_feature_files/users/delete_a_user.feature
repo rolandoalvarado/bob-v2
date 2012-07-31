@@ -1,4 +1,4 @@
-@jira-MCF-43
+@jira-MCF-43 @users
 Feature: Delete a user
   As an authorized user, I want to delete a user.
 

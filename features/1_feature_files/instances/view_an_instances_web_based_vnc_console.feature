@@ -1,4 +1,4 @@
-@jira-MCF-24
+@jira-MCF-24 @instances
 Feature: View an Instance's Web-based VNC Console
   As a user, I want to view my instance's web-based VNC console so that I can
   connect and manage it graphically without installing a VNC client in my

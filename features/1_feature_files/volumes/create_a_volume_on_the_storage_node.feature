@@ -1,4 +1,4 @@
-@jira-MCF-107
+@jira-MCF-107 @volumes
 Feature: Create a Volume on the Storage Node
   As an authorized user, I want to create a volume on the storage node so that
   I can use it with one of my instances.
