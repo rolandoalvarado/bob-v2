@@ -1,4 +1,4 @@
-@jira-MCF-40 @format-v2
+@jira-MCF-40 @format-v2 @volumes
 Feature: Delete a volume
   As an authorized user, I want to delete a volume on the storage node so that
   I can free up resources.

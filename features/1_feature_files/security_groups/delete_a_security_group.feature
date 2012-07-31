@@ -1,4 +1,4 @@
-@jira-MCF-33
+@jira-MCF-33 @security_groups
 Feature: Delete a Security Group
   As an authorized user, I want to delete a security group
 
@@ -13,7 +13,7 @@ Feature: Delete a Security Group
     * A project exists in the system
     * The project has 2 security groups named default, and Web Servers
     * The project has an instance that is a member of the default security group
-    * Ensure that a user exists in the project    
+    * Ensure that a user exists in the project
 
   @permissions
   Scenario Outline: Check User Permissions

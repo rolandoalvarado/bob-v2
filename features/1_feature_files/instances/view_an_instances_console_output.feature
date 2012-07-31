@@ -1,4 +1,4 @@
-@jira-MCF-23
+@jira-MCF-23 @instances
 Feature: View an Instance's Console Output
   As a user, I want to view the console output of an instance in my project
   so that I will know if there are any errors in the instance.
