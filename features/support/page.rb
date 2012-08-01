@@ -150,7 +150,7 @@ module NodeMethods
   end
 
   def has_xpath?(selector)
-    retry_before_returning_false { self.node.has_xpath? selector }
+    self.node.has_xpath? selector
   end
 
   def has_no_xpath?(selector)
