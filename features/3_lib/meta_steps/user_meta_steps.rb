@@ -38,17 +38,10 @@ Then /^Ensure that I have a role of (.+) in the system$/i do |role_name|
     role_name = "Member"
   end
 
-  role = identity_service.roles.find_by_name(RoleNameDictionary.db_name(role_name))
-  if role.nil?
-    raise "Role #{ role_name } couldn't be found. Make sure it's defined in " +
-      "features/support/role_name_dictionary.rb and that it exists in " +
-      "#{ ConfigFile.web_client_url }."
-  end
-
   begin
-    admin_project.grant_user_role(user.id, role.id)
+    identity_service.ensure_tenant_role(user, admin_project, role_name)
   rescue Fog::Identity::OpenStack::NotFound => e
-    raise "Couldn't add #{ user.name } to #{ admin_project.name } as #{ role.name }"
+    raise "Couldn't add #{ user.name } to #{ admin_project.name } as #{ role_name }"
   end
 
   # Make variable(s) available for use in succeeding steps

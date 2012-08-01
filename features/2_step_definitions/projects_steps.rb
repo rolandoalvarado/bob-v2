@@ -83,7 +83,7 @@ Given /^I have a role of (.+) in the project$/ do |role_name|
     begin
       identity_service.ensure_tenant_role(user, @project, role_name)
     rescue Fog::Identity::OpenStack::NotFound => e
-      raise "Couldn't add #{ user.name } to #{ @project.name } as #{ role.name }"
+      raise "Couldn't add #{ user.name } to #{ @project.name } as #{ role_name }"
     end
   end
 
