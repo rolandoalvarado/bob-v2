@@ -271,7 +271,7 @@ Then /^I Cannot Create a project$/ do
 
     * Wait 30 seconds
     * Visit the projects page
-    * The create project button should be disabled
+    * The create project button should not be visible
   }
   
 end
