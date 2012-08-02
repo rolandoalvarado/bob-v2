@@ -126,7 +126,7 @@ Then /^Click the (.+) button for instance (.+)$/ do |button_name, instance_id|
   sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
     button_name = button_name.split.join('_').downcase
     @current_page.send("#{ button_name }_button", id: instance_id).click
-  end 
+  end
 end
 
 

@@ -1,4 +1,4 @@
-@jira-DPBLOG-16 @jira-DPBLOG-17 @jira-MCF-7 @format-v2
+@jira-DPBLOG-16 @jira-DPBLOG-17 @jira-MCF-7 @format-v2 @users
 Feature: Create a User
 
   @permissions @jira-MCF-7-CUP

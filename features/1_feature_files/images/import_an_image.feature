@@ -1,4 +1,4 @@
-@future
+@future @images
 Feature: Import an Image
   As a user, I want to import an image so that I can re-use the images that I
   created from other cloud providers.

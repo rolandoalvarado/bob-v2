@@ -1,4 +1,4 @@
-@jira-MCF-34
+@jira-MCF-34 @security_groups
 Feature: Edit a Security Group
   As an authorized user, I want to edit a security group so that I can
   control the incoming network traffic for one or more instances.
@@ -45,7 +45,7 @@ Feature: Edit a Security Group
        | TCP      | (Random)  | (Random) | 0.0.0.0/25  | Added          |
        | UDP      | (Random)  | (Random) | 0.0.0.0/25  | Added          |
        | ICMP     | (Random)  | (Random) | 0.0.0.0/25  | Added          |
-       | TCP      | (Random)  | (Random) | (None)      | Added          | 
+       | TCP      | (Random)  | (Random) | (None)      | Added          |
 
      Scenarios: Invalid Rules
        | Protocol | From Port | To Port  | CIDR        | Added or Not   | Reason                            |

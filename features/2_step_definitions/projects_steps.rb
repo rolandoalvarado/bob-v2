@@ -84,7 +84,7 @@ Given /^I have a role of (.+) in the project$/ do |role_name|
     begin
       identity_service.ensure_tenant_role(user, @project, role_name)
     rescue Fog::Identity::OpenStack::NotFound => e
-      raise "Couldn't add #{ user.name } to #{ @project.name } as #{ role.name }"
+      raise "Couldn't add #{ user.name } to #{ @project.name } as #{ role_name }"
     end
   end
 
@@ -272,7 +272,7 @@ Then /^I Cannot Create a project$/ do
 
     * Wait 30 seconds
     * Visit the projects page
-    * The create project button should be disabled
+    * The create project button should not be visible
   }
   
 end

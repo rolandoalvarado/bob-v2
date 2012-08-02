@@ -6,8 +6,8 @@ class ProjectPage < SecurePage
   # For Project
   link      'project',                            xpath:  "//*[@id='projects-list']//td[normalize-space(text())='<name>']/.."
   message   'update project',                     '#alert-template .alert-success'
-  row       'project',                            xpath:  "//td[@title='<name>']/"
-  
+  row       'project',                            xpath:  "//td[@title='<name>']"
+
   button    'close',                              '.close'
 
   tab       'instances and volumes',              '.nav-tabs .instances-and-volumes a'
@@ -40,12 +40,12 @@ class ProjectPage < SecurePage
   # Edit Quota Elements
   #==========================
 # Type      Name                                  Selector
-  button    'quota modify',                       xpath: '//*[@id="edit-quota"]' 
-  link      'disabled quota modify',              xpath: '//*[@id="edit-quota"]' 
+  button    'quota modify',                       xpath: '//*[@id="edit-quota"]'
+  link      'disabled quota modify',              xpath: '//*[@id="edit-quota"]'
   form      'modify quota',                       '#quota-form'
   message   'Modify Quota',                       xpath: '//h3[text()="Modify Quota"]'
   message   'update quota',                       '#alert-template .alert-success' #xpath: '//*[div[@class="alert alert-success"]]'
-  
+
   button    'disabled quota modify',              '.show-quota-form.disabled'
   button    'save quota edit',                    '#update-quota'
   field     'floating ips quota edit',            xpath: '//input[@name="floating_ips"]'
@@ -63,7 +63,7 @@ class ProjectPage < SecurePage
   #==========================
   button    'new security group',                 "#new-security-group"
   button    'edit security group',                "#security-item-<id> .edit-security-rules"
-  button    'delete security group',              "#security-item-<id> .delete-security-group"  
+  button    'delete security group',              "#security-item-<id> .delete-security-group"
   button    'Context Menu',                       xpath: "//tr[@id='security-item-<id>']/..//a[@class='dropdown-toggle']"
   form      'new security',                       "#new-security-group-modal"
   form      'security group rules',               "#security-group-rules-modal"
@@ -210,5 +210,5 @@ class ProjectPage < SecurePage
   link      'user',                               xpath: '//*[@class="chzn-drop"]//*[li[text()="<name>"]]'
   row       'User',                               xpath: "//*[@id='users-list']//td[normalize-space(text())=\"<name>\"]/.."
   element   'collaborator',                       "#users-list"
-  
+
 end

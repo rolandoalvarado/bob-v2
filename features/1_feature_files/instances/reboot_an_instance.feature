@@ -1,4 +1,4 @@
-@jira-MCF-17
+@jira-MCF-17 @instances
 Feature: Reboot an Instance
   As a user, I want to reboot an instance so that any new updates will be
   fully installed.

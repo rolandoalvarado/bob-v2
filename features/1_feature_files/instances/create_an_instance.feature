@@ -1,4 +1,4 @@
-@jira-DPBLOG-14 @jira-DPBLOG-18 @jira-MCF-14
+@jira-DPBLOG-14 @jira-DPBLOG-18 @jira-MCF-14 @instances
 Feature: Create an Instance
   As a user, I want to create instances in my projects so that I can
   deploy my applications (web apps, services, etc).

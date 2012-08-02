@@ -1,4 +1,4 @@
-@jira-MCF-15
+@jira-MCF-15 @instances
 Feature: Delete an Instance
   As a user, I want to delete instances in my project so that I can free up
   my compute resources.
