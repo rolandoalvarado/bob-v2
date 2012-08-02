@@ -310,10 +310,6 @@ Then /^I can connect to that instance via (.+)/ do |remote_client|
   floating_ip = compute_service.addresses.find { |a| a.instance_id == @instance.id }
   raise "Couldn't find a floating IP associated with instance #{ @instance.name }!" unless floating_ip
   
-  #@image_name = "64Bit CentOS 5.8 (v1.0.1)" unless @image_name
-
-  raise "@image_name : @image_name"
-
   steps %{
     * Click the logout button if currently logged in
 
