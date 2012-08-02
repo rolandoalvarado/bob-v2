@@ -1,0 +1,67 @@
+#!/usr/bin/env ruby
+
+with_users = ARGV.first === '--with_users'
+
+# ===========================
+#  Warning and Confirmation
+# ===========================
+
+print "\033[31mThis will remove all test projects "
+print 'and users ' if with_users
+print "including those that are possibly in use.\n"
+print "Are you sure you want to continue cleaning (Yes)?\033[0m "
+
+exit 0 if STDIN.gets.chomp != 'Yes'
+
+
+# =============================================
+#  Setup required gems, classes, and variable
+# =============================================
+
+require 'bundler/setup'
+require 'fog'
+
+['environment_cleaner',
+ 'cloud_configuration',
+ 'fog_monkey_patch',
+ 'cloud_services/compute_service',
+ 'cloud_services/identity_service',
+ 'cloud_services/image_service',
+ 'cloud_services/volume_service'
+].each do |file|
+  require_relative "./../features/support/#{ file }"
+end
+
+identity_service = IdentityService.session
+
+
+# ==============================
+#  Register resources to delete
+# ==============================
+
+exempted_projects = %w{ admin demo }
+exempted_users    = %w{ admin demo nova glance }
+
+puts 'Projects to delete:'
+identity_service.tenants.each do |project|
+  unless exempted_projects.include? project.name
+    puts "  #{project.name}"
+    EnvironmentCleaner.register(:project, project.id)
+  end
+end
+
+if with_users
+  puts 'Users to delete:'
+  identity_service.users.each do |user|
+    unless exempted_users.include? user.name
+      puts "  #{user.name}"
+      EnvironmentCleaner.register(:user, user.id)
+    end
+  end
+end
+
+
+# ==============================
+#  Delete registered resources
+# ==============================
+EnvironmentCleaner.delete_test_objects
