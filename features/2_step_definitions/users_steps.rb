@@ -574,7 +574,7 @@ TestCase /^A user with a role of (.+) in the system can create a user$/i do |rol
   Preconditions %{
     * Ensure that a project named #{ test_project_name } exists
     * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
-    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the system
+    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the project #{ test_project_name }
     * Ensure that a user with username #{ user.name } does not exist
   }
 
