@@ -379,7 +379,6 @@ Then /^I [Cc]an [Cc]reate an instance in the project$/ do
     * Current page should have the instance password form
     * Close the instance password form
 
-    * Wait 90 seconds
     * The instances table should include the text #{ instance_name }
     * The instance named #{ instance_name } should be in active status
   }
@@ -661,7 +660,6 @@ Then /^the instance will be created$/i do
     * Current page should have the instance password form
     * Close the instance password form
   
-    * Wait 120 seconds
     * The instances table should include the text #{ @instance_name }
     * The instance named #{ @instance_name } should be in active status
   }
@@ -672,6 +670,7 @@ Then /^the instance will be not created$/i do
     * Current page should still have the new instance form
     * The new instance form has an error message
     * Click the cancel create instance button
+    
     * The instances table should not include the text #{ @instance_name }
   }
 end
@@ -683,9 +682,8 @@ Then /^the instance will reboot$/i do
 end
 
 Then /^the instance should be active$/ do
-  status = 'ACTIVE'  
   steps %{
-    * The instance #{ @instance.id } should be of #{status} status
+    * The instance #{ @instance.id } should be of active status
   }
 end
 

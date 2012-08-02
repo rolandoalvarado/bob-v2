@@ -1,11 +1,13 @@
 #=================
 # GIVENs
 #=================
-
 Given /^[Aa] project exists in the system$/ do
   identity_service = IdentityService.session
   project          = identity_service.ensure_project_exists(:name => ('project'))
+  
+  # Register project for clean-up.
   EnvironmentCleaner.register(:project, project.id)
+  
   if project.nil? or project.id.empty?
     raise "Project couldn't be initialized!"
   end
@@ -13,7 +15,6 @@ Given /^[Aa] project exists in the system$/ do
   # Make variable(s) available for use in succeeding steps
   @project = project
 end
-
 
 Given /^At least (\d+) images? should be available for use in the project$/ do |number_of_images|
   number_of_images = number_of_images.to_i

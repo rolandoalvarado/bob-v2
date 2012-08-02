@@ -96,10 +96,12 @@ end
 
 Then /^Click the (.+) button$/ do |button_name|
   button_name = button_name.split.join('_').downcase
-  @current_page.send("#{ button_name }_button").click
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+    @current_page.send("#{ button_name }_button").click
 
-  if button_name == 'login'
-    @current_page = SecurePage.new
+    if button_name == 'login'
+      @current_page = SecurePage.new
+    end
   end
 end
 
@@ -608,11 +610,13 @@ Step /^The instance named (.+) should be (?:in|of) (.+) status$/ do |instance_na
   # and instead finding it directly from the page object.
   selector = "//*[@id='instances-list']//*[contains(@class, 'name') and contains(text(), \"#{ instance_name }\")]/.."
   row      = @current_page.find_by_xpath(selector)
-
-  actual_status = row.find('.status').text.strip
-  unless actual_status == expected_status.upcase.gsub(' ', '_')
-    raise "Instance #{ instance_name } is not or took too long to become #{ expected_status }. " +
-          "Current status is #{ actual_status }."
+  
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_long).tries do
+    actual_status = row.find('.status').text.strip
+    unless actual_status == expected_status.upcase.gsub(' ', '_')
+      raise "Instance #{ instance_name } is not or took too long to become #{ expected_status }. " +
+            "Current status is #{ actual_status }."
+    end
   end
 end
 
