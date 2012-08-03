@@ -21,10 +21,8 @@ end
 #=================
 
 When /^I assign a floating IP to the instance$/ do
-  compute_service = ComputeService.session
-  compute_service.set_tenant @project
 
-  num_addresses       = compute_service.addresses
+  ComputeService.session.ensure_keypair_exists(test_keypair_name, @current_user.name, @current_user.password)
 
   steps %{
     * Click the logout button if currently logged in
@@ -36,21 +34,16 @@ When /^I assign a floating IP to the instance$/ do
 
     * Visit the projects page
     * Click the #{ @project.name } project
-
+    
+    * Wait 10 seconds
     * Click the access security tab
     * Click the new floating IP allocation button
     * Current page should have the new floating IP allocation form
     * Choose the 1st item in the pool dropdown
     * Choose the 2nd item in the instance dropdown
     * Click the create floating IP allocation button
-
-    * The floating IPs table's last row should include the text #{ @instance.name }
   }
 
-  num_addresses.reload
-  @floating = num_addresses.find {|a| a.instance_id == @instance.id}
-
-  raise "No floating IP associated to instance #{ @instance.name }" if @floating.nil?
 end
 
 When /^I create an instance on that project based on the image (.+)$/ do |image_name|
@@ -316,7 +309,7 @@ Then /^I can connect to that instance via (.+)/ do |remote_client|
 
   floating_ip = compute_service.addresses.find { |a| a.instance_id == @instance.id }
   raise "Couldn't find a floating IP associated with instance #{ @instance.name }!" unless floating_ip
-
+  
   steps %{
     * Click the logout button if currently logged in
 
@@ -539,7 +532,6 @@ Then /^I [Cc]an [Ss]uspend (?:an|the) instance(?:| in the project)$/ do
 end
 
 Then /^I [Cc]an [Uu]npause (?:that|the) instance$/ do
-
   steps %{
     * Click the logout button if currently logged in
 
@@ -556,7 +548,6 @@ Then /^I [Cc]an [Uu]npause (?:that|the) instance$/ do
 
     * The instance #{ @instance.id } should be in active status
   }
-  
 end
 
 Then /^I [Cc]an [Vv]iew console output of the instance$/ do
@@ -687,6 +678,16 @@ Then /^the instance should be active$/ do
   }
 end
 
+Then /^an instance is publicly accessible via SSH$/ do
+  steps %{
+    * The Floating IPs table should have 1 row
+    * The Floating IP should be associated to instance #{ @instance.name }
+
+    * Wait for 5 minutes for floating IP to be associated to the instance
+    * Connect to the instance named #{ @instance.name } in project #{ @project.name } via SSH
+  }
+end
+
 TestCase /^A user with a role of (.+) in the project can assign a floating IP to an instance$/i do |role_name|
 
   Preconditions %{
@@ -750,6 +751,68 @@ TestCase /^A user with a role of (.+) in the project cannot assign a floating IP
     * The #{ test_project_name } project should not be visible
   }
 end
+
+TestCase /^A user with a role of (.+) in the project can unpause an instance$/i do |role_name|
+
+  Preconditions %{
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that a project named #{ test_project_name } has 1 paused instance named #{ test_instance_name }
+    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the project #{ test_project_name }
+  }
+
+  Cleanup %{
+    * Register the project named #{ test_project_name } for deletion at exit
+    * Register the user named #{ bob_username } for deletion at exit
+  }
+
+  Script %{
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ bob_username }
+    * Fill in the Password field with #{ bob_password }
+    * Click the Login button
+
+    * Click the Projects link
+    * Click the #{ test_project_name } project
+
+    * Click the context menu button for instance #{ test_instance_name }
+    * Click the unpause button for instance #{ test_instance_name }
+
+    * The instance named #{ test_instance_name } should be in active status
+  }
+
+end
+
+
+TestCase /^A user with a role of (.+) in the project cannot unpause an instance$/i do |role_name|
+
+  Preconditions %{
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that the project named #{ test_project_name } has an instance named #{ test_instance_name }
+    * Ensure that the project named #{ test_project_name } has 1 paused instance
+    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the project #{ test_project_name }
+  }
+
+  Cleanup %{
+    * Register the project named #{ test_project_name } for deletion at exit
+    * Register the user named #{ bob_username } for deletion at exit
+  }
+
+  Script %{
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ bob_username }
+    * Fill in the Password field with #{ bob_password }
+    * Click the Login button
+
+    * Visit the projects page
+    * The #{ test_project_name } project should not be visible
+  }
+
+end
+
 
 TestCase /^An instance created based on the image (.+) is accessible via (.+)$/ do |image_name, remote_client|
 

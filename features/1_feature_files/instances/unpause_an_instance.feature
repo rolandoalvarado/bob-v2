@@ -28,4 +28,4 @@ Feature: Unpause a Paused Instance
     Given I am authorized to unpause instances in the project
      When I unpause the instance in the project
       And I assign a floating IP to the instance
-     Then I can connect to that instance via SSH
+     Then an instance is publicly accessible via SSH
