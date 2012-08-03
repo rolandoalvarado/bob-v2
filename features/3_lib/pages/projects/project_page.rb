@@ -173,6 +173,7 @@ class ProjectPage < SecurePage
 
   # These buttons are accessible via 'Click the <name> button for instance <instance id>'
   button    'instance menu',                      "#instance-item-<id> .dropdown-toggle"
+  button    'context',                            "#instance-item-<id> .dropdown-toggle"
   button    'delete instance',                    "#instance-item-<id> .destroy"
   button    'soft reboot instance',               "#instance-item-<id> .soft-reboot"
   button    'hard reboot instance',               "#instance-item-<id> .hard-reboot"
@@ -181,6 +182,7 @@ class ProjectPage < SecurePage
   button    'resume instance',                    "#instance-item-<id> .resume"
   button    'suspend instance',                   "#instance-item-<id> .suspend"
   button    'unpause instance',                   "#instance-item-<id> .unpause"
+  button    'unpause',                            "#instance-item-<id> .unpause"
   button    'view console output',                "#instance-item-<id> .logs"
   button    'VNC console',                        "#instance-item-<id> .vnc-console"
 

@@ -22,21 +22,33 @@ Step /^Ensure that the project named (.+) has an instance with name (.+) and key
   raise "Instance #{ instance_name } couldn't be found!" unless instance
 end
 
-
-Step /^Ensure that the project named (.+) has (?:a|an) active instance named (.+)$/ do |project_name, instance_name|
+Step /^Ensure that the project named (.+) has (?:a|an) (.+) instance named (.+)$/ do |project_name, status, instance_name|
   project = IdentityService.session.find_project_by_name(project_name)
   raise "#{ project_name } couldn't be found!" unless project
 
-  ComputeService.session.create_instance_in_project(project, name: instance_name)
+  instance = ComputeService.session.create_instance_in_project(project, name: instance_name)
+  raise "Instance #{ instance_name } couldn't be found!" unless instance
 
-  if instance = ComputeService.session.find_instance_by_name(project, instance_name)
-    raise "Instance #{ instance_name } was found, but is not active!" unless instance.state == 'ACTIVE'
+  if status.upcase == 'PAUSED'
+    paused_instance = ComputeService.session.pause_an_instance(project, instance)
+    raise "Couldn't ensure #{ instance.name } is in paused state" unless paused_instance
   else
-    raise "Instance #{ instance_name } couldn't be found!"
+    actual_count = ComputeService.session.send(:"ensure_#{ status }_instance_count", project, 1)
+    raise "Couldn't ensure #{ project.name } has 1 #{ status } instance" unless actual_count == 1
   end
 end
 
 Step /^Ensure that the project named (.+) has (\d+) (.+) (?:instance|instances)/ do |project_name, desired_count,status |
+  desired_count = desired_count.to_i
+
+  project = IdentityService.session.find_project_by_name(project_name)
+  raise "#{ project_name } couldn't be found!" unless project
+
+  actual_count = ComputeService.session.send(:"ensure_#{ status }_instance_count", project, desired_count)
+  raise "Couldn't ensure #{ project.name } has #{ desired_count } #{ status } instances" unless actual_count == desired_count
+end
+
+Step /^Ensure that the project named (.+) has (\d+) (.+) instance (.+)/ do |project_name, desired_count, status, instance_name |
   desired_count = desired_count.to_i
 
   project = IdentityService.session.find_project_by_name(project_name)

@@ -752,12 +752,12 @@ TestCase /^A user with a role of (.+) in the project cannot assign a floating IP
   }
 end
 
-TestCase /^A user with a role of (.+) in the project can unpause an instance$/i do |role_name|
+TestCase /^A user with a role of (.+) in the project Can Unpause an instance$/i do |role_name|
 
   Preconditions %{
     * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
     * Ensure that a project named #{ test_project_name } exists
-    * Ensure that a project named #{ test_project_name } has 1 paused instance named #{ test_instance_name }
+    * Ensure that the project named #{ test_project_name } has a paused instance named #{ test_instance_name }
     * Ensure that the user #{ bob_username } has a role of #{ role_name } in the project #{ test_project_name }
   }
 
@@ -776,8 +776,41 @@ TestCase /^A user with a role of (.+) in the project can unpause an instance$/i 
     * Click the Projects link
     * Click the #{ test_project_name } project
 
-    * Click the context menu button for instance #{ test_instance_name }
-    * Click the unpause button for instance #{ test_instance_name }
+    * Click the context button of instance #{ test_instance_name } in #{ test_project_name }
+    * Click the unpause button of instance #{ test_instance_name } in #{ test_project_name }
+
+    * The instance named #{ test_instance_name } should be in active status
+  }
+
+end
+
+
+TestCase /^An authorized user can unpause an instance in the project$/i do
+
+  Preconditions %{
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that the project named #{ test_project_name } has a paused instance named #{ test_instance_name }
+    * Ensure that the user #{ bob_username } has a role of Project Manager in the project #{ test_project_name }
+  }
+
+  Cleanup %{
+    * Register the project named #{ test_project_name } for deletion at exit
+    * Register the user named #{ bob_username } for deletion at exit
+  }
+
+  Script %{
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ bob_username }
+    * Fill in the Password field with #{ bob_password }
+    * Click the Login button
+
+    * Click the Projects link
+    * Click the #{ test_project_name } project
+
+    * Click the context button of instance #{ test_instance_name } in #{ test_project_name }
+    * Click the unpause button of instance #{ test_instance_name } in #{ test_project_name }
 
     * The instance named #{ test_instance_name } should be in active status
   }
@@ -789,10 +822,7 @@ TestCase /^A user with a role of (.+) in the project cannot unpause an instance$
 
   Preconditions %{
     * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
-    * Ensure that a project named #{ test_project_name } exists
-    * Ensure that the project named #{ test_project_name } has an instance named #{ test_instance_name }
-    * Ensure that the project named #{ test_project_name } has 1 paused instance
-    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the project #{ test_project_name }
+    * Ensure that a project named #{ test_project_name } does not exists
   }
 
   Cleanup %{
