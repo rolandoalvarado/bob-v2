@@ -9,7 +9,7 @@ end
 Then /^A quota edit dialog show error/i do
   element_name =  "quota edit error element".split.join('_').downcase
   element_name2 = "quota edit error2 element".split.join('_').downcase
-  if ( !@current_page.send("has_#{ element_name }?") && 
+  if ( !@current_page.send("has_#{ element_name }?") &&
       !@current_page.send("has_#{ element_name2 }?")  )
     raise "A quota edit should show error, but it does not."
   end
@@ -162,7 +162,7 @@ end
 
 Step /^Ensure that the project (.+) has an instance$/ do |project|
   project = @project
-  
+
   if project
     compute_service = ComputeService.session
     compute_service.ensure_active_instance_count(project, 1)
@@ -196,7 +196,7 @@ Then /^Quota Values should be updated with (.+) , (.+) and (.+)$/i do |floating_
 end
 
 Then /^Quota Values should be warned with (.+) , (.+) and (.+)$/i do |floating_ip,volumes,cores|
-  @pending          
+  @pending
 end
 
 Then /^Edit the (.+) project$/i do |project_name|
@@ -211,4 +211,15 @@ Then /^Delete the (.+) project$/i do |project_name|
   @current_page.project_menu_button( name: project_name ).click
   @current_page.delete_project_link( name: project_name ).click
   @current_page.delete_confirmation_button.click
+end
+
+Step /^Ensure that the project named (.+) has (?:an|a) (member|project manager) named (.+)$/ do |project_name, role, username|
+  project = IdentityService.session.find_project_by_name(project_name)
+  raise "#{ project_name } couldn't be found!" unless project
+
+  user_attrs       = CloudObjectBuilder.attributes_for(:user, :name => Unique.username(username), :project_id => project.id)
+  identity_service = IdentityService.session
+  user             = identity_service.ensure_user_exists_in_project(user_attrs, project, admin_role?(role))
+
+  EnvironmentCleaner.register(:user, user.id)
 end
