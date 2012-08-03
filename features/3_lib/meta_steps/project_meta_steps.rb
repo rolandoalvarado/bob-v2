@@ -28,6 +28,15 @@ Step /^Ensure that a project named (.+) exists$/i do |project_name|
   @named_project = project
 end
 
+Step /^Ensure that a project named (.+) does not exists$/i do |project_name|
+  identity_service = IdentityService.session
+  project          = identity_service.ensure_tenant_does_not_exist(:name => project_name)
+
+  if project
+    EnvironmentCleaner.register(:project, project.id)
+  end
+end
+
 Step /^Ensure that the project named (.+) has (\d+) instances?$/i do |project_name, instance_count|
   instance_count   = instance_count.to_i
   project          = IdentityService.session.ensure_project_exists(:name => project_name)

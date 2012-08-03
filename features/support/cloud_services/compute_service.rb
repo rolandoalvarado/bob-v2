@@ -394,8 +394,8 @@ class ComputeService < BaseCloudService
     ensure_instance_count(project, :active, desired_count, strict, attributes)
   end
 
-  def ensure_paused_instance_count(project, desired_count, strict = true)
-    ensure_instance_count(project, :paused, desired_count, strict)
+  def ensure_paused_instance_count(project, desired_count, strict = true, attributes = {})
+    ensure_instance_count(project, :paused, desired_count, strict, attributes)
   end
 
   def ensure_suspended_instance_count(project, desired_count, strict = true)
@@ -632,6 +632,13 @@ class ComputeService < BaseCloudService
     @addresses.reload
     @instances.reload
     @volumes.reload
+  end
+  
+  def pause_an_instance(project, instance)
+    service.set_tenant project
+    
+    sleep(ConfigFile.wait_long)
+    service.pause_server(instance.id)
   end
 
   private

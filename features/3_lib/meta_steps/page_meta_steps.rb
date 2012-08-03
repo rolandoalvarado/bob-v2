@@ -223,11 +223,11 @@ Step /^Click the context menu button of the volume named (.+)$/i do |volume_name
   @current_page.volume_context_menu_button(:id => volume['id']).click
 end
 
-Step /^Click the context menu button of the instance named (.+)$/i do |instance_name|
-  instance = ComputeService.session.find_instance_by_name(instance_name.strip)
+Step /^Click the (.+) button of instance (.+) in (.+)$/i do |button_name, instance_name, project|
+  instance = ComputeService.session.find_instance_by_name(project, instance_name)
   raise "ERROR: I couldn't find an instance with named '#{ instance_name }'." unless instance
 
-  @current_page.send("instance menu_button", id: instance.id).click
+  @current_page.send("#{ button_name }_button", id: instance.id).click
 end
 
 Step /^Click the (attach|delete|detach) button of the volume named (.+)$/i do |button_name, volume_name|
