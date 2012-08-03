@@ -111,12 +111,7 @@ class IdentityService < BaseCloudService
     attributes[:name] = Unique.project_name(attributes[:name])
 
     tenant = tenants.find_by_name(attributes[:name])
-
-    if tenant
-      tenant.update(attributes)
-    else
-      tenant = create_tenant(attributes)
-    end
+    tenant = create_tenant(attributes) unless tenant
 
     # Make ConfigFile.admin_username an admin of the tenant. This is so that we
     # can manipulate it as needed. Turns out the 'admin' role in Keystone is
@@ -154,11 +149,27 @@ class IdentityService < BaseCloudService
 
   def ensure_user_exists(attributes)
     user = find_user_by_name(attributes[:name])
-    if user
-      user.update(attributes)
-    else
+    user = create_user(attributes) unless user
+    user.password = attributes[:password]
+    user
+  end
+
+  def ensure_user_exists_in_project(attributes, project, admin_role = false)
+    attributes[:project_id] = project.is_a?(Fixnum) ? project : project.id
+    user = find_user_by_name(attributes[:name])
+
+    unless user
       user = create_user(attributes)
+      member_role = roles.find_by_name(RoleNameDictionary.db_name('Member'))
+      project.grant_user_role(user.id, member_role.id)
+
+      if admin_role
+        admin_tenant = tenants.find_by_name('admin')
+        admin_role = roles.find_by_name(RoleNameDictionary.db_name('Project Manager'))
+        admin_tenant.grant_user_role(user.id, admin_role.id)
+      end
     end
+
     user.password = attributes[:password]
     user
   end
