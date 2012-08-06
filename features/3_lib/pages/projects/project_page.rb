@@ -36,6 +36,7 @@ class ProjectPage < SecurePage
   form      'instance password',                  '#instance-password-modal'
   button    'close instance dialogue',            "#instance-password-modal a.btn"
   button    'cancel create instance',             "#new-instance-modal a.btn"
+  element   'page loader',                        'div.page-loader'
   #==========================
   # Edit Quota Elements
   #==========================

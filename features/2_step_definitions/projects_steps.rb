@@ -328,8 +328,7 @@ Then /^I can grant project membership to (.+)$/i do |username|
     * The #{ (@project || @project_attrs).name  } project should be visible
     * Click the #{ (@project || @project_attrs).name } project
 
-    * Click the collaborators tab
-    * Click the add collaborator button
+    * Wait 10 seconds
     * Click the collaborators tab
     * Click the add collaborator button
     * Fill in the email field with #{ user.email }
@@ -431,8 +430,8 @@ end
 
 Then /^I can edit (?:that|the) project$/i do
   
-  project_name = "Edited Project"
-  project_description = "Edited Project Description"
+  edited_project_name = (@project || @project_attrs).name.gsub('project', 'edited')
+  edited_project_description = "Edited Project Description"
   
   steps %{
     * Click the logout button if currently logged in
@@ -445,16 +444,16 @@ Then /^I can edit (?:that|the) project$/i do
     * The #{ (@project || @project_attrs).name } project should be visible
 
     * Edit the #{ (@project || @project_attrs).name } project
-    * Fill in the project name field with #{ project_name }
-    * Fill in the project description field with #{ project_description }
+    * Fill in the project name field with #{ edited_project_name }
+    * Fill in the project description field with #{ edited_project_description }
     * Click the modify project button
     
     * Visit the projects page
-    * The #{ project_name } project should be visible
+    * The #{ edited_project_name } project should be visible
   }
   
   # Register created project for post-test deletion
-  edited_project = IdentityService.session.find_project_by_name(project_name)
+  edited_project = IdentityService.session.find_project_by_name(edited_project_name)
   EnvironmentCleaner.register(:project, edited_project.id) if edited_project
 
 end
@@ -622,7 +621,8 @@ Then /^I [Cc]annot [Ee]dit (?:that|the) project$/ do
     * Click the Login button
 
     * Visit the projects page
-    * The #{ project_name } project should not be visible
+    * The #{ project_name } project should be visible
+    * The edit project link should be disabled with #{ project_name }
   }
 end
 
@@ -652,7 +652,8 @@ TestCase /^I cannot delete (?:that|the) project$/i do
     * Click the Login button
 
     * Visit the projects page
-    * The #{ project_name } project should not be visible
+    * The #{ project_name } project should be visible
+    * The delete project link should be disabled with #{ project_name }
   }
 end
 
