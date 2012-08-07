@@ -532,7 +532,6 @@ end
 
 Then /^The (.+) link should be disabled with (.+)$/i do |link_name,name|
   link_name = link_name.split.join('_').downcase
-
   unless @current_page.send("has_disabled_#{ link_name.gsub(' ','_') }_link?", name: name)
     raise "Couldn't find disabled #{ link_name } link."
   end
