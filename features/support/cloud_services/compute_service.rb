@@ -88,17 +88,15 @@ class ComputeService < BaseCloudService
 
     sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_long).tries do
       instance.reload
-      if instance.state =~ /ERROR|SHUTOFF/
-        break # No use retrying if instance is in error state
-      elsif instance.state != 'ACTIVE'
+      if instance.state =~ /BUILD/
         raise "Instance #{ instance.name } took too long to become active. " +
-              "Instance is currently #{ instance.state }."
-      else
+              "Instance is currently in #{ instance.state } status."
+      elsif instance.state =~ /ACTIVE/
         return instance
       end
     end
 
-    raise "Instance #{ instance.name } is in #{ instance.state } status." if instance.state =~ /ERROR|SHUTOFF/
+    raise "Instance #{ instance.name } is in #{ instance.state } status."
   end
 
   def create_instances_in_project(project, desired_count, attributes = {})
@@ -723,8 +721,8 @@ class ComputeService < BaseCloudService
   end
 
   def remove_attached_instance_resources(project, instance)
-    service.set_tenant project
-    associated_addresses = service.addresses.select { |a| a.instance_id == instance.id }
+    set_tenant project
+    associated_addresses = @addresses.reload.select { |a| a.instance_id == instance.id }
     associated_addresses.each do |address|
       instance.disassociate_address(address.ip)
       sleep(ConfigFile.wait_short)

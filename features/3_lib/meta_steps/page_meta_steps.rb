@@ -96,12 +96,10 @@ end
 
 Then /^Click the (.+) button$/ do |button_name|
   button_name = button_name.split.join('_').downcase
-  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
-    @current_page.send("#{ button_name }_button").click
+  @current_page.send("#{ button_name }_button").click
 
-    if button_name == 'login'
-      @current_page = SecurePage.new
-    end
+  if button_name == 'login'
+    @current_page = SecurePage.new
   end
 end
 
@@ -123,9 +121,26 @@ end
 
 
 Then /^Click the (.+) button for instance (.+)$/ do |button_name, instance_id|
+  button_name = button_name.split.join('_').downcase
+  @current_page.send("#{ button_name }_button", id: instance_id).click
+end
+
+Then /^The instance menu for instance (.+) should have the (.+) button$/ do |instance_id, button_name|
+  button_name = button_name.split.join('_').downcase
+  unless @current_page.send("has_#{ button_name }_instance_button?", id: instance_id)
+    raise "Couldn't find the #{ button_name } button in the instance menu!"
+  end
+end
+
+Then /^Click the (.+) action in the instance menu for instance (.+)$/i do |instance_action, instance_id|
+  instance_action = instance_action.split.join('_').downcase
+
   sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
-    button_name = button_name.split.join('_').downcase
-    @current_page.send("#{ button_name }_button", id: instance_id).click
+    @current_page.instance_menu_button(id: instance_id).click
+
+    @current_page.send("#{ instance_action }_instance_button", id: instance_id).click
+
+    raise "Couldn't find resize instance form!" unless @current_page.has_resize_instance_form?
   end
 end
 
@@ -386,6 +401,13 @@ Then /^Fill in the (.+) field with (.+)$/ do |field_name, value|
   @current_page.send("#{ field_name }_field").set value
 end
 
+Step /^Reload the page$/ do
+  if @current_page
+    @current_page.session.execute_script %{
+      window.location.reload();
+    }
+  end
+end
 
 Then /^Select OS image (.+) item from the images radiolist$/ do |image_name|
  if image_name == "(Any)"
@@ -532,6 +554,7 @@ end
 
 Then /^The (.+) link should be disabled with (.+)$/i do |link_name,name|
   link_name = link_name.split.join('_').downcase
+
   unless @current_page.send("has_disabled_#{ link_name.gsub(' ','_') }_link?", name: name)
     raise "Couldn't find disabled #{ link_name } link."
   end
@@ -603,8 +626,13 @@ end
 
 
 Then /^The instance ((?:(?!named )).+) should be (?:in|of) (.+) status$/ do |instance_id, status|
+  row = @current_page.instance_row( id: instance_id )
+  unless row
+    raise "Couldn't find row for instance #{ instance_id } in the instances list!"
+  end
+
   sleeping(1).seconds.between_tries.failing_after(20).tries do
-    unless @current_page.instance_row( id: instance_id ).find('.status').has_content?(status.upcase.gsub(' ', '_'))
+    unless row.find('.status').has_content?(status.upcase.gsub(' ', '_'))
       raise "Instance #{ instance_id } does not have or took to long to become #{ status } status."
     end
   end
@@ -616,21 +644,21 @@ Step /^The instance named (.+) should be (?:in|of) (.+) status$/ do |instance_na
   # and instead finding it directly from the page object.
   selector = "//*[@id='instances-list']//*[contains(@class, 'name') and contains(text(), \"#{ instance_name }\")]/.."
   row      = @current_page.find_by_xpath(selector)
-  
-  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_long).tries do
-    actual_status = row.find('.status').text.strip
-    unless actual_status == expected_status.upcase.gsub(' ', '_')
-      raise "Instance #{ instance_name } is not or took too long to become #{ expected_status }. " +
-            "Current status is #{ actual_status }."
-    end
+
+  actual_status = row.find('.status').text.strip
+  unless actual_status == expected_status.upcase.gsub(' ', '_')
+    raise "Instance #{ instance_name } is not or took too long to become #{ expected_status }. " +
+          "Current status is #{ actual_status }."
   end
 end
 
 
 Then /^The instance (.+) should not have flavor (.+)$/ do |instance_id, flavor_name|
-  if @current_page.instance_row( id: instance_id ).find('.flavor').has_content?(flavor_name)
-    raise "Expected flavor of instance #{ instance_id } to change. " +
-          "Current flavor is #{ flavor_name }."
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+    if @current_page.instance_row( id: instance_id ).find('.flavor').has_content?(flavor_name)
+      raise "Expected flavor of instance #{ instance_id } to change. " +
+            "Current flavor is #{ flavor_name }."
+    end
   end
 end
 

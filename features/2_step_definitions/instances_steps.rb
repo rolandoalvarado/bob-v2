@@ -177,21 +177,21 @@ When /^I resize the instance to a different flavor$/ do
     * Visit the projects page
     * Click the #{ @project.name } project
 
-    * Wait 90 seconds
-    * Click the instance menu button for instance #{ @instance.id }
-    * Click the resize instance button for instance #{ @instance.id }
-    * Current page should have the resize instance form
+    * The instance #{ @instance.id } should be in active status
+
+    * Click the resize action in the instance menu for instance #{ @instance.id }
+
     * Drag the instance flavor slider to a different flavor
     * Click the resize instance confirmation button
 
     * The instance #{ @instance.id } should be in resizing status
     * The instance #{ @instance.id } should be performing task resize_prep
 
+    * Wait for 5 minutes for resizing to finish
     * The instance #{ @instance.id } should be in active status
     * The instance #{ @instance.id } should be performing task resize_verify
 
-    * Click the instance menu button for instance #{ @instance.id }
-    * Click the confirm resize instance button for instance #{ @instance.id }
+    * Click the confirm resize action in the instance menu for instance #{ @instance.id }
   }
 end
 
@@ -642,6 +642,7 @@ end
 Then /^the instance should be resized$/i do
   old_flavor = ComputeService.session.flavors.find { |f| f.id == @instance.flavor['id'].to_s }
   steps %{
+    * Wait for 5 minutes for resizing to finish
     * The instance #{ @instance.id } should not have flavor #{ old_flavor.name }
   }
 end
