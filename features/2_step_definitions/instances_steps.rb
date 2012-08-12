@@ -939,3 +939,217 @@ TestCase /^An instance is publicly accessible via its assigned floating IP$/ do
   }
 
 end
+
+TestCase /^A user with a role of (.+) in the project can resize an instance$/i do |role_name|
+
+  original_flavor = 'm1.small'
+  new_flavor      = 'm1.medium'
+
+  Preconditions %{
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that the project named #{ test_project_name } has an instance with name #{ test_instance_name } and flavor #{ original_flavor }
+    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the project #{ test_project_name }
+  }
+
+  Cleanup %{
+    * Register the user named #{ bob_username } for deletion at exit
+    * Register the project named #{ test_project_name } for deletion at exit
+  }
+
+  Script %{
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ bob_username }
+    * Fill in the Password field with #{ bob_password }
+    * Click the Login button
+
+    * Click the Projects link
+    * Click the #{ test_project_name } project
+
+    * The instance named #{ test_instance_name } should be in active status
+
+    * The context menu for the instance named #{ test_instance_name } should have the resize action
+  }
+
+end
+
+TestCase /^A user with a role of (.+) in the project cannot resize an instance$/i do |role_name|
+
+  Preconditions %{
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that the project named #{ test_project_name } has an instance named #{ test_instance_name }
+    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the project #{ test_project_name }
+  }
+
+  Cleanup %{
+    * Register the user named #{ bob_username } for deletion at exit
+  }
+
+  Script %{
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ bob_username }
+    * Fill in the Password field with #{ bob_password }
+    * Click the Login button
+
+    * Click the Projects link
+    * The #{ test_project_name } project should not be visible
+  }
+
+end
+
+TestCase /^A user with a role of (.+) in the project can revert a resized instance$/i do |role_name|
+
+  original_flavor = 'm1.small'
+  new_flavor      = 'm1.medium'
+
+  Preconditions %{
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that the project named #{ test_project_name } has an instance with name #{ test_instance_name } and flavor #{ original_flavor }
+    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the project #{ test_project_name }
+  }
+
+  Cleanup %{
+    * Register the user named #{ bob_username } for deletion at exit
+    * Register the project named #{ test_project_name } for deletion at exit
+  }
+
+  Script %{
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ bob_username }
+    * Fill in the Password field with #{ bob_password }
+    * Click the Login button
+
+    * Click the Projects link
+    * Click the #{ test_project_name } project
+
+    * Click the resize action in the context menu for the instance named #{ test_instance_name }
+
+    * Drag the instance flavor slider to #{ new_flavor }
+    * Click the resize instance confirmation button
+
+    * The instance named #{ test_instance_name } should be in resizing status
+
+    * Wait at most 3 minutes until the instance named #{ test_instance_name } is in active status
+    * The context menu for the instance named #{ test_instance_name } should have the revert resize action
+  }
+
+end
+
+TestCase /^A user with a role of (.+) in the project cannot revert a resized instance$/i do |role_name|
+
+  Preconditions %{
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that the project named #{ test_project_name } has an instance named #{ test_instance_name }
+    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the project #{ test_project_name }
+  }
+
+  Cleanup %{
+    * Register the user named #{ bob_username } for deletion at exit
+  }
+
+  Script %{
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ bob_username }
+    * Fill in the Password field with #{ bob_password }
+    * Click the Login button
+
+    * Click the Projects link
+    * The #{ test_project_name } project should not be visible
+  }
+
+end
+
+TestCase /^An instance resized by an authorized user will have a different flavor$/i do
+
+  original_flavor = 'm1.small'
+  new_flavor      = 'm1.medium'
+
+  Preconditions %{
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that the project named #{ test_project_name } has an instance with name #{ test_instance_name } and flavor #{ original_flavor }
+    * Ensure that the user #{ bob_username } has a role of Project Manager in the project #{ test_project_name }
+  }
+
+  Cleanup %{
+    * Register the user named #{ bob_username } for deletion at exit
+    * Register the project named #{ test_project_name } for deletion at exit
+  }
+
+  Script %{
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ bob_username }
+    * Fill in the Password field with #{ bob_password }
+    * Click the Login button
+
+    * Click the Projects link
+    * Click the #{ test_project_name } project
+
+    * The instance named #{ test_instance_name } should be in active status
+
+    * Click the resize action in the context menu for the instance named #{ test_instance_name }
+
+    * Drag the instance flavor slider to #{ new_flavor }
+    * Click the resize instance confirmation button
+
+    * The instance named #{ test_instance_name } should be in resizing status
+
+    * Wait at most 3 minutes until the instance named #{ test_instance_name } is in active status
+    * Click the confirm resize action in the context menu for the instance named #{ test_instance_name }
+
+    * The instance named #{ test_instance_name } should have flavor #{ new_flavor }
+  }
+
+end
+
+TestCase /^An instance that has been resized by an authorized user can be reverted to its original flavor$/ do
+
+  original_flavor = 'm1.small'
+  new_flavor      = 'm1.medium'
+
+  Preconditions %{
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that the project named #{ test_project_name } has an instance with name #{ test_instance_name } and flavor #{ original_flavor }
+    * Ensure that the user #{ bob_username } has a role of Project Manager in the project #{ test_project_name }
+  }
+
+  Cleanup %{
+    * Register the user named #{ bob_username } for deletion at exit
+    * Register the project named #{ test_project_name } for deletion at exit
+  }
+
+  Script %{
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ bob_username }
+    * Fill in the Password field with #{ bob_password }
+    * Click the Login button
+
+    * Click the Projects link
+    * Click the #{ test_project_name } project
+
+    * The instance named #{ test_instance_name } should be in active status
+
+    * Click the resize action in the context menu for the instance named #{ test_instance_name }
+
+    * Drag the instance flavor slider to #{ new_flavor }
+    * Click the resize instance confirmation button
+
+    * The instance named #{ test_instance_name } should be in resizing status
+
+    * Wait at most 3 minutes until the instance named #{ test_instance_name } is in active status
+    * Click the revert resize action in the context menu for the instance named #{ test_instance_name }
+
+    * The instance named #{ test_instance_name } should have flavor #{ original_flavor }
+  }
+
+end

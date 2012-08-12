@@ -186,6 +186,8 @@ class ProjectPage < SecurePage
   button    'unpause',                            "#instance-item-<id> .unpause"
   button    'view console output',                "#instance-item-<id> .logs"
   button    'VNC console',                        "#instance-item-<id> .vnc-console"
+  button    'confirm resize instance',            "#instance-item-<id> .confirm-resize"
+  button    'revert resize instance',             "#instance-item-<id> .revert-resize"
 
   button    'confirm instance deletion',          '#alert-template .okay'
   button    'confirm instance reboot',            "#alert-template .okay"

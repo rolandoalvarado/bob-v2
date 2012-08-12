@@ -13,6 +13,16 @@ Step /^Ensure that the project named (.+) has an instance named (.+)$/ do |proje
 end
 
 
+Step /^Ensure that the project named (.+) has an instance with name (.+) and flavor (.+)$/ do |project_name, instance_name, flavor_name|
+  project = IdentityService.session.find_project_by_name(project_name)
+  raise "#{ project_name } couldn't be found!" unless project
+
+  ComputeService.session.create_instance_in_project(project, name: instance_name, flavor: flavor_name)
+  instance = ComputeService.session.find_instance_by_name(project, instance_name)
+  raise "Instance #{ instance_name } couldn't be found!" unless instance
+end
+
+
 Step /^Ensure that the project named (.+) has an instance with name (.+) and keypair (.+)$/ do |project_name, instance_name, key_name|
   project = IdentityService.session.find_project_by_name(project_name)
   raise "#{ project_name } couldn't be found!" unless project

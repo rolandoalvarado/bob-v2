@@ -125,15 +125,12 @@ Then /^Click the (.+) button for instance (.+)$/ do |button_name, instance_id|
   @current_page.send("#{ button_name }_button", id: instance_id).click
 end
 
-Then /^The instance menu for instance (.+) should have the (.+) button$/ do |instance_id, button_name|
-  button_name = button_name.split.join('_').downcase
-  unless @current_page.send("has_#{ button_name }_instance_button?", id: instance_id)
-    raise "Couldn't find the #{ button_name } button in the instance menu!"
-  end
-end
-
-Then /^Click the (.+) action in the instance menu for instance (.+)$/i do |instance_action, instance_id|
+Then /^Click the (.+) action in the context menu for the instance named (.+)$/i do |instance_action, instance_name|
   instance_action = instance_action.split.join('_').downcase
+
+  instance = ComputeService.session.instances.find { |i| i.name == instance_name }
+  raise "Couldn't find instance #{ instance_name }!" unless instance
+  instance_id = instance.id
 
   sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
     @current_page.instance_menu_button(id: instance_id).click
@@ -141,6 +138,23 @@ Then /^Click the (.+) action in the instance menu for instance (.+)$/i do |insta
     @current_page.send("#{ instance_action }_instance_button", id: instance_id).click
 
     raise "Couldn't find resize instance form!" unless @current_page.has_resize_instance_form?
+  end
+end
+
+Then /^The context menu for the instance named (.+) should have the (.+) action$/i do |instance_name, instance_action|
+  instance_action = instance_action.split.join('_').downcase
+
+  instance = ComputeService.session.instances.find { |i| i.name == instance_name }
+  raise "Couldn't find instance #{ instance_name }!" unless instance
+  instance_id = instance.id
+
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+    @current_page.instance_menu_button(id: instance_id).click
+
+    unless @current_page.send("has_#{ instance_action }_instance_button?", id: instance_id)
+      raise "Couldn't find #{ instance_action } action in the context menu for instance " +
+            "#{ instance_name }!"
+    end
   end
 end
 
@@ -238,11 +252,11 @@ Step /^Click the context menu button of the volume named (.+)$/i do |volume_name
   @current_page.volume_context_menu_button(:id => volume['id']).click
 end
 
-Step /^Click the (.+) button of instance (.+) in (.+)$/i do |button_name, instance_name, project|
-  instance = ComputeService.session.find_instance_by_name(project, instance_name)
+Step /^Click the context menu button of the instance named (.+)$/i do |instance_name|
+  instance = ComputeService.session.find_instance_by_name(instance_name.strip)
   raise "ERROR: I couldn't find an instance with named '#{ instance_name }'." unless instance
 
-  @current_page.send("#{ button_name }_button", id: instance.id).click
+  @current_page.send("instance menu_button", id: instance.id).click
 end
 
 Step /^Click the (attach|delete|detach) button of the volume named (.+)$/i do |button_name, volume_name|
@@ -374,7 +388,7 @@ Then /^Drag the(?:| instance) flavor slider to a different flavor$/ do
   }
 end
 
-Then /^Drag the(?:| instance) flavor slider to the (.+)$/ do |flavor|
+Then /^Drag the(?:| instance) flavor slider to(?:| the) (.+)$/ do |flavor|
   flavors = %w[ m1.small m1.medium m1.large m1.xlarge ]
 
   if flavor.downcase != '(any)'
@@ -593,7 +607,7 @@ Step /^(?:A|The) floating IP should not be associated to instance (.+)$/i do |in
 end
 
 
-Then /^The instance (.+) should be performing task (.+)$/ do |instance_id, task|
+Then /^The instance ((?:(?!named )).+) should be performing task (.+)$/ do |instance_id, task|
   sleeping(1).seconds.between_tries.failing_after(15).tries do
     unless @current_page.instance_row( id: instance_id ).find('.task').text.include?(task)
       raise "Instance #{ instance_id } is not shown as performing task #{ task }."
@@ -602,25 +616,18 @@ Then /^The instance (.+) should be performing task (.+)$/ do |instance_id, task|
 end
 
 
-Then /^The instance (.+) should be shown as rebooting$/ do |instance_id|
-  sleeping(1).seconds.between_tries.failing_after(15).tries do
-    unless @current_page.instance_row( id: instance_id ).find('.task').text.include?('rebooting')
-      raise "Instance #{ instance_id } is not shown as rebooting."
+Then /^The instance named (.+) should be performing task (.+)$/ do |instance_name, task|
+  # TODO To prevent conflict with other instance steps, temporarily forgo changing the selector,
+  # and instead finding it directly from the page object.
+  selector = "//*[@id='instances-list']//*[contains(@class, 'name') and contains(text(), \"#{ instance_name }\")]/.."
+  row = @current_page.find_by_xpath(selector)
+
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+    actual_task = row.find('.task').text.to_s.strip
+    unless actual_task.include?(task)
+      raise "Instance #{ instance_name } is not shown as performing task #{ task }. " +
+            "It is currently #{ actual_task }."
     end
-  end
-end
-
-
-Then /^The instance (.+) should be shown as resuming$/ do |instance_id|
-  unless @current_page.instance_row( id: instance_id ).find('.task').has_content?('resuming')
-    raise "Instance #{ instance_id } is not shown as resuming."
-  end
-end
-
-
-Then /^The instance (.+) should be shown as suspending$/ do |instance_id|
-  unless @current_page.instance_row( id: instance_id ).find('.task').has_content?('suspending')
-    raise "Instance #{ instance_id } is not shown as suspending."
   end
 end
 
@@ -644,20 +651,38 @@ Step /^The instance named (.+) should be (?:in|of) (.+) status$/ do |instance_na
   # and instead finding it directly from the page object.
   selector = "//*[@id='instances-list']//*[contains(@class, 'name') and contains(text(), \"#{ instance_name }\")]/.."
   row      = @current_page.find_by_xpath(selector)
-
-  actual_status = row.find('.status').text.strip
-  unless actual_status == expected_status.upcase.gsub(' ', '_')
-    raise "Instance #{ instance_name } is not or took too long to become #{ expected_status }. " +
-          "Current status is #{ actual_status }."
+  
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+    actual_status = row.find('.status').text.strip
+    unless actual_status == expected_status.upcase.gsub(' ', '_')
+      raise "Instance #{ instance_name } is not or took too long to become #{ expected_status }. " +
+            "Current status is #{ actual_status }."
+    end
   end
 end
 
 
-Then /^The instance (.+) should not have flavor (.+)$/ do |instance_id, flavor_name|
+Step /^The instance ((?:(?!named )).+) should not have flavor (.+)$/ do |instance_id, flavor_name|
   sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
     if @current_page.instance_row( id: instance_id ).find('.flavor').has_content?(flavor_name)
       raise "Expected flavor of instance #{ instance_id } to change. " +
             "Current flavor is #{ flavor_name }."
+    end
+  end
+end
+
+
+Step /^The instance named (.+) should have flavor (.+)$/ do |instance_name, flavor_name|
+  # TODO To prevent conflict with other instance steps, temporarily forgo changing the selector,
+  # and instead finding it directly from the page object.
+  selector = "//*[@id='instances-list']//*[contains(@class, 'name') and contains(text(), \"#{ instance_name }\")]/.."
+  row = @current_page.find_by_xpath(selector)
+
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+    actual_flavor_name = row.find('.flavor').text.to_s.strip
+    unless row.find('.flavor').has_content?(flavor_name)
+      raise "Expected flavor of instance #{ instance_name } to be #{ flavor_name }. " +
+            "Current flavor is #{ actual_flavor_name }."
     end
   end
 end
@@ -967,6 +992,22 @@ end
 
 Then /^Wait (.+) second(?:s|)/i  do |wait_secs|
   sleep(wait_secs.to_i)
+end
+
+Then /^Wait at most (\d+) minutes until the instance named (.+) is in (.+) status$/ do |number_of_minutes, instance_name, expected_status|
+  # TODO To prevent conflict with other instance steps, temporarily forgo changing the selector,
+  # and instead finding it directly from the page object.
+  selector = "//*[@id='instances-list']//*[contains(@class, 'name') and contains(text(), \"#{ instance_name }\")]/.."
+  row = @current_page.find_by_xpath(selector)
+
+  # Retry every 5 seconds up to x minutes
+  sleeping(5).seconds.between_tries.failing_after((60 * number_of_minutes.to_i) / 5).tries do
+    actual_status = row.find('.status').text.strip
+    unless actual_status == expected_status.upcase.gsub(' ', '_')
+      raise "Instance #{ instance_id } does not have or took to long to become #{ expected_status } status. " +
+            "Instance is currently in #{ actual_status } status."
+    end
+  end
 end
 
 Then /^Wait for (\d+) (?:minute|minutes).*$/ do |number_of_minutes|
