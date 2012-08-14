@@ -96,10 +96,12 @@ end
 
 Then /^Click the (.+) button$/ do |button_name|
   button_name = button_name.split.join('_').downcase
-  @current_page.send("#{ button_name }_button").click
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+    @current_page.send("#{ button_name }_button").click
 
-  if button_name == 'login'
-    @current_page = SecurePage.new
+    if button_name == 'login'
+      @current_page = SecurePage.new
+    end
   end
 end
 
@@ -523,8 +525,11 @@ end
 
 Then /^The (.+) table should include the text (.+)$/ do |table_name, text|
   table_name = table_name.split.join('_').downcase
-  unless @current_page.send("#{ table_name }_table").has_content?(text)
-    raise "Couldn't find the text '#{ text }' in the #{ table_name } table."
+  
+  sleeping(1).seconds.between_tries.failing_after(15).tries do
+    unless @current_page.send("#{ table_name }_table").has_content?(text)
+      raise "Couldn't find the text '#{ text }' in the #{ table_name } table."
+    end
   end
 end
 
