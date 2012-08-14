@@ -37,9 +37,6 @@ class EnvironmentCleaner
 
   def initialize
     @registry = {}
-    @identity_service = IdentityService.session
-    @compute_service  = ComputeService.session
-    @volume_service   = VolumeService.session
   end
 
   def register(object_type, options)
@@ -55,9 +52,13 @@ class EnvironmentCleaner
   end
 
   def delete_test_objects
-    puts "Deleting test objects (Cancel with Ctrl-C)" if registry.count > 0
-    delete_test_projects
-    delete_test_users
+    if registry.count > 0
+      puts "Deleting test objects (Cancel with Ctrl-C)"
+      delete_test_projects
+      delete_test_users
+    else
+      puts "No test objects to delete."
+    end
   end
 
 
@@ -72,6 +73,9 @@ class EnvironmentCleaner
     return unless project_ids
 
     puts "Deleting test projects and their resources..."
+    @identity_service = IdentityService.session
+    @compute_service  = ComputeService.session
+    @volume_service   = VolumeService.session
 
     project_ids.uniq.each do |project_id|
       project = @identity_service.tenants.reload.find { |t| t.id == project_id }
@@ -86,7 +90,7 @@ class EnvironmentCleaner
           puts "    Releasing addresses..."
           released_addresses = @compute_service.release_addresses_from_project(project)
           released_addresses.each do |address|
-            puts "     RELEASED: #{ address[:ip] } (id: #{ address[:id] })"
+            puts "     RELEASED: #{ address[:ip] } (id: #{ address[:id] }, instance_id: #{ address[:instance_id] || '-' })"
           end
         end
 
@@ -143,6 +147,7 @@ class EnvironmentCleaner
     return unless user_ids
 
     puts "Deleting test users and their memberships..."
+    @identity_service = IdentityService.session
 
     user_ids.uniq.each do |user_id|
       if user_id.class == String || (user_id.class == Hash && user_id[:id])

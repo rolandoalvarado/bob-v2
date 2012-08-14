@@ -5,6 +5,12 @@ Step /^Ensure that (?:a|another) user with username (.+) and password (.+) exist
   EnvironmentCleaner.register(:user, @user.id)
 end
 
+Step /^Ensure that (?:a|another) user named (.+) exists$/i do |username|
+  username           = Unique.username(username)
+  @user_attrs        = CloudObjectBuilder.attributes_for(:user, :name => username, :password => bob_password || '123qwe')
+  @existing_user = @user = IdentityService.session.ensure_user_exists(@user_attrs)
+  EnvironmentCleaner.register(:user, @user.id)
+end
 
 Then /^Ensure that a user with username (.+) does not exist$/i do |username|
   user_attrs = CloudObjectBuilder.attributes_for(:user, :name => username)
