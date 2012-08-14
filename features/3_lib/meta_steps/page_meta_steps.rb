@@ -96,7 +96,7 @@ end
 
 Then /^Click the (.+) button$/ do |button_name|
   button_name = button_name.split.join('_').downcase
-  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(10).tries do
     @current_page.send("#{ button_name }_button").click
 
     if button_name == 'login'
@@ -390,7 +390,7 @@ Then /^Drag the(?:| instance) flavor slider to a different flavor$/ do
   }
 end
 
-Then /^Drag the(?:| instance) flavor slider to(?:| the) (.+)$/ do |flavor|
+Then /^Drag the(?:| instance) flavor slider to (?:|the) (.+)$/ do |flavor|
   flavors = %w[ m1.small m1.medium m1.large m1.xlarge ]
 
   if flavor.downcase != '(any)'
@@ -404,6 +404,19 @@ Then /^Drag the(?:| instance) flavor slider to(?:| the) (.+)$/ do |flavor|
   end
 end
 
+#Then /^Drag the(?:| instance) flavor slider to the (.+)$/ do |flavor|
+#  flavors = %w[ m1.small m1.medium m1.large m1.xlarge ]
+
+#  if flavor.downcase != '(any)'
+#    value = flavors.index(flavor)
+
+#    @current_page.session.execute_script %{
+#      var slider = $('#flavor-slider');
+#      slider.slider('option', 'value', #{ value });
+#      slider.trigger('slide', { 'value': #{ value } });
+#    }
+#  end
+#end
 
 Then /^Fill in the (.+) field with (.+)$/ do |field_name, value|
   value      = value.gsub(/^\([Nn]one\)$/, '')
@@ -657,7 +670,7 @@ Step /^The instance named (.+) should be (?:in|of) (.+) status$/ do |instance_na
   selector = "//*[@id='instances-list']//*[contains(@class, 'name') and contains(text(), \"#{ instance_name }\")]/.."
   row      = @current_page.find_by_xpath(selector)
   
-  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(40).tries do
     actual_status = row.find('.status').text.strip
     unless actual_status == expected_status.upcase.gsub(' ', '_')
       raise "Instance #{ instance_name } is not or took too long to become #{ expected_status }. " +
