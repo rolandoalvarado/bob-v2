@@ -27,15 +27,12 @@ module CloudConfiguration
   WAIT                 = :wait
   SHORT                = :short
   LONG                 = :long
-<<<<<<< HEAD
   NODE_QUERY_WAIT      = :node
   NODE_QUERY_RETRIES   = :node
-=======
   TEN                  = :ten
   FIFTEEN              = :fifteen
   TWENTY               = :twenty
   FORTY                = :forty
->>>>>>> 622f3e63c289c81ddadd1e9f0f3caf4155998636
 
   class ConfigFile
     include Singleton
