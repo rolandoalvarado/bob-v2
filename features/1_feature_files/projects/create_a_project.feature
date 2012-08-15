@@ -1,4 +1,4 @@
-@jira-DPBLOG-9 @jira-MCF-4
+@jira-DPBLOG-9 @jira-MCF-4 @projects
 Feature: Create a Project
   As a user, I want to create a project in mCloud so that I can group my
   resources together and control who has access to them.

@@ -27,8 +27,15 @@ module CloudConfiguration
   WAIT                 = :wait
   SHORT                = :short
   LONG                 = :long
+<<<<<<< HEAD
   NODE_QUERY_WAIT      = :node
   NODE_QUERY_RETRIES   = :node
+=======
+  TEN                  = :ten
+  FIFTEEN              = :fifteen
+  TWENTY               = :twenty
+  FORTY                = :forty
+>>>>>>> 622f3e63c289c81ddadd1e9f0f3caf4155998636
 
   class ConfigFile
     include Singleton
@@ -91,6 +98,43 @@ module CloudConfiguration
       end
       self.instance[REPEAT][SHORT]
     end
+    
+    def self.repeat_ten
+      self.instance.ensure_repeat_and_wait_key
+      unless self.instance[REPEAT][TEN]
+        self.instance[REPEAT][TEN] = 10
+        self.instance.save
+      end
+      self.instance[REPEAT][TEN]
+    end
+    
+    def self.repeat_fifteen
+      self.instance.ensure_repeat_and_wait_key
+      unless self.instance[REPEAT][FIFTEEN]
+        self.instance[REPEAT][FIFTEEN] = 15
+        self.instance.save
+      end
+      self.instance[REPEAT][FIFTEEN]
+    end
+    
+    def self.repeat_twenty
+      self.instance.ensure_repeat_and_wait_key
+      unless self.instance[REPEAT][TWENTY]
+        self.instance[REPEAT][TWENTY] = 20
+        self.instance.save
+      end
+      self.instance[REPEAT][TWENTY]
+    end
+    
+    def self.repeat_forty
+      self.instance.ensure_repeat_and_wait_key
+      unless self.instance[REPEAT][FORTY]
+        self.instance[REPEAT][FORTY] = 40
+        self.instance.save
+      end
+      self.instance[REPEAT][FORTY]
+    end
+    
 
     def self.repeat_long
       self.instance.ensure_repeat_and_wait_key

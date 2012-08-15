@@ -1,4 +1,4 @@
-@jira-DPBLOG-14 @jira-DPBLOG-18 @jira-MCF-14
+@jira-DPBLOG-14 @jira-DPBLOG-18 @jira-MCF-14 @instances
 Feature: Create an Instance
   As a user, I want to create instances in my projects so that I can
   deploy my applications (web apps, services, etc).
@@ -35,22 +35,12 @@ Feature: Create an Instance
      When I create an instance with attributes <Image>, <Name>, <Flavor>, <Keypair> and <Security Group>
      Then the instance will be <Created or Not>
 
-      Scenarios: Valid Values
-        | Image  | Name        | Flavor | Keypair | Security Group | Created or Not |
-        | (Any)  | My Server   | (Any)  | (Any)   | (Any)          | Created        |
-
-      Scenarios: Invalid Values
-        | Image  | Name        | Flavor | Keypair | Security Group | Created or Not | Reason                                           |
-        | (Any)  | (None)      | (Any)  | (Any)   | (Any)          | Not Created    | Must specify a name                              |
-        | (Any)  | My Server   | (Any)  | (Any)   | (None)         | Not Created    | Instance should have at least one security group |
-
       Scenarios: Specific Images
         | Image                                | Name        | Flavor | Keypair | Security Group | Created or Not |
         | 64Bit CentOS 5.8 (v1.0.1)            | My Server   | (Any)  | (Any)   | (Any)          | Created        |
         | 64Bit CentOS 6.2                     | My Server   | (Any)  | (Any)   | (Any)          | Created        |
         | 64Bit Ubuntu 10.04                   | My Server   | (Any)  | (Any)   | (Any)          | Created        |
         | 64Bit Ubuntu 12.04                   | My Server   | (Any)  | (Any)   | (Any)          | Created        |
-        | 64Bit Windows 2008 R2 Enterprise SP1 | My Server   | (Any)  | (Any)   | (Any)          | Created        |
 
       Scenarios: Specific Flavors
         | Image  | Name        | Flavor    | Keypair | Security Group | Created or Not |
@@ -58,3 +48,9 @@ Feature: Create an Instance
         | (Any)  | My Server   | m1.medium | (Any)   | (Any)          | Created        |
         | (Any)  | My Server   | m1.large  | (Any)   | (Any)          | Created        |
         | (Any)  | My Server   | m1.xlarge | (Any)   | (Any)          | Created        |
+        
+      Scenarios: Invalid Values
+        | Image  | Name        | Flavor | Keypair | Security Group | Created or Not | Reason                                           |
+        | (Any)  | (None)      | (Any)  | (Any)   | (Any)          | Not Created    | Must specify a name                              |
+        | (Any)  | My Server   | (Any)  | (Any)   | (None)         | Not Created    | Instance should have at least one security group |
+

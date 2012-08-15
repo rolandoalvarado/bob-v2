@@ -1,11 +1,13 @@
 #=================
 # GIVENs
 #=================
-
 Given /^[Aa] project exists in the system$/ do
   identity_service = IdentityService.session
   project          = identity_service.ensure_project_exists(:name => ('project'))
+  
+  # Register project for clean-up.
   EnvironmentCleaner.register(:project, project.id)
+  
   if project.nil? or project.id.empty?
     raise "Project couldn't be initialized!"
   end
@@ -13,7 +15,6 @@ Given /^[Aa] project exists in the system$/ do
   # Make variable(s) available for use in succeeding steps
   @project = project
 end
-
 
 Given /^At least (\d+) images? should be available for use in the project$/ do |number_of_images|
   number_of_images = number_of_images.to_i
@@ -54,8 +55,6 @@ end
 Given /^The project has more than (\d+) instance flavors?$/ do |number_of_flavors|
   number_of_flavors = number_of_flavors.to_i
   compute_service   = ComputeService.session
-  compute_service.service.set_tenant @project
-
   unless compute_service.flavors.count > number_of_flavors
     raise "Project does not have more than #{ number_of_flavors } flavors."
   end
@@ -80,18 +79,10 @@ Given /^I have a role of (.+) in the project$/ do |role_name|
 
   # Ensure user has the following role in the project
   unless role_name.downcase == "(none)"
-    role = identity_service.roles.find_by_name(RoleNameDictionary.db_name(role_name))
-
-    if role.nil?
-        raise "Role #{ role_name } couldn't be found. Make sure it's defined in " +
-        "features/support/role_name_dictionary.rb and that it exists in " +
-        "#{ ConfigFile.web_client_url }."
-    end
-
     begin
-      role.add_to_user(user, @project)
+      identity_service.ensure_tenant_role(user, @project, role_name)
     rescue Fog::Identity::OpenStack::NotFound => e
-      raise "Couldn't add #{ user.name } to #{ @project.name } as #{ role.name }"
+      raise "Couldn't add #{ user.name } to #{ @project.name } as #{ role_name }"
     end
   end
 
@@ -279,7 +270,7 @@ Then /^I Cannot Create a project$/ do
 
     * Wait 30 seconds
     * Visit the projects page
-    * The create project button should be disabled
+    * The create project button should not be visible
   }
   
 end
@@ -335,8 +326,7 @@ Then /^I can grant project membership to (.+)$/i do |username|
     * The #{ (@project || @project_attrs).name  } project should be visible
     * Click the #{ (@project || @project_attrs).name } project
 
-    * Click the collaborators tab
-    * Click the add collaborator button
+    * Wait 10 seconds
     * Click the collaborators tab
     * Click the add collaborator button
     * Fill in the email field with #{ user.email }
@@ -438,8 +428,8 @@ end
 
 Then /^I can edit (?:that|the) project$/i do
   
-  project_name = "Edited Project"
-  project_description = "Edited Project Description"
+  edited_project_name = (@project || @project_attrs).name.gsub('project', 'edited')
+  edited_project_description = "Edited Project Description"
   
   steps %{
     * Click the logout button if currently logged in
@@ -452,16 +442,16 @@ Then /^I can edit (?:that|the) project$/i do
     * The #{ (@project || @project_attrs).name } project should be visible
 
     * Edit the #{ (@project || @project_attrs).name } project
-    * Fill in the project name field with #{ project_name }
-    * Fill in the project description field with #{ project_description }
+    * Fill in the project name field with #{ edited_project_name }
+    * Fill in the project description field with #{ edited_project_description }
     * Click the modify project button
     
     * Visit the projects page
-    * The #{ project_name } project should be visible
+    * The #{ edited_project_name } project should be visible
   }
   
   # Register created project for post-test deletion
-  edited_project = IdentityService.session.find_project_by_name(project_name)
+  edited_project = IdentityService.session.find_project_by_name(edited_project_name)
   EnvironmentCleaner.register(:project, edited_project.id) if edited_project
 
 end
@@ -629,7 +619,8 @@ Then /^I [Cc]annot [Ee]dit (?:that|the) project$/ do
     * Click the Login button
 
     * Visit the projects page
-    * The #{ project_name } project should not be visible
+    * The #{ project_name } project should be visible
+    * The edit project link should be disabled with #{ project_name }
   }
 end
 
@@ -659,7 +650,8 @@ TestCase /^I cannot delete (?:that|the) project$/i do
     * Click the Login button
 
     * Visit the projects page
-    * The #{ project_name } project should not be visible
+    * The #{ project_name } project should be visible
+    * The delete project link should be disabled with #{ project_name }
   }
 end
 

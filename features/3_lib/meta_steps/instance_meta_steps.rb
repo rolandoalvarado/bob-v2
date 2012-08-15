@@ -1,11 +1,6 @@
-Then /^Ensure that the an instance is a member of the default security group$/ do
-  compute_service = ComputeService.session
-  compute_service.ensure_active_instance_count(@project, 1)
-end
-
 Then /^Ensure that the instance is a member of the (.+) security group$/ do |security_group|
   compute_service = ComputeService.session
-  compute_service.ensure_active_instance_count(@project, 1)
+  compute_service.ensure_active_instance_count(@project, 1, true, {:security_group => security_group})
 end
 
 
@@ -13,11 +8,18 @@ Step /^Ensure that the project named (.+) has an instance named (.+)$/ do |proje
   project = IdentityService.session.find_project_by_name(project_name)
   raise "#{ project_name } couldn't be found!" unless project
 
-  ComputeService.session.create_instance_in_project(project, name: instance_name)
-  sleeping(ConfigFile.wait_long).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
-    instance = ComputeService.session.find_instance_by_name(project, instance_name)
-    raise "Instance #{ instance_name } couldn't be found!" unless instance
-  end
+  instance = ComputeService.session.create_instance_in_project(project, name: instance_name)
+  raise "Instance #{ instance_name } couldn't be found!" unless instance
+end
+
+
+Step /^Ensure that the project named (.+) has an instance with name (.+) and flavor (.+)$/ do |project_name, instance_name, flavor_name|
+  project = IdentityService.session.find_project_by_name(project_name)
+  raise "#{ project_name } couldn't be found!" unless project
+
+  ComputeService.session.create_instance_in_project(project, name: instance_name, flavor: flavor_name)
+  instance = ComputeService.session.find_instance_by_name(project, instance_name)
+  raise "Instance #{ instance_name } couldn't be found!" unless instance
 end
 
 
@@ -30,21 +32,33 @@ Step /^Ensure that the project named (.+) has an instance with name (.+) and key
   raise "Instance #{ instance_name } couldn't be found!" unless instance
 end
 
-
-Step /^Ensure that the project named (.+) has (?:a|an) active instance named (.+)$/ do |project_name, instance_name|
+Step /^Ensure that the project named (.+) has (?:a|an) (.+) instance named (.+)$/ do |project_name, status, instance_name|
   project = IdentityService.session.find_project_by_name(project_name)
   raise "#{ project_name } couldn't be found!" unless project
 
-  ComputeService.session.create_instance_in_project(project, name: instance_name)
+  instance = ComputeService.session.create_instance_in_project(project, name: instance_name)
+  raise "Instance #{ instance_name } couldn't be found!" unless instance
 
-  if instance = ComputeService.session.find_instance_by_name(project, instance_name)
-    raise "Instance #{ instance_name } was found, but is not active!" unless instance.state == 'ACTIVE'
+  if status.upcase == 'PAUSED'
+    paused_instance = ComputeService.session.pause_an_instance(project, instance)
+    raise "Couldn't ensure #{ instance.name } is in paused state" unless paused_instance
   else
-    raise "Instance #{ instance_name } couldn't be found!"
+    actual_count = ComputeService.session.send(:"ensure_#{ status }_instance_count", project, 1)
+    raise "Couldn't ensure #{ project.name } has 1 #{ status } instance" unless actual_count == 1
   end
 end
 
 Step /^Ensure that the project named (.+) has (\d+) (.+) (?:instance|instances)/ do |project_name, desired_count,status |
+  desired_count = desired_count.to_i
+
+  project = IdentityService.session.find_project_by_name(project_name)
+  raise "#{ project_name } couldn't be found!" unless project
+
+  actual_count = ComputeService.session.send(:"ensure_#{ status }_instance_count", project, desired_count)
+  raise "Couldn't ensure #{ project.name } has #{ desired_count } #{ status } instances" unless actual_count == desired_count
+end
+
+Step /^Ensure that the project named (.+) has (\d+) (.+) instance (.+)/ do |project_name, desired_count, status, instance_name |
   desired_count = desired_count.to_i
 
   project = IdentityService.session.find_project_by_name(project_name)

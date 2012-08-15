@@ -110,7 +110,7 @@ Capybara.app_host = ConfigFile.web_client_url
 # high or you'll be pulling your hair waiting for your tests to finish
 NODE_QUERY_WAIT_TIME       = ConfigFile.wait_node
 MAX_NODE_QUERY_RETRIES     = ConfigFile.repeat_node
-Capybara.default_wait_time = 5    # OLD_VALUE: 0 Don't change this value unless you know the purpose
+Capybara.default_wait_time = 0    # OLD_VALUE: 0 Don't change this value unless you know the purpose
 
 module NodeMethods
   include Anticipate
@@ -134,7 +134,7 @@ module NodeMethods
   #=====================
 
   def has_css_selector?(selector)
-    retry_before_returning_false { self.node.has_selector? selector }
+    self.node.has_selector? selector
   end
 
   def has_no_css_selector?(selector)
@@ -142,7 +142,7 @@ module NodeMethods
   end
 
   def has_content?(content)
-    retry_before_returning_false { self.node.has_content? content }
+    self.node.has_content? content
   end
 
   def has_no_content?(content)
@@ -150,7 +150,7 @@ module NodeMethods
   end
 
   def has_xpath?(selector)
-    retry_before_returning_false { self.node.has_xpath? selector }
+    self.node.has_xpath? selector
   end
 
   def has_no_xpath?(selector)

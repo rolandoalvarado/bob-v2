@@ -3,7 +3,7 @@ require_relative '../secure_page'
 class ProjectsPage < SecurePage
   path '/projects'
 
-  button  'create project',                '#new-project'
+  button  'create project',                '#new-project:not(.disabled)'
   button  'disabled create project',       '#new-project.disabled'
   field   'project name',                  '#new-project-name'
   field   'project description',           '#new-project-description'
@@ -12,11 +12,12 @@ class ProjectsPage < SecurePage
   span    'new project description error', "span.error[for='new-project-description']"
 
   # To click on a project link, use ProjectsPage#project_link( name: NAME_OF_PROJECT ).click
-  row     'project',                        xpath:  "//td[@title='<name>']/"
+  row     'project',                        xpath:  "//td[@title='<name>']"
   link    'project',                        xpath:  "//td[@title='<name>']/..//a[@class='view-project']"
   link    'edit project',                   xpath:  "//td[@title='<name>']/..//a[@class='edit-project']"
   link    'disabled edit project',          xpath:  "//td[@title='<name>']/..//a[@class='edit-project disabled'][@disabled='disabled']"
   link    'delete project',                 xpath:  "//td[@title='<name>']/..//a[@class='destroy-project']"
+  link    'disabled delete project',        xpath:  "//td[@title='<name>']/..//a[@class='destroy-project disabled'][@disabled='disabled']"
   button  'project menu',                   xpath:  "//td[@title='<name>']/..//a[@class='dropdown-toggle']"
   button  'delete confirmation',            xpath:  "//*[@class='btn btn-danger okay']"
   field   'unable to delete',               xpath:  "//h4[@class='alert-heading'][contains(text(),'Unable to delete the project')]"

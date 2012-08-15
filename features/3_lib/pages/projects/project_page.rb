@@ -6,8 +6,8 @@ class ProjectPage < SecurePage
   # For Project
   link      'project',                            xpath:  "//*[@id='projects-list']//td[normalize-space(text())='<name>']/.."
   message   'update project',                     '#alert-template .alert-success'
-  row       'project',                            xpath:  "//td[@title='<name>']/"
-  
+  row       'project',                            xpath:  "//td[@title='<name>']"
+
   button    'close',                              '.close'
 
   tab       'instances and volumes',              '.nav-tabs .instances-and-volumes a'
@@ -36,16 +36,17 @@ class ProjectPage < SecurePage
   form      'instance password',                  '#instance-password-modal'
   button    'close instance dialogue',            "#instance-password-modal a.btn"
   button    'cancel create instance',             "#new-instance-modal a.btn"
+  element   'page loader',                        'div.page-loader'
   #==========================
   # Edit Quota Elements
   #==========================
 # Type      Name                                  Selector
-  button    'quota modify',                       xpath: '//*[@id="edit-quota"]' 
-  link      'disabled quota modify',              xpath: '//*[@id="edit-quota"]' 
+  button    'quota modify',                       xpath: '//*[@id="edit-quota"]'
+  link      'disabled quota modify',              xpath: '//*[@id="edit-quota"]'
   form      'modify quota',                       '#quota-form'
   message   'Modify Quota',                       xpath: '//h3[text()="Modify Quota"]'
   message   'update quota',                       '#alert-template .alert-success' #xpath: '//*[div[@class="alert alert-success"]]'
-  
+
   button    'disabled quota modify',              '.show-quota-form.disabled'
   button    'save quota edit',                    '#update-quota'
   field     'floating ips quota edit',            xpath: '//input[@name="floating_ips"]'
@@ -63,7 +64,7 @@ class ProjectPage < SecurePage
   #==========================
   button    'new security group',                 "#new-security-group"
   button    'edit security group',                "#security-item-<id> .edit-security-rules"
-  button    'delete security group',              "#security-item-<id> .delete-security-group"  
+  button    'delete security group',              "#security-item-<id> .delete-security-group"
   button    'Context Menu',                       xpath: "//tr[@id='security-item-<id>']/..//a[@class='dropdown-toggle']"
   form      'new security',                       "#new-security-group-modal"
   form      'security group rules',               "#security-group-rules-modal"
@@ -113,6 +114,7 @@ class ProjectPage < SecurePage
   field     'volume size',                        '#appendedInput'
   button    'create volume',                      '#create-volume'
   table     'volumes',                            '#volume-list'
+  tab       'volumes',                            '.nav-tabs .instances-and-volumes a'
 
 # Type      Name                                  Selector
   button    'volume menu',                        '#volume-item-<id> .dropdown-toggle'
@@ -131,6 +133,7 @@ class ProjectPage < SecurePage
   button    'confirm volume snapshot deletion',   '#alert-template .okay'
   table     'volume snapshots',                   '#volume-snapshot-list'
   row       'volume snapshot',                    xpath: "//*[@id='volume-snapshot-list']//td[@class='name' and @title=\"<name>\"]/.."
+  button    'clone volume snapshot',              '.clone-snapshot'
 
 # Type      Name                                  Selector
   message   'new volume form error',              'span.error[for="name"], span.error[for="appendedInput"]'
@@ -171,6 +174,7 @@ class ProjectPage < SecurePage
 
   # These buttons are accessible via 'Click the <name> button for instance <instance id>'
   button    'instance menu',                      "#instance-item-<id> .dropdown-toggle"
+  button    'context',                            "#instance-item-<id> .dropdown-toggle"
   button    'delete instance',                    "#instance-item-<id> .destroy"
   button    'soft reboot instance',               "#instance-item-<id> .soft-reboot"
   button    'hard reboot instance',               "#instance-item-<id> .hard-reboot"
@@ -179,8 +183,11 @@ class ProjectPage < SecurePage
   button    'resume instance',                    "#instance-item-<id> .resume"
   button    'suspend instance',                   "#instance-item-<id> .suspend"
   button    'unpause instance',                   "#instance-item-<id> .unpause"
+  button    'unpause',                            "#instance-item-<id> .unpause"
   button    'view console output',                "#instance-item-<id> .logs"
   button    'VNC console',                        "#instance-item-<id> .vnc-console"
+  button    'confirm resize instance',            "#instance-item-<id> .confirm-resize"
+  button    'revert resize instance',             "#instance-item-<id> .revert-resize"
 
   button    'confirm instance deletion',          '#alert-template .okay'
   button    'confirm instance reboot',            "#alert-template .okay"
@@ -208,5 +215,5 @@ class ProjectPage < SecurePage
   link      'user',                               xpath: '//*[@class="chzn-drop"]//*[li[text()="<name>"]]'
   row       'User',                               xpath: "//*[@id='users-list']//td[normalize-space(text())=\"<name>\"]/.."
   element   'collaborator',                       "#users-list"
-  
+
 end

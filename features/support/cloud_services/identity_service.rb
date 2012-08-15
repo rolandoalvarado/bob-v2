@@ -59,8 +59,8 @@ class IdentityService < BaseCloudService
     attributes[:tenant_id] = test_tenant.id
     user = users.new(attributes)
     user.save
-    admin_role = roles.find_by_name(RoleNameDictionary.db_name('System Admin'))
-    test_tenant.grant_user_role(user.id, admin_role.id)
+    member_role = roles.find_by_name(RoleNameDictionary.db_name('Member'))
+    test_tenant.grant_user_role(user.id, member_role.id)
     user
   end
 
@@ -106,7 +106,7 @@ class IdentityService < BaseCloudService
     end
   end
 
-  def ensure_tenant_exists(attributes)
+  def ensure_tenant_exists(attributes, clear = false)
     attributes        = CloudObjectBuilder.attributes_for(:tenant, attributes)
     attributes[:name] = Unique.project_name(attributes[:name])
 
@@ -114,6 +114,13 @@ class IdentityService < BaseCloudService
 
     if tenant
       tenant.update(attributes)
+
+      # Remove instances and volumes if exist.
+      if clear
+        ComputeService.session.delete_instances_in_project(tenant)
+        VolumeService.session.delete_volume_snapshots_in_project(tenant)
+        VolumeService.session.delete_volumes_in_project(tenant)
+      end
     else
       tenant = create_tenant(attributes)
     end
@@ -138,10 +145,6 @@ class IdentityService < BaseCloudService
     tenant.revoke_user_role(admin_user.id, manager_role['id']) if manager_role
     tenant.grant_user_role(admin_user.id, member_role.id)
 
-    # Remove instances and volumes if exist.
-    ComputeService.session.delete_instances_in_project(tenant)
-    VolumeService.session.delete_volumes_in_project(tenant)
-
     tenant
   end
 
@@ -153,11 +156,27 @@ class IdentityService < BaseCloudService
 
   def ensure_user_exists(attributes)
     user = find_user_by_name(attributes[:name])
-    if user
-      user.update(attributes)
-    else
+    user = create_user(attributes) unless user
+    user.password = attributes[:password]
+    user
+  end
+
+  def ensure_user_exists_in_project(attributes, project, admin_role = false)
+    attributes[:project_id] = project.is_a?(Fixnum) ? project : project.id
+    user = find_user_by_name(attributes[:name])
+
+    unless user
       user = create_user(attributes)
+      member_role = roles.find_by_name(RoleNameDictionary.db_name('Member'))
+      project.grant_user_role(user.id, member_role.id)
+
+      if admin_role
+        admin_tenant = tenants.find_by_name('admin')
+        admin_role = roles.find_by_name(RoleNameDictionary.db_name('Project Manager'))
+        admin_tenant.grant_user_role(user.id, admin_role.id)
+      end
     end
+
     user.password = attributes[:password]
     user
   end

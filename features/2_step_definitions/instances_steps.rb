@@ -21,10 +21,8 @@ end
 #=================
 
 When /^I assign a floating IP to the instance$/ do
-  compute_service = ComputeService.session
-  compute_service.set_tenant @project
 
-  num_addresses       = compute_service.addresses
+  ComputeService.session.ensure_keypair_exists(test_keypair_name, @current_user.name, @current_user.password)
 
   steps %{
     * Click the logout button if currently logged in
@@ -37,20 +35,15 @@ When /^I assign a floating IP to the instance$/ do
     * Visit the projects page
     * Click the #{ @project.name } project
 
+    * Wait 10 seconds
     * Click the access security tab
     * Click the new floating IP allocation button
     * Current page should have the new floating IP allocation form
     * Choose the 1st item in the pool dropdown
     * Choose the 2nd item in the instance dropdown
     * Click the create floating IP allocation button
-
-    * The floating IPs table's last row should include the text #{ @instance.name }
   }
 
-  num_addresses.reload
-  @floating = num_addresses.find {|a| a.instance_id == @instance.id}
-
-  raise "No floating IP associated to instance #{ @instance.name }" if @floating.nil?
 end
 
 When /^I create an instance on that project based on the image (.+)$/ do |image_name|
@@ -122,9 +115,9 @@ When /^I hard reboot the instance$/ do
 end
 
 When /^I create an instance with attributes (.+), (.+), (.+), (.+) and (.+)$/ do |image,name,flavor,keypair,security_group |
-   
+
   steps %{
-    * Click the logout button if currently logged in
+    * Click the Logout button if currently logged in
 
     * Visit the login page
     * Fill in the username field with #{ @current_user.name }
@@ -144,7 +137,7 @@ When /^I create an instance with attributes (.+), (.+), (.+), (.+) and (.+)$/ do
     * Select Security Group #{ security_group } item from the security group checklist
     * Click the create instance button
   }
-  
+
   @instance_name  = name
 end
 
@@ -184,21 +177,21 @@ When /^I resize the instance to a different flavor$/ do
     * Visit the projects page
     * Click the #{ @project.name } project
 
-    * Wait 90 seconds
-    * Click the instance menu button for instance #{ @instance.id }
-    * Click the resize instance button for instance #{ @instance.id }
-    * Current page should have the resize instance form
+    * The instance #{ @instance.id } should be in active status
+
+    * Click the resize action in the instance menu for instance #{ @instance.id }
+
     * Drag the instance flavor slider to a different flavor
     * Click the resize instance confirmation button
 
     * The instance #{ @instance.id } should be in resizing status
     * The instance #{ @instance.id } should be performing task resize_prep
 
+    * Wait for 5 minutes for resizing to finish
     * The instance #{ @instance.id } should be in active status
     * The instance #{ @instance.id } should be performing task resize_verify
 
-    * Click the instance menu button for instance #{ @instance.id }
-    * Click the confirm resize instance button for instance #{ @instance.id }
+    * Click the confirm resize action in the instance menu for instance #{ @instance.id }
   }
 end
 
@@ -270,7 +263,7 @@ end
 #=================
 
 Then /^I [Cc]an [Aa]ssign a floating IP to an instance in the project$/ do
-  
+
   steps %{
     * Click the logout button if currently logged in
 
@@ -289,7 +282,7 @@ Then /^I [Cc]an [Aa]ssign a floating IP to an instance in the project$/ do
     * Choose the 1st item in the pool dropdown
     * Choose the 2nd item in the instance dropdown
     * Click the create floating IP allocation button
-    
+
     * The floating IPs table's last row should include the text #{ @instance.name }
   }
 end
@@ -357,7 +350,7 @@ end
 
 Then /^I [Cc]an [Cc]reate an instance in the project$/ do
   instance_name = Unique.name('Instance')
-  
+
   steps %{
     * Click the logout button if currently logged in
 
@@ -375,11 +368,10 @@ Then /^I [Cc]an [Cc]reate an instance in the project$/ do
     * Fill in the server name field with #{ instance_name }
     * Check the 1st item in the security groups checklist
     * Click the create instance button
-   
+
     * Current page should have the instance password form
     * Close the instance password form
 
-    * Wait 90 seconds
     * The instances table should include the text #{ instance_name }
     * The instance named #{ instance_name } should be in active status
   }
@@ -408,7 +400,7 @@ Then /^I [Cc]an [Dd]elete an instance in the project$/ do
 end
 
 Then /^I [Cc]an [Pp]ause the instances?(?:| in the project)$/ do
-  
+
   steps %{
     * Click the logout button if currently logged in
 
@@ -425,7 +417,7 @@ Then /^I [Cc]an [Pp]ause the instances?(?:| in the project)$/ do
 
     * The instance #{ @instance.id } should be of paused status
   }
-   
+
 end
 
 Then /^I [Cc]an [Rr]eboot an instance in the project$/ do
@@ -534,13 +526,12 @@ Then /^I [Cc]an [Ss]uspend (?:an|the) instance(?:| in the project)$/ do
     * Wait 90 seconds
     * The instance #{ @instance.id } should be in suspended status
   }
-  
+
   @paused_instance = @instance
-  
+
 end
 
 Then /^I [Cc]an [Uu]npause (?:that|the) instance$/ do
-
   steps %{
     * Click the logout button if currently logged in
 
@@ -557,7 +548,6 @@ Then /^I [Cc]an [Uu]npause (?:that|the) instance$/ do
 
     * The instance #{ @instance.id } should be in active status
   }
-  
 end
 
 Then /^I [Cc]an [Vv]iew console output of the instance$/ do
@@ -652,6 +642,7 @@ end
 Then /^the instance should be resized$/i do
   old_flavor = ComputeService.session.flavors.find { |f| f.id == @instance.flavor['id'].to_s }
   steps %{
+    * Wait for 5 minutes for resizing to finish
     * The instance #{ @instance.id } should not have flavor #{ old_flavor.name }
   }
 end
@@ -660,8 +651,6 @@ Then /^the instance will be created$/i do
   steps %{
     * Current page should have the instance password form
     * Close the instance password form
-  
-    * Wait 120 seconds
     * The instances table should include the text #{ @instance_name }
     * The instance named #{ @instance_name } should be in active status
   }
@@ -672,6 +661,7 @@ Then /^the instance will be not created$/i do
     * Current page should still have the new instance form
     * The new instance form has an error message
     * Click the cancel create instance button
+
     * The instances table should not include the text #{ @instance_name }
   }
 end
@@ -683,39 +673,46 @@ Then /^the instance will reboot$/i do
 end
 
 Then /^the instance should be active$/ do
-  status = 'ACTIVE'  
   steps %{
-    * The instance #{ @instance.id } should be of #{status} status
+    * The instance #{ @instance.id } should be of active status
+  }
+end
+
+Then /^an instance is publicly accessible via SSH$/ do
+  steps %{
+    * The Floating IPs table should have 1 row
+    * The Floating IP should be associated to instance #{ @instance.name }
+
+    * Wait for 5 minutes for floating IP to be associated to the instance
+    * Connect to the instance named #{ @instance.name } in project #{ @project.name } via SSH
   }
 end
 
 TestCase /^A user with a role of (.+) in the project can assign a floating IP to an instance$/i do |role_name|
 
   Preconditions %{
-    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
     * Ensure that a project named #{ test_project_name } exists
+    * Ensure that the project named #{ test_project_name } has a member named #{ member_username }
     * Ensure that the project named #{ test_project_name } has an instance named #{ test_instance_name }
-    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the project #{ test_project_name }
     * Ensure that a security group rule exists for project #{ test_project_name }
     * Ensure that an instance named #{ test_instance_name } does not have any floating IPs
   }
 
   Cleanup %{
     * Register the project named #{ test_project_name } for deletion at exit
-    * Register the user named #{ bob_username } for deletion at exit
+    * Register the user named #{ member_username } for deletion at exit
   }
 
   Script %{
     * Click the Logout button if currently logged in
     * Visit the Login page
-    * Fill in the Username field with #{ bob_username }
-    * Fill in the Password field with #{ bob_password }
+    * Fill in the Username field with #{ member_username }
+    * Fill in the Password field with #{ member_password }
     * Click the Login button
 
     * Click the Projects link
     * Click the #{ test_project_name } project
 
-    * Wait 90 seconds
     * Click the Access Security tab
     * Click the New Floating IP Allocation button
     * Current page should have the New Floating IP Allocation form
@@ -731,10 +728,9 @@ end
 TestCase /^A user with a role of (.+) in the project cannot assign a floating IP to an instance$/i do |role_name|
 
   Preconditions %{
-    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists 
     * Ensure that a project named #{ test_project_name } exists
+    * Ensure that the project named #{ test_project_name } has a #{ role_name } named #{ member_username }
     * Ensure that the project named #{ test_project_name } has an instance named #{ test_instance_name }
-    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the project #{ test_project_name }
   }
 
   Cleanup %{
@@ -753,13 +749,104 @@ TestCase /^A user with a role of (.+) in the project cannot assign a floating IP
   }
 end
 
-TestCase /^An instance created based on the image (.+) is accessible via (.+)$/ do |image_name, remote_client|
+TestCase /^A user with a role of (.+) in the project Can Unpause an instance$/i do |role_name|
 
   Preconditions %{
     * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
     * Ensure that a project named #{ test_project_name } exists
+    * Ensure that the project named #{ test_project_name } has a paused instance named #{ test_instance_name }
+    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the project #{ test_project_name }
+  }
+
+  Cleanup %{
+    * Register the project named #{ test_project_name } for deletion at exit
+    * Register the user named #{ bob_username } for deletion at exit
+  }
+
+  Script %{
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ bob_username }
+    * Fill in the Password field with #{ bob_password }
+    * Click the Login button
+
+    * Click the Projects link
+    * Click the #{ test_project_name } project
+
+    * Click the context button of instance #{ test_instance_name } in #{ test_project_name }
+    * Click the unpause button of instance #{ test_instance_name } in #{ test_project_name }
+
+    * The instance named #{ test_instance_name } should be in active status
+  }
+
+end
+
+
+TestCase /^An authorized user can unpause an instance in the project$/i do
+
+  Preconditions %{
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that the project named #{ test_project_name } has a paused instance named #{ test_instance_name }
+    * Ensure that the user #{ bob_username } has a role of Project Manager in the project #{ test_project_name }
+  }
+
+  Cleanup %{
+    * Register the project named #{ test_project_name } for deletion at exit
+    * Register the user named #{ bob_username } for deletion at exit
+  }
+
+  Script %{
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ bob_username }
+    * Fill in the Password field with #{ bob_password }
+    * Click the Login button
+
+    * Click the Projects link
+    * Click the #{ test_project_name } project
+
+    * Click the context button of instance #{ test_instance_name } in #{ test_project_name }
+    * Click the unpause button of instance #{ test_instance_name } in #{ test_project_name }
+
+    * The instance named #{ test_instance_name } should be in active status
+  }
+
+end
+
+
+TestCase /^A user with a role of (.+) in the project cannot unpause an instance$/i do |role_name|
+
+  Preconditions %{
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that a project named #{ test_project_name } does not exists
+  }
+
+  Cleanup %{
+    * Register the project named #{ test_project_name } for deletion at exit
+    * Register the user named #{ bob_username } for deletion at exit
+  }
+
+  Script %{
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ bob_username }
+    * Fill in the Password field with #{ bob_password }
+    * Click the Login button
+
+    * Visit the projects page
+    * The #{ test_project_name } project should not be visible
+  }
+
+end
+
+
+TestCase /^An instance created based on the image (.+) is accessible via (.+)$/ do |image_name, remote_client|
+
+  Preconditions %{
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that the project named #{ test_project_name } has a member named #{ member_username }
     * Ensure that the project named #{ test_project_name } has 0 active instances
-    * Ensure that the user #{ bob_username } has a role of Member in the project #{ test_project_name }
     * Ensure that the user with credentials #{ bob_username }/#{ bob_password } has a keypair named #{ test_keypair_name }
     * Ensure that a security group rule exists for project #{ test_project_name }
     * Ensure that an instance named #{ test_instance_name } does not have any floating IPs
@@ -813,9 +900,8 @@ end
 TestCase /^An instance is publicly accessible via its assigned floating IP$/ do
 
   Preconditions %{
-    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
     * Ensure that a project named #{ test_project_name } exists
-    * Ensure that the user #{ bob_username } has a role of Member in the project #{ test_project_name }
+    * Ensure that the project named #{ test_project_name } has a member named #{ member_username }
     * Ensure that the user with credentials #{ bob_username }/#{ bob_password } has a keypair named #{ test_keypair_name }
     * Ensure that the project named #{ test_project_name } has an instance with name #{ test_instance_name } and keypair #{ test_keypair_name }
     * Ensure that a security group rule exists for project #{ test_project_name }
@@ -850,6 +936,220 @@ TestCase /^An instance is publicly accessible via its assigned floating IP$/ do
 
     * Wait for 5 minutes for floating IP to be associated to the instance
     * Connect to the instance named #{ test_instance_name } in project #{ test_project_name } via SSH
+  }
+
+end
+
+TestCase /^A user with a role of (.+) in the project can resize an instance$/i do |role_name|
+
+  original_flavor = 'm1.small'
+  new_flavor      = 'm1.medium'
+
+  Preconditions %{
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that the project named #{ test_project_name } has an instance with name #{ test_instance_name } and flavor #{ original_flavor }
+    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the project #{ test_project_name }
+  }
+
+  Cleanup %{
+    * Register the user named #{ bob_username } for deletion at exit
+    * Register the project named #{ test_project_name } for deletion at exit
+  }
+
+  Script %{
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ bob_username }
+    * Fill in the Password field with #{ bob_password }
+    * Click the Login button
+
+    * Click the Projects link
+    * Click the #{ test_project_name } project
+
+    * The instance named #{ test_instance_name } should be in active status
+
+    * The context menu for the instance named #{ test_instance_name } should have the resize action
+  }
+
+end
+
+TestCase /^A user with a role of (.+) in the project cannot resize an instance$/i do |role_name|
+
+  Preconditions %{
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that the project named #{ test_project_name } has an instance named #{ test_instance_name }
+    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the project #{ test_project_name }
+  }
+
+  Cleanup %{
+    * Register the user named #{ bob_username } for deletion at exit
+  }
+
+  Script %{
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ bob_username }
+    * Fill in the Password field with #{ bob_password }
+    * Click the Login button
+
+    * Click the Projects link
+    * The #{ test_project_name } project should not be visible
+  }
+
+end
+
+TestCase /^A user with a role of (.+) in the project can revert a resized instance$/i do |role_name|
+
+  original_flavor = 'm1.small'
+  new_flavor      = 'm1.medium'
+
+  Preconditions %{
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that the project named #{ test_project_name } has an instance with name #{ test_instance_name } and flavor #{ original_flavor }
+    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the project #{ test_project_name }
+  }
+
+  Cleanup %{
+    * Register the user named #{ bob_username } for deletion at exit
+    * Register the project named #{ test_project_name } for deletion at exit
+  }
+
+  Script %{
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ bob_username }
+    * Fill in the Password field with #{ bob_password }
+    * Click the Login button
+
+    * Click the Projects link
+    * Click the #{ test_project_name } project
+
+    * Click the resize action in the context menu for the instance named #{ test_instance_name }
+
+    * Drag the instance flavor slider to #{ new_flavor }
+    * Click the resize instance confirmation button
+
+    * The instance named #{ test_instance_name } should be in resizing status
+
+    * Wait at most 3 minutes until the instance named #{ test_instance_name } is in active status
+    * The context menu for the instance named #{ test_instance_name } should have the revert resize action
+  }
+
+end
+
+TestCase /^A user with a role of (.+) in the project cannot revert a resized instance$/i do |role_name|
+
+  Preconditions %{
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that the project named #{ test_project_name } has an instance named #{ test_instance_name }
+    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the project #{ test_project_name }
+  }
+
+  Cleanup %{
+    * Register the user named #{ bob_username } for deletion at exit
+  }
+
+  Script %{
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ bob_username }
+    * Fill in the Password field with #{ bob_password }
+    * Click the Login button
+
+    * Click the Projects link
+    * The #{ test_project_name } project should not be visible
+  }
+
+end
+
+TestCase /^An instance resized by an authorized user will have a different flavor$/i do
+
+  original_flavor = 'm1.small'
+  new_flavor      = 'm1.medium'
+
+  Preconditions %{
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that the project named #{ test_project_name } has an instance with name #{ test_instance_name } and flavor #{ original_flavor }
+    * Ensure that the user #{ bob_username } has a role of Project Manager in the project #{ test_project_name }
+  }
+
+  Cleanup %{
+    * Register the user named #{ bob_username } for deletion at exit
+    * Register the project named #{ test_project_name } for deletion at exit
+  }
+
+  Script %{
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ bob_username }
+    * Fill in the Password field with #{ bob_password }
+    * Click the Login button
+
+    * Click the Projects link
+    * Click the #{ test_project_name } project
+
+    * The instance named #{ test_instance_name } should be in active status
+
+    * Click the resize action in the context menu for the instance named #{ test_instance_name }
+
+    * Drag the instance flavor slider to #{ new_flavor }
+    * Click the resize instance confirmation button
+
+    * The instance named #{ test_instance_name } should be in resizing status
+
+    * Wait at most 3 minutes until the instance named #{ test_instance_name } is in active status
+    * Click the confirm resize action in the context menu for the instance named #{ test_instance_name }
+
+    * The instance named #{ test_instance_name } should have flavor #{ new_flavor }
+  }
+
+end
+
+TestCase /^An instance that has been resized by an authorized user can be reverted to its original flavor$/ do
+
+  original_flavor = 'm1.small'
+  new_flavor      = 'm1.medium'
+
+  Preconditions %{
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that the project named #{ test_project_name } has an instance with name #{ test_instance_name } and flavor #{ original_flavor }
+    * Ensure that the user #{ bob_username } has a role of Project Manager in the project #{ test_project_name }
+  }
+
+  Cleanup %{
+    * Register the user named #{ bob_username } for deletion at exit
+    * Register the project named #{ test_project_name } for deletion at exit
+  }
+
+  Script %{
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ bob_username }
+    * Fill in the Password field with #{ bob_password }
+    * Click the Login button
+
+    * Click the Projects link
+    * Click the #{ test_project_name } project
+
+    * The instance named #{ test_instance_name } should be in active status
+
+    * Click the resize action in the context menu for the instance named #{ test_instance_name }
+
+    * Drag the instance flavor slider to #{ new_flavor }
+    * Click the resize instance confirmation button
+
+    * The instance named #{ test_instance_name } should be in resizing status
+
+    * Wait at most 3 minutes until the instance named #{ test_instance_name } is in active status
+    * Click the revert resize action in the context menu for the instance named #{ test_instance_name }
+
+    * The instance named #{ test_instance_name } should have flavor #{ original_flavor }
   }
 
 end
