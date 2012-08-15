@@ -35,15 +35,6 @@ Feature: Create an Instance
      When I create an instance with attributes <Image>, <Name>, <Flavor>, <Keypair> and <Security Group>
      Then the instance will be <Created or Not>
 
-      Scenarios: Valid Values
-        | Image  | Name        | Flavor | Keypair | Security Group | Created or Not |
-        | (Any)  | My Server   | (Any)  | (Any)   | (Any)          | Created        |
-
-      Scenarios: Invalid Values
-        | Image  | Name        | Flavor | Keypair | Security Group | Created or Not | Reason                                           |
-        | (Any)  | (None)      | (Any)  | (Any)   | (Any)          | Not Created    | Must specify a name                              |
-        | (Any)  | My Server   | (Any)  | (Any)   | (None)         | Not Created    | Instance should have at least one security group |
-
       Scenarios: Specific Images
         | Image                                | Name        | Flavor | Keypair | Security Group | Created or Not |
         | 64Bit CentOS 5.8 (v1.0.1)            | My Server   | (Any)  | (Any)   | (Any)          | Created        |
@@ -57,3 +48,9 @@ Feature: Create an Instance
         | (Any)  | My Server   | m1.medium | (Any)   | (Any)          | Created        |
         | (Any)  | My Server   | m1.large  | (Any)   | (Any)          | Created        |
         | (Any)  | My Server   | m1.xlarge | (Any)   | (Any)          | Created        |
+        
+      Scenarios: Invalid Values
+        | Image  | Name        | Flavor | Keypair | Security Group | Created or Not | Reason                                           |
+        | (Any)  | (None)      | (Any)  | (Any)   | (Any)          | Not Created    | Must specify a name                              |
+        | (Any)  | My Server   | (Any)  | (Any)   | (None)         | Not Created    | Instance should have at least one security group |
+

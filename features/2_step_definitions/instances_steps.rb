@@ -117,7 +117,7 @@ end
 When /^I create an instance with attributes (.+), (.+), (.+), (.+) and (.+)$/ do |image,name,flavor,keypair,security_group |
 
   steps %{
-    * Click the logout button if currently logged in
+    * Click the Logout button if currently logged in
 
     * Visit the login page
     * Fill in the username field with #{ @current_user.name }
