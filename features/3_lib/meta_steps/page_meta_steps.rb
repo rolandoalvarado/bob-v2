@@ -601,8 +601,10 @@ end
 
 
 Then /^The (.+) user row should be visible$/ do |username|
-  unless @current_page.has_user_row?( name: username )
-    raise "The row for user #{ username } should exist, but it doesn't."
+  sleeping(1).seconds.between_tries.failing_after(15).tries do
+    unless @current_page.has_user_row?( name: username )
+      raise "The row for user #{ username } should exist, but it doesn't."
+    end
   end
 end
 

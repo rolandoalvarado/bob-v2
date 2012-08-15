@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/MorphGlobal/fog.git
-  revision: 3d958235902d56653cc483142de807725b872626
+  revision: 5113e4a62995f0b0add271c545986c0bb39a635e
   branch: development
   specs:
     mcloud-fog (1.3.4)
@@ -40,8 +40,8 @@ GEM
     capybara-webkit (0.12.1)
       capybara (>= 1.0.0, < 1.2)
       json
-    childprocess (0.3.5)
-      ffi (~> 1.0, >= 1.0.6)
+    childprocess (0.3.3)
+      ffi (~> 1.0.6)
     coderay (1.0.7)
     cucumber (1.2.1)
       builder (>= 2.1.2)
