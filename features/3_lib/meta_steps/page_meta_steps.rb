@@ -96,7 +96,7 @@ end
 
 Then /^Click the (.+) button$/ do |button_name|
   button_name = button_name.split.join('_').downcase
-  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_ten).tries do
     @current_page.send("#{ button_name }_button").click
 
     if button_name == 'login'
@@ -390,7 +390,7 @@ Then /^Drag the(?:| instance) flavor slider to a different flavor$/ do
   }
 end
 
-Then /^Drag the(?:| instance) flavor slider to(?:| the) (.+)$/ do |flavor|
+Then /^Drag the(?:| instance) flavor slider to (?:|the) (.+)$/ do |flavor|
   flavors = %w[ m1.small m1.medium m1.large m1.xlarge ]
 
   if flavor.downcase != '(any)'
@@ -404,6 +404,19 @@ Then /^Drag the(?:| instance) flavor slider to(?:| the) (.+)$/ do |flavor|
   end
 end
 
+#Then /^Drag the(?:| instance) flavor slider to the (.+)$/ do |flavor|
+#  flavors = %w[ m1.small m1.medium m1.large m1.xlarge ]
+
+#  if flavor.downcase != '(any)'
+#    value = flavors.index(flavor)
+
+#    @current_page.session.execute_script %{
+#      var slider = $('#flavor-slider');
+#      slider.slider('option', 'value', #{ value });
+#      slider.trigger('slide', { 'value': #{ value } });
+#    }
+#  end
+#end
 
 Then /^Fill in the (.+) field with (.+)$/ do |field_name, value|
   value      = value.gsub(/^\([Nn]one\)$/, '')
@@ -526,7 +539,7 @@ end
 Then /^The (.+) table should include the text (.+)$/ do |table_name, text|
   table_name = table_name.split.join('_').downcase
   
-  sleeping(1).seconds.between_tries.failing_after(15).tries do
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_fifteen).tries do
     unless @current_page.send("#{ table_name }_table").has_content?(text)
       raise "Couldn't find the text '#{ text }' in the #{ table_name } table."
     end
@@ -613,7 +626,7 @@ end
 
 
 Then /^The instance ((?:(?!named )).+) should be performing task (.+)$/ do |instance_id, task|
-  sleeping(1).seconds.between_tries.failing_after(15).tries do
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_fifteen).tries do
     unless @current_page.instance_row( id: instance_id ).find('.task').text.include?(task)
       raise "Instance #{ instance_id } is not shown as performing task #{ task }."
     end
@@ -643,7 +656,7 @@ Then /^The instance ((?:(?!named )).+) should be (?:in|of) (.+) status$/ do |ins
     raise "Couldn't find row for instance #{ instance_id } in the instances list!"
   end
 
-  sleeping(1).seconds.between_tries.failing_after(20).tries do
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_twenty).tries do
     unless row.find('.status').has_content?(status.upcase.gsub(' ', '_'))
       raise "Instance #{ instance_id } does not have or took to long to become #{ status } status."
     end
@@ -657,7 +670,7 @@ Step /^The instance named (.+) should be (?:in|of) (.+) status$/ do |instance_na
   selector = "//*[@id='instances-list']//*[contains(@class, 'name') and contains(text(), \"#{ instance_name }\")]/.."
   row      = @current_page.find_by_xpath(selector)
   
-  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_forty).tries do
     actual_status = row.find('.status').text.strip
     unless actual_status == expected_status.upcase.gsub(' ', '_')
       raise "Instance #{ instance_name } is not or took too long to become #{ expected_status }. " +
