@@ -108,9 +108,9 @@ Capybara.app_host = ConfigFile.web_client_url
 # tests will slow down to a crawl. Play around with the time between retries
 # instead, but always be mindful that the total waiting time doesn't get too
 # high or you'll be pulling your hair waiting for your tests to finish
-NODE_QUERY_WAIT_TIME       = 1
-MAX_NODE_QUERY_RETRIES     = 30
-Capybara.default_wait_time = 0  # Don't change this value unless you know the purpose
+NODE_QUERY_WAIT_TIME       = ConfigFile.wait_node
+MAX_NODE_QUERY_RETRIES     = ConfigFile.repeat_node
+Capybara.default_wait_time = 0    # OLD_VALUE: 0 Don't change this value unless you know the purpose
 
 module NodeMethods
   include Anticipate
