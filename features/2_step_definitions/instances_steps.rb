@@ -725,23 +725,23 @@ TestCase /^A user with a role of (.+) in the project can assign a floating IP to
 
 end
 
-TestCase /^A user with a role of (.+) in the project cannot assign a floating IP to an instance$/i do |role_name|
+TestCase /^A user with a role of \(None\) in the project cannot assign a floating IP to an instance$/i do
 
   Preconditions %{
     * Ensure that a project named #{ test_project_name } exists
-    * Ensure that the project named #{ test_project_name } has a #{ role_name } named #{ member_username }
+    * Ensure that a user named #{ member_username } exists
     * Ensure that the project named #{ test_project_name } has an instance named #{ test_instance_name }
   }
 
   Cleanup %{
-    * Register the user named #{ bob_username } for deletion at exit
+    * Register the user named #{ member_username } for deletion at exit
   }
 
   Script %{
     * Click the Logout button if currently logged in
     * Visit the Login page
-    * Fill in the Username field with #{ bob_username }
-    * Fill in the Password field with #{ bob_password }
+    * Fill in the Username field with #{ member_username }
+    * Fill in the Password field with #{ member_password }
     * Click the Login button
 
     * Click the Projects link
@@ -902,7 +902,7 @@ TestCase /^An instance is publicly accessible via its assigned floating IP$/ do
   Preconditions %{
     * Ensure that a project named #{ test_project_name } exists
     * Ensure that the project named #{ test_project_name } has a member named #{ member_username }
-    * Ensure that the user with credentials #{ bob_username }/#{ bob_password } has a keypair named #{ test_keypair_name }
+    * Ensure that the user with credentials #{ member_username }/#{ member_password } has a keypair named #{ test_keypair_name }
     * Ensure that the project named #{ test_project_name } has an instance with name #{ test_instance_name } and keypair #{ test_keypair_name }
     * Ensure that a security group rule exists for project #{ test_project_name }
     * Ensure that an instance named #{ test_instance_name } does not have any floating IPs
@@ -910,14 +910,14 @@ TestCase /^An instance is publicly accessible via its assigned floating IP$/ do
 
   Cleanup %{
     * Register the project named #{ test_project_name } for deletion at exit
-    * Register the user named #{ bob_username } for deletion at exit
+    * Register the user named #{ member_username } for deletion at exit
   }
 
   Script %{
     * Click the Logout button if currently logged in
     * Visit the Login page
-    * Fill in the Username field with #{ bob_username }
-    * Fill in the Password field with #{ bob_password }
+    * Fill in the Username field with #{ member_username }
+    * Fill in the Password field with #{ member_password }
     * Click the Login button
 
     * Click the Projects link
@@ -925,11 +925,11 @@ TestCase /^An instance is publicly accessible via its assigned floating IP$/ do
 
     * The instance named #{ test_instance_name } should be in active status
 
-    * Click the access security tab
-    * Click the new floating IP allocation button
-    * Current page should have the new floating IP allocation form
-    * Choose the item with text #{ test_instance_name } in the instance dropdown
-    * Click the create floating IP allocation button
+    * Click the Access Security tab
+    * Click the New Floating IP Allocation button
+    * Current page should have the New Floating IP Allocation form
+    * Choose the item with text #{ test_instance_name } in the Instance dropdown
+    * Click the Create Floating IP Allocation button
 
     * The Floating IPs table should have 1 row
     * The Floating IP should be associated to instance #{ test_instance_name }
