@@ -1030,6 +1030,22 @@ Then /^Wait at most (\d+) minutes until the instance named (.+) is in (.+) statu
   end
 end
 
+Then /^Wait for a few minutes until the instance named (.+) is in (.+) status$/ do |instance_name, expected_status|
+  # TODO To prevent conflict with other instance steps, temporarily forgo changing the selector,
+  # and instead finding it directly from the page object.
+  selector = "//*[@id='instances-list']//*[contains(@class, 'name') and contains(text(), \"#{ instance_name }\")]/.."
+  row = @current_page.find_by_xpath(selector)
+
+  # Retry every 5 seconds up to x minutes
+  sleeping(ConfigFile.wait_seconds).seconds.between_tries.failing_after((ConfigFile.minute * ConfigFile.repeat_timing) / ConfigFile.timing).tries do
+    actual_status = row.find('.status').text.strip
+    unless actual_status == expected_status.upcase.gsub(' ', '_')
+      raise "Instance #{ instance_id } does not have or took to long to become #{ expected_status } status. " +
+            "Instance is currently in #{ actual_status } status."
+    end
+  end
+end
+
 Then /^Wait for (\d+) (?:minute|minutes).*$/ do |number_of_minutes|
   sleep(60 * number_of_minutes.to_i)
 end
