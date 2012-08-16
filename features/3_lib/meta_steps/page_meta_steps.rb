@@ -672,7 +672,7 @@ Step /^The instance named (.+) should be (?:in|of) (.+) status$/ do |instance_na
   selector = "//*[@id='instances-list']//*[contains(@class, 'name') and contains(text(), \"#{ instance_name }\")]/.."
   row      = @current_page.find_by_xpath(selector)
   
-  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_forty).tries do
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
     actual_status = row.find('.status').text.strip
     unless actual_status == expected_status.upcase.gsub(' ', '_')
       raise "Instance #{ instance_name } is not or took too long to become #{ expected_status }. " +
