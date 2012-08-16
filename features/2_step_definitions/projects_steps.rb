@@ -49,7 +49,7 @@ end
 
 Given /^[Tt]he project does not have any floating IPs$/ do
   compute_service = ComputeService.session
-  compute_service.ensure_project_does_not_have_floating_ip(@project, 0, @instance)
+  compute_service.ensure_project_floating_ip_count(@project, 0, instance)
 end
 
 Given /^The project has more than (\d+) instance flavors?$/ do |number_of_flavors|

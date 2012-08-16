@@ -70,5 +70,5 @@ end
 
 Step /^Ensure that an instance named (.+) does not have any floating IPs$/ do |instance|
   compute_service = ComputeService.session
-  compute_service.ensure_project_does_not_have_floating_ip(@named_project, 0, instance)
+  compute_service.ensure_project_floating_ip_count(@named_project, 0, instance)
 end
