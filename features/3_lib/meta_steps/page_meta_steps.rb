@@ -60,7 +60,7 @@ Then /^Choose the item with text (.+) in the (.+) dropdown$/ do |item_text, drop
          end
 
   if item
-    item.click
+    item.select_option
   else
     raise "Couldn't find the dropdown option '#{ item_text }'."
   end
@@ -601,8 +601,10 @@ end
 
 
 Then /^The (.+) user row should be visible$/ do |username|
-  unless @current_page.has_user_row?( name: username )
-    raise "The row for user #{ username } should exist, but it doesn't."
+  sleeping(1).seconds.between_tries.failing_after(15).tries do
+    unless @current_page.has_user_row?( name: username )
+      raise "The row for user #{ username } should exist, but it doesn't."
+    end
   end
 end
 
@@ -670,7 +672,7 @@ Step /^The instance named (.+) should be (?:in|of) (.+) status$/ do |instance_na
   selector = "//*[@id='instances-list']//*[contains(@class, 'name') and contains(text(), \"#{ instance_name }\")]/.."
   row      = @current_page.find_by_xpath(selector)
   
-  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_forty).tries do
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
     actual_status = row.find('.status').text.strip
     unless actual_status == expected_status.upcase.gsub(' ', '_')
       raise "Instance #{ instance_name } is not or took too long to become #{ expected_status }. " +
@@ -912,15 +914,18 @@ end
 Then /^The (.+) table should have (\d+) (?:row|rows)$/ do |table_name, num_rows|
   table_name      = table_name.split.join('_').downcase
   table           = @current_page.send("#{ table_name }_table")
-  actual_num_rows = if table.has_no_css_selector?('td.empty-table')
-                      table.has_css_selector?('tbody tr') ? table.all('tbody tr').count : table.all('tr').count
-                    else
-                      0
-                    end
-  num_rows        = num_rows.to_i
 
-  if actual_num_rows != num_rows
-    raise "Expected #{ num_rows } rows in the #{ table_name } table, but counted #{ actual_num_rows }."
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+    actual_num_rows = if table.has_no_css_selector?('td.empty-table')
+                        table.has_css_selector?('tbody tr') ? table.all('tbody tr').count : table.all('tr').count
+                      else
+                        0
+                      end
+    num_rows        = num_rows.to_i
+
+    if actual_num_rows != num_rows
+      raise "Expected #{ num_rows } rows in the #{ table_name } table, but counted #{ actual_num_rows }."
+    end
   end
 end
 

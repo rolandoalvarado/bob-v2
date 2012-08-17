@@ -10,15 +10,10 @@ class ComputeService < BaseCloudService
     initialize_service Compute
 
     @addresses = service.addresses
-    @flavors   = service.flavors
     @instances = service.servers
     @volumes   = service.volumes
     @security_groups = service.security_groups
-    @images = ImageService.session.get_bootable_images
     @key_pairs = service.key_pairs
-
-    # Get smallest-sized flavor
-    @min_flavor = flavors.select { |f| f.disk > 0 }.min { |f, g| f.vcpus <=> g.vcpus }
 
     @private_keys = {}
   end
@@ -47,6 +42,9 @@ class ComputeService < BaseCloudService
   def create_instance_in_project(project, attributes={})
     set_tenant project
 
+    @flavors ||= service.flavors
+    @images  ||= ImageService.session.get_bootable_images
+
     if attributes[:flavor].is_a? String
       attributes[:flavor] = flavor_from_name(attributes[:flavor])
     end
@@ -54,13 +52,12 @@ class ComputeService < BaseCloudService
     attributes[:name]           ||= Faker::Name.name
     attributes[:password]       ||= test_instance_password || '123qwe'
     attributes[:image]          ||= @images[0].id || @images[2].id || @images[5].id
-    attributes[:flavor]         ||= @min_flavor.id
+    attributes[:flavor]         ||= @flavors.find { |f| f.name == 'm1.small' }.id
     attributes[:key_name]       ||= @key_pairs[0] && @key_pairs[0].name
 
-    if(attributes[:security_group])
-      security_groups = service.security_groups
-      security_groups.each do |sg|
-        if(sg.name.match Regexp.new(attributes[:security_group]))
+    if attributes[:security_group]
+      @security_groups.each do |sg|
+        if sg.name.match Regexp.new(attributes[:security_group])
           @security_group_array = [{ :name => sg.name }]
         end
       end
@@ -220,9 +217,8 @@ class ComputeService < BaseCloudService
     instance_ids = instances.select { |i| i.state == 'ACTIVE' }.collect(&:id)
 
     addresses.each do |address|
-      address_attributes = { ip: address.ip, id: address.id }
+      address_attributes = { ip: address.ip, id: address.id, instance_id: address.instance_id }
       if instance_ids.include?(address.instance_id) && !address.instance_id.blank?
-        address_attributes.merge!( instance_id: address.instance_id )
         service.disassociate_address(address.instance_id, address.ip)
       end
 
@@ -291,105 +287,48 @@ class ComputeService < BaseCloudService
     end
     response = user_service.create_key_pair(key_name)
     private_keys[key_name] = response.body['keypair']['private_key']
-    public_key = response.body['keypair']['public_key']
-
-    keypairs = service.key_pairs.reload
-    if keypair = keypairs.find { |keypair| keypair.name == key_name }
-      keypair.destroy
-    end
-    service.create_key_pair(key_name, public_key)
 
     return keypairs.reload.find { |keypair| keypair.name == key_name }
   rescue => e
     raise "Couldn't create keypair '#{ key_name }'! The error returned " +
-          "was #{ e.inspect }."
+          "was: #{ e.inspect }"
   end
 
   def ensure_project_floating_ip_count(project, desired_count, instance=nil)
     set_tenant project
 
-    sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_long).tries do
-      addresses = service.addresses
-      actual_count = addresses.count
+    actual_count = @addresses.count
 
-      if desired_count > actual_count
+    if desired_count > actual_count
 
-        how_many = desired_count - actual_count
-        how_many.times do |n|
-          service.allocate_address
+      if instance
+        @addresses.each do |address|
+          address.server = instance
+          address.save
           sleep(ConfigFile.wait_short)
         end
-        addresses.reload
-
-
-      elsif desired_count < addresses.length
-
-        while addresses.length > desired_count
-          addresses.reload
-          addresses[0].destroy rescue nil
-        end
-
       end
 
-      # Floating IPs should usually be associated to an instance
-      unless instance.nil? && instance.id.blank?
-        desired_count.times do |n|
-          if addresses[n] && !addresses[n].ip.blank?
-            service.associate_address(instance.id, addresses[n].ip)
-            sleep(ConfigFile.wait_short)
-          end
-        end
+      while @addresses.length < desired_count
+        @addresses.reload
+        @addresses.create(server: instance)
+        sleep(ConfigFile.wait_short)
       end
 
-      addresses.reload
-      addresses = addresses.select { |a| a.instance_id == instance.id } unless instance.nil? && instance.id.blank?
-      if addresses.length != desired_count
-        raise "Couldn't ensure that #{ project.name } has #{ desired_count } " +
-              "floating IPs. Current number of floating IPs is #{ addresses.length }."
+    elsif desired_count < @addresses.length
+
+      while @addresses.length > desired_count
+        @addresses.reload
+        @addresses.first.destroy rescue nil
+        sleep(ConfigFile.wait_short)
       end
 
-      return addresses.count
     end
-  end
 
-  def ensure_project_does_not_have_floating_ip(project, desired_count, instance)
-    set_tenant project
-
-    sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_long).tries do
-      addresses = service.addresses
-      actual_count = addresses.count
-
-      if desired_count > actual_count
-
-        how_many = desired_count - actual_count
-        how_many.times do |n|
-          service.allocate_address
-          sleep(ConfigFile.wait_short)
-        end
-        addresses.reload
-
-
-      elsif desired_count < addresses.length
-
-        while addresses.length > desired_count
-          addresses.reload
-          addresses[0].destroy rescue nil
-        end
-
-      end
-
-      # Floating IPs should usually be associated to an instance
-      unless instance.nil? && instance.id.blank?
-        desired_count.times do |n|
-          if addresses[n] && !addresses[n].ip.blank?
-            service.associate_address(instance.id, addresses[n].ip)
-            sleep(ConfigFile.wait_short)
-          end
-        end
-      end
-
-      addresses.reload
-      addresses = addresses.select { |a| a.instance_id == instance.id } unless instance.nil? && instance.id.blank?
+    # Wait for any addresses that are still being created/associated
+    sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+      @addresses.reload
+      addresses = @addresses.select { |a| a.instance_id == instance.id } unless instance.nil? && instance.id.blank?
       if addresses.length != desired_count
         raise "Couldn't ensure that #{ project.name } has #{ desired_count } " +
               "floating IPs. Current number of floating IPs is #{ addresses.length }."
@@ -540,17 +479,6 @@ class ComputeService < BaseCloudService
     security_groups = service.security_groups
     security_groups.find_by_name(name)
     security_groups
-  end
-
-  def set_tenant(project, reload = true)
-    if @current_project != project
-      @current_project = project
-      service.set_tenant(project)
-    end
-    if reload
-      addresses.reload
-      instances.reload
-    end
   end
 
   def create_security_group(project, attributes)

@@ -27,6 +27,8 @@ module CloudConfiguration
   WAIT                 = :wait
   SHORT                = :short
   LONG                 = :long
+  NODE_QUERY_WAIT      = :node
+  NODE_QUERY_RETRIES   = :node
   TEN                  = :ten
   FIFTEEN              = :fifteen
   TWENTY               = :twenty
@@ -46,6 +48,25 @@ module CloudConfiguration
 
     def self.web_client_url
       self.instance[WEB_CLIENT_HOST]
+    end
+
+
+    def self.repeat_node
+      self.instance.ensure_repeat_and_wait_key
+      unless self.instance[REPEAT][NODE_QUERY_RETRIES]
+        self.instance[REPEAT][NODE_QUERY_RETRIES] = 3
+        self.instance.save
+      end
+      self.instance[REPEAT][NODE_QUERY_RETRIES]
+    end
+
+    def self.wait_node
+      self.instance.ensure_repeat_and_wait_key
+      unless self.instance[WAIT][NODE_QUERY_WAIT]
+        self.instance[WAIT][NODE_QUERY_WAIT] = 10
+        self.instance.save
+      end
+      self.instance[WAIT][NODE_QUERY_WAIT]
     end
 
     def self.wait_short

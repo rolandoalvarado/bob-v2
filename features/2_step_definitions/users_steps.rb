@@ -308,9 +308,9 @@ Then /^I can edit a user$/i do
     * Click the Edit button for the user named #{ @existing_user.name }
     * Fill in the Username field with #{ new_attrs.name }
     * Fill in the Email field with #{ new_attrs.email }
+    * Fill in the Password field with #{ new_attrs.password }
     * Choose the 2nd item in the Primary Project dropdown
     * Click the Update User button
-    * The Edit User form should not be visible
     * The #{ new_attrs.name } user row should be visible
   }
 end
@@ -360,7 +360,6 @@ Then /^I can update a user with attributes (.+), (.+), (.+), (.+), and (.+)$/i d
     * Choose the #{ primary_project_choice } item in the Primary Project dropdown
     * Choose the item with text #{ role } in the Role dropdown
     * Click the Update User button
-    * The Edit User form should not be visible
     * The #{ new_attrs.name } user row should be visible
   }
 end
@@ -599,7 +598,6 @@ TestCase /^A user with a role of (.+) in the system can create a user$/i do |rol
     * Choose the item with text #{ test_project_name } in the Primary Project dropdown
     * Choose the item with text Project Manager in the Role dropdown
     * Click the Create User button
-    * The New User form should be visible
     * The #{ user.name } user row should be visible
   }
 
@@ -666,7 +664,6 @@ TestCase /^An authorized user can create a user with attributes (.+), (.+), (.+)
     * Choose the item with text #{ primary_project } in the Primary Project dropdown
     * Choose the item with text #{ role } in the Role dropdown
     * Click the Create User button
-    * The New User form should not be visible
     * The #{ user.name } user row should be visible
   }
 end
