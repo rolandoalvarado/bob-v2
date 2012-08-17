@@ -3,17 +3,16 @@ Feature: Edit a User
 
   @permissions
   Scenario Outline: Check User Permissions
-    Given I have a role of <Role> in the system
+    Given a <Role> is in the system
      Then I <Can or Cannot Edit> a user
 
       Scenarios: Authorized Roles
-        | Role         | Can or Cannot Edit |
-        | System Admin | Can Edit           |
+        | Role            | Can or Cannot Edit |
+        | Project Manager | Can Edit           |
 
       Scenarios: Unauthorized Roles
         | Role         | Can or Cannot Edit |
-        | User         | Cannot Edit        |
-
+        | Member       | Cannot Edit        |
 
   Scenario Outline: Edit a user with certain attributes
     Given I am authorized to edit users in the system
