@@ -41,11 +41,13 @@ end
 
 
 Then /^Logging in after anonymously accessing (.+) redirects me back to it$/ do |page_name|
-  username = Unique.username('rstark')
+  project_name = Unique.project_name('bob-authentication')
+  username = Unique.username('bob-redirect')
   password = '123qwe'
 
   steps %{
-    * Ensure that a user with username #{ username } and password #{ password } exists
+    * Ensure that a project named bob-authentication exists
+    * Ensure that the project named #{ project_name } has a project manager named #{ username }
     * Register the user named #{ username } for deletion at exit
 
     * Click the Logout button if currently logged in
@@ -60,7 +62,7 @@ end
 
 
 Then /^Logging out redirects me to the Log In page$/ do
-  username = Unique.username('rstark')
+  username = Unique.username('bob-logout')
   password = '123qwe'
 
   steps %{
@@ -80,7 +82,7 @@ end
 
 
 Then /^Logging out clears my session$/ do
-  username = Unique.username('rstark')
+  username = Unique.username('bob-logout')
   password = '123qwe'
 
   steps %{
