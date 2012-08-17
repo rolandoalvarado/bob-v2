@@ -16,6 +16,7 @@ Then /^A quota edit dialog show error/i do
 end
 
 Step /^Ensure that a project named (.+) exists$/i do |project_name|
+  project_name.strip!
   identity_service = IdentityService.session
   project          = identity_service.ensure_project_exists(:name => project_name)
 
@@ -223,6 +224,7 @@ Then /^Delete the (.+) project$/i do |project_name|
 end
 
 Step /^Ensure that the project named (.+) has (?:an|a) (member|project manager) named (.+)$/ do |project_name, role, username|
+  project_name.strip!
   project = IdentityService.session.find_project_by_name(project_name)
   raise "#{ project_name } couldn't be found!" unless project
 
