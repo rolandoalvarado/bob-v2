@@ -82,6 +82,7 @@ class EnvironmentCleaner
       next if project.nil? || project.name == 'admin'
       puts "  #{ project.name }..."
 
+      success = false
       begin
         @compute_service.set_tenant project
         @volume_service.set_tenant project
@@ -135,9 +136,14 @@ class EnvironmentCleaner
         sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
           @identity_service.delete_project(project)
         end
+        success = true
       rescue Exception => e
         puts "\033[0;33m  ERROR: #{ project.name } could not be deleted. The error returned was: " +
              e.inspect + "\033[m"
+      ensure
+        unless success
+          project.update(name: "failed delete #{ project.name }") rescue nil
+        end
       end
     end
   end
