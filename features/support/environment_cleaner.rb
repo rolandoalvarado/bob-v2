@@ -142,7 +142,9 @@ class EnvironmentCleaner
              e.inspect + "\033[m"
       ensure
         unless success
-          project.update(name: "failed delete #{ project.name }") rescue nil
+          failed_at = Time.now
+          project.update(name: "failed delete #{ failed_at.strftime('%Y%m%d%H%M%S') }",
+                         description: "Failed to delete #{ project.name } on #{ failed_at }. #{ project.description }") rescue nil
         end
       end
     end
