@@ -158,6 +158,7 @@ class IdentityService < BaseCloudService
     user = find_user_by_name(attributes[:name])
     user = create_user(attributes) unless user
     user.password = attributes[:password]
+    user.update(attributes)
     user
   end
 
