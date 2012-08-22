@@ -1097,12 +1097,12 @@ TestCase /^An instance resized by an authorized user will have a different flavo
 
     * Click the resize action in the context menu for the instance named #{ test_instance_name }
 
-    * Drag the instance flavor slider to #{ new_flavor }
+    * Drag the instance flavor slider to the #{ new_flavor }
     * Click the resize instance confirmation button
 
     * The instance named #{ test_instance_name } should be in resizing status
 
-    * Wait at most 3 minutes until the instance named #{ test_instance_name } is in active status
+    * Wait for a few minutes until the instance named #{ test_instance_name } is in active status
     * Click the confirm resize action in the context menu for the instance named #{ test_instance_name }
 
     * The instance named #{ test_instance_name } should have flavor #{ new_flavor }

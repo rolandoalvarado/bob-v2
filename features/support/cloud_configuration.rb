@@ -33,6 +33,9 @@ module CloudConfiguration
   FIFTEEN              = :fifteen
   TWENTY               = :twenty
   FORTY                = :forty
+  WAIT_IN_SECONDS      = :seconds
+  TIMING               = :timing
+  MINUTE               = :seconds
 
   class ConfigFile
     include Singleton
@@ -49,7 +52,24 @@ module CloudConfiguration
     def self.web_client_url
       self.instance[WEB_CLIENT_HOST]
     end
-
+  
+    def self.minute
+      self.instance.ensure_repeat_and_wait_key
+      unless self.instance[REPEAT][MINUTE]
+        self.instance[REPEAT][MINUTE] = 60
+        self.instance.save
+      end
+      self.instance[REPEAT][MINUTE]
+    end
+    
+    def self.timing
+      self.instance.ensure_repeat_and_wait_key
+      unless self.instance[REPEAT][TIMING]
+        self.instance[REPEAT][TIMING] = 3
+        self.instance.save
+      end
+      self.instance[REPEAT][TIMING]
+    end
 
     def self.repeat_node
       self.instance.ensure_repeat_and_wait_key
@@ -86,6 +106,15 @@ module CloudConfiguration
       end
       self.instance[WAIT][LONG]
     end
+    
+    def self.wait_seconds
+      self.instance.ensure_repeat_and_wait_key
+      unless self.instance[WAIT][WAIT_IN_SECONDS]
+        self.instance[WAIT][WAIT_IN_SECONDS] = 5
+        self.instance.save
+      end
+      self.instance[WAIT][WAIT_IN_SECONDS]
+    end
 
     def self.repeat_short
       self.instance.ensure_repeat_and_wait_key
@@ -94,6 +123,15 @@ module CloudConfiguration
         self.instance.save
       end
       self.instance[REPEAT][SHORT]
+    end
+    
+    def self.repeat_timing
+      self.instance.ensure_repeat_and_wait_key
+      unless self.instance[REPEAT][TIMING]
+        self.instance[REPEAT][TIMING] = 3
+        self.instance.save
+      end
+      self.instance[REPEAT][TIMING]
     end
     
     def self.repeat_ten
