@@ -36,7 +36,7 @@ module CloudConfiguration
   WAIT_IN_SECONDS      = :seconds
   TIMING               = :timing
   MINUTE               = :seconds
-
+  INSTANCE             = :instance
   class ConfigFile
     include Singleton
 
@@ -80,6 +80,15 @@ module CloudConfiguration
       self.instance[REPEAT][NODE_QUERY_RETRIES]
     end
 
+    def self.wait_instance_launch
+      self.instance.ensure_repeat_and_wait_key
+      unless self.instance[WAIT][INSTANCE]
+        self.instance[WAIT][INSTANCE] = 120
+        self.instance.save
+      end
+      self.instance[WAIT][INSTANCE]
+    end
+
     def self.wait_node
       self.instance.ensure_repeat_and_wait_key
       unless self.instance[WAIT][NODE_QUERY_WAIT]
@@ -114,6 +123,15 @@ module CloudConfiguration
         self.instance.save
       end
       self.instance[WAIT][WAIT_IN_SECONDS]
+    end
+
+    def self.repeat_instance_launch
+      self.instance.ensure_repeat_and_wait_key
+      unless self.instance[REPEAT][INSTANCE]
+        self.instance[REPEAT][INSTANCE] = 3
+        self.instance.save
+      end
+      self.instance[REPEAT][INSTANCE]
     end
 
     def self.repeat_short
