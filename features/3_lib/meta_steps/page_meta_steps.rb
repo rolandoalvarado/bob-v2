@@ -667,18 +667,23 @@ end
 
 
 Step /^The instance named (.+) should be (?:in|of) (.+) status$/ do |instance_name, expected_status|
-  # TODO To prevent conflict with other instance steps, temporarily forgo changing the selector,
-  # and instead finding it directly from the page object.
-  selector = "//*[@id='instances-list']//*[contains(@class, 'name') and contains(text(), \"#{ instance_name }\")]/.."
-  row      = @current_page.find_by_xpath(selector)
-  
-  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
-    actual_status = row.find('.status').text.strip
-    unless actual_status == expected_status.upcase.gsub(' ', '_')
-      raise "Instance #{ instance_name } is not or took too long to become #{ expected_status }. " +
-            "Current status is #{ actual_status }."
+
+  wait_time = ConfigFile.wait_instance_launch + Time.now().to_i
+  while wait_time >= Time.now().to_i
+    selector = "//*[@id='instances-list']//*[contains(@class, 'name') and contains(text(), \"#{ instance_name }\")]/.."
+    row      = @current_page.find_by_xpath(selector)
+    unless row
+      next
     end
+    actual_status = row.find('.status').text.strip
+    break if actual_status == expected_status.upcase.gsub(' ', '_')
+    sleep ConfigFile.wait_short
   end
+  if (wait_time < Time.now().to_i) then
+    raise "Instance #{ instance_name } is not or took too long to become #{ expected_status }. " +
+        "Current status is #{ actual_status }."
+  end
+
 end
 
 
