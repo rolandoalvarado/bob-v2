@@ -87,15 +87,16 @@ class ComputeService < BaseCloudService
       end
     end
 
-    sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_long).tries do
+    wait_period = ConfigFile.wait_instance_launch + Time.now().to_i
+    while wait_period >= Time.now().to_i
       instance.reload
       if instance.state =~ /BUILD/
-        raise "Instance #{ instance.name } took too long to become active. " +
-              "Instance is currently in #{ instance.state } status."
+        sleep ConfigFile.wait_short
       elsif instance.state =~ /ACTIVE/
         return instance
       else
         activate_instance(instance)
+        sleep ConfigFile.wait_short
         if instance.state !~ /ERROR|SHUTOFF/
           raise "Instance #{ instance.name } is still in #{ instance.state } status."
         else
