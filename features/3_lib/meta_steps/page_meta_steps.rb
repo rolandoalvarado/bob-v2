@@ -667,23 +667,23 @@ end
 
 
 Step /^The instance named (.+) should be (?:in|of) (.+) status$/ do |instance_name, expected_status|
-
   wait_time = ConfigFile.wait_instance_launch + Time.now().to_i
+  
   while wait_time >= Time.now().to_i
     selector = "//*[@id='instances-list']//*[contains(@class, 'name') and contains(text(), \"#{ instance_name }\")]/.."
     row      = @current_page.find_by_xpath(selector)
-    unless row
-      next
-    end
-    actual_status = row.find('.status').text.strip
-    break if actual_status == expected_status.upcase.gsub(' ', '_')
-    sleep ConfigFile.wait_short
+      unless row
+        next
+      end
+      actual_status = row.find('.status').text.strip
+        break if actual_status == expected_status.upcase.gsub(' ', '_')
+        sleep ConfigFile.wait_short
   end
+  
   if (wait_time < Time.now().to_i) then
     raise "Instance #{ instance_name } is not or took too long to become #{ expected_status }. " +
-        "Current status is #{ actual_status }."
+      "Current status is #{ actual_status }."
   end
-
 end
 
 

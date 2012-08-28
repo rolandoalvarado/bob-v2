@@ -349,8 +349,7 @@ Then /^I cannot connect to that instance via (.+)/ do |remote_client|
 end
 
 Then /^I [Cc]an [Cc]reate an instance in the project$/ do
-  instance_name = Unique.name('Instance')
-
+  
   steps %{
     * Click the logout button if currently logged in
 
@@ -365,16 +364,17 @@ Then /^I [Cc]an [Cc]reate an instance in the project$/ do
     * Click the new instance button
     * Current page should have the new instance form
     * Choose the 1st item in the images radiolist
-    * Fill in the server name field with #{ instance_name }
+    * Fill in the server name field with #{ test_instance_name }
     * Check the 1st item in the security groups checklist
     * Click the create instance button
 
     * Current page should have the instance password form
     * Close the instance password form
 
-    * The instances table should include the text #{ instance_name }
-    * The instance named #{ instance_name } should be in active status
+    * The instances table should include the text #{ test_instance_name }
+    * The instance named #{ test_instance_name } should be in active status
   }
+  
 end
 
 Then /^I [Cc]an [Dd]elete an instance in the project$/ do
@@ -648,15 +648,18 @@ Then /^the instance should be resized$/i do
 end
 
 Then /^the instance will be created$/i do
+  
   steps %{
     * Current page should have the instance password form
     * Close the instance password form
     * The instances table should include the text #{ @instance_name }
     * The instance named #{ @instance_name } should be in active status
   }
+  
 end
 
 Then /^the instance will be not created$/i do
+  
   steps %{
     * Current page should still have the new instance form
     * The new instance form has an error message
@@ -664,6 +667,7 @@ Then /^the instance will be not created$/i do
 
     * The instances table should not include the text #{ @instance_name }
   }
+  
 end
 
 Then /^the instance will reboot$/i do
