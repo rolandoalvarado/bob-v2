@@ -18,7 +18,7 @@ end
 
 Then /^Ensure that (.+) security group does not exist$/i do |security_group|
   compute_service = ComputeService.session
-  compute_service.ensure_project_security_group_count(@project, 0)  
+  compute_service.ensure_project_security_group_count(@project, 0)
 end
 
 Then /^Ensure that a security group named Web Servers exist$/i do

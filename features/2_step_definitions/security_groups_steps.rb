@@ -132,6 +132,9 @@ When /^I edit the Web Servers security group with the following rule: (.+), (.+)
     * Wait 2 seconds
 
     * Click the access security tab
+
+    * Wait 2 seconds
+
     * Current page should have the security groups
 
     * Click the edit security group button for security group #{ security_group.id }
@@ -175,6 +178,9 @@ When /^I add the following rule: (.+), (.+), (.+), (\d+\.\d+\.\d+\.\d+(?:|\/\d+)
     * Wait 2 seconds
 
     * Click the access security tab
+
+    * Wait 2 seconds
+
     * Current page should have the security groups
 
     * Click the edit security group button for security group #{ security_group.id }
