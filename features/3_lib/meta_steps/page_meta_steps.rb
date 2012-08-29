@@ -136,10 +136,7 @@ Then /^Click the (.+) action in the context menu for the instance named (.+)$/i 
 
   sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
     @current_page.instance_menu_button(id: instance_id).click
-
     @current_page.send("#{ instance_action }_instance_button", id: instance_id).click
-
-    raise "Couldn't find resize instance form!" unless @current_page.has_resize_instance_form?
   end
 end
 

@@ -204,7 +204,7 @@ class ProjectPage < SecurePage
   tab       'disabled collaborators',             '.nav-tabs .collaborators.disabled'
   button    'add collaborator',                   '#add-collaborator:not(.disabled)'
   option    'collaborator',                       xpath: '//*[@class="chzn-drop"]//*[li[text()="<name>"]]'
-  button    'add collaborator',                   'a.btn-primary'
+  button    'add new collaborator',               '#add-collaborator-submit'
   table     'collaborators',                      xpath: "//*[tr[@class='user']]/td[normalize-space(text())='<name>']"
 
   dropdown  'Users',                              "#user-id"
