@@ -326,11 +326,20 @@ Then /^I can grant project membership to (.+)$/i do |username|
     * The #{ (@project || @project_attrs).name  } project should be visible
     * Click the #{ (@project || @project_attrs).name } project
 
-    * Wait 10 seconds
+    * Wait 2 seconds
     * Click the collaborators tab
+
+    * Wait 2 seconds
+
     * Click the add collaborator button
+
+    * Wait 2 seconds
+
     * Fill in the email field with #{ user.email }
-    * Click the add collaborator button
+    * Click the add new collaborator button
+
+    * Wait 2 seconds
+
     * Current page should have the new collaborator
   }
 
