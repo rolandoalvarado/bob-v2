@@ -94,9 +94,6 @@ When /^I pause the instance in the project$/ do
 end
 
 When /^I hard reboot the instance$/ do
-  compute_service = ComputeService.session
-  @instance       = compute_service.instances.find { |i| i.state == 'ACTIVE' }
-
   steps %{
     * Click the logout button if currently logged in
 
@@ -142,9 +139,6 @@ When /^I create an instance with attributes (.+), (.+), (.+), (.+) and (.+)$/ do
 end
 
 When /^I soft reboot the instance$/ do
-  compute_service = ComputeService.session
-  @instance       = compute_service.instances.find { |i| i.state == 'ACTIVE' }
-
   steps %{
     * Click the logout button if currently logged in
 
@@ -421,10 +415,6 @@ Then /^I [Cc]an [Pp]ause the instances?(?:| in the project)$/ do
 end
 
 Then /^I [Cc]an [Rr]eboot an instance in the project$/ do
-  compute_service = ComputeService.session
-  compute_service.set_tenant @project
-  instance        = compute_service.instances.find { |i| i.state == 'ACTIVE' }
-
   steps %{
     * Click the logout button if currently logged in
 
@@ -436,11 +426,11 @@ Then /^I [Cc]an [Rr]eboot an instance in the project$/ do
     * Visit the projects page
     * Click the #{ @project.name } project
 
-    * Click the instance menu button for instance #{ instance.id }
-    * Click the soft reboot instance button for instance #{ instance.id }
+    * Click the instance menu button for instance #{ @instance.id }
+    * Click the soft reboot instance button for instance #{ @instance.id }
     * Click the confirm instance reboot button
 
-    * The instance #{ instance.id } should be shown as rebooting
+    * The instance named #{ @instance.name } should be performing task rebooting
   }
 end
 
@@ -672,7 +662,7 @@ end
 
 Then /^the instance will reboot$/i do
   steps %{
-    * The instance #{ @instance.id } should be shown as rebooting
+    * The instance named #{ @instance.name } should be performing task rebooting
   }
 end
 

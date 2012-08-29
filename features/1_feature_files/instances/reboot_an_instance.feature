@@ -13,7 +13,6 @@ Feature: Reboot an Instance
     * A project exists in the system
     * The project has 1 active instance
 
-
   @permissions
   Scenario Outline: Check User Permissions
     Given I have a role of <Role> in the project
@@ -24,12 +23,10 @@ Feature: Reboot an Instance
         | Member          | Can Reboot           |
         | Project Manager | Can Reboot           |
 
-
   Scenario: Soft Reboot
     Given I am authorized to reboot an instance in the project
      When I soft reboot the instance
      Then the instance will reboot
-
 
   Scenario: Hard Reboot
     Given I am authorized to reboot an instance in the project
