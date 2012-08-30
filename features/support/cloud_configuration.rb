@@ -37,6 +37,7 @@ module CloudConfiguration
   TIMING               = :timing
   MINUTE               = :seconds
   INSTANCE             = :instance
+  VOLUME               = :volume
   class ConfigFile
     include Singleton
 
@@ -87,6 +88,15 @@ module CloudConfiguration
         self.instance.save
       end
       self.instance[WAIT][INSTANCE]
+    end
+
+    def self.wait_volume_attach
+      self.instance.ensure_repeat_and_wait_key
+      unless self.instance[WAIT][VOLUME]
+        self.instance[WAIT][VOLUME] = 40
+        self.instance.save
+      end
+      self.instance[WAIT][VOLUME]
     end
 
     def self.wait_node

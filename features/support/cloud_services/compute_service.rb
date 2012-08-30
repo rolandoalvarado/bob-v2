@@ -51,7 +51,7 @@ class ComputeService < BaseCloudService
 
     attributes[:name]           ||= Faker::Name.name
     attributes[:password]       ||= test_instance_password || '123qwe'
-    attributes[:image]          ||= @images[0].id || @images[2].id || @images[5].id
+    attributes[:image]          ||= @images.sample.id
     attributes[:flavor]         ||= @flavors.find { |f| f.name == 'm1.small' }.id
     attributes[:key_name]       ||= @key_pairs[0] && @key_pairs[0].name
 
@@ -65,7 +65,10 @@ class ComputeService < BaseCloudService
       @security_group_array = [{ :name => @security_groups[0].name }]
     end
 
-    instance = @instances.find { |i| i.name == attributes[:name] }
+    instance = @instances.find do |i|
+      # ensure flavor is also the same (currently only for @resize tests)
+      i.name == attributes[:name] and i.flavor['id'] == attributes[:flavor]
+    end
 
     unless instance
       begin
@@ -90,18 +93,16 @@ class ComputeService < BaseCloudService
     wait_period = ConfigFile.wait_instance_launch + Time.now().to_i
     while wait_period >= Time.now().to_i
       instance.reload
-      if instance.state =~ /BUILD/
+      case instance.state
+      when /BUILD|REVERT_RESIZE/
         sleep ConfigFile.wait_short
-      elsif instance.state =~ /ACTIVE/
+      when /ACTIVE/
         return instance
-      else
+      when /PAUSED|SUSPENDED|VERIFY_RESIZE/
         activate_instance(instance)
         sleep ConfigFile.wait_short
-        if instance.state !~ /ERROR|SHUTOFF/
-          raise "Instance #{ instance.name } is still in #{ instance.state } status."
-        else
-          break
-        end
+      when /ERROR|SHUTOFF/
+        break
       end
     end
 
@@ -378,6 +379,25 @@ class ComputeService < BaseCloudService
 
       if instance.state != 'ACTIVE'
         raise "Couldn't ensure that instance #{ name } in #{ project.name }" +
+              "is active."
+      end
+
+      return instance
+    end
+  end
+
+  def ensure_instance_is_rebooted_and_active(project, instance)
+    service.set_tenant project
+    instance.reboot("HARD")
+
+    sleeping(ConfigFile.wait_long).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+      instances.reload
+
+      instance_search = instances.select { |i| i.name == instance.name }
+      instance = instance_search.last
+
+      if instance.state != 'ACTIVE'
+        raise "Couldn't ensure that instance #{ instance.name } in #{ project.name }" +
               "is active."
       end
 
