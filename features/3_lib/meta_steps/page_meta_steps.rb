@@ -378,10 +378,21 @@ Step /^Current page should display project details in the sidebar$/ do
   end
 end
 
+#-------------- DONOT REMOVE THIS ----------------------------------------------
+# Comment-out, use this if the resource graph is functional.
+#Then /^Current page should have the (.+) graph$/ do |graph_name|
+#  graph_name = graph_name.to_s.downcase.split.join('_')
+#  unless @current_page.send(:"has_#{ graph_name }_graph?")
+#    raise "Current page doesn't have the #{ graph_name } graph."
+#  end
+#end
+#-------------------------------------------------------------------------------
+
 Then /^Current page should have the (.+) graph$/ do |graph_name|
-  graph_name = graph_name.to_s.downcase.split.join('_')
-  unless @current_page.send(:"has_#{ graph_name }_graph?")
-    raise "Current page doesn't have the #{ graph_name } graph."
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+    unless @current_page.has_graph_element?
+      raise "Current page doesn't have the #{graph_name} graph."
+    end
   end
 end
 
@@ -903,15 +914,22 @@ Step /^The (.+) project row should be visible$/ do |project_name|
 end
 
 Step /^The (.+) project details should be visible in the sidebar$/ do |project_name|
-  unless @current_page.has_project_details_element?( name: project_name )
-    raise "The project '#{ project_name }' should be visible, but it's not."
+  project_name.strip!
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+    unless @current_page.has_project_details_element?( name: project_name )
+      raise "Couldn't find tile for project #{ project_name }!"
+    else
+      @current_page.project_details_element( name: project_name ).click
+    end
   end
 end
 
-
 Step /^The (.+) project tile should be visible$/ do |project_name|
-  unless @current_page.has_tile_element?( name: project_name )
-    raise "The tile for project '#{ project_name }' should be visible, but it's not."
+  project_name.strip!
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+    unless @current_page.has_tile_element?( name: project_name )
+      raise "The tile for project '#{ project_name }' should be visible, but it's not."
+    end
   end
 end
 
