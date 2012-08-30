@@ -21,28 +21,14 @@ Then /^Ensure that (.+) security group does not exist$/i do |security_group|
   compute_service.ensure_project_security_group_count(@project, 0)
 end
 
-Then /^Ensure that a security group named Web Servers exist$/i do
+Then /^Ensure that a security group named (.+) exist$/i do |security_group_name|
   compute_service = ComputeService.session
   security_group_attrs = CloudObjectBuilder.attributes_for(
                       :security_group,
-                      :name     => Unique.name('Web Servers'),
-                      :description    => ('Web Servers Security Group')
+                      :name     => Unique.name(security_group_name),
+                      :description    => ('Security Group Description')
                     )
-  new_security_group  = compute_service.create_security_group(@project, security_group_attrs)
-
-  @new_security_group = new_security_group
-end
-
-Then /^Ensure that a security group named default exist$/i do
-  compute_service = ComputeService.session
-  security_group_attrs = CloudObjectBuilder.attributes_for(
-                      :security_group,
-                      :name     => Unique.name('default'),
-                      :description    => ('Default Security Group')
-                    )
-  default_security_group  = compute_service.create_security_group(@project, security_group_attrs)
-
-  @default_security_group = default_security_group
+  @security_group  = compute_service.create_security_group(@project, security_group_attrs)
 end
 
 Then /^the security group rules will be Added$/i do

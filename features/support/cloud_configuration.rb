@@ -129,7 +129,7 @@ module CloudConfiguration
     def self.wait_seconds
       self.instance.ensure_repeat_and_wait_key
       unless self.instance[WAIT][WAIT_IN_SECONDS]
-        self.instance[WAIT][WAIT_IN_SECONDS] = 5
+        self.instance[WAIT][WAIT_IN_SECONDS] = 3
         self.instance.save
       end
       self.instance[WAIT][WAIT_IN_SECONDS]

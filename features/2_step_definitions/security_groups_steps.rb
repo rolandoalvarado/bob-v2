@@ -40,13 +40,6 @@ Given /^the project has only one security group named Web Servers$/ do
   }
 end
 
-Given /^The project has (\d+) security groups named default, and Web Servers$/ do |security_group_count|
-   steps %{
-    * Ensure that a security group named Web Servers exist
-    * Ensure that a project has #{security_group_count} security groups
-  }
-end
-
 Given /^The project has an instance that is a member of the (.+) security group$/ do |security_group|
   steps %{
     * Ensure that the instance is a member of the #{security_group} security group
@@ -106,17 +99,7 @@ When /^I create a security group with attributes (.+), (.+)$/ do |name, descript
 end
 
 
-When /^I edit the Web Servers security group with the following rule: (.+), (.+), (.+), (\d+\.\d+\.\d+\.\d+(?:|\/\d+)|\(None\)|\(Random\))$/ do |protocol, from_port, to_port, cidr|
-
-  compute_service = ComputeService.session
-
-  attrs           = CloudObjectBuilder.attributes_for(
-                    :security_group,
-                    :name => Unique.name('Web Servers'),
-                    :description => 'Web Servers Security Group'
-                  )
-
-  security_group  = compute_service.ensure_security_group_exists(@project, attrs)
+When /^I edit a security group with the following rule: (.+), (.+), (.+), (\d+\.\d+\.\d+\.\d+(?:|\/\d+)|\(None\)|\(Random\))$/ do |protocol, from_port, to_port, cidr|
 
   steps %{
     * Click the logout button if currently logged in
@@ -129,15 +112,13 @@ When /^I edit the Web Servers security group with the following rule: (.+), (.+)
     * Visit the projects page
     * Click the #{ @project.name } project
 
-    * Wait 2 seconds
-
+    * Wait #{ConfigFile.wait_seconds} seconds
     * Click the access security tab
 
-    * Wait 2 seconds
-
+    * Wait #{ConfigFile.wait_seconds} seconds
     * Current page should have the security groups
 
-    * Click the edit security group button for security group #{ security_group.id }
+    * Click the edit security group button for security group #{ @security_group.id }
     * Current page should have the security group rules form
 
     * Click the new security group rule button
@@ -236,16 +217,6 @@ Then /^I [Cc]an [Cc]reate a security group in the project$/ do
 end
 
 Then /^I [Cc]an [Ee]dit a security group in the project$/ do
-  compute_service = ComputeService.session
-
-  attrs           = CloudObjectBuilder.attributes_for(
-                    :security_group,
-                    :name => Unique.name('Web Servers'),
-                    :description => 'Web Servers Security Group'
-                  )
-
-  security_group  = compute_service.ensure_security_group_exists(@project, attrs)
-
   steps %{
     * Click the logout button if currently logged in
 
@@ -257,12 +228,12 @@ Then /^I [Cc]an [Ee]dit a security group in the project$/ do
     * Visit the projects page
     * Click the #{ @project.name } project
 
-    * Wait 2 seconds
+    * Wait #{ConfigFile.wait_seconds} seconds
 
     * Click the access security tab
     * Current page should have the security groups
 
-    * Click the edit security group button for security group #{ security_group.id }
+    * Click the edit security group button for security group #{ @security_group.id }
     * Current page should have the security group rules form
 
     * Click the new security group rule button

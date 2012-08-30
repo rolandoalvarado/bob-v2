@@ -18,6 +18,7 @@ Feature: Edit a Security Group
   Background:
     * A project exists in the system
     * Ensure that a user exists in the project
+    * Ensure that a security group named Web Servers exist
 
   @permissions @jira-MCF-34-cup
   Scenario Outline: Check User Permissions
@@ -36,8 +37,7 @@ Feature: Edit a Security Group
   @jira-MCF-34-esg
   Scenario Outline: Edit a Security Group
     Given I am authorized to edit a security group in the project
-      And The project has 2 security groups named default, and Web Servers
-     When I edit the Web Servers security group with the following rule: <Protocol>, <From Port>, <To Port>, <CIDR>
+     When I edit a security group with the following rule: <Protocol>, <From Port>, <To Port>, <CIDR>
      Then the rule will be <Added or Not>
 
      Scenarios: Valid Rules
