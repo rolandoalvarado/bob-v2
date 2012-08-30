@@ -140,6 +140,23 @@ Then /^Click the (.+) action in the context menu for the instance named (.+)$/i 
   end
 end
 
+Then /^Click the (.+) action in the context menu for an instance named (.+) and flavored (.+)$/i do |instance_action, instance_name, flavor_name|
+  @flavors ||= ComputeService.session.flavors
+
+  instance_action = instance_action.split.join('_').downcase
+  flavor_id       = @flavors.find { |f| f.name == flavor_name }.id
+
+  instance = ComputeService.session.instances.find { |i| i.name == instance_name and i.flavor['id'] == flavor_id }
+  raise "Couldn't find instance #{ instance_name }!" unless instance
+  instance_id = instance.id
+
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+    @current_page.instance_menu_button(id: instance_id).click
+    @current_page.send("#{ instance_action }_instance_button", id: instance_id).click
+  end
+end
+
+
 Then /^The context menu for the instance named (.+) should have the (.+) action$/i do |instance_name, instance_action|
   instance_action = instance_action.split.join('_').downcase
 

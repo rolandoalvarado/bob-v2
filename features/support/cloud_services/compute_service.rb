@@ -65,7 +65,10 @@ class ComputeService < BaseCloudService
       @security_group_array = [{ :name => @security_groups[0].name }]
     end
 
-    instance = @instances.find { |i| i.name == attributes[:name] }
+    instance = @instances.find do |i|
+      # ensure flavor is also the same (currently only for @resize tests)
+      i.name == attributes[:name] and i.flavor['id'] == attributes[:flavor]
+    end
 
     unless instance
       begin
@@ -90,18 +93,16 @@ class ComputeService < BaseCloudService
     wait_period = ConfigFile.wait_instance_launch + Time.now().to_i
     while wait_period >= Time.now().to_i
       instance.reload
-      if instance.state =~ /BUILD/
+      case instance.state
+      when /BUILD|REVERT_RESIZE/
         sleep ConfigFile.wait_short
-      elsif instance.state =~ /ACTIVE/
+      when /ACTIVE/
         return instance
-      else
+      when /PAUSED|SUSPENDED|VERIFY_RESIZE/
         activate_instance(instance)
         sleep ConfigFile.wait_short
-        if instance.state !~ /ERROR|SHUTOFF/
-          raise "Instance #{ instance.name } is still in #{ instance.state } status."
-        else
-          break
-        end
+      when /ERROR|SHUTOFF/
+        break
       end
     end
 
