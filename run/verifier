@@ -16,7 +16,9 @@ fi
 
 rm -rf output/*
 if [ $# -eq 1 ]; then
-  bundle exec cucumber --profile $1
+  bundle exec cucumber --profile $1 --t ~@future --t ~@pending
+elif [ $# -eq 2 ]; then
+  bundle exec cucumber --profile $1 --t ~@future --t ~@pending --t $2
 else
-  bundle exec cucumber --profile default
+  bundle exec cucumber --profile default --t ~@future --t ~@pending
 fi

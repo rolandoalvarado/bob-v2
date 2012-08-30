@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Bob Report - <%= @feature[:name] %></title>
+  <%= asset_tags('../') %>
+</head>
+<body id="feature">
+
+  <div id="feature-name">
+    <%= @feature[:name] %>
+  </div>
+
+  <div class="description">
+    <%= @feature[:description].split(/\n+/).map { |text| "<p>#{ text }</p>" }.join %>
+  </div>
+
+  <div class="elements">
+    <% (@feature[:elements] || []).each do |element| %>
+      <div class="element">
+
+        <div class="header">
+          <span class="type"><%= /^Scenario/ =~ element[:type] ? 'Requirement' : element[:type] %>:</span>
+          <span class="name"><%= element[:name] %></span><br>
+          <span class="description"><%= element[:description].gsub(/\n/, '<br>') %></span>
+        </div>
+
+        <ul class="steps <%= "outline" if is_scenario_outline?(element) %>">
+          <% element[:steps].each do |s| %>
+            <% modal_id = SecureRandom.uuid %>
+            <li class="step <%= status_class_name(s[:status]) unless is_scenario_outline?(element) %>">
+              <a data-toggle="modal" data-target="#<%= modal_id %>" href="#">
+                <%= "#{ s[:keyword] } #{ s[:name] }" %>
+              </a>
+              <div class="modal hide" id="<%= modal_id %>">
+                <div class="modal-header">
+                  <a class="close" data-dismiss="modal">×</a>
+                  <h4><%= "#{ s[:keyword] } #{ s[:name] }" %></h4>
+                </div>
+                <div class="modal-body">
+                  <% if s[:screenshot] && s[:status] != :skipped %>
+                    <pre class="viewport"><%= s[:url] %></pre>
+                    <a href="<%= s[:screenshot] %>" target="_blank"><img src="<%= s[:screenshot] %>"/></a>
+                  <% end %>
+                  <% if s[:exception] %>
+                    <pre class="viewport"><%= s[:exception][:message] %></pre>
+                    <pre class="viewport"><%= s[:exception][:backtrace].join('<br>') %></pre>
+                    <pre><%= s[:exception][:extra_failure_content] %></pre>
+                  <% elsif s[:status] == :skipped %>
+                    <p>Skipped</p>
+                  <% else %>
+                    <p>No errors</p>
+                  <% end %>
+                </div>
+              </div>
+            </li>
+          <% end %>
+        </ul><!-- class="steps" -->
+
+        <% if examples = element[:examples] %>
+          <div class="examples">
+            <% examples.each do |x| %>
+
+              <div class="header">
+                <span class="type">Examples:</span>
+                <span class="name"><%= x[:name] %></span><br>
+              </div>
+
+              <table class="table table-bordered">
+                <tr>
+                  <% x[:rows][0].each do |header| %>
+                    <th><%= header[:value] %></th>
+                  <% end %>
+                </tr>
+                <% (1...x[:rows].length).each do |index| %>
+                  <tr>
+                    <% x[:rows][index].each do |cell| %>
+                      <% modal_id = SecureRandom.uuid %>
+                      <td>
+                        <span class="<%= status_class_name(cell[:status]) %>">
+                          <a data-toggle="modal" data-target="#<%= modal_id %>" href="#"><%= cell[:value] %></a>
+                        </span>
+                        <div class="modal hide" id="<%= modal_id %>">
+                          <div class="modal-header">
+                            <a class="close" data-dismiss="modal">×</a>
+                            <h4><%= "#{ cell[:value] }" %></h4>
+                          </div>
+                          <div class="modal-body">
+                            <% if cell[:screenshot] && cell[:status] != :skipped %>
+                              <pre class="viewport"><%= cell[:url] %></pre>
+                              <a href="<%= cell[:screenshot] %>" target="_blank"><img src="<%= cell[:screenshot] %>"/></a>
+                            <% end %>
+                            <% if cell[:exception] %>
+                              <pre class="viewport"><%= cell[:exception][:message] %></pre>
+                              <pre class="viewport"><%= cell[:exception][:backtrace].join('<br>') %></pre>
+                              <pre><%= cell[:exception][:extra_failure_content] %></pre>
+                            <% elsif cell[:status] == :skipped %>
+                              <p>Skipped</p>
+                            <% else %>
+                              <p>No errors</p>
+                            <% end %>
+                          </div>
+                        </div>
+                      </td>
+                    <% end %>
+                  </tr>
+                <% end %>
+              </table>
+
+            <% end %>
+          </div><!-- class="examples" -->
+        <% end %>
+
+      </div><!-- class="element" -->
+    <% end %>
+  </div><!-- class="elements" -->
+
+</body>
+</html>

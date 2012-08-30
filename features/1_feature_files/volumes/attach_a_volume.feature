@@ -1,4 +1,4 @@
-@jira-MCF-35
+@jira-MCF-35 @format-v2 @volumes
 Feature: Attach a Volume
   As a user, I want to attach a volume to my instance so that the instance will
   have a scalable, persistent storage.
@@ -19,23 +19,19 @@ Feature: Attach a Volume
   most cases is /dev/vdc) and the disk shows up there on the guest.
   http://docs.openstack.org/trunk/openstack-compute/admin/content/managing-volumes.html
 
-  Background:
-    * A project exists in the system
-    * The project has 1 active instance
-    * The project has 1 available volume
-
 
   @permissions
   Scenario Outline: Check User Permissions
-    Given I have a role of <Role> in the project
-     Then I <Can or Cannot Attach> the volume to the instance
+    * A user with a role of <Role> in a project <Can or Cannot Attach> any of its volumes
 
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Attach |
         | Member          | Can Attach           |
         | Project Manager | Can Attach           |
 
+      Scenarios: Unauthorized Roles
+        | Role            | Can or Cannot Attach |
+        | (None)          | Cannot Attach        |
 
   Scenario: Attach a Volume
-    Given I am authorized to attach volumes to the instance
-     Then an attached volume will be accessible from the instance
+    * Volumes that are attached to an instance will be accessible from the instance

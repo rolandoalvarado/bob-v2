@@ -1,4 +1,4 @@
-@jira-MCF-19
+@jira-MCF-19 @instances
 Feature: Resume an Instance
   As a user, I want to resume a suspended instance so that I can use it again
   after I'm done doing any maintenance work on it.
@@ -27,4 +27,4 @@ Feature: Resume an Instance
   Scenario: Resume an Instance
     Given I am authorized to resume instances in the project
      When I resume the instance in the project
-     Then I can connect to that instance via SSH
+     Then the instance should be active

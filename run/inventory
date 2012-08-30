@@ -10,4 +10,4 @@ elif [ $# -eq 1 ] && [ $1 == '--help' ]; then
 fi
 
 
-bundle exec cucumber --format usage --dry-run --no-profile
+bundle exec cucumber --format usage --dry-run --no-profile --t ~@pending --t ~@future

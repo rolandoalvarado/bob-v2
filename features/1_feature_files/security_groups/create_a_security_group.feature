@@ -1,4 +1,4 @@
-@jira-MCF-32
+@jira-MCF-32 @security_groups
 Feature: Create a Security Group
   As an authorized user, I want to create a security group so that I can
   control the incoming network traffic for one or more instances.
@@ -17,6 +17,8 @@ Feature: Create a Security Group
 
   Background:
     * A project exists in the system
+    * Ensure that the project has no security groups
+    * Ensure that a user exists in the project
 
 
   @permissions @jira-MCF-32-cup
@@ -41,35 +43,28 @@ Feature: Create a Security Group
       Scenarios: Valid Values
         | Name             | Description              | Created or Not Created  |
         | Database Servers | Only port 443 is allowed | Created                 |
-        | Database Servers | (None)                   | Created                 |
 
       Scenarios: Invalid Values
-        | Name             | Description              | Created or Not Created  | Reason              |
-        | (None)           | Only port 443 is allowed | Not Created             | Name can't be empty |
+        | Name             | Description              | Created or Not Created  | Reason                     |
+        | (None)           | Only port 443 is allowed | Not Created             | Name can't be empty        |
+        | Database Servers | (None)                   | Not Created             | Description can't be empty |
 
   @jira-MCF-32-ardc
   Scenario Outline: Add a Rule
     Given I am authorized to create a security group in the project
       And the project has only one security group named Web Servers
-     When I add the following rule: <Protocol>, <From Port>, <To Port>, <Source Type>, <Source>
-     Then the rules will be <Added or Not>
+    When I add the following rule: <Protocol>, <From Port>, <To Port>, <CIDR>
+    Then the rule will be <Added or Not>
 
       Scenarios: Valid Rules
-        | Protocol | From Port | To Port  | Source Type    | Source      | Added or Not |
-        | TCP      | (Random)  | (Random) | Subnet         | 0.0.0.0/25  | Added        |
-        | TCP      | (Random)  | (Random) | Security Group | Web Servers | Added        |
-        | UDP      | (Random)  | (Random) | Subnet         | 0.0.0.0/25  | Added        |
-        | UDP      | (Random)  | (Random) | Security Group | Web Servers | Added        |
-        | ICMP     | (Random)  | (Random) | Subnet         | 0.0.0.0/25  | Added        |
-        | ICMP     | (Random)  | (Random) | Security Group | Web Servers | Added        |
+        | Protocol | From Port | To Port  | CIDR        | Added or Not |
+        | TCP      | (Random)  | (Random) | 0.0.0.0/25  | Added        |
+        | UDP      | (Random)  | (Random) | 0.0.0.0/25  | Added        |
+        | ICMP     | (Random)  | (Random) | 0.0.0.0/25  | Added        |
 
       Scenarios: Invalid Rules
-        | Protocol | From Port | To Port  | Source Type    | Source      | Added or Not | Reason                                     |
-        | (Any)    | (None)    | (Random) | Subnet         | 0.0.0.0/25  | Not Added    | 'From Port' must be specified              |
-        | (Any)    | (Random)  | (None)   | Subnet         | 0.0.0.0/25  | Not Added    | 'To Port' must be specified                |
-        | (Any)    | (Random)  | (None)   | Subnet         | 1.2.9.12    | Not Added    | Source must be in CIDR notation            |
-        | (Any)    | (Random)  | (Random) | Subnet         | (None)      | Not Added    | 'Source' can't be empty                    |
-        | (Any)    | (None)    | (Random) | Security Group | Web Servers | Not Added    | 'From Port' must be specified              |
-        | (Any)    | (Random)  | (None)   | Security Group | Web Servers | Not Added    | 'To Port' must be specified                |
-        | (Any)    | (Random)  | (Random) | Security Group | (None)      | Not Added    | 'Source' can't be empty                    |
-        | (Any)    | (Random)  | (Random) | Security Group | App Servers | Not Added    | Security group 'App Servers' doesn't exist |
+        | Protocol | From Port | To Port  | CIDR        | Added or Not | Reason                            |
+        | (Any)    | (None)    | (Random) | 0.0.0.0/25  | Not Added    | 'From Port' must be specified     |
+        | (Any)    | (Random)  | (None)   | 0.0.0.0/25  | Not Added    | 'To Port' must be specified       |
+        | (Any)    | (Random)  | (None)   | 1.2.9.12    | Not Added    | CIDR must be in CIDR notation     |
+        | (Any)    | (Random)  | (Random) | (None)      | Not Added    | 'CIDR' can't be empty             |

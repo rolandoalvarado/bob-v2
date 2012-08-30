@@ -1,21 +1,15 @@
-@jira-MCF-9
+@jira-MCF-9 @format-v2 @wip @blocked @instances
 Feature: Connect to an Instance
   As a user, I want to be able to connect to an instance, so that I can
   install binaries to it and configure it according to my needs.
 
-  Background:
-    * A project exists in the system
-    * The project has 0 active instances
-
   Scenario Outline:
-    Given I am authorized to create instances in the project
-     When I create an instance on that project based on the image <Image Name>
-      And I assign a floating IP to the instance
-     Then I can connect to that instance via <Remote Client>
+    * An instance created based on the image <Image Name> is accessible via <Remote Client>
 
     Scenarios:
-      | Image Name                     | Remote Client |
-      | Windows 2008 Enterprise Server | RDP           |
-      | CentOS 5.8                     | SSH           |
-      | Ubuntu 10.04 Lucid             | SSH           |
-      | Ubuntu 12.04 Precise           | SSH           |
+      | Image Name                           | Remote Client |
+      | 64Bit CentOS 5.8 (v1.0.0)            | SSH           |
+      | 64Bit CentOS 6.2                     | SSH           |
+      | 64Bit Ubuntu 10.04                   | SSH           |
+      | 64Bit Ubuntu 12.04                   | SSH           |
+      | 64Bit Windows 2008 R2 Enterprise SP1 | RDP           |

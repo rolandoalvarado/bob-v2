@@ -21,17 +21,25 @@
 # can just re-use the objects each time it is executed.
 
 module Unique
+  def self.alpha
+    ConfigFile.unique_alpha
+  end
+
   def self.email(value)
     prefix = alpha[0, 4]
     "#{ prefix }_#{ value }"
   end
 
   def self.username(value = '', length = 16)
-    self.string_without_whitespace(value, length)
+    "#{ value }#{ self.alpha }"[0, length - 1]
   end
 
   def self.user_name(value = '', length = 16)
     self.username(value, length)
+  end
+
+  def self.instance_name(value = '', length = 25)
+    self.string_with_whitespace(value, length)
   end
 
   def self.name(value = '', length = 16)
@@ -50,7 +58,15 @@ module Unique
     "#{ value }_#{ self.alpha }"[0, length - 1]
   end
 
-  def self.alpha
-    ConfigFile.unique_alpha
+  def self.volume_name(value = '', length = 16)
+    self.string_with_whitespace(value, length)
+  end
+
+  def self.instance_name(value = '', length = 16)
+    self.string_with_whitespace(value, length)
+  end
+
+  def self.keypair_name(value = '', length = 16)
+    self.string_with_whitespace(value, length)
   end
 end

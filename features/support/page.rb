@@ -103,14 +103,14 @@ Capybara.javascript_driver = ConfigFile.capybara_driver
 Capybara.run_server = false
 Capybara.app_host = ConfigFile.web_client_url
 
-# NOTE: Total waiting time will be default_wait_time * MAX_NODE_QUERY_RETRIES
+# NOTE: Total waiting time will be NODE_QUERY_WAIT_TIME * MAX_NODE_QUERY_RETRIES
 # You want to avoid raising the total waiting time beyond 30 seconds or the
 # tests will slow down to a crawl. Play around with the time between retries
 # instead, but always be mindful that the total waiting time doesn't get too
 # high or you'll be pulling your hair waiting for your tests to finish
-Capybara.default_wait_time = 1
-MAX_NODE_QUERY_RETRIES     = 40
-
+NODE_QUERY_WAIT_TIME       = ConfigFile.wait_node
+MAX_NODE_QUERY_RETRIES     = ConfigFile.repeat_node
+Capybara.default_wait_time = 0    # OLD_VALUE: 0 Don't change this value unless you know the purpose
 
 module NodeMethods
   include Anticipate
@@ -134,7 +134,7 @@ module NodeMethods
   #=====================
 
   def has_css_selector?(selector)
-    retry_before_returning_false { self.node.has_selector? selector }
+    self.node.has_selector? selector
   end
 
   def has_no_css_selector?(selector)
@@ -142,7 +142,7 @@ module NodeMethods
   end
 
   def has_content?(content)
-    retry_before_returning_false { self.node.has_content? content }
+    self.node.has_content? content
   end
 
   def has_no_content?(content)
@@ -150,7 +150,7 @@ module NodeMethods
   end
 
   def has_xpath?(selector)
-    retry_before_returning_false { self.node.has_xpath? selector }
+    self.node.has_xpath? selector
   end
 
   def has_no_xpath?(selector)
@@ -174,7 +174,7 @@ module NodeMethods
   # This method keeps executing the block called by yield
   # until the block stops raising an error OR until x tries
   def retry_before_failing
-    sleeping(0).seconds.between_tries.failing_after(number_of_retries).tries do
+    sleeping(NODE_QUERY_WAIT_TIME).seconds.between_tries.failing_after(MAX_NODE_QUERY_RETRIES).tries do
       yield
     end
     yield
@@ -193,20 +193,13 @@ module NodeMethods
     raise "NodeMethods#node must be defined by the class."
   end
 
-  def sleep_time
-    Capybara.default_wait_time
-  end
-
-  def number_of_retries
-    MAX_NODE_QUERY_RETRIES
-  end
 end
 
 
 class Page
   include NodeMethods
 
-  ELEMENT_TYPES    = 'button|field|link|checkbox|form|table|span|element|row|option|message|tab'
+  ELEMENT_TYPES    = 'button|field|link|checkbox|form|table|span|element|row|option|message|tab|tile|graph'
   RADIO_LIST_TYPES = 'radiolist'
   CHECK_LIST_TYPES = 'checklist'
   SELECTION_TYPES  = 'selection|dropdown'

@@ -1,4 +1,4 @@
-@jira-MCF-21
+@jira-MCF-21 @instances
 Feature: Suspend an Instance
   As a user, I want to suspend an instance so that I can free up some RAM and
   vCPUs without permanently losing my instance's state.
@@ -27,4 +27,4 @@ Feature: Suspend an Instance
   Scenario: Suspend an Instance
     Given I am authorized to suspend instances in the project
      Then I can suspend the instance
-      And I cannot connect to that instance via ssh
+      And I cannot assign a floating IP to that instance

@@ -1,4 +1,4 @@
-@jira-DPBLOG-7
+@jira-DPBLOG-7 @authentication
 Feature: Log In
   As a registered user, I want to log in so that I can use mCloud
 

@@ -1,4 +1,4 @@
-@jira-MCF-18
+@jira-MCF-18 @instances @resize
 Feature: Resize an Instance
   As a user, I want to resize an instance so that I can adjust its capacity
   according to its resource demands.
@@ -11,24 +11,18 @@ Feature: Resize an Instance
   All resizes are automatically confirmed after 24 hours if they are not
   explicitly confirmed or reverted.
 
-  Background:
-    * A project exists in the system
-    * The project has 1 active instance
-    * The project has more than 1 instance flavor
-
-
   @permissions
   Scenario Outline: Check User Permissions
-    Given I have a role of <Role> in the project
-     Then I <Can or Cannot Resize> the instance
+    * A user with a role of <Role> in the project <Can or Cannot Resize> an instance
 
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Resize |
         | Member          | Can Resize           |
         | Project Manager | Can Resize           |
 
+      Scenarios: Unauthorized Roles
+        | Role            | Can or Cannot Resize |
+        | (None)          | Cannot Resize        |
 
   Scenario: Resize an Instance
-    Given I am authorized to resize instances in the project
-     When I resize the instance to a different flavor
-     Then the instance should be resized
+    * An instance resized by an authorized user will have a different flavor

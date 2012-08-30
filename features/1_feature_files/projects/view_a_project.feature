@@ -1,9 +1,9 @@
-@MCF-30
+@jira-MCF-30 @projects
 Feature: View a Project
   As a user, I should be able to see the details of a project
   # Currently, if user does not have project role and he is the system admin,
-  # he can see the project. so last test may fail.  
- 
+  # he can see the project. so last test may fail.
+
   Background:
     * A project exists in the system
 

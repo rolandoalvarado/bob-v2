@@ -1,3 +1,4 @@
+@pending @reports
 Feature: View a Project's Compute Usage Report
   As a user, I want to see the usage report of my project so that I can manage
   its resource usage more effectively.

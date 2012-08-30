@@ -10,7 +10,7 @@ Then /^Connect to (.+) instance with floating IP (.+) via (.+)$/ do |image_name,
     when 'RDP'
       %x{ rdesktop #{ ip_address } -u #{ username } -p #{ password } }
     when 'SSH'
-      Net::SSH.start(ip_address, username, password: password, port: 2222, timeout: 10) do |ssh|
+      Net::SSH.start(ip_address, username, password: password, port: 22, timeout: 10) do |ssh|
         # Test connection and automatically close
       end
     end
@@ -37,7 +37,7 @@ Then /^Connect to instance with floating IP (.+) via (.+)$/ do |floating_ip, rem
       username   = ServerConfigFile.username(image_name)
       password   = ServerConfigFile.password(image_name)
 
-      Net::SSH.start(ip_address, username, password: password, port: 2222, timeout: 10) do |ssh|
+      Net::SSH.start(ip_address, username, password: password, port: 22, timeout: 10) do |ssh|
         # Test connection and automatically close
       end
     end
@@ -59,7 +59,7 @@ Then /^Fail connecting to (.+) instance with floating IP (.+) via (.+)$/ do |ima
     when 'RDP'
       %x{ rdesktop #{ ip_address } -u #{ username } -p #{ password } }
     when 'SSH'
-      Net::SSH.start(ip_address, username, password: password, port: 2222, timeout: 10) do |ssh|
+      Net::SSH.start(ip_address, username, password: password, port: 22, timeout: 10) do |ssh|
         # Test connection and automatically close
       end
     end
@@ -86,7 +86,7 @@ Then /^Fail connecting to instance with floating IP (.+) via (.+)$/ do |floating
       username   = ServerConfigFile.username(image_name)
       password   = ServerConfigFile.password(image_name)
 
-      Net::SSH.start(ip_address, username, password: password, port: 2222, timeout: 10) do |ssh|
+      Net::SSH.start(ip_address, username, password: password, port: 22, timeout: 10) do |ssh|
         # Test connection and automatically close
       end
     end
@@ -96,8 +96,8 @@ Then /^Fail connecting to instance with floating IP (.+) via (.+)$/ do |floating
 end
 
 
-Then /^Fetch a list of device files on the instance with floating IP (.+)$/ do |floating_ip|
-  row        = @current_page.floating_ip_row( id: floating_ip )
+Step /^A new device file should have been created on the instance named (.+) in project (.+)$/ do |instance_name, project_name|
+  row        = @current_page.associated_floating_ip_row( name: instance_name )
   ip_address = row.find('.public-ip').text
   raise "No public IP found for instance!" if ip_address.empty?
 
@@ -105,43 +105,87 @@ Then /^Fetch a list of device files on the instance with floating IP (.+)$/ do |
   instance_name = row.find('.instance').text
   image_name    = instance_name.scan(/\((.+)\)/).flatten.first
 
+  # If the above fails, get the image name from the compute service
+  if image_name.blank?
+    project    = IdentityService.session.tenants.find { |i| i.name == project_name }
+    raise "#{ project_name } couldn't be found!" unless project
+    ComputeService.session.set_tenant project
+    instance   = ComputeService.session.instances.find { |i| i.name == instance_name }
+    image      = ImageService.session.images.find { |i| i.id == instance.image['id'] }
+    image_name = image.name
+  end
+
   username = ServerConfigFile.username(image_name)
-  password = ServerConfigFile.password(image_name)
+
+  delta_time       = ((Time.now - @time_started) / 60).ceil
+  device_file_list = []
+
+  private_key = ComputeService.session.private_keys[test_keypair_name]
+  raise "Couldn't find private key for keypair '#{ test_keypair_name }'!" unless private_key
+
+  if instance.addresses.first[1].count  < 2
+    instance = ComputeService.session.ensure_instance_is_rebooted_and_active(project, instance)
+  end
+
+  raise "Couldn't find public ip for instance '#{ instance_name }'!" unless instance.addresses.first[1].count > 1
 
   begin
-    Net::SSH.start(ip_address, username, password: password, port: 2222, timeout: 10) do |ssh|
-      @device_file_list = ssh.exec!('ls -1 /dev/vc*').split
+    Net::SSH.start(ip_address, username, port: 22, timeout: 30, key_data: [ private_key ]) do |ssh|
+      # Get a list of all device /dev/vd* files modified/created from x minutes ago
+      device_file_list = ssh.exec!("find /dev/vd* -mmin -#{ delta_time }").split
     end
-  rescue
-    raise "Cannot fetch list of device files from #{ ip_address }."
+
+    if device_file_list.empty?
+      raise "No new device file has been created on the instance."
+    end
+  rescue => e
+    raise "Cannot fetch list of device files from #{ ip_address }. " +
+          "The error returned was: #{ e.inspect }"
   end
 end
 
+Step /^Ensure the instance named (.+) in project (.+) has an accessible public ip$/ do |instance_name, project_name|
+  project    = IdentityService.session.tenants.find { |i| i.name == project_name }
+  raise "#{ project_name } couldn't be found!" unless project
+  ComputeService.session.set_tenant project
+  instance   = ComputeService.session.instances.find { |i| i.name == instance_name }
+  raise "#{ instance_name } couldn't be found!" unless instance
 
-Then /^A new device file should have been created on the instance with floating IP (.+)$/ do |floating_ip|
-  row        = @current_page.floating_ip_row( id: floating_ip )
-  ip_address = row.find('.public-ip').text
+  #Reboot instance to make sure it has an external ip address
+  if instance.addresses.first[1].count  < 2
+    instance = ComputeService.session.ensure_instance_is_rebooted_and_active(project, instance)
+  end
+
+  raise "Couldn't find public ip for instance '#{ instance_name }'!" unless instance.addresses.first[1].count > 1
+end
+
+
+Step /^Connect to the instance named (.+) in project (.+) via (SSH|RDP)$/ do |instance_name, project_name, remote_client|
+  row         = @current_page.associated_floating_ip_row( name: instance_name )
+  ip_address  = row.find('.public-ip').text
   raise "No public IP found for instance!" if ip_address.empty?
 
-  # Parse the image name from the instance column value
-  instance_name = row.find('.instance').text
-  image_name    = instance_name.scan(/\((.+)\)/).flatten.first
+  project     = IdentityService.session.tenants.find { |p| p.name == project_name }
+  raise "#{ project_name } couldn't be found!" unless project
 
-  username = ServerConfigFile.username(image_name)
-  password = ServerConfigFile.password(image_name)
-  changed_device_file_list = []
+  ComputeService.session.set_tenant project
+  instance    = ComputeService.session.instances.find { |i| i.name == instance_name }
+  raise "Instance #{ instance_name } couldn't be found!" unless instance
 
-  begin
-    Net::SSH.start(ip_address, username, password: password, port: 2222, timeout: 10) do |ssh|
-      changed_device_file_list = ssh.exec!('ls -1 /dev/vc*').split
-    end
+  image       = ImageService.session.images.find { |i| i.id == instance.image['id'] }
+  raise "Couldn't find image for instance #{ instance_name }!" unless image
+  image_name  = image.name
 
-    if (changed_device_file_list - @device_file_list).count != 1
-      raise "Cannot ensure that a new device file has been created on the instance. " +
-            "Expected count is #{ @device_file_list.count + 1 }. " +
-            "Current count is #{ changed_device_file_list.count }."
-    end
-  rescue
-    raise "Cannot fetch list of device files from #{ ip_address }."
-  end
+  username    = ServerConfigFile.username(image_name)
+
+  remote_client_connection( remote_client, ip_address, username )
+end
+
+
+Step /^Ensure that a keypair named (.+) exists$/ do |keypair_name|
+  ComputeService.session.ensure_keypair_exists keypair_name
+end
+
+Step /^Ensure that the user with credentials (.+)\/(.+) has a keypair named (.+)$/ do |username, password, key_name|
+  ComputeService.session.ensure_keypair_exists(key_name, username, password)
 end

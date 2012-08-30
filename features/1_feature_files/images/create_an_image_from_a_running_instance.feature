@@ -1,4 +1,4 @@
-@jira-MCF-10
+@jira-MCF-10 @pending @images
 Feature: Create an Image from a Running Instance
   As a user, I want to create an image from a running instance, so that I can
   easily create one or more exact copies of the instance.

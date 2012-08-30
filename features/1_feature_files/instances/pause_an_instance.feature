@@ -1,4 +1,4 @@
-@jira-MCF-16
+@jira-MCF-16 @instances
 Feature: Pause an Instance
   As a user, I want to pause an instance so that I can do maintenance work on it
 
@@ -24,5 +24,5 @@ Feature: Pause an Instance
 
   Scenario: Pause an Instance
     Given I am authorized to pause instances in the project
-     Then I can pause the instance in the project
-      And I cannot connect to that instance via SSH
+     Then I Can Pause the instance in the project
+      And I cannot assign a floating IP to that instance

@@ -1,3 +1,4 @@
+@jira-MCF-40 @format-v2 @volumes
 Feature: Delete a volume
   As an authorized user, I want to delete a volume on the storage node so that
   I can free up resources.
@@ -9,27 +10,14 @@ Feature: Delete a volume
   instances, you will have to use an NFS or SAMBA share from an existing
   instance.
 
-  Background:
-    * A project exists in the system
-    * The project has a volume
-
-
   @permissions
-  Scenario Outline: Check User Permissions
-    Given I have a role of <Role> in the project
-     Then I <Can or Cannot Delete> a volume in the project
+  Scenario Outline:
+    * A user with a role of <Role> in a project <Can or Cannot Delete> any of its volumes
 
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Delete |
-        | Member          | Can Delete           |
-        | Admin           | Can Delete           |
+        | System Admin    | Can Delete           |
+        | Project Manager | Can Delete           |
 
-      Scenarios: Unauthorized Roles
-        | Role            | Can or Cannot Delete |
-        | (None)          | Cannot Delete        |
-
-
-  Scenario: Delete an attached volume
-    Given the project has a running instance
-      And the volume is attached to the instance
-     Then I cannot delete the volume
+  Scenario:
+    * Volumes that are attached to an instance cannot be deleted

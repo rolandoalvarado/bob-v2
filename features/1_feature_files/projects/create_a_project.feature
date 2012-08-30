@@ -1,4 +1,4 @@
-@jira-DPBLOG-9 @jira-MCF-4
+@jira-DPBLOG-9 @jira-MCF-4 @projects
 Feature: Create a Project
   As a user, I want to create a project in mCloud so that I can group my
   resources together and control who has access to them.
@@ -14,7 +14,7 @@ Feature: Create a Project
   API request, Compute attempts to use a project with the same id as the user.
 
 
-  @permissions
+  @permissions @jira-MCF-4-CUP
   Scenario Outline: Check User Permissions
     Given I have a role of <Role> in the system
      Then I <Can or Cannot Create> a project
@@ -22,12 +22,13 @@ Feature: Create a Project
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Create |
         | System Admin    | Can Create           |
+        | Project Manager | Can Create           |
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Create |
-        | User            | Cannot Create        |
+        | Member          | Cannot Create        |
 
-
+  @jira-MCF-4-CAP
   Scenario Outline: Create a Project
     Given I am authorized to create projects
      When I create a project with attributes <Name>, <Description>
@@ -35,7 +36,7 @@ Feature: Create a Project
 
       Scenarios: Valid Values
         | Name            | Description     | Created or Not |
-        | Awesome         | Another project | Created        |
+        | MCF-4-CAP       | Another project | Created        |
 
 
       Scenarios: Invalid Values
@@ -43,6 +44,7 @@ Feature: Create a Project
         | (None)          | Wrong name      | Not Created    | Name is required |
         | Wrong Desc      | (None)          | Not Created    | Description is required |
 
+  @jira-MCF-4-CPT
   Scenario: Create a Project That is Not Accessible to Another User
    Given I am authorized to create projects
      And a user named Arya Stark exists in the system
