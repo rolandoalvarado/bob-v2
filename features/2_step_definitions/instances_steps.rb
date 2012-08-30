@@ -1031,9 +1031,9 @@ TestCase /^A user with a role of (.+) in the project can revert a resized instan
     * Click the Projects link
     * Click the #{ test_project_name } project
 
-    * Click the resize action in the context menu for the instance named #{ test_instance_name }
+    * Click the resize action in the context menu for an instance named #{ test_instance_name } and flavored #{ original_flavor }
 
-    * Drag the instance flavor slider to #{ new_flavor }
+    * Drag the instance flavor slider to the #{ new_flavor }
     * Click the resize instance confirmation button
 
     * The instance named #{ test_instance_name } should be in resizing status
@@ -1145,7 +1145,7 @@ TestCase /^An instance that has been resized by an authorized user can be revert
 
     * Click the resize action in the context menu for the instance named #{ test_instance_name }
 
-    * Drag the instance flavor slider to #{ new_flavor }
+    * Drag the instance flavor slider to the #{ new_flavor }
     * Click the resize instance confirmation button
 
     * The instance named #{ test_instance_name } should be in resizing status
