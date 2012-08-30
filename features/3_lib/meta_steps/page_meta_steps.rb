@@ -753,7 +753,7 @@ Then /^The volume named (.+) should be attached to the instance named (.+)$/ do 
     end
   end
 
-  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+  sleeping(ConfigFile.wait_volume_attach).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
     attachment = @current_page.volume_row(id: volume['id']).find('.attachments').text.to_s.strip
     if attachment != instance_name
       raise "Expected volume #{ volume_name } to be attached to instance #{ instance_name }, " +
