@@ -123,6 +123,12 @@ Step /^A new device file should have been created on the instance named (.+) in 
   private_key = ComputeService.session.private_keys[test_keypair_name]
   raise "Couldn't find private key for keypair '#{ test_keypair_name }'!" unless private_key
 
+  if instance.addresses.first[1].count  < 2
+    instance = ComputeService.session.ensure_instance_is_rebooted_and_active(project, instance)
+  end
+
+  raise "Couldn't find public ip for instance '#{ instance_name }'!" unless instance.addresses.first[1].count > 1
+
   begin
     Net::SSH.start(ip_address, username, port: 22, timeout: 30, key_data: [ private_key ]) do |ssh|
       # Get a list of all device /dev/vd* files modified/created from x minutes ago
@@ -136,6 +142,21 @@ Step /^A new device file should have been created on the instance named (.+) in 
     raise "Cannot fetch list of device files from #{ ip_address }. " +
           "The error returned was: #{ e.inspect }"
   end
+end
+
+Step /^Ensure the instance named (.+) in project (.+) has an accessible public ip$/ do |instance_name, project_name|
+  project    = IdentityService.session.tenants.find { |i| i.name == project_name }
+  raise "#{ project_name } couldn't be found!" unless project
+  ComputeService.session.set_tenant project
+  instance   = ComputeService.session.instances.find { |i| i.name == instance_name }
+  raise "#{ instance_name } couldn't be found!" unless instance
+
+  #Reboot instance to make sure it has an external ip address
+  if instance.addresses.first[1].count  < 2
+    instance = ComputeService.session.ensure_instance_is_rebooted_and_active(project, instance)
+  end
+
+  raise "Couldn't find public ip for instance '#{ instance_name }'!" unless instance.addresses.first[1].count > 1
 end
 
 

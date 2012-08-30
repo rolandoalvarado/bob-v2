@@ -33,6 +33,5 @@ Feature: Attach a Volume
         | Role            | Can or Cannot Attach |
         | (None)          | Cannot Attach        |
 
-
   Scenario: Attach a Volume
     * Volumes that are attached to an instance will be accessible from the instance
