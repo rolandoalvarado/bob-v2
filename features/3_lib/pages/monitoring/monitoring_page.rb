@@ -6,6 +6,8 @@ class MonitoringPage < SecurePage
   element  "project name",      "div[name='<name>']"
   element  "project details",   "#details_body *[name='<name>']"
   element  "tile",              "#dash_body .block[name='<name>']"
+  element  "graph",             '#graph'
+
 
   graph    'cpu_usage',         '#cpu_usage'
   graph    'network_usage',     '#network_usage'

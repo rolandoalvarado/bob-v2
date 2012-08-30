@@ -152,8 +152,9 @@ class ProjectPage < SecurePage
   #==========================
   # Monitoring-related elements
   #==========================
-  element  "project details",                      xpath: '//*[div[@name="<name>"]]'
-
+  element   "project details",                    xpath: "//*[@id='details_body']//*[div[@name='<name>']]"
+  tile      "project tile",                       xpath: '//*[div[@name="<name>"]]'
+  
   #==========================
   # Instance-related elements
   #==========================
