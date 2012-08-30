@@ -137,6 +137,10 @@ Then /^Click the (.+) action in the context menu for the instance named (.+)$/i 
   sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
     @current_page.instance_menu_button(id: instance_id).click
     @current_page.send("#{ instance_action }_instance_button", id: instance_id).click
+
+    if instance_action == 'resize'
+      raise "Couldn't find resize instance form!" unless @current_page.has_resize_instance_form?
+    end
   end
 end
 
@@ -153,6 +157,30 @@ Then /^Click the (.+) action in the context menu for an instance named (.+) and 
   sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
     @current_page.instance_menu_button(id: instance_id).click
     @current_page.send("#{ instance_action }_instance_button", id: instance_id).click
+
+    if instance_action == 'resize'
+      raise "Couldn't find resize instance form!" unless @current_page.has_resize_instance_form?
+    end
+  end
+end
+
+Then /^Click and confirm the (.+) action in the context menu for the instance named (.+)$/i do |instance_action, instance_name|
+  instance_action = instance_action.split.join('_').downcase
+
+  instance = ComputeService.session.instances.find { |i| i.name == instance_name }
+  raise "Couldn't find instance #{ instance_name }!" unless instance
+  instance_id = instance.id
+
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+    @current_page.instance_menu_button(id: instance_id).click
+
+    @current_page.send("#{ instance_action }_instance_button", id: instance_id).click
+
+    confirm_action = case instance_action
+                     when /delete/  then 'deletion'
+                     when /reboot$/ then 'reboot'
+                     end
+    @current_page.send("confirm_instance_#{ confirm_action }_button").click unless confirm_action.blank?
   end
 end
 
@@ -672,6 +700,20 @@ Then /^The instance named (.+) should be performing task (.+)$/ do |instance_nam
     unless actual_task.include?(task)
       raise "Instance #{ instance_name } is not shown as performing task #{ task }. " +
             "It is currently #{ actual_task }."
+    end
+  end
+end
+
+Then /^The instance named (.+) should be idle$/ do |instance_name|
+  # TODO To prevent conflict with other instance steps, temporarily forgo changing the selector,
+  # and instead finding it directly from the page object.
+  selector = "//*[@id='instances-list']//*[contains(@class, 'name') and contains(text(), \"#{ instance_name }\")]/.."
+  row = @current_page.find_by_xpath(selector)
+
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+    actual_task = row.find('.task').text.to_s.strip
+    unless actual_task.blank? || actual_task =~ /none/i
+      raise "Instance #{ instance_name } is not idle. It is currently #{ actual_task }."
     end
   end
 end

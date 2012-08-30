@@ -223,7 +223,7 @@ Then /^Delete the (.+) project$/i do |project_name|
   @current_page.delete_confirmation_button.click
 end
 
-Step /^Ensure that the project named (.+) has (?:an|a) (member|project manager) named (.+)$/ do |project_name, role, username|
+Step /^Ensure that the project named (.+) has (?:an|a) (member|project manager) named (.+)$/i do |project_name, role, username|
   project_name.strip!
   project = IdentityService.session.find_project_by_name(project_name)
   raise "#{ project_name } couldn't be found!" unless project
