@@ -285,11 +285,6 @@ Step /^Click the (attach|delete|detach) button of the volume named (.+)$/i do |b
 
   raise "Couldn't find an available volume named '#{ volume_name }'" unless volume
 
-  if button_name == 'detach'
-    VolumeService.session.reload_volumes
-    volume = VolumeService.session.volumes.find { |v| v['display_name'] == volume_name && v['status'] == 'in-use' }
-  end
-
   button_name = button_name.split.join('_').downcase
   @current_page.send("#{ button_name }_volume_button", id: volume['id']).click
 end
