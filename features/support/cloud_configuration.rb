@@ -37,7 +37,9 @@ module CloudConfiguration
   TIMING               = :timing
   MINUTE               = :seconds
   INSTANCE             = :instance
-  VOLUME               = :volume
+  VOLUME_ATTACH        = :volume_attach
+  VOLUME_DETACH        = :volume_detach
+
   class ConfigFile
     include Singleton
 
@@ -96,11 +98,20 @@ module CloudConfiguration
 
     def self.wait_volume_attach
       self.instance.ensure_repeat_and_wait_key
-      unless self.instance[WAIT][VOLUME]
-        self.instance[WAIT][VOLUME] = 40
+      unless self.instance[WAIT][VOLUME_ATTACH]
+        self.instance[WAIT][VOLUME_ATTACH] = 40
         self.instance.save
       end
-      self.instance[WAIT][VOLUME]
+      self.instance[WAIT][VOLUME_ATTACH]
+    end
+
+    def self.wait_volume_detach
+      self.instance.ensure_repeat_and_wait_key
+      unless self.instance[WAIT][VOLUME_DETACH]
+        self.instance[WAIT][VOLUME_DETACH] = 40
+        self.instance.save
+      end
+      self.instance[WAIT][VOLUME_DETACH]
     end
 
     def self.wait_node
@@ -146,6 +157,15 @@ module CloudConfiguration
         self.instance.save
       end
       self.instance[REPEAT][INSTANCE]
+    end
+
+    def self.repeat_volume_detach
+      self.instance.ensure_repeat_and_wait_key
+      unless self.instance[REPEAT][VOLUME_DETACH]
+        self.instance[REPEAT][VOLUME_DETACH] = 3
+        self.instance.save
+      end
+      self.instance[REPEAT][VOLUME_DETACH]
     end
 
     def self.repeat_short
