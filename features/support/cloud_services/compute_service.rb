@@ -251,12 +251,12 @@ class ComputeService < BaseCloudService
       if desired_count > attached_volumes.count
         (desired_count - attached_volumes.count).times do |i|
           service.attach_volume(non_attached_volumes[i].id, instance.id, '/dev/vdc')
-          sleep(ConfigFile.wait_short)
+          sleep(ConfigFile.attach_volume)
         end
       elsif strict && desired_count < attached_volumes.count
         (attached_volumes.count - desired_count).times do |i|
           service.detach_volume(instance.id, attached_volumes[i].id)
-          sleep(ConfigFile.wait_short)
+          sleep(ConfigFile.detach_volume)
         end
       end
 

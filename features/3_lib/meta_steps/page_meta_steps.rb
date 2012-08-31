@@ -277,7 +277,18 @@ end
 
 Step /^Click the (attach|delete|detach) button of the volume named (.+)$/i do |button_name, volume_name|
   volume = VolumeService.session.volumes.find { |v| v['display_name'] == volume_name && v['status'] == 'available' }
+
+  if button_name == 'detach'
+    VolumeService.session.reload_volumes
+    volume = VolumeService.session.volumes.find { |v| v['display_name'] == volume_name && v['status'] == 'in-use' }
+  end
+
   raise "Couldn't find an available volume named '#{ volume_name }'" unless volume
+
+  if button_name == 'detach'
+    VolumeService.session.reload_volumes
+    volume = VolumeService.session.volumes.find { |v| v['display_name'] == volume_name && v['status'] == 'in-use' }
+  end
 
   button_name = button_name.split.join('_').downcase
   @current_page.send("#{ button_name }_volume_button", id: volume['id']).click
@@ -790,7 +801,7 @@ Then /^The volume named (.+) should not be attached to the instance named (.+)$/
 
   raise "Couldn't find a volume named '#{ volume_name }'" unless volume
 
-  sleeping(1).seconds.between_tries.failing_after(15).tries do
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(15).tries do
     unless @current_page.has_volume_row?(id: volume['id'])
       raise "Could not find row for the volume named #{ volume_name }!"
     end
@@ -802,7 +813,7 @@ Then /^The volume named (.+) should not be attached to the instance named (.+)$/
   end
 end
 
-Step /^The volume named (.+) should not be attached to the instance named (.+) in project (.+)$/ do |volume_name, instance_name, project_name|
+Step /^The volume named (.+) should be detached to the instance named (.+) in project (.+)$/ do |volume_name, instance_name, project_name|
   project = IdentityService.session.find_tenant_by_name(project_name)
   raise "Couldn't find a project named '#{ project_name }'" unless project
 
@@ -814,11 +825,13 @@ Step /^The volume named (.+) should not be attached to the instance named (.+) i
 
   raise "Couldn't find a volume named '#{ volume_name }'" unless volume
 
-  sleeping(1).seconds.between_tries.failing_after(15).tries do
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(15).tries do
     unless @current_page.has_volume_row?(id: volume['id'])
       raise "Could not find row for the volume named #{ volume_name }!"
     end
+  end
 
+  sleeping(ConfigFile.wait_volume_detach).seconds.between_tries.failing_after(ConfigFile.repeat_volume_detach).tries do
     attachment_id = @current_page.volume_row(id: volume['id']).find('.attachments')[:title]
     if attachment_id == instance.id
       raise "Expected volume #{ volume_name } to not be attached to instance #{ instance_name }, but it is."

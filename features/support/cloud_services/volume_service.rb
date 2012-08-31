@@ -53,7 +53,7 @@ class VolumeService < BaseCloudService
         sleep(ConfigFile.wait_short)
       end
 
-      sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_long).tries do
+      sleeping(ConfigFile.wait_volume_detach).seconds.between_tries.failing_after(ConfigFile.repeat_volume_detach).tries do
         reload_volumes
         volume = @volumes.find { |v| v['display_name'] == attrs.name }
         attachment_count = volume['attachments'].count { |a| !a.empty? }
