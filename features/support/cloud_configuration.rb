@@ -50,10 +50,14 @@ module CloudConfiguration
       cloud_credentials[OPENSTACK_USERNAME]
     end
 
+    def self.admin_api_key
+      cloud_credentials[OPENSTACK_API_KEY]
+    end
+
     def self.web_client_url
       self.instance[WEB_CLIENT_HOST]
     end
-  
+
     def self.minute
       self.instance.ensure_repeat_and_wait_key
       unless self.instance[REPEAT][MINUTE]
@@ -62,7 +66,7 @@ module CloudConfiguration
       end
       self.instance[REPEAT][MINUTE]
     end
-    
+
     def self.timing
       self.instance.ensure_repeat_and_wait_key
       unless self.instance[REPEAT][TIMING]
@@ -125,7 +129,7 @@ module CloudConfiguration
       end
       self.instance[WAIT][LONG]
     end
-    
+
     def self.wait_seconds
       self.instance.ensure_repeat_and_wait_key
       unless self.instance[WAIT][WAIT_IN_SECONDS]
@@ -152,7 +156,7 @@ module CloudConfiguration
       end
       self.instance[REPEAT][SHORT]
     end
-    
+
     def self.repeat_timing
       self.instance.ensure_repeat_and_wait_key
       unless self.instance[REPEAT][TIMING]
@@ -161,7 +165,7 @@ module CloudConfiguration
       end
       self.instance[REPEAT][TIMING]
     end
-    
+
     def self.repeat_ten
       self.instance.ensure_repeat_and_wait_key
       unless self.instance[REPEAT][TEN]
@@ -170,7 +174,7 @@ module CloudConfiguration
       end
       self.instance[REPEAT][TEN]
     end
-    
+
     def self.repeat_fifteen
       self.instance.ensure_repeat_and_wait_key
       unless self.instance[REPEAT][FIFTEEN]
@@ -179,7 +183,7 @@ module CloudConfiguration
       end
       self.instance[REPEAT][FIFTEEN]
     end
-    
+
     def self.repeat_twenty
       self.instance.ensure_repeat_and_wait_key
       unless self.instance[REPEAT][TWENTY]
@@ -188,7 +192,7 @@ module CloudConfiguration
       end
       self.instance[REPEAT][TWENTY]
     end
-    
+
     def self.repeat_forty
       self.instance.ensure_repeat_and_wait_key
       unless self.instance[REPEAT][FORTY]
@@ -197,7 +201,7 @@ module CloudConfiguration
       end
       self.instance[REPEAT][FORTY]
     end
-    
+
 
     def self.repeat_long
       self.instance.ensure_repeat_and_wait_key

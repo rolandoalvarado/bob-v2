@@ -8,6 +8,12 @@ Given /^I have a role of (.+) in the system$/ do |role_name|
   }
 end
 
+Given /^a (system admin|project manager|member) is in the system$/i do |role_name|
+  steps %{
+    * Ensure that a #{role_name} is in the system
+  }
+end
+
 Given /^I am an? (System Admin|User)$/ do |role_name|
   steps %{
     * Ensure that I have a role of #{ role_name } in the system
@@ -279,12 +285,7 @@ end
 
 Then /^I can edit a user$/i do
   existing_user = CloudObjectBuilder.attributes_for(:user, :name => Unique.username('existing'), :password => '123qwe')
-  new_attrs     = CloudObjectBuilder.attributes_for(
-                    :user,
-                    :name     => ( Unique.username('NewUser') ),
-                    :email    => ( Unique.email('NewEmail@mail.com') ),
-                    :password => '123qwe'
-                  )
+  new_attrs     = CloudObjectBuilder.attributes_for(:user)
 
   IdentityService.session.ensure_user_does_not_exist(new_attrs)
   @existing_user = IdentityService.session.ensure_user_exists(existing_user)
@@ -296,7 +297,6 @@ Then /^I can edit a user$/i do
 
     * Ensure that a user with username #{ existing_user.name } and password #{ existing_user.password } exists
     * Ensure that a test project is available for use
-    * Ensure that I have a role of Project Manager in the named project
 
     * Click the Logout button if currently logged in
     * Visit the Login page

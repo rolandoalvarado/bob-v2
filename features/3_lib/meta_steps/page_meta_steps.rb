@@ -42,7 +42,7 @@ end
 
 Then /^Choose the (\d+)(?:st|nd|rd|th) item in the (.+) dropdown$/ do |item_number, dropdown_name|
   dropdown_name = dropdown_name.split.join('_').downcase
-  @current_page.send("#{ dropdown_name }_dropdown_items")[item_number.to_i - 1].click
+  @current_page.send("#{ dropdown_name }_dropdown_items")[item_number.to_i - 1].select_option
 end
 
 
@@ -446,12 +446,6 @@ end
 Then /^Fill in the (.+) field with (.+)$/ do |field_name, value|
   value      = value.gsub(/^\([Nn]one\)$/, '')
   field_name = field_name.split.join('_').downcase
-
-  case field_name
-  when 'username'
-    value = Unique.username(value) unless value.empty?
-  end
-
   @current_page.send("#{ field_name }_field").set value
 end
 
@@ -563,7 +557,7 @@ end
 
 Then /^The (.+) table should include the text (.+)$/ do |table_name, text|
   table_name = table_name.split.join('_').downcase
-  
+
   sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_fifteen).tries do
     unless @current_page.send("#{ table_name }_table").has_content?(text)
       raise "Couldn't find the text '#{ text }' in the #{ table_name } table."
@@ -693,7 +687,7 @@ end
 
 Step /^The instance named (.+) should be (?:in|of) (.+) status$/ do |instance_name, expected_status|
   wait_time = ConfigFile.wait_instance_launch + Time.now().to_i
-  
+
   while wait_time >= Time.now().to_i
     selector = "//*[@id='instances-list']//*[contains(@class, 'name') and contains(text(), \"#{ instance_name }\")]/.."
     row      = @current_page.find_by_xpath(selector)
@@ -704,7 +698,7 @@ Step /^The instance named (.+) should be (?:in|of) (.+) status$/ do |instance_na
         break if actual_status == expected_status.upcase.gsub(' ', '_')
         sleep ConfigFile.wait_short
   end
-  
+
   if (wait_time < Time.now().to_i) then
     raise "Instance #{ instance_name } is not or took too long to become #{ expected_status }. " +
       "Current status is #{ actual_status }."
