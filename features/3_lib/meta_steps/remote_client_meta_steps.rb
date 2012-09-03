@@ -187,5 +187,8 @@ Step /^Ensure that a keypair named (.+) exists$/ do |keypair_name|
 end
 
 Step /^Ensure that the user with credentials (.+)\/(.+) has a keypair named (.+)$/ do |username, password, key_name|
-  ComputeService.session.ensure_keypair_exists(key_name, username, password)
+  # Keypairs are user-scoped, thus the need to login to the compute service
+  # with the current user's credentials.
+  ComputeService.session.set_credentials(username, password)
+  ComputeService.session.ensure_keypair_exists(key_name)
 end

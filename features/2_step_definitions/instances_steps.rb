@@ -22,7 +22,8 @@ end
 
 When /^I assign a floating IP to the instance$/ do
 
-  ComputeService.session.ensure_keypair_exists(test_keypair_name, @current_user.name, @current_user.password)
+  ComputeService.session.set_credentials(@current_user.name, @current_user.password)
+  ComputeService.session.ensure_keypair_exists(test_keypair_name)
 
   steps %{
     * Click the logout button if currently logged in
@@ -686,9 +687,10 @@ TestCase /^A user with a role of (.+) in the project can assign a floating IP to
 
   Preconditions %{
     * Ensure that a project named #{ test_project_name } exists
-    * Ensure that the project named #{ test_project_name } has a member named #{ member_username }
-    * Ensure that the project named #{ test_project_name } has an instance named #{ test_instance_name }
+    * Ensure that the project named #{ test_project_name } has a #{ role_name } named #{ member_username }
     * Ensure that a security group rule exists for project #{ test_project_name }
+    * Ensure that the user with credentials #{ member_username }/#{ member_password } has a keypair named #{ test_keypair_name }
+    * Ensure that the project named #{ test_project_name } has an instance with name #{ test_instance_name } and keypair #{ test_keypair_name }
     * Ensure that an instance named #{ test_instance_name } does not have any floating IPs
   }
 
@@ -724,10 +726,10 @@ TestCase /^A user with a role of \(None\) in the project cannot assign a floatin
   Preconditions %{
     * Ensure that a project named #{ test_project_name } exists
     * Ensure that a user named #{ member_username } exists
-    * Ensure that the project named #{ test_project_name } has an instance named #{ test_instance_name }
   }
 
   Cleanup %{
+    * Register the project named #{ test_project_name } for deletion at exit
     * Register the user named #{ member_username } for deletion at exit
   }
 
@@ -896,9 +898,9 @@ TestCase /^An instance is publicly accessible via its assigned floating IP$/ do
   Preconditions %{
     * Ensure that a project named #{ test_project_name } exists
     * Ensure that the project named #{ test_project_name } has a member named #{ member_username }
+    * Ensure that a security group rule exists for project #{ test_project_name }
     * Ensure that the user with credentials #{ member_username }/#{ member_password } has a keypair named #{ test_keypair_name }
     * Ensure that the project named #{ test_project_name } has an instance with name #{ test_instance_name } and keypair #{ test_keypair_name }
-    * Ensure that a security group rule exists for project #{ test_project_name }
     * Ensure that an instance named #{ test_instance_name } does not have any floating IPs
   }
 
@@ -928,7 +930,13 @@ TestCase /^An instance is publicly accessible via its assigned floating IP$/ do
     * The Floating IPs table should have 1 row
     * The Floating IP should be associated to instance #{ test_instance_name }
 
-    * Wait for 5 minutes for floating IP to be associated to the instance
+    * Click the Instances and Volumes tab
+    * Click and confirm the hard reboot action in the context menu for the instance named #{ test_instance_name }
+    * The instance named #{ test_instance_name } should be performing task rebooting
+    * The instance named #{ test_instance_name } should be idle
+    * The instance named #{ test_instance_name } should have a public IP
+
+    * Click the Access Security tab
     * Connect to the instance named #{ test_instance_name } in project #{ test_project_name } via SSH
   }
 
