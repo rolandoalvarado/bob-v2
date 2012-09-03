@@ -779,6 +779,17 @@ Step /^The instance named (.+) should have flavor (.+)$/ do |instance_name, flav
   end
 end
 
+Step /^The instance named (.+) should have a public IP$/ do |instance_name|
+  # TODO To prevent conflict with other instance steps, temporarily forgo changing the selector,
+  # and instead finding it directly from the page object.
+  selector = "//*[@id='instances-list']//*[contains(@class, 'name') and contains(text(), \"#{ instance_name }\")]/.."
+  row = @current_page.find_by_xpath(selector)
+
+  public_ip = row.find('.public-ipaddress')
+  if public_ip.text.to_s.strip.blank?
+    raise "Instance #{ instance_name } does not have a public IP."
+  end
+end
 
 Step /^The item with text (.+) should be default in the (.+) dropdown$/ do |item_text, dropdown_name|
   dropdown_name = dropdown_name.split.join('_').downcase
