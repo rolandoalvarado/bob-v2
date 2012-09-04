@@ -265,6 +265,7 @@ Then /^I [Cc]an [Aa]ssign a floating IP to an instance in the project$/ do
     * Visit the login page
     * Fill in the username field with #{ @current_user.name }
     * Fill in the password field with #{ @current_user.password }
+    * Wait #{ConfigFile.wait_seconds} seconds
     * Click the login button
 
     * Visit the projects page
@@ -273,7 +274,7 @@ Then /^I [Cc]an [Aa]ssign a floating IP to an instance in the project$/ do
     * Click the access security tab
     * Click the new floating IP allocation button
     * Current page should have the new floating IP allocation form
-    * Wait 60 seconds
+    * Wait #{ConfigFile.wait_createinstance} seconds
     * Choose the 1st item in the pool dropdown
     * Choose the 2nd item in the instance dropdown
     * Click the create floating IP allocation button
@@ -452,7 +453,6 @@ Then /^I [Cc]an [Rr]esize (?:that|the) instance$/ do
     * Visit the projects page
     * Click the #{ @project.name } project
 
-    * Wait 90 seconds
     * Click the instance menu button for instance #{ instance.id }
     * Click the resize instance button for instance #{ instance.id }
     * Current page should have the resize instance form
@@ -461,6 +461,8 @@ Then /^I [Cc]an [Rr]esize (?:that|the) instance$/ do
 
     * The instance #{ instance.id } should be in resizing status
     * The instance #{ instance.id } should be performing task resize_prep
+
+    * Wait #{ConfigFile.wait_restart} seconds
 
     * The instance #{ instance.id } should be in active status
     * The instance #{ instance.id } should be performing task resize_verify
