@@ -38,15 +38,11 @@ Feature: Create an Instance
       @jira-MCF-14-CISI
       Scenarios: Specific Images
         | Image                                | Name        | Flavor | Keypair | Security Group | Created or Not |
-        | 64Bit CentOS 5.8 (v1.0.1)            | My Server   | (Any)  | (Any)   | (Any)          | Created        |
-        | 64Bit CentOS 6.2                     | My Server   | (Any)  | (Any)   | (Any)          | Created        |
-        | 64Bit Ubuntu 10.04                   | My Server   | (Any)  | (Any)   | (Any)          | Created        |
         | 64Bit Ubuntu 12.04                   | My Server   | (Any)  | (Any)   | (Any)          | Created        |
 
       @jira-MCF-14-CISF
       Scenarios: Specific Flavors
         | Image  | Name        | Flavor    | Keypair | Security Group | Created or Not |
-        | (Any)  | My Server   | m1.small  | (Any)   | (Any)          | Created        |
         | (Any)  | My Server   | m1.medium | (Any)   | (Any)          | Created        |
         | (Any)  | My Server   | m1.large  | (Any)   | (Any)          | Created        |
         | (Any)  | My Server   | m1.xlarge | (Any)   | (Any)          | Created        |

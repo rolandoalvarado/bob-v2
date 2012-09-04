@@ -37,6 +37,7 @@ module CloudConfiguration
   TIMING               = :timing
   MINUTE               = :seconds
   INSTANCE             = :instance
+  RESTART              = :restart
   VOLUME_ATTACH        = :volume_attach
   VOLUME_DETACH        = :volume_detach
 
@@ -94,6 +95,15 @@ module CloudConfiguration
         self.instance.save
       end
       self.instance[WAIT][INSTANCE]
+    end
+
+    def self.wait_restart
+      self.instance.ensure_repeat_and_wait_key
+      unless self.instance[WAIT][RESTART]
+        self.instance[WAIT][RESTART] = 90
+        self.instance.save
+      end
+      self.instance[WAIT][RESTART]
     end
 
     def self.wait_volume_attach
