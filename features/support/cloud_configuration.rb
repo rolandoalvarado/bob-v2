@@ -37,7 +37,10 @@ module CloudConfiguration
   TIMING               = :timing
   MINUTE               = :seconds
   INSTANCE             = :instance
-  VOLUME               = :volume
+  RESTART              = :restart
+  VOLUME_ATTACH        = :volume_attach
+  VOLUME_DETACH        = :volume_detach
+
   class ConfigFile
     include Singleton
 
@@ -50,10 +53,14 @@ module CloudConfiguration
       cloud_credentials[OPENSTACK_USERNAME]
     end
 
+    def self.admin_api_key
+      cloud_credentials[OPENSTACK_API_KEY]
+    end
+
     def self.web_client_url
       self.instance[WEB_CLIENT_HOST]
     end
-  
+
     def self.minute
       self.instance.ensure_repeat_and_wait_key
       unless self.instance[REPEAT][MINUTE]
@@ -62,7 +69,7 @@ module CloudConfiguration
       end
       self.instance[REPEAT][MINUTE]
     end
-    
+
     def self.timing
       self.instance.ensure_repeat_and_wait_key
       unless self.instance[REPEAT][TIMING]
@@ -90,13 +97,31 @@ module CloudConfiguration
       self.instance[WAIT][INSTANCE]
     end
 
-    def self.wait_volume_attach
+    def self.wait_restart
       self.instance.ensure_repeat_and_wait_key
-      unless self.instance[WAIT][VOLUME]
-        self.instance[WAIT][VOLUME] = 40
+      unless self.instance[WAIT][RESTART]
+        self.instance[WAIT][RESTART] = 90
         self.instance.save
       end
-      self.instance[WAIT][VOLUME]
+      self.instance[WAIT][RESTART]
+    end
+
+    def self.wait_volume_attach
+      self.instance.ensure_repeat_and_wait_key
+      unless self.instance[WAIT][VOLUME_ATTACH]
+        self.instance[WAIT][VOLUME_ATTACH] = 40
+        self.instance.save
+      end
+      self.instance[WAIT][VOLUME_ATTACH]
+    end
+
+    def self.wait_volume_detach
+      self.instance.ensure_repeat_and_wait_key
+      unless self.instance[WAIT][VOLUME_DETACH]
+        self.instance[WAIT][VOLUME_DETACH] = 40
+        self.instance.save
+      end
+      self.instance[WAIT][VOLUME_DETACH]
     end
 
     def self.wait_node
@@ -125,7 +150,7 @@ module CloudConfiguration
       end
       self.instance[WAIT][LONG]
     end
-    
+
     def self.wait_seconds
       self.instance.ensure_repeat_and_wait_key
       unless self.instance[WAIT][WAIT_IN_SECONDS]
@@ -144,6 +169,15 @@ module CloudConfiguration
       self.instance[REPEAT][INSTANCE]
     end
 
+    def self.repeat_volume_detach
+      self.instance.ensure_repeat_and_wait_key
+      unless self.instance[REPEAT][VOLUME_DETACH]
+        self.instance[REPEAT][VOLUME_DETACH] = 3
+        self.instance.save
+      end
+      self.instance[REPEAT][VOLUME_DETACH]
+    end
+
     def self.repeat_short
       self.instance.ensure_repeat_and_wait_key
       unless self.instance[REPEAT][SHORT]
@@ -152,7 +186,7 @@ module CloudConfiguration
       end
       self.instance[REPEAT][SHORT]
     end
-    
+
     def self.repeat_timing
       self.instance.ensure_repeat_and_wait_key
       unless self.instance[REPEAT][TIMING]
@@ -161,7 +195,7 @@ module CloudConfiguration
       end
       self.instance[REPEAT][TIMING]
     end
-    
+
     def self.repeat_ten
       self.instance.ensure_repeat_and_wait_key
       unless self.instance[REPEAT][TEN]
@@ -170,7 +204,7 @@ module CloudConfiguration
       end
       self.instance[REPEAT][TEN]
     end
-    
+
     def self.repeat_fifteen
       self.instance.ensure_repeat_and_wait_key
       unless self.instance[REPEAT][FIFTEEN]
@@ -179,7 +213,7 @@ module CloudConfiguration
       end
       self.instance[REPEAT][FIFTEEN]
     end
-    
+
     def self.repeat_twenty
       self.instance.ensure_repeat_and_wait_key
       unless self.instance[REPEAT][TWENTY]
@@ -188,7 +222,7 @@ module CloudConfiguration
       end
       self.instance[REPEAT][TWENTY]
     end
-    
+
     def self.repeat_forty
       self.instance.ensure_repeat_and_wait_key
       unless self.instance[REPEAT][FORTY]
@@ -197,7 +231,7 @@ module CloudConfiguration
       end
       self.instance[REPEAT][FORTY]
     end
-    
+
 
     def self.repeat_long
       self.instance.ensure_repeat_and_wait_key

@@ -22,14 +22,10 @@ Then /^Ensure that the user (.+) has a role of (.+) in the system$/i do |user_na
 end
 
 Then /^Ensure that I have a role of (.+) in the system$/i do |role_name|
-
-  user_attrs       = CloudObjectBuilder.attributes_for(
-                       :user,
-                       :name => Unique.username('bob')
-                     )
+  user_attrs = CloudObjectBuilder.attributes_for(:user, name: Unique.username('bob'))
   identity_service = IdentityService.session
 
-  user             = identity_service.ensure_user_exists(user_attrs)
+  user = identity_service.ensure_user_exists(user_attrs)
   EnvironmentCleaner.register(:user, user.id)
 
   admin_project = identity_service.tenants.find { |t| t.name == 'admin' }
@@ -54,6 +50,17 @@ Then /^Ensure that I have a role of (.+) in the system$/i do |role_name|
   @current_user = user
 end
 
+Given /^Ensure that a (.*) is in the system$/i do |role_name|
+  role_name = role_name.downcase.strip.gsub(' ', '_')
+
+  @users ||= Hash.new
+  if @current_user = @users[role_name]
+    @current_user
+  else
+    @current_user = @users[role_name] =
+      IdentityService.session.get_generic_user(role_name)
+  end
+end
 
 Step /^Ensure that the user (.+) has a role of (.+) in the project (.+)$/ do |username, role_name, project_name|
   user_attrs       = CloudObjectBuilder.attributes_for( :user, :name => Unique.username(username) )

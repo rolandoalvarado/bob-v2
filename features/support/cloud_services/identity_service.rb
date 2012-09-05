@@ -156,10 +156,16 @@ class IdentityService < BaseCloudService
 
   def ensure_user_exists(attributes)
     user = find_user_by_name(attributes[:name])
-    user = create_user(attributes) unless user
-    user.password = attributes[:password]
-    user.update(attributes)
+    unless user
+      user = create_user(attributes) 
+    else
+      if attributes[:password] != nil && user.password != attributes[:password]
+        user.password = attributes[:password]
+        user.update_password(attributes[:password])
+      end
+    end
     user
+
   end
 
   def ensure_user_exists_in_project(attributes, project, admin_role = false)
@@ -198,6 +204,24 @@ class IdentityService < BaseCloudService
     sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_long).tries do
       raise "Roles for user #{ user.name } on tenant #{ tenant.name } took too long to revoke!" if user.roles(tenant.id).length > 0
     end
+  end
+
+  def get_generic_user(role)
+    if role.eql?('system_admin')
+      user = ensure_user_exists({ :name => ConfigFile.admin_username })
+      user.password = ConfigFile.admin_api_key
+    else
+      project = find_project_by_name(default_project_name)
+      unless project
+        project = ensure_tenant_exists(:name => default_project_name)
+      end
+
+      user_attrs       = CloudObjectBuilder.attributes_for(:user, :name => Unique.username(role, 32), :project_id => project.id)
+      user             = ensure_user_exists_in_project(user_attrs, project, admin_role?(role))
+      EnvironmentCleaner.register(:user, user.id)
+    end
+
+    user
   end
 
   #================================================

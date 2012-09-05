@@ -54,6 +54,9 @@ class EnvironmentCleaner
   def delete_test_objects
     if registry.count > 0
       puts "Deleting test objects (Cancel with Ctrl-C)"
+      IdentityService.session.reset_credentials
+      ComputeService.session.reset_credentials
+      VolumeService.session.reset_credentials
       delete_test_projects
       delete_test_users
     else

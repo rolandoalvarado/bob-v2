@@ -2,8 +2,8 @@ require_relative 'base_cloud_service'
 
 class ComputeService < BaseCloudService
 
-  attr_reader :addresses, :flavors, :instances, :security_groups, :volumes, :current_project,
-    :images, :key_pairs
+  attr_reader :addresses, :flavors, :instances, :security_groups, :volumes,
+    :images, :key_pairs, :current_project, :current_user
   attr_accessor :private_keys
 
   def initialize
@@ -251,12 +251,12 @@ class ComputeService < BaseCloudService
       if desired_count > attached_volumes.count
         (desired_count - attached_volumes.count).times do |i|
           service.attach_volume(non_attached_volumes[i].id, instance.id, '/dev/vdc')
-          sleep(ConfigFile.wait_short)
+          sleep(ConfigFile.attach_volume)
         end
       elsif strict && desired_count < attached_volumes.count
         (attached_volumes.count - desired_count).times do |i|
           service.detach_volume(instance.id, attached_volumes[i].id)
-          sleep(ConfigFile.wait_short)
+          sleep(ConfigFile.detach_volume)
         end
       end
 
@@ -272,23 +272,15 @@ class ComputeService < BaseCloudService
     end
   end
 
-  def ensure_keypair_exists(key_name, username='', password='')
-    # Keypairs are user-scoped, thus the need to login to the compute service
-    # with the current user's credentials.
-    unless username.blank? || password.blank?
-      credentials = ConfigFile.cloud_credentials.merge(
-        openstack_username: username, openstack_api_key: password)
-      user_service = Fog::Compute.new(credentials)
-    else
-      user_service = service
+  def ensure_keypair_exists(key_name)
+    keypairs = service.key_pairs
+    if keypair = keypairs.find { |k| k.name == key_name }
+      keypair.destroy
+      sleep(1)
     end
 
-    keypairs = user_service.key_pairs.reload
-    if keypair = keypairs.find { |keypair| keypair.name == key_name }
-      keypair.destroy
-    end
-    response = user_service.create_key_pair(key_name)
-    private_keys[key_name] = response.body['keypair']['private_key']
+    response = service.create_key_pair(key_name)
+    @private_keys[key_name] = response.body['keypair']['private_key']
 
     return keypairs.reload.find { |keypair| keypair.name == key_name }
   rescue => e

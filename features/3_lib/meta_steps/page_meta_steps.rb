@@ -42,7 +42,7 @@ end
 
 Then /^Choose the (\d+)(?:st|nd|rd|th) item in the (.+) dropdown$/ do |item_number, dropdown_name|
   dropdown_name = dropdown_name.split.join('_').downcase
-  @current_page.send("#{ dropdown_name }_dropdown_items")[item_number.to_i - 1].click
+  @current_page.send("#{ dropdown_name }_dropdown_items")[item_number.to_i - 1].select_option
 end
 
 
@@ -137,6 +137,10 @@ Then /^Click the (.+) action in the context menu for the instance named (.+)$/i 
   sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
     @current_page.instance_menu_button(id: instance_id).click
     @current_page.send("#{ instance_action }_instance_button", id: instance_id).click
+
+    if instance_action == 'resize'
+      raise "Couldn't find resize instance form!" unless @current_page.has_resize_instance_form?
+    end
   end
 end
 
@@ -153,6 +157,30 @@ Then /^Click the (.+) action in the context menu for an instance named (.+) and 
   sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
     @current_page.instance_menu_button(id: instance_id).click
     @current_page.send("#{ instance_action }_instance_button", id: instance_id).click
+
+    if instance_action == 'resize'
+      raise "Couldn't find resize instance form!" unless @current_page.has_resize_instance_form?
+    end
+  end
+end
+
+Then /^Click and confirm the (.+) action in the context menu for the instance named (.+)$/i do |instance_action, instance_name|
+  instance_action = instance_action.split.join('_').downcase
+
+  instance = ComputeService.session.instances.find { |i| i.name == instance_name }
+  raise "Couldn't find instance #{ instance_name }!" unless instance
+  instance_id = instance.id
+
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+    @current_page.instance_menu_button(id: instance_id).click
+
+    @current_page.send("#{ instance_action }_instance_button", id: instance_id).click
+
+    confirm_action = case instance_action
+                     when /delete/  then 'deletion'
+                     when /reboot$/ then 'reboot'
+                     end
+    @current_page.send("confirm_instance_#{ confirm_action }_button").click unless confirm_action.blank?
   end
 end
 
@@ -277,6 +305,12 @@ end
 
 Step /^Click the (attach|delete|detach) button of the volume named (.+)$/i do |button_name, volume_name|
   volume = VolumeService.session.volumes.find { |v| v['display_name'] == volume_name && v['status'] == 'available' }
+
+  if button_name == 'detach'
+    VolumeService.session.reload_volumes
+    volume = VolumeService.session.volumes.find { |v| v['display_name'] == volume_name && v['status'] == 'in-use' }
+  end
+
   raise "Couldn't find an available volume named '#{ volume_name }'" unless volume
 
   button_name = button_name.split.join('_').downcase
@@ -446,12 +480,6 @@ end
 Then /^Fill in the (.+) field with (.+)$/ do |field_name, value|
   value      = value.gsub(/^\([Nn]one\)$/, '')
   field_name = field_name.split.join('_').downcase
-
-  case field_name
-  when 'username'
-    value = Unique.username(value) unless value.empty?
-  end
-
   @current_page.send("#{ field_name }_field").set value
 end
 
@@ -563,7 +591,7 @@ end
 
 Then /^The (.+) table should include the text (.+)$/ do |table_name, text|
   table_name = table_name.split.join('_').downcase
-  
+
   sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_fifteen).tries do
     unless @current_page.send("#{ table_name }_table").has_content?(text)
       raise "Couldn't find the text '#{ text }' in the #{ table_name } table."
@@ -676,6 +704,20 @@ Then /^The instance named (.+) should be performing task (.+)$/ do |instance_nam
   end
 end
 
+Then /^The instance named (.+) should be idle$/ do |instance_name|
+  # TODO To prevent conflict with other instance steps, temporarily forgo changing the selector,
+  # and instead finding it directly from the page object.
+  selector = "//*[@id='instances-list']//*[contains(@class, 'name') and contains(text(), \"#{ instance_name }\")]/.."
+  row = @current_page.find_by_xpath(selector)
+
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+    actual_task = row.find('.task').text.to_s.strip
+    unless actual_task.blank? || actual_task =~ /none/i
+      raise "Instance #{ instance_name } is not idle. It is currently #{ actual_task }."
+    end
+  end
+end
+
 
 Then /^The instance ((?:(?!named )).+) should be (?:in|of) (.+) status$/ do |instance_id, status|
   row = @current_page.instance_row( id: instance_id )
@@ -693,7 +735,7 @@ end
 
 Step /^The instance named (.+) should be (?:in|of) (.+) status$/ do |instance_name, expected_status|
   wait_time = ConfigFile.wait_instance_launch + Time.now().to_i
-  
+
   while wait_time >= Time.now().to_i
     selector = "//*[@id='instances-list']//*[contains(@class, 'name') and contains(text(), \"#{ instance_name }\")]/.."
     row      = @current_page.find_by_xpath(selector)
@@ -704,7 +746,7 @@ Step /^The instance named (.+) should be (?:in|of) (.+) status$/ do |instance_na
         break if actual_status == expected_status.upcase.gsub(' ', '_')
         sleep ConfigFile.wait_short
   end
-  
+
   if (wait_time < Time.now().to_i) then
     raise "Instance #{ instance_name } is not or took too long to become #{ expected_status }. " +
       "Current status is #{ actual_status }."
@@ -737,6 +779,17 @@ Step /^The instance named (.+) should have flavor (.+)$/ do |instance_name, flav
   end
 end
 
+Step /^The instance named (.+) should have a public IP$/ do |instance_name|
+  # TODO To prevent conflict with other instance steps, temporarily forgo changing the selector,
+  # and instead finding it directly from the page object.
+  selector = "//*[@id='instances-list']//*[contains(@class, 'name') and contains(text(), \"#{ instance_name }\")]/.."
+  row = @current_page.find_by_xpath(selector)
+
+  public_ip = row.find('.public-ipaddress')
+  if public_ip.text.to_s.strip.blank?
+    raise "Instance #{ instance_name } does not have a public IP."
+  end
+end
 
 Step /^The item with text (.+) should be default in the (.+) dropdown$/ do |item_text, dropdown_name|
   dropdown_name = dropdown_name.split.join('_').downcase
@@ -796,7 +849,7 @@ Then /^The volume named (.+) should not be attached to the instance named (.+)$/
 
   raise "Couldn't find a volume named '#{ volume_name }'" unless volume
 
-  sleeping(1).seconds.between_tries.failing_after(15).tries do
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(15).tries do
     unless @current_page.has_volume_row?(id: volume['id'])
       raise "Could not find row for the volume named #{ volume_name }!"
     end
@@ -808,7 +861,7 @@ Then /^The volume named (.+) should not be attached to the instance named (.+)$/
   end
 end
 
-Step /^The volume named (.+) should not be attached to the instance named (.+) in project (.+)$/ do |volume_name, instance_name, project_name|
+Step /^The volume named (.+) should be detached to the instance named (.+) in project (.+)$/ do |volume_name, instance_name, project_name|
   project = IdentityService.session.find_tenant_by_name(project_name)
   raise "Couldn't find a project named '#{ project_name }'" unless project
 
@@ -820,11 +873,13 @@ Step /^The volume named (.+) should not be attached to the instance named (.+) i
 
   raise "Couldn't find a volume named '#{ volume_name }'" unless volume
 
-  sleeping(1).seconds.between_tries.failing_after(15).tries do
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(15).tries do
     unless @current_page.has_volume_row?(id: volume['id'])
       raise "Could not find row for the volume named #{ volume_name }!"
     end
+  end
 
+  sleeping(ConfigFile.wait_volume_detach).seconds.between_tries.failing_after(ConfigFile.repeat_volume_detach).tries do
     attachment_id = @current_page.volume_row(id: volume['id']).find('.attachments')[:title]
     if attachment_id == instance.id
       raise "Expected volume #{ volume_name } to not be attached to instance #{ instance_name }, but it is."
