@@ -1166,3 +1166,37 @@ TestCase /^An instance that has been resized by an authorized user can be revert
   }
 
 end
+
+TestCase /^An instance deleted by an authorized user should not be visible$/i do
+
+  Preconditions %{
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that the project named #{ test_project_name } has an active instance named #{ test_instance_name }
+    * Ensure that the user #{ bob_username } has a role of Project Manager in the project #{ test_project_name }
+  }
+
+  Cleanup %{
+    * Register the project named #{ test_project_name } for deletion at exit
+    * Register the user named #{ bob_username } for deletion at exit
+  }
+
+  Script %{
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ bob_username }
+    * Fill in the Password field with #{ bob_password }
+    * Click the Login button
+
+    * Click the Projects link
+    * Click the #{ test_project_name } project
+
+    * The instance named #{ test_instance_name } should be in active status
+
+    * Click the delete action in the context menu for the instance named #{ test_instance_name }
+    * Click the confirm instance deletion button
+
+    * The instance named #{ test_instance_name } should not be visible
+  }
+
+end

@@ -14,3 +14,6 @@ Feature: Delete an Instance
         | Role            | Can or Cannot Delete |
         | Member          | Can Delete           |
         | Project Manager | Can Delete           |
+
+  Scenario: Delete an Instance
+    * An instance deleted by an authorized user should not be visible
