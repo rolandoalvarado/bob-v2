@@ -11,14 +11,12 @@ Feature: Delete a Security Group
 
   Background:
     * A project exists in the system
-    * The project has 2 security groups named default, and Web Servers
-    * Ensure that a user exists in the project
-
+    * Ensure that a security group exist
+      
   @permissions
   Scenario Outline: Check User Permissions
     Given I have a role of <Role> in the project
-      And the instance is a member of the default security group
-     Then I <Can or Cannot Delete> the Web Servers security group in the project
+     Then I <Can or Cannot Delete> a security group in the project
 
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Delete |
@@ -29,8 +27,8 @@ Feature: Delete a Security Group
         | Role            | Can or Cannot Delete |
         | (None)          | Cannot Delete        |
 
-
+  @jira-MCF-33-DSG
   Scenario: Delete a Security Group That's in Use
     Given I am authorized to delete security groups in the project
-      And the instance is a member of the Web Servers security group
-     Then I Cannot Delete the Web Servers security group
+      And the security group is still in use by an instance
+     Then I Cannot Delete the security group

@@ -62,9 +62,9 @@ Given /^I am authorized to delete security groups in the project$/ do
   }
 end
 
-Given /^the instance is a member of the (.+) security group$/ do |security_group|
+Given /^the security group is still in use by an instance$/ do
   steps %{
-    * Ensure that the instance is a member of the #{security_group} security group
+    * Ensure that the instance is a member of the security group
   }
 end
 
@@ -249,7 +249,7 @@ Then /^I [Cc]an [Ee]dit a security group in the project$/ do
   }
 end
 
-Then /^I [Cc]an Delete the Web Servers security group in the project$/ do
+Then /^I [Cc]an Delete a security group in the project$/ do
   steps %{
     * Click the logout button if currently logged in
 
@@ -264,10 +264,10 @@ Then /^I [Cc]an Delete the Web Servers security group in the project$/ do
     * Wait 2 seconds
 
     * Click the access security tab
-    * Click the context menu button for security group #{ @new_security_group.id }
-    * Click the delete security group button for security group #{ @new_security_group.id }
+    * Click the context menu button for security group #{ @security_group.id }
+    * Click the delete security group button for security group #{ @security_group.id }
     * Click the confirm security group deletion button
-    * The #{@new_security_group.name} security group should not be visible
+    * The #{@security_group.name} security group should not be visible
   }
 end
 
@@ -299,7 +299,7 @@ Then /^I [Cc]annot [Ee]dit a security group in the project$/ do
   }
 end
 
-Then /^I Cannot Delete the Web Servers security group in the project$/ do
+Then /^I Cannot Delete a security group in the project$/ do
   steps %{
     * Click the logout button if currently logged in
 
@@ -313,16 +313,7 @@ Then /^I Cannot Delete the Web Servers security group in the project$/ do
   }
 end
 
-Then /^I Cannot Delete the (.+) security group$/ do |sec_group|
-  compute_service = ComputeService.session
-  compute_service.set_tenant(@project)
-  security_groups = compute_service.security_groups
-  security_groups.each do |sg|
-    if(sg.name.match Regexp.new(sec_group))
-      @delete_security_group = sg
-    end
-  end
-
+Then /^I Cannot Delete the security group$/ do
   steps %{
     * Click the logout button if currently logged in
 
@@ -337,10 +328,10 @@ Then /^I Cannot Delete the (.+) security group$/ do |sec_group|
     * Wait 2 seconds
 
     * Click the access security tab
-    * Click the context menu button for security group #{ @delete_security_group.id }
-    * Click the delete security group button for security group #{ @delete_security_group.id }
+    * Click the context menu button for security group #{ @security_group.id }
+    * Click the delete security group button for security group #{ @security_group.id }
     * Click the confirm security group deletion button
-    * The #{@delete_security_group.name} security group row should be visible
+    * Current page should still have the security groups
   }
 end
 

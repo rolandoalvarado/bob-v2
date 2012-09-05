@@ -80,6 +80,7 @@ class ProjectPage < SecurePage
   field     'security group description',         "#new-security-description"
   button    'create security',                    "#create-security-group"
   message   'new security group form error',      "span.error[for='new-security-name'], span.error[for='new-security-description']"
+  message   'security group error',               '#alert-template .alert-error'
   span      'new security group form error',      "span.error[for='new-security-name'], span.error[for='new-security-description']"
   element   'security group form error message',  "#security-group-rules-form .error"
 

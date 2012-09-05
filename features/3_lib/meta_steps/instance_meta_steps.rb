@@ -3,6 +3,10 @@ Then /^Ensure that the instance is a member of the (.+) security group$/ do |sec
   compute_service.ensure_active_instance_count(@project, 1, true, {:security_group => security_group})
 end
 
+Step /^Ensure that the instance is a member of the security group$/ do
+  compute_service = ComputeService.session
+  compute_service.ensure_active_instance_count(@project, 1, true, {:security_group => test_security_group_name })
+end
 
 Step /^Ensure that the project named (.+) has an instance named (.+)$/ do |project_name, instance_name|
   project = IdentityService.session.find_project_by_name(project_name)

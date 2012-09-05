@@ -68,7 +68,7 @@ Given /^I have a role of (.+) in the project$/ do |role_name|
   
   user_attrs       = CloudObjectBuilder.attributes_for(
                        :user,
-                       :name => Unique.username('bob')
+                       :name => bob_username
                      )
 
   identity_service = IdentityService.session

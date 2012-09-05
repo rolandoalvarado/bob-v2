@@ -165,7 +165,6 @@ class IdentityService < BaseCloudService
       end
     end
     user
-
   end
 
   def ensure_user_exists_in_project(attributes, project, admin_role = false)
