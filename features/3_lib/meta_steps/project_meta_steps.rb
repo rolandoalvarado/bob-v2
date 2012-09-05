@@ -129,8 +129,14 @@ Then /^Ensure that I have a role of (.+) in the project$/i do |role_name|
           "before this step."
   end
 
+  user_attrs       = CloudObjectBuilder.attributes_for(
+                       :user,
+                       :name => bob_username
+                     )
+
   identity_service = IdentityService.session
-  user             = @current_user
+  user             = identity_service.ensure_user_exists(user_attrs)
+  EnvironmentCleaner.register(:user, user.id)
 
   identity_service.revoke_all_user_roles(user, @project)
 
@@ -151,6 +157,8 @@ Then /^Ensure that I have a role of (.+) in the project$/i do |role_name|
     end
   end
 
+  # Make variable(s) available for use in succeeding steps
+  @current_user = user
 end
 
 Then /^Ensure that the project has no security groups$/i do
