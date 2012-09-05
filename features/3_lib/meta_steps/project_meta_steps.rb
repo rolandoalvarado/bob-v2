@@ -110,15 +110,13 @@ Step /^Ensure that a user exists in the project$/ do
                        :user,
                        :name => bob_username
                      )
-  identity_service = IdentityService.session
-
-  user             = identity_service.ensure_user_exists(user_attrs)
-
+  user             = IdentityService.session.ensure_user_exists_in_project(user_attrs, @project)
+  # Check if user is nil, then raise error message.
   if user.nil? or user.id.empty?
     raise "User couldn't be initialized!"
   end
+  # Register user for deletion.
   EnvironmentCleaner.register(:user, user.id)
-
   # Make variable(s) available for use in succeeding steps
   @current_user = user
 end
