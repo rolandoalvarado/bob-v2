@@ -180,10 +180,9 @@ module CloudConfiguration
     end
 
     def self.repeat_instance_delete
-      repeat = 6
       self.instance.ensure_repeat_and_wait_key
-      unless self.instance[REPEAT][INSTANCE_DELETE] === repeat
-        self.instance[REPEAT][INSTANCE_DELETE] = repeat
+      unless self.instance[REPEAT][INSTANCE_DELETE]
+        self.instance[REPEAT][INSTANCE_DELETE] = 6
         self.instance.save
       end
       self.instance[REPEAT][INSTANCE_DELETE]
