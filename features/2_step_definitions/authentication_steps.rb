@@ -5,7 +5,7 @@ Then /^If my username is (.+) and my password is (.+), I can log in with the fol
 
     * Click the Logout button if currently logged in
     * Visit the login page
-    * Fill in the username field with #{ typed_username }
+    * Fill in the username field with #{ Unique.username(typed_username) }
     * Fill in the password field with #{ typed_password }
     * Click the login button
 
@@ -21,7 +21,7 @@ Then /^If my username is (.+) and my password is (.+), I cannot log in with the 
 
     * Click the Logout button if currently logged in
     * Visit the login page
-    * Fill in the username field with #{ typed_username }
+    * Fill in the username field with #{ Unique.username(typed_username) }
     * Fill in the password field with #{ typed_password }
     * Click the login button
 
