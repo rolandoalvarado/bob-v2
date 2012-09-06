@@ -477,9 +477,6 @@ Then /^I [Cc]an [Rr]esume the instance$/ do
 end
 
 Then /^I [Cc]an [Ss]uspend (?:an|the) instance(?:| in the project)$/ do
-  compute_service = ComputeService.session
-  compute_service.set_tenant @project
-
   steps %{
     * Click the logout button if currently logged in
 
@@ -494,7 +491,7 @@ Then /^I [Cc]an [Ss]uspend (?:an|the) instance(?:| in the project)$/ do
     * Click the instance menu button for instance #{ @instance.id }
     * Click the suspend instance button for instance #{ @instance.id }
 
-    * Wait 90 seconds
+    * Wait #{ConfigFile.wait_restart} seconds
     * The instance #{ @instance.id } should be in suspended status
   }
 
