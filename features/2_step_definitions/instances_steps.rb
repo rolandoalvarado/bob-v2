@@ -463,7 +463,7 @@ Then /^I [Cc]an [Rr]esume the instance$/ do
     * Click the instance menu button for instance #{ @instance.id }
     * Click the resume instance button for instance #{ @instance.id }
 
-     * Wait #{ConfigFile.minute} seconds
+     * Wait #{ConfigFile.wait_instance_resume} seconds
     * The instance #{ @instance.id } should be of active status
   }
 end
