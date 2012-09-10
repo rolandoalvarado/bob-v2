@@ -18,7 +18,6 @@ Feature: Create a Security Group
   Background:
     * A project exists in the system
     * Ensure that the project has no security groups
-    * Ensure that a user exists in the project
 
 
   @permissions @jira-MCF-32-cup

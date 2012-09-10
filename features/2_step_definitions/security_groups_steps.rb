@@ -371,7 +371,7 @@ end
 
 Then /^The (.+) security group row should be visible$/ do |security_group|
   steps %{
-    * Ensure that #{security_group} security group exist
+    * Ensure that a security group named #{security_group} exist
   }
 end
 
