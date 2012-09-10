@@ -275,11 +275,11 @@ Then /^I [Cc]an [Cc]reate a clone of the volume snapshot$/ do
     * Visit the projects page
     * Click the #{ @project.name } project
 
-    * Wait 5 seconds
+    * Wait 10 seconds
 
     * Click the snapshots tab
 
-    * Wait 5 seconds
+    * Wait 10 seconds
 
     * Click the clone volume snapshot button for volume snapshot named #{ snapshot["display_name"] }
     * Current page should have the new volume form
@@ -287,7 +287,7 @@ Then /^I [Cc]an [Cc]reate a clone of the volume snapshot$/ do
     * Fill in the volume description field with #{ attrs.description }
     * Click the create volume button
 
-    * Wait 5 seconds
+    * Wait 10 seconds
 
     * Click the volumes tab
     * The volumes table should have a row for the volume named #{ attrs.name }
