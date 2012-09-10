@@ -791,6 +791,20 @@ Step /^The instance named (.+) should have a public IP$/ do |instance_name|
   end
 end
 
+Step /^The instance named (.+) should not be visible$/ do |instance_name|
+  # TODO To prevent conflict with other instance steps, temporarily forgo changing the selector,
+  # and instead finding it directly from the page object.
+  selector = "//*[@id='instances-list']//*[contains(@class, 'name') and contains(text(), \"#{ instance_name }\")]/.."
+
+  sleeping(ConfigFile.wait_instance_delete).seconds.between_tries.failing_after(ConfigFile.repeat_instance_delete).tries do
+    begin
+      row = @current_page.find_by_xpath(selector)
+      raise "The instance named '#{ instance_name }' should not be visible, but it is."
+    rescue Anticipate::TimeoutError
+    end
+  end
+end
+
 Step /^The item with text (.+) should be default in the (.+) dropdown$/ do |item_text, dropdown_name|
   dropdown_name = dropdown_name.split.join('_').downcase
   if item = @current_page.send("#{ dropdown_name }_dropdown_items").find { |d| d.text == item_text }

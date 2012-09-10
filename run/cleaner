@@ -1,4 +1,10 @@
 #!/usr/bin/env ruby
+description="Clear all projects and users"
+
+if ARGV.first == "describe" then
+  printf "  %-12s - #{description}\n",__FILE__.gsub(/\w+\//,"")
+  exit 0
+end
 
 with_users = ARGV.first === '--with_users'
 
