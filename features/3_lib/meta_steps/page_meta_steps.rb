@@ -1056,13 +1056,16 @@ Then /^The (.+) table's last row should not include the text (.+)$/ do |table_na
 end
 
 Then /^The volumes table should have a row for the volume named (.+)$/ do |volume_name|
-  VolumeService.session.reload_volumes
-  volume = VolumeService.session.volumes.find { |v| v['display_name'] == volume_name }
-  raise "Couldn't find a volume named '#{ volume_name }'" unless volume
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+    VolumeService.session.reload_volumes
+    volume = VolumeService.session.volumes.find { |v| v['display_name'] == volume_name }
 
-  unless @current_page.has_volume_row?( id: volume['id'] )
-    raise "Expected to find a row for volume #{ volume_name } in the " +
-          "volumes table, but couldn't find it."
+    raise "Couldn't find a volume named '#{ volume_name }'" unless volume
+
+    unless @current_page.has_volume_row?( id: volume['id'] )
+      raise "Expected to find a row for volume #{ volume_name } in the " +
+            "volumes table, but couldn't find it."
+    end
   end
 end
 

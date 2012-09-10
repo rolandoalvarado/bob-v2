@@ -291,6 +291,7 @@ Then /^I [Cc]an [Cc]reate a clone of the volume snapshot$/ do
 
     * Click the volumes tab
     * The volumes table should have a row for the volume named #{ attrs.name }
+
     * Remove the verified clone with the name #{ attrs.name } of the project #{ @project.name }
   }
 end
@@ -377,9 +378,9 @@ TestCase /^A user with a role of (.+) in a project can detach any of its volumes
   Preconditions %{
     * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
     * Ensure that a project named #{ test_project_name } exists
+    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the project #{ test_project_name }
     * Ensure that the project named #{ test_project_name } has an instance named #{ test_instance_name }
     * Ensure that the project named #{ test_project_name } has an available volume named #{ test_volume_name }
-    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the project #{ test_project_name }
   }
 
   Cleanup %{
@@ -397,6 +398,8 @@ TestCase /^A user with a role of (.+) in a project can detach any of its volumes
     * Click the Projects link
     * Click the #{ test_project_name } project
 
+    * Wait 5 seconds
+
     * Click the attach button of the volume named #{ test_volume_name }
     * Choose the item with text #{ test_instance_name } in the attachable instance dropdown
     * Click the volume attach confirmation button
@@ -406,7 +409,7 @@ TestCase /^A user with a role of (.+) in a project can detach any of its volumes
     * Click the detach button of the volume named #{ test_volume_name }
     * Click the volume detach confirmation button
 
-    * Wait for volume to finish detached
+    * Wait for volume to finish detaching
 
     * The volume named #{ test_volume_name } should be detached to the instance named #{ test_instance_name } in project #{ test_project_name }
   }
