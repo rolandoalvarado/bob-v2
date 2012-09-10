@@ -191,10 +191,6 @@ When /^I resize the instance to a different flavor$/ do
 end
 
 When /^I resume the instance in the project$/ do
-  compute_service = ComputeService.session
-  compute_service.service.set_tenant @project
-  @instance       = compute_service.instances.find { |i| i.state == 'SUSPENDED' }
-
   steps %{
     * Click the logout button if currently logged in
 
@@ -475,10 +471,6 @@ Then /^I [Cc]an [Rr]esize (?:that|the) instance$/ do
 end
 
 Then /^I [Cc]an [Rr]esume the instance$/ do
-  compute_service = ComputeService.session
-  compute_service.set_tenant @project
-  instance        = compute_service.instances.find { |i| i.state == 'SUSPENDED' }
-
   steps %{
     * Click the logout button if currently logged in
 
@@ -490,11 +482,11 @@ Then /^I [Cc]an [Rr]esume the instance$/ do
     * Visit the projects page
     * Click the #{ @project.name } project
 
-    * Click the instance menu button for instance #{ instance.id }
-    * Click the resume instance button for instance #{ instance.id }
+    * Click the instance menu button for instance #{ @instance.id }
+    * Click the resume instance button for instance #{ @instance.id }
 
-    * Wait 60 seconds
-    * The instance #{ instance.id } should be of active status
+     * Wait #{ConfigFile.minute} seconds
+    * The instance #{ @instance.id } should be of active status
   }
 end
 
