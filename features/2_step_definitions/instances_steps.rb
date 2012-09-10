@@ -345,7 +345,7 @@ Then /^I cannot connect to that instance via (.+)/ do |remote_client|
 end
 
 Then /^I [Cc]an [Cc]reate an instance in the project$/ do
-  
+
   steps %{
     * Click the logout button if currently logged in
 
@@ -370,7 +370,7 @@ Then /^I [Cc]an [Cc]reate an instance in the project$/ do
     * The instances table should include the text #{ test_instance_name }
     * The instance named #{ test_instance_name } should be in active status
   }
-  
+
 end
 
 Then /^I [Cc]an [Pp]ause the instances?(?:| in the project)$/ do
@@ -565,14 +565,11 @@ Then /^I [Cc]an [Vv]iew the instance's web-based VNC console$/ do
 end
 
 Then /^I cannot assign a floating IP to (?:that|the) instance$/ do
-  steps %{
-    * Click the logout button if currently logged in
+  Preconditions %{
+    * Ensure that the current user is logged in
+  }
 
-    * Visit the login page
-    * Fill in the username field with #{ @current_user.name }
-    * Fill in the password field with #{ @current_user.password }
-    * Click the login button
-
+  Script %{
     * Visit the projects page
     * Click the #{ @project.name } project
 
@@ -616,18 +613,18 @@ Then /^the instance should be resized$/i do
 end
 
 Then /^the instance will be created$/i do
-  
+
   steps %{
     * Current page should have the instance password form
     * Close the instance password form
     * The instances table should include the text #{ @instance_name }
     * The instance named #{ @instance_name } should be in active status
   }
-  
+
 end
 
 Then /^the instance will be not created$/i do
-  
+
   steps %{
     * Current page should still have the new instance form
     * The new instance form has an error message
@@ -635,7 +632,7 @@ Then /^the instance will be not created$/i do
 
     * The instances table should not include the text #{ @instance_name }
   }
-  
+
 end
 
 Then /^the instance will reboot$/i do

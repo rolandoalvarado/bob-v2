@@ -1,3 +1,17 @@
+Step /^Ensure that the current user is logged in$/ do
+  @current_page ||= RootPage.new
+  @current_page.visit
+
+  if @current_page.actual_url.empty? # Logged Out?
+    step %{
+      * Visit the login page
+      * Fill in the username field with #{ @current_user.name }
+      * Fill in the password field with #{ @current_user.password }
+      * Click the login button
+    }
+  end
+end
+
 Step /^Ensure that (?:a|another) user with username (.+) and password (.+) exists$/i do |username, password|
   username           = Unique.username(username)
   @user_attrs        = CloudObjectBuilder.attributes_for(:user, :name => username, :password => password)
@@ -94,3 +108,5 @@ Then /^The user (.+) should not exist in the system$/i do |username|
     raise "User #{ username } should not exist, but it does." if user
   end
 end
+
+
