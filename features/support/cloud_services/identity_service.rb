@@ -56,11 +56,13 @@ class IdentityService < BaseCloudService
   end
 
   def create_user(attributes)
-    attributes[:tenant_id] = test_tenant.id
+    tenants.reload
+    project = tenants.find_by_id(attributes[:project_id]) rescue test_tenant
+    attributes[:tenant_id] = project.id
     user = users.new(attributes)
     user.save
     member_role = roles.find_by_name(RoleNameDictionary.db_name('Member'))
-    test_tenant.grant_user_role(user.id, member_role.id)
+    project.grant_user_role(user.id, member_role.id)
     user
   end
 
