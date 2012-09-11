@@ -692,6 +692,7 @@ TestCase /^A user with a role of \(None\) in the project cannot assign a floatin
   Preconditions %{
     * Ensure that a project named #{ test_project_name } exists
     * Ensure that a user named #{ member_username } exists
+    * Ensure that the user #{ member_username } does not have a role in the project #{ test_project_name }
   }
 
   Cleanup %{

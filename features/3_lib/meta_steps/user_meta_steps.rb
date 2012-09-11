@@ -94,6 +94,16 @@ Step /^Ensure that the user (.+) has a role of (.+) in the project (.+)$/ do |us
   identity_service.ensure_project_role(user, project, role_name)
 end
 
+Step /^Ensure that the user (.+) (?:does not have a role in|is not a member of) the project (.+)$/ do |username, project_name|
+  user_attrs       = CloudObjectBuilder.attributes_for :user, :name => Unique.username(username)
+  identity_service = IdentityService.session
+  user             = identity_service.ensure_user_exists(user_attrs)
+
+  project = identity_service.tenants.reload.find { |t| t.name == project_name }
+  raise "The project named #{ project_name } couldn't be found!" if project.nil? or project.id.empty?
+
+  identity_service.revoke_all_user_roles(user, project)
+end
 
 Then /^Register the user named (.+) for deletion at exit$/i do |username|
   EnvironmentCleaner.register(:user, :name => username)
