@@ -110,15 +110,13 @@ Step /^Ensure that a user exists in the project$/ do
                        :user,
                        :name => bob_username
                      )
-  identity_service = IdentityService.session
-
-  user             = identity_service.ensure_user_exists(user_attrs)
-
+  user             = IdentityService.session.ensure_user_exists_in_project(user_attrs, @project)
+  # Check if user is nil, then raise error message.
   if user.nil? or user.id.empty?
     raise "User couldn't be initialized!"
   end
+  # Register user for deletion.
   EnvironmentCleaner.register(:user, user.id)
-
   # Make variable(s) available for use in succeeding steps
   @current_user = user
 end
@@ -131,8 +129,14 @@ Then /^Ensure that I have a role of (.+) in the project$/i do |role_name|
           "before this step."
   end
 
+  user_attrs       = CloudObjectBuilder.attributes_for(
+                       :user,
+                       :name => bob_username
+                     )
+
   identity_service = IdentityService.session
-  user             = @current_user
+  user             = identity_service.ensure_user_exists(user_attrs)
+  EnvironmentCleaner.register(:user, user.id)
 
   identity_service.revoke_all_user_roles(user, @project)
 
@@ -153,6 +157,8 @@ Then /^Ensure that I have a role of (.+) in the project$/i do |role_name|
     end
   end
 
+  # Make variable(s) available for use in succeeding steps
+  @current_user = user
 end
 
 Then /^Ensure that the project has no security groups$/i do

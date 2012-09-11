@@ -373,7 +373,7 @@ Then /^Current page should show the instance's console output$/ do
 end
 
 
-Then /^Current page should have the security groups$/ do
+Step /^Current page should(?:| still) have the security groups$/ do
   unless @current_page.has_security_groups_element?
     raise "Current page doesn't have security groups."
   end
@@ -788,6 +788,20 @@ Step /^The instance named (.+) should have a public IP$/ do |instance_name|
   public_ip = row.find('.public-ipaddress')
   if public_ip.text.to_s.strip.blank?
     raise "Instance #{ instance_name } does not have a public IP."
+  end
+end
+
+Step /^The instance named (.+) should not be visible$/ do |instance_name|
+  # TODO To prevent conflict with other instance steps, temporarily forgo changing the selector,
+  # and instead finding it directly from the page object.
+  selector = "//*[@id='instances-list']//*[contains(@class, 'name') and contains(text(), \"#{ instance_name }\")]/.."
+
+  sleeping(ConfigFile.wait_instance_delete).seconds.between_tries.failing_after(ConfigFile.repeat_instance_delete).tries do
+    begin
+      row = @current_page.find_by_xpath(selector)
+      raise "The instance named '#{ instance_name }' should not be visible, but it is."
+    rescue Anticipate::TimeoutError
+    end
   end
 end
 

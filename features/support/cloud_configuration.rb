@@ -37,8 +37,11 @@ module CloudConfiguration
   TIMING               = :timing
   MINUTE               = :seconds
   INSTANCE             = :instance
+  RESTART              = :restart
+  INSTANCE_DELETE      = :instance_delete
   VOLUME_ATTACH        = :volume_attach
   VOLUME_DETACH        = :volume_detach
+  RESUME_INSTANCE      = :resume
 
   class ConfigFile
     include Singleton
@@ -94,6 +97,33 @@ module CloudConfiguration
         self.instance.save
       end
       self.instance[WAIT][INSTANCE]
+    end
+    
+    def self.wait_instance_resume
+      self.instance.ensure_repeat_and_wait_key
+      unless self.instance[WAIT][RESUME_INSTANCE]
+        self.instance[WAIT][RESUME_INSTANCE] = 60
+        self.instance.save
+      end
+      self.instance[WAIT][RESUME_INSTANCE]
+    end
+
+    def self.wait_restart
+      self.instance.ensure_repeat_and_wait_key
+      unless self.instance[WAIT][RESTART]
+        self.instance[WAIT][RESTART] = 90
+        self.instance.save
+      end
+      self.instance[WAIT][RESTART]
+    end
+
+    def self.wait_instance_delete
+      self.instance.ensure_repeat_and_wait_key
+      unless self.instance[WAIT][INSTANCE_DELETE]
+        self.instance[WAIT][INSTANCE_DELETE] = 10
+        self.instance.save
+      end
+      self.instance[WAIT][INSTANCE_DELETE]
     end
 
     def self.wait_volume_attach
@@ -157,6 +187,15 @@ module CloudConfiguration
         self.instance.save
       end
       self.instance[REPEAT][INSTANCE]
+    end
+
+    def self.repeat_instance_delete
+      self.instance.ensure_repeat_and_wait_key
+      unless self.instance[REPEAT][INSTANCE_DELETE]
+        self.instance[REPEAT][INSTANCE_DELETE] = 6
+        self.instance.save
+      end
+      self.instance[REPEAT][INSTANCE_DELETE]
     end
 
     def self.repeat_volume_detach

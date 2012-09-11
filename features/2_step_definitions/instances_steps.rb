@@ -191,10 +191,6 @@ When /^I resize the instance to a different flavor$/ do
 end
 
 When /^I resume the instance in the project$/ do
-  compute_service = ComputeService.session
-  compute_service.service.set_tenant @project
-  @instance       = compute_service.instances.find { |i| i.state == 'SUSPENDED' }
-
   steps %{
     * Click the logout button if currently logged in
 
@@ -265,6 +261,7 @@ Then /^I [Cc]an [Aa]ssign a floating IP to an instance in the project$/ do
     * Visit the login page
     * Fill in the username field with #{ @current_user.name }
     * Fill in the password field with #{ @current_user.password }
+    * Wait #{ConfigFile.wait_seconds} seconds
     * Click the login button
 
     * Visit the projects page
@@ -273,7 +270,7 @@ Then /^I [Cc]an [Aa]ssign a floating IP to an instance in the project$/ do
     * Click the access security tab
     * Click the new floating IP allocation button
     * Current page should have the new floating IP allocation form
-    * Wait 60 seconds
+    * Wait #{ConfigFile.wait_createinstance} seconds
     * Choose the 1st item in the pool dropdown
     * Choose the 2nd item in the instance dropdown
     * Click the create floating IP allocation button
@@ -372,28 +369,6 @@ Then /^I [Cc]an [Cc]reate an instance in the project$/ do
   
 end
 
-Then /^I [Cc]an [Dd]elete an instance in the project$/ do
-  compute_service = ComputeService.session
-  compute_service.set_tenant @project
-
-  steps %{
-    * Click the logout button if currently logged in
-
-    * Visit the login page
-    * Fill in the username field with #{ @current_user.name }
-    * Fill in the password field with #{ @current_user.password }
-    * Click the login button
-
-    * Visit the projects page
-    * Click the #{ @project.name } project
-
-    * Click the instance menu button for instance #{ @instance.id }
-    * Click the delete instance button for instance #{ @instance.id }
-    * Click the confirm instance deletion button
-    * The instances table should not include the text #{ @instance.name }
-  }
-end
-
 Then /^I [Cc]an [Pp]ause the instances?(?:| in the project)$/ do
 
   steps %{
@@ -452,7 +427,6 @@ Then /^I [Cc]an [Rr]esize (?:that|the) instance$/ do
     * Visit the projects page
     * Click the #{ @project.name } project
 
-    * Wait 90 seconds
     * Click the instance menu button for instance #{ instance.id }
     * Click the resize instance button for instance #{ instance.id }
     * Current page should have the resize instance form
@@ -461,6 +435,8 @@ Then /^I [Cc]an [Rr]esize (?:that|the) instance$/ do
 
     * The instance #{ instance.id } should be in resizing status
     * The instance #{ instance.id } should be performing task resize_prep
+
+    * Wait #{ConfigFile.wait_restart} seconds
 
     * The instance #{ instance.id } should be in active status
     * The instance #{ instance.id } should be performing task resize_verify
@@ -473,10 +449,6 @@ Then /^I [Cc]an [Rr]esize (?:that|the) instance$/ do
 end
 
 Then /^I [Cc]an [Rr]esume the instance$/ do
-  compute_service = ComputeService.session
-  compute_service.set_tenant @project
-  instance        = compute_service.instances.find { |i| i.state == 'SUSPENDED' }
-
   steps %{
     * Click the logout button if currently logged in
 
@@ -488,18 +460,15 @@ Then /^I [Cc]an [Rr]esume the instance$/ do
     * Visit the projects page
     * Click the #{ @project.name } project
 
-    * Click the instance menu button for instance #{ instance.id }
-    * Click the resume instance button for instance #{ instance.id }
+    * Click the instance menu button for instance #{ @instance.id }
+    * Click the resume instance button for instance #{ @instance.id }
 
-    * Wait 60 seconds
-    * The instance #{ instance.id } should be of active status
+     * Wait #{ConfigFile.wait_instance_resume} seconds
+    * The instance #{ @instance.id } should be of active status
   }
 end
 
 Then /^I [Cc]an [Ss]uspend (?:an|the) instance(?:| in the project)$/ do
-  compute_service = ComputeService.session
-  compute_service.set_tenant @project
-
   steps %{
     * Click the logout button if currently logged in
 
@@ -514,7 +483,7 @@ Then /^I [Cc]an [Ss]uspend (?:an|the) instance(?:| in the project)$/ do
     * Click the instance menu button for instance #{ @instance.id }
     * Click the suspend instance button for instance #{ @instance.id }
 
-    * Wait 90 seconds
+    * Wait #{ConfigFile.wait_restart} seconds
     * The instance #{ @instance.id } should be in suspended status
   }
 
@@ -743,6 +712,37 @@ TestCase /^A user with a role of \(None\) in the project cannot assign a floatin
     * Click the Projects link
     * The #{ test_project_name } project should not be visible
   }
+end
+
+TestCase /^A user with a role of (.+) in the project Can Delete an instance$/i do |role_name|
+
+  Preconditions %{
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that the project named #{ test_project_name } has an active instance named #{ test_instance_name }
+    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the project #{ test_project_name }
+  }
+
+  Cleanup %{
+    * Register the project named #{ test_project_name } for deletion at exit
+    * Register the user named #{ bob_username } for deletion at exit
+  }
+
+  Script %{
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ bob_username }
+    * Fill in the Password field with #{ bob_password }
+    * Click the Login button
+
+    * Click the Projects link
+    * Click the #{ test_project_name } project
+
+    * The instance named #{ test_instance_name } should be in active status
+
+    * The context menu for the instance named #{ test_instance_name } should have the delete action
+  }
+
 end
 
 TestCase /^A user with a role of (.+) in the project Can Unpause an instance$/i do |role_name|
@@ -1152,6 +1152,40 @@ TestCase /^An instance that has been resized by an authorized user can be revert
     * Click the revert resize action in the context menu for the instance named #{ test_instance_name }
 
     * The instance named #{ test_instance_name } should have flavor #{ original_flavor }
+  }
+
+end
+
+TestCase /^An instance deleted by an authorized user should not be visible$/i do
+
+  Preconditions %{
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that the project named #{ test_project_name } has an active instance named #{ test_instance_name }
+    * Ensure that the user #{ bob_username } has a role of Project Manager in the project #{ test_project_name }
+  }
+
+  Cleanup %{
+    * Register the project named #{ test_project_name } for deletion at exit
+    * Register the user named #{ bob_username } for deletion at exit
+  }
+
+  Script %{
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ bob_username }
+    * Fill in the Password field with #{ bob_password }
+    * Click the Login button
+
+    * Click the Projects link
+    * Click the #{ test_project_name } project
+
+    * The instance named #{ test_instance_name } should be in active status
+
+    * Click the delete action in the context menu for the instance named #{ test_instance_name }
+    * Click the confirm instance deletion button
+
+    * The instance named #{ test_instance_name } should not be visible
   }
 
 end
