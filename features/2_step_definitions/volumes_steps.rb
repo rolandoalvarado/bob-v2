@@ -272,26 +272,35 @@ Then /^I [Cc]an [Cc]reate a clone of the volume snapshot$/ do
     * Fill in the password field with #{ @current_user.password }
     * Click the login button
 
-    * Wait 5 seconds
+    * Wait #{ ConfigFile.wait_long } seconds
 
     * Visit the projects page
+
+    * Wait #{ ConfigFile.wait_seconds } seconds
+
     * Click the #{ @project.name } project
 
-    * Wait 10 seconds
+    * Wait #{ ConfigFile.wait_long } seconds
 
     * Click the snapshots tab
 
-    * Wait 10 seconds
+    * Wait #{ ConfigFile.wait_long } seconds
 
     * Click the clone volume snapshot button for volume snapshot named #{ snapshot["display_name"] }
+
+    * Wait #{ ConfigFile.wait_seconds } seconds
+
     * Current page should have the new volume form
     * Fill in the volume name field with #{ attrs.name }
     * Fill in the volume description field with #{ attrs.description }
     * Click the create volume button
 
-    * Wait 10 seconds
+    * Wait #{ ConfigFile.wait_long } seconds
 
     * Click the volumes tab
+
+    * Wait #{ ConfigFile.wait_volume_ready } seconds
+
     * The volumes table should have a row for the volume named #{ attrs.name }
 
     * Remove the verified clone with the name #{ attrs.name } of the project #{ @project.name }
