@@ -272,6 +272,8 @@ Then /^I [Cc]an [Cc]reate a clone of the volume snapshot$/ do
     * Fill in the password field with #{ @current_user.password }
     * Click the login button
 
+    * Wait 5 seconds
+
     * Visit the projects page
     * Click the #{ @project.name } project
 
