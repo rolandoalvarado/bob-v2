@@ -109,7 +109,6 @@ Then /^Register the user named (.+) for deletion at exit$/i do |username|
   EnvironmentCleaner.register(:user, :name => username)
 end
 
-
 Then /^The user (.+) should not exist in the system$/i do |username|
   username = Unique.username(username)
 
@@ -118,5 +117,3 @@ Then /^The user (.+) should not exist in the system$/i do |username|
     raise "User #{ username } should not exist, but it does." if user
   end
 end
-
-
