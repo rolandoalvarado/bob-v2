@@ -153,11 +153,27 @@ class IdentityService < BaseCloudService
       delete_user(user)
     end
   end
-
+  
+  # OLD ensure_user_exists() method
+  #  def ensure_user_exists(attributes)
+  #    user = find_user_by_name(attributes[:name])
+  #    user = create_user(attributes) unless user
+  #    user.password = attributes[:password]
+  #    user
+  #  end
+  
   def ensure_user_exists(attributes)
     user = find_user_by_name(attributes[:name])
-    user = create_user(attributes) unless user
-    user.password = attributes[:password]
+    
+    unless user
+      user = create_user(attributes) 
+      user.password = attributes[:password]
+    else
+      if attributes[:password] != nil && user.password != attributes[:password]
+        user.password = attributes[:password]
+        user.update_password(attributes[:password])
+      end
+    end  
     user
   end
 
