@@ -279,7 +279,6 @@ class ComputeService < BaseCloudService
 
     response = service.create_key_pair(key_name)
     @private_keys[key_name] = response.body['keypair']['private_key']
-
     return keypairs.reload.find { |keypair| keypair.name == key_name }
   rescue => e
     raise "Couldn't create keypair '#{ key_name }'! The error returned " +
@@ -395,7 +394,7 @@ class ComputeService < BaseCloudService
     end
   end
 
-  def ensure_security_group_rule(project, ip_protocol='tcp', from_port=22, to_port=22, cidr='0.0.0.0/0')
+  def ensure_security_group_rule(project, ip_protocol='tcp', from_port=2222, to_port=2222, cidr='0.0.0.0/0')
     service.set_tenant project
     security_group = service.security_groups.first
     parent_group_id = security_group.id
@@ -418,7 +417,7 @@ class ComputeService < BaseCloudService
     raise "Couldn't ensure security group rule exists! The error returned was #{ e.inspect }"
   end
 
-  def ensure_security_group_rule_exist(project, ip_protocol='tcp', from_port=22, to_port=22, cidr='0.0.0.0/0')
+  def ensure_security_group_rule_exist(project, ip_protocol='tcp', from_port=2222, to_port=2222, cidr='0.0.0.0/0')
     service.set_tenant project
     security_group = service.security_groups.first
     parent_group_id = security_group.id

@@ -926,13 +926,6 @@ TestCase /^An instance is publicly accessible via its assigned floating IP$/ do
     * The Floating IPs table should have 1 row
     * The Floating IP should be associated to instance #{ test_instance_name }
 
-    * Click the Instances and Volumes tab
-    * Click and confirm the hard reboot action in the context menu for the instance named #{ test_instance_name }
-    * The instance named #{ test_instance_name } should be performing task rebooting
-    * The instance named #{ test_instance_name } should be idle
-    * The instance named #{ test_instance_name } should have a public IP
-
-    * Click the Access Security tab
     * Connect to the instance named #{ test_instance_name } in project #{ test_project_name } via SSH
   }
 
