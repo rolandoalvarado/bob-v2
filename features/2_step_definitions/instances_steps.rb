@@ -690,13 +690,11 @@ end
 TestCase /^A user with a role of \(None\) in the project cannot assign a floating IP to an instance$/i do
 
   Preconditions %{
-    * Ensure that a project named #{ test_project_name } exists
     * Ensure that a user named #{ member_username } exists
-    * Ensure that the user #{ member_username } does not have a role in the project #{ test_project_name }
+    * Ensure that the user #{ member_username } does not have a role in the system
   }
 
   Cleanup %{
-    * Register the project named #{ test_project_name } for deletion at exit
     * Register the user named #{ member_username } for deletion at exit
   }
 
@@ -707,8 +705,8 @@ TestCase /^A user with a role of \(None\) in the project cannot assign a floatin
     * Fill in the Password field with #{ member_password }
     * Click the Login button
 
-    * Click the Projects link
-    * The #{ test_project_name } project should not be visible
+    * Current page should still be the login page
+    * The error message "There are currently no projects assigned to this account." should be displayed
   }
 end
 

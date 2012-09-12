@@ -333,7 +333,7 @@ Step /^Close the (.+) form$/i do |form_name|
   @current_page.send("#{ form_name }_form").find('.close').click
 end
 
-Then /^Current page should be the (.+) page$/i do |page_name|
+Then /^Current page should(?:| still) be the (.+) page$/i do |page_name|
   @current_page = eval("#{ page_name.downcase.capitalize }Page").new
   unless @current_page.has_expected_path?
     raise "Expected #{ @current_page.expected_path } but another page was returned: #{ @current_page.actual_path }"
@@ -813,6 +813,12 @@ Step /^The item with text (.+) should be default in the (.+) dropdown$/ do |item
     end
   else
     raise "Couldn't find the dropdown option '#{ item_text }'."
+  end
+end
+
+Step /^(?:An|The) error message "(.+)" should be displayed$/i do |error_message|
+  unless @current_page.has_css_selector?('.alert-error') && @current_page.has_content?(error_message)
+    raise "Couldn't find error message `#{ error_message }`."
   end
 end
 
