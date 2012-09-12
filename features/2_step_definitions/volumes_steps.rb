@@ -272,25 +272,37 @@ Then /^I [Cc]an [Cc]reate a clone of the volume snapshot$/ do
     * Fill in the password field with #{ @current_user.password }
     * Click the login button
 
+    * Wait #{ ConfigFile.wait_long } seconds
+
     * Visit the projects page
+
+    * Wait #{ ConfigFile.wait_seconds } seconds
+
     * Click the #{ @project.name } project
 
-    * Wait 5 seconds
+    * Wait #{ ConfigFile.wait_long } seconds
 
     * Click the snapshots tab
 
-    * Wait 5 seconds
+    * Wait #{ ConfigFile.wait_long } seconds
 
     * Click the clone volume snapshot button for volume snapshot named #{ snapshot["display_name"] }
+
+    * Wait #{ ConfigFile.wait_seconds } seconds
+
     * Current page should have the new volume form
     * Fill in the volume name field with #{ attrs.name }
     * Fill in the volume description field with #{ attrs.description }
     * Click the create volume button
 
-    * Wait 5 seconds
+    * Wait #{ ConfigFile.wait_long } seconds
 
     * Click the volumes tab
+
+    * Wait #{ ConfigFile.wait_volume_ready } seconds
+
     * The volumes table should have a row for the volume named #{ attrs.name }
+
     * Remove the verified clone with the name #{ attrs.name } of the project #{ @project.name }
   }
 end
@@ -377,9 +389,9 @@ TestCase /^A user with a role of (.+) in a project can detach any of its volumes
   Preconditions %{
     * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
     * Ensure that a project named #{ test_project_name } exists
+    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the project #{ test_project_name }
     * Ensure that the project named #{ test_project_name } has an instance named #{ test_instance_name }
     * Ensure that the project named #{ test_project_name } has an available volume named #{ test_volume_name }
-    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the project #{ test_project_name }
   }
 
   Cleanup %{
@@ -397,6 +409,8 @@ TestCase /^A user with a role of (.+) in a project can detach any of its volumes
     * Click the Projects link
     * Click the #{ test_project_name } project
 
+    * Wait 5 seconds
+
     * Click the attach button of the volume named #{ test_volume_name }
     * Choose the item with text #{ test_instance_name } in the attachable instance dropdown
     * Click the volume attach confirmation button
@@ -406,7 +420,7 @@ TestCase /^A user with a role of (.+) in a project can detach any of its volumes
     * Click the detach button of the volume named #{ test_volume_name }
     * Click the volume detach confirmation button
 
-    * Wait for volume to finish detached
+    * Wait for volume to finish detaching
 
     * The volume named #{ test_volume_name } should be detached to the instance named #{ test_instance_name } in project #{ test_project_name }
   }

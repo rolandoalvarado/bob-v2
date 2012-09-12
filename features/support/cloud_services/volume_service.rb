@@ -183,7 +183,7 @@ class VolumeService < BaseCloudService
   private
 
   def try_fixing_volume_count(project, desired_count)
-    sleeping(2).seconds.between_tries.failing_after(10).tries do
+    sleeping(ConfigFile.wait_volume_ready).seconds.between_tries.failing_after(ConfigFile.repeat_volume_ready).tries do
       difference = (@volumes.count - desired_count).abs
 
       if(@volumes.count > desired_count)
@@ -197,6 +197,13 @@ class VolumeService < BaseCloudService
       end
 
       assert_volume_count(project, desired_count)
+
+      volumes = reload_volumes
+      creating = volumes.select {|volume| volume['status'] != 'available'}
+
+      if(creating.count > 0)
+        raise 'Volumes are still being created. Time ran out.'
+      end
     end
   end
 end

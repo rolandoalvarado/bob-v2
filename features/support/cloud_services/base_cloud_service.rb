@@ -36,6 +36,7 @@ class BaseCloudService
     credentials = ConfigFile.cloud_credentials
     unless username.blank? || password.blank?
       credentials.merge!(:openstack_username => username, :openstack_api_key  => password)
+      credentials.delete(:openstack_tenant)
     end
     if !@service || (@current_user && @current_user['username'] != credentials[:openstack_username])
       @service = @service_type.new(credentials)

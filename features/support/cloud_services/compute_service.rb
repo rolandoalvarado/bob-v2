@@ -45,14 +45,12 @@ class ComputeService < BaseCloudService
     @flavors ||= service.flavors
     @images  ||= ImageService.session.get_bootable_images
 
-    if attributes[:flavor].is_a? String
-      attributes[:flavor] = flavor_from_name(attributes[:flavor])
+    if attributes[:flavor].to_i <= 0
+      attributes[:flavor] = flavor_from_name(attributes[:flavor] || 'm1.small')
     end
 
     attributes[:name]           ||= Faker::Name.name
     attributes[:password]       ||= test_instance_password || '123qwe'
-    attributes[:image]          ||= @images.sample.id
-    attributes[:flavor]         ||= @flavors.find { |f| f.name == 'm1.small' }.id
     attributes[:key_name]       ||= @key_pairs[0] && @key_pairs[0].name
 
     if attributes[:security_group]
@@ -74,7 +72,7 @@ class ComputeService < BaseCloudService
       begin
         response = service.create_server(
           attributes[:name],
-          attributes[:image],
+          attributes[:image] || @images.sample.id,
           attributes[:flavor],
           {
             'tenant_id'       => project.id,
@@ -583,10 +581,10 @@ class ComputeService < BaseCloudService
     @instances.reload
     @volumes.reload
   end
-  
+
   def pause_an_instance(project, instance)
     service.set_tenant project
-    
+
     sleep(ConfigFile.wait_long)
     service.pause_server(instance.id)
   end

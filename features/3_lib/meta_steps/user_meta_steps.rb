@@ -1,3 +1,17 @@
+Step /^Ensure that the current user is logged in$/ do
+  @current_page ||= RootPage.new
+  @current_page.visit
+
+  if @current_page.actual_url.empty? # Logged Out?
+    step %{
+      * Visit the login page
+      * Fill in the username field with #{ @current_user.name }
+      * Fill in the password field with #{ @current_user.password }
+      * Click the login button
+    }
+  end
+end
+
 Step /^Ensure that (?:a|another) user with username (.+) and password (.+) exists$/i do |username, password|
   username           = Unique.username(username)
   @user_attrs        = CloudObjectBuilder.attributes_for(:user, :name => username, :password => password)
@@ -80,11 +94,20 @@ Step /^Ensure that the user (.+) has a role of (.+) in the project (.+)$/ do |us
   identity_service.ensure_project_role(user, project, role_name)
 end
 
+Step /^Ensure that the user (.+) (?:does not have a role in|is not a member of) the project (.+)$/ do |username, project_name|
+  user_attrs       = CloudObjectBuilder.attributes_for :user, :name => Unique.username(username)
+  identity_service = IdentityService.session
+  user             = identity_service.ensure_user_exists(user_attrs)
+
+  project = identity_service.tenants.reload.find { |t| t.name == project_name }
+  raise "The project named #{ project_name } couldn't be found!" if project.nil? or project.id.empty?
+
+  identity_service.revoke_all_user_roles(user, project)
+end
 
 Then /^Register the user named (.+) for deletion at exit$/i do |username|
   EnvironmentCleaner.register(:user, :name => username)
 end
-
 
 Then /^The user (.+) should not exist in the system$/i do |username|
   username = Unique.username(username)

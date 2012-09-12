@@ -876,24 +876,22 @@ Then /^The volume named (.+) should not be attached to the instance named (.+)$/
 end
 
 Step /^The volume named (.+) should be detached to the instance named (.+) in project (.+)$/ do |volume_name, instance_name, project_name|
-  project = IdentityService.session.find_tenant_by_name(project_name)
-  raise "Couldn't find a project named '#{ project_name }'" unless project
+  sleeping(ConfigFile.wait_volume_detach).seconds.between_tries.failing_after(ConfigFile.repeat_volume_detach).tries do
+    project = IdentityService.session.find_tenant_by_name(project_name)
+    raise "Couldn't find a project named '#{ project_name }'" unless project
 
-  instance = ComputeService.session.find_instance_by_name(project, instance_name)
-  raise "Couldn't find an instance named '#{ instance_name }'" unless instance
+    instance = ComputeService.session.find_instance_by_name(project, instance_name)
+    raise "Couldn't find an instance named '#{ instance_name }'" unless instance
 
-  VolumeService.session.reload_volumes
-  volume = VolumeService.session.volumes.find { |v| v['display_name'] == volume_name }
+    VolumeService.session.reload_volumes
+    volume = VolumeService.session.volumes.find { |v| v['display_name'] == volume_name }
 
-  raise "Couldn't find a volume named '#{ volume_name }'" unless volume
+    raise "Couldn't find a volume named '#{ volume_name }'" unless volume
 
-  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(15).tries do
     unless @current_page.has_volume_row?(id: volume['id'])
       raise "Could not find row for the volume named #{ volume_name }!"
     end
-  end
 
-  sleeping(ConfigFile.wait_volume_detach).seconds.between_tries.failing_after(ConfigFile.repeat_volume_detach).tries do
     attachment_id = @current_page.volume_row(id: volume['id']).find('.attachments')[:title]
     if attachment_id == instance.id
       raise "Expected volume #{ volume_name } to not be attached to instance #{ instance_name }, but it is."
@@ -1056,13 +1054,16 @@ Then /^The (.+) table's last row should not include the text (.+)$/ do |table_na
 end
 
 Then /^The volumes table should have a row for the volume named (.+)$/ do |volume_name|
-  VolumeService.session.reload_volumes
-  volume = VolumeService.session.volumes.find { |v| v['display_name'] == volume_name }
-  raise "Couldn't find a volume named '#{ volume_name }'" unless volume
+  sleeping(ConfigFile.wait_long).seconds.between_tries.failing_after(ConfigFile.repeat_long).tries do
+    VolumeService.session.reload_volumes
+    volume = VolumeService.session.volumes.find { |v| v['display_name'] == volume_name }
 
-  unless @current_page.has_volume_row?( id: volume['id'] )
-    raise "Expected to find a row for volume #{ volume_name } in the " +
-          "volumes table, but couldn't find it."
+    raise "Couldn't find a volume named '#{ volume_name }'" unless volume
+
+    unless @current_page.has_volume_row?( id: volume['id'] )
+      raise "Expected to find a row for volume #{ volume_name } in the " +
+            "volumes table, but couldn't find it."
+    end
   end
 end
 
