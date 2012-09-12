@@ -8,8 +8,8 @@ require 'pry'
 # NOTE: Look at gems.rb for other gems being required
 
 # Ensure capybara webkit is working in headless mode
-#headless = Headless.new
-#headless.start
+headless = Headless.new
+headless.start
 
 include Anticipate
 
