@@ -65,6 +65,10 @@ Then /^Logging out redirects me to the Log In page$/ do
   username = Unique.username('bob-logout')
   password = '123qwe'
 
+  Preconditions %{
+    * A project exists in the system
+  }
+
   steps %{
     * Ensure that a user with username #{ username } and password #{ password } exists
     * Register the user named #{ username } for deletion at exit
@@ -84,6 +88,10 @@ end
 Then /^Logging out clears my session$/ do
   username = Unique.username('bob-logout')
   password = '123qwe'
+  
+  Preconditions %{
+    * A project exists in the system
+  }
 
   steps %{
     * Ensure that a user with username #{ username } and password #{ password } exists
