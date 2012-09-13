@@ -23,20 +23,10 @@ Step /^Ensure that (?:a|another) user with username (.+) and password (.+) exist
   identity_service = IdentityService.session
   user = identity_service.ensure_user_exists(user_attrs)
   EnvironmentCleaner.register(:user, user.id)
-  
-  identity_service.revoke_all_user_roles(user, @project)
-  
-  role_name = 'System Admin' 
-  
-  # Ensure user has the following role in the project
-  unless role_name.downcase == "(none)"
-    begin
-      identity_service.ensure_tenant_role(user, @project, role_name)
-    rescue Fog::Identity::OpenStack::NotFound => e
-      raise "Couldn't add #{ user.name } to #{ @project.name } as #{ role_name }"
-    end
-  end
 
+  #if user has project , reset roles for next steps
+  identity_service.revoke_all_user_roles(user, @project) if @project != nil
+  
   # Make variable(s) available for use in succeeding steps
   @existing_user = @user = user
 end
