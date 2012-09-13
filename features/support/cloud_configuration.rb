@@ -42,6 +42,7 @@ module CloudConfiguration
   VOLUME_READY         = :volume_ready
   VOLUME_ATTACH        = :volume_attach
   VOLUME_DETACH        = :volume_detach
+  VOLUME_DELETE        = :volume_delete
   RESUME_INSTANCE      = :resume
 
   class ConfigFile
@@ -184,16 +185,25 @@ module CloudConfiguration
     def self.wait_volume_ready
       self.instance.ensure_repeat_and_wait_key
       unless self.instance[WAIT][VOLUME_READY]
-        self.instance[WAIT][VOLUME_READY] = 6
+        self.instance[WAIT][VOLUME_READY] = 30
         self.instance.save
       end
       self.instance[WAIT][VOLUME_READY]
     end
 
+    def self.wait_volume_delete
+      self.instance.ensure_repeat_and_wait_key
+      unless self.instance[WAIT][VOLUME_DELETE]
+        self.instance[WAIT][VOLUME_DELETE] = 20
+        self.instance.save
+      end
+      self.instance[WAIT][VOLUME_DELETE]
+    end
+
     def self.repeat_volume_ready
       self.instance.ensure_repeat_and_wait_key
       unless self.instance[REPEAT][VOLUME_READY]
-        self.instance[REPEAT][VOLUME_READY] = 10
+        self.instance[REPEAT][VOLUME_READY] = 2
         self.instance.save
       end
       self.instance[REPEAT][VOLUME_READY]

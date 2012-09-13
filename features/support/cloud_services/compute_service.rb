@@ -20,6 +20,8 @@ class ComputeService < BaseCloudService
 
   def attach_volume_to_instance_in_project(project, instance, volume)
     set_tenant project, false
+
+    volumes = service.volumes
     volume      = volumes.find { |v| v.id == volume['id'].to_i }
     device_name = "/dev/vd#{ ('a'..'z').to_a.sample(2).join }"
 
@@ -33,7 +35,7 @@ class ComputeService < BaseCloudService
     sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
       volumes.reload
       volume = volumes.get(volume.id)
-      unless volume.attachments.any? { |a| a['server_id'] == instance.id }
+      unless volume.attachments { |a| a['server_id'] == instance.id }
         raise "Couldn't ensure that instance #{ instance.name } has attached volume #{ volume.name }!"
       end
     end
@@ -279,7 +281,6 @@ class ComputeService < BaseCloudService
 
     response = service.create_key_pair(key_name)
     @private_keys[key_name] = response.body['keypair']['private_key']
-
     return keypairs.reload.find { |keypair| keypair.name == key_name }
   rescue => e
     raise "Couldn't create keypair '#{ key_name }'! The error returned " +
@@ -395,7 +396,7 @@ class ComputeService < BaseCloudService
     end
   end
 
-  def ensure_security_group_rule(project, ip_protocol='tcp', from_port=22, to_port=22, cidr='0.0.0.0/0')
+  def ensure_security_group_rule(project, ip_protocol='tcp', from_port=2222, to_port=2222, cidr='0.0.0.0/0')
     service.set_tenant project
     security_group = service.security_groups.first
     parent_group_id = security_group.id
@@ -418,7 +419,7 @@ class ComputeService < BaseCloudService
     raise "Couldn't ensure security group rule exists! The error returned was #{ e.inspect }"
   end
 
-  def ensure_security_group_rule_exist(project, ip_protocol='tcp', from_port=22, to_port=22, cidr='0.0.0.0/0')
+  def ensure_security_group_rule_exist(project, ip_protocol='tcp', from_port=2222, to_port=2222, cidr='0.0.0.0/0')
     service.set_tenant project
     security_group = service.security_groups.first
     parent_group_id = security_group.id

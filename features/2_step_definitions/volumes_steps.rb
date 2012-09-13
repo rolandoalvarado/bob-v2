@@ -276,15 +276,15 @@ Then /^I [Cc]an [Cc]reate a clone of the volume snapshot$/ do
 
     * Visit the projects page
 
-    * Wait #{ ConfigFile.wait_seconds } seconds
+    * Wait #{ ConfigFile.wait_long } seconds
 
     * Click the #{ @project.name } project
 
-    * Wait #{ ConfigFile.wait_long } seconds
+    * Wait #{ ConfigFile.wait_seconds } seconds
 
     * Click the snapshots tab
 
-    * Wait #{ ConfigFile.wait_long } seconds
+    * Wait #{ ConfigFile.wait_volume_ready } seconds
 
     * Click the clone volume snapshot button for volume snapshot named #{ snapshot["display_name"] }
 
@@ -295,7 +295,7 @@ Then /^I [Cc]an [Cc]reate a clone of the volume snapshot$/ do
     * Fill in the volume description field with #{ attrs.description }
     * Click the create volume button
 
-    * Wait #{ ConfigFile.wait_long } seconds
+    * Wait #{ ConfigFile.wait_seconds } seconds
 
     * Click the volumes tab
 
@@ -307,6 +307,44 @@ Then /^I [Cc]an [Cc]reate a clone of the volume snapshot$/ do
   }
 end
 
+Then /^I [Cc]an [Dd]elete a volume$/ do
+  volume_service = VolumeService.session
+  volume_service.set_tenant @project
+  volume = volume_service.volumes.first
+
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Wait #{ ConfigFile.wait_seconds } seconds
+
+    * Visit the projects page
+
+    * Wait #{ ConfigFile.wait_seconds } seconds
+
+    * Click the #{ @project.name } project
+
+    * Wait #{ ConfigFile.wait_long } seconds
+
+    * Click the Context Menu button of the volume named #{ volume['display_name'] }
+
+    * Wait #{ ConfigFile.wait_short } seconds
+
+    * Click the Delete button of the volume named #{ volume['display_name'] }
+
+    * Wait #{ ConfigFile.wait_seconds } seconds
+
+    * Click the Volume Delete confirmation button
+
+    * Wait #{ ConfigFile.wait_volume_delete } seconds
+
+    * The Volumes table should have 0 rows
+  }
+end
 
 
 TestCase /^A user with a role of (.+) in a project can attach any of its volumes$/i do |role_name|
@@ -409,7 +447,7 @@ TestCase /^A user with a role of (.+) in a project can detach any of its volumes
     * Click the Projects link
     * Click the #{ test_project_name } project
 
-    * Wait 5 seconds
+    * Wait #{ ConfigFile.wait_seconds } seconds
 
     * Click the attach button of the volume named #{ test_volume_name }
     * Choose the item with text #{ test_instance_name } in the attachable instance dropdown
@@ -493,6 +531,7 @@ TestCase /^Volumes that are attached to an instance cannot be deleted$/i do
     * Ensure that the project named #{ test_project_name } has an instance named #{ test_instance_name }
     * Ensure that the project named #{ test_project_name } has an available volume named #{ test_volume_name }
     * Ensure that the user #{ bob_username } has a role of Project Manager in the project #{ test_project_name }
+    * Ensure that the instance named #{ test_instance_name } has an attached volume named #{ test_volume_name } in the project #{ test_project_name }
 
   }
 
@@ -511,7 +550,6 @@ TestCase /^Volumes that are attached to an instance cannot be deleted$/i do
     * Click the Projects link
     * Click the #{ test_project_name } project
     * Click the context menu button of the volume named #{ test_volume_name }
-    * Click the delete button of the volume named #{ test_volume_name }
     * The delete button of the volume named #{ test_volume_name } should not be visible
   }
 
