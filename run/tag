@@ -1,17 +1,80 @@
-#!/usr/bin/env bash
-description="Validates features that have a given tag"
+#!/usr/bin/env ruby
+description = 'Validates features that have a given tag'
 
-if [ $# -eq 2 ] && [ $1 == 'describe' ]; then
-  printf "  %-0$2s - $description\n" `basename $0`
+basename = File.basename(__FILE__).to_s
+if ARGV[0] == 'describe'
+  puts "  #{basename.ljust(ARGV[1].to_i)} - #{description}"
   exit 0
-elif [ $# -eq 1 ] && [ $1 == '--help' ]; then
-  printf "run/`basename $0` <tag>\n"
-  printf "Examples:\n"
-  printf "  run/`basename $0` @wip\n"
-  printf "  run/`basename $0` @jira-DPBLOG-14\n"
-  exit 0
-fi
-printf "Verifying requirements tagged with $1\n"
-printf "Start at %s GMT\n" `TZ=GMT date '+%F-%T'`
-bundle exec cucumber --no-profile --tags $1 --require features --format Cucumber::Formatter::Bob::Html --out output --format rerun --out rerun.txt --format 'Slowhandcuke::Formatter'
-printf "Finished at %s GMT\n" `TZ=GMT date '+%F-%T'`
+end
+
+require 'rubygems'
+require 'yaml'
+require 'fileutils'
+require 'optparse'
+require 'uri'
+require 'net/ssh/gateway'
+require File.expand_path('../../features/support/cloud_configuration.rb', __FILE__)
+
+include CloudConfiguration
+
+@options = {}
+OptionParser.new do |opts|
+  opts.banner = <<HELP
+Usage: run/#{basename} tag1[,tag2,tag3] [options]
+Separate tags by a ',' (no spaces) to run more than one tag.
+HELP
+
+  opts.separator ''
+
+  opts.on('-t', '--[no-]tunnel', 'Connect to web client host via SSH tunnel') do |t|
+    @options[TUNNEL] = t
+  end
+
+  opts.on('-u', '--username [USERNAME]', 'Username to connect to via SSH tunnel') do |username|
+    @options[:username] = username
+  end
+
+  opts.separator ''
+
+  opts.on_tail('-h', '--help', 'Display this screen') do
+    puts opts
+    exit 0
+  end
+end.parse!
+
+@host = URI.parse(ConfigFile.web_client_url).host
+def create_tunnel
+  username = @options[:username] || `whoami`.chomp
+  abort 'ERROR: Username must be specified!' if username.to_s.empty?
+
+  gateway = Net::SSH::Gateway.new(@host, username)
+  gateway.open(@host, 35357, 35357)
+  gateway.open(@host, 8776, 8776)
+  gateway.open(@host, 9292, 9292)
+  gateway.open(@host, 8774, 8774)
+  gateway.open(@host, 8773, 8773)
+  gateway.open(@host, 5000, 5000)
+  gateway
+end
+
+original_tunnel_config = ConfigFile.tunnel
+ConfigFile.tunnel = @options[TUNNEL]
+ConfigFile.instance.save
+
+if ConfigFile.tunnel
+  print "Connecting to #{@host} via SSH tunnel... "
+  @tunnel = create_tunnel
+  puts 'Connected.'
+end
+
+puts "Verifying requirements tagged with #{ARGV[0]}"
+puts "Start at #{Time.now}"
+system "bundle exec cucumber --no-profile --tags #{ARGV[0]} --require features --format Cucumber::Formatter::Bob::Html --out output --format rerun --out rerun.txt --format 'Slowhandcuke::Formatter'"
+if @tunnel
+  @tunnel.shutdown!
+  puts "SSH tunnel closed..."
+end
+puts "Finished at #{Time.now}"
+
+ConfigFile.tunnel = original_tunnel_config
+ConfigFile.instance.save
