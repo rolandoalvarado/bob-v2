@@ -973,13 +973,15 @@ end
 
 
 Then /^The (.+) project should be visible$/ do |project_name|
-  unless @current_page.has_project_link?( name: project_name )
-    raise "The project '#{ project_name }' should be visible, but it's not."
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_until_project_is_visible).tries do
+    unless @current_page.has_project_link?( name: project_name )
+      raise "The project '#{ project_name }' should be visible, but it's not."
+    end
   end
 end
 
 Step /^The (.+) project row should be visible$/ do |project_name|
-  sleeping(1).seconds.between_tries.failing_after(15).tries do
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_until_project_is_visible).tries do
     unless @current_page.has_project_row?( name: project_name )
       raise "The project '#{ project_name }' row should be visible, but it's not."
     end

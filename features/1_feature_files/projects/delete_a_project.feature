@@ -8,7 +8,7 @@ Feature: Delete a project
   Background:
     * A project exists in the system
 
-  @permissions
+  @permissions @jira-MCF-25-CUP
   Scenario Outline: Check User Permissions
     Given I have a role of <Role> in the project
      Then I <Can or Cannot Delete> the project
