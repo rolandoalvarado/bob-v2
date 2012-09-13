@@ -635,32 +635,28 @@ end
 
 
 TestCase /^I cannot delete (?:that|the) project$/i do
-  username      = Unique.username('bob')
-  password      = '123qwe'
-  project_name  = Unique.project_name('project')
-
   Preconditions %{
-    * Ensure that a user with username #{ username } and password #{ password } exists
-    * Ensure that a project named #{ project_name } exists
-    * Ensure that the user #{ username } has a role of Member in the system
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that the user #{ bob_username } has a role of Member in the system
   }
 
   Cleanup %{
-    * Register the project named #{ project_name } for deletion at exit
-    * Register the user named #{ username } for deletion at exit
+    * Register the project named #{ test_project_name } for deletion at exit
+    * Register the user named #{ bob_username } for deletion at exit
   }
   
   Script %{
 
     * Click the Logout button if currently logged in
     * Visit the Login page
-    * Fill in the Username field with #{ username }
-    * Fill in the Password field with #{ password }
+    * Fill in the Username field with #{ bob_username }
+    * Fill in the Password field with #{ bob_password }
     * Click the Login button
 
     * Visit the projects page
-    * The #{ project_name } project should be visible
-    * The delete project link should be disabled with #{ project_name }
+    * The #{ test_project_name } project should be visible
+    * The delete project link should be disabled with #{ test_project_name }
   }
 end
 
