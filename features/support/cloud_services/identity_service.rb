@@ -87,9 +87,9 @@ class IdentityService < BaseCloudService
     unless valid_roles.include?(role_name)
       raise "Unknown role '#{ role_name }'. Valid roles are #{ valid_roles.join(',') }"
     end
-
+    
     revoke_all_user_roles(user, tenant) # It's for (None)
-
+    
     if ['System Admin', 'Project Manager', 'Member'].include?(role_name)
       admin_tenant = tenants.find_by_name('admin')
       member_role = roles.find_by_name('Member')
@@ -103,7 +103,7 @@ class IdentityService < BaseCloudService
     end
 
   end
-
+  
   def ensure_tenant_does_not_exist(attributes)
     if tenant = tenants.find_by_name(attributes[:name])
       ComputeService.session.delete_instances_in_project(tenant)
