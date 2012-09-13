@@ -44,6 +44,7 @@ module CloudConfiguration
   VOLUME_DETACH        = :volume_detach
   VOLUME_DELETE        = :volume_delete
   RESUME_INSTANCE      = :resume
+  TUNNEL               = :tunnel
 
   class ConfigFile
     include Singleton
@@ -333,6 +334,14 @@ module CloudConfiguration
       self.instance[UNIQUE_HELPER_VALUES][NUMERIC]
     end
 
+    def self.tunnel
+      self.instance[TUNNEL] == true
+    end
+
+    def self.tunnel=(value)
+      self.instance[TUNNEL] = !!value
+    end
+
     def initialize
       if File.exists?(PATH)
         @config = YAML.load_file( File.open(PATH, 'r+') )
@@ -349,6 +358,10 @@ module CloudConfiguration
 
     def [](key)
       @config[key]
+    end
+
+    def []=(key, value)
+      @config[key] = value
     end
 
     def ensure_unique_helper_key
