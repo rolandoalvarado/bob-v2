@@ -893,6 +893,7 @@ TestCase /^An instance is publicly accessible via its assigned floating IP$/ do
 
   Preconditions %{
     * Ensure that a project named #{ test_project_name } exists
+    * Ensure that the project named #{ test_project_name } has 0 instances
     * Ensure that the project named #{ test_project_name } has a member named #{ member_username }
     * Ensure that a security group rule exists for project #{ test_project_name }
     * Ensure that the user with credentials #{ member_username }/#{ member_password } has a keypair named #{ test_keypair_name }
