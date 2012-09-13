@@ -20,6 +20,8 @@ class ComputeService < BaseCloudService
 
   def attach_volume_to_instance_in_project(project, instance, volume)
     set_tenant project, false
+
+    volumes = service.volumes
     volume      = volumes.find { |v| v.id == volume['id'].to_i }
     device_name = "/dev/vd#{ ('a'..'z').to_a.sample(2).join }"
 
@@ -33,7 +35,7 @@ class ComputeService < BaseCloudService
     sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
       volumes.reload
       volume = volumes.get(volume.id)
-      unless volume.attachments.any? { |a| a['server_id'] == instance.id }
+      unless volume.attachments { |a| a['server_id'] == instance.id }
         raise "Couldn't ensure that instance #{ instance.name } has attached volume #{ volume.name }!"
       end
     end
