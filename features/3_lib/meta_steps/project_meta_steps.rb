@@ -73,6 +73,7 @@ Then /^Ensure that I have a role of (.+) in the named project$/i do |role_name|
   user             = @current_user
 
   identity_service.revoke_all_user_roles(user, @named_project)
+  admin_project = identity_service.tenants.find { |t| t.name == 'admin' }
   identity_service.revoke_all_user_roles(user, admin_project)
 
   # Ensure user has the following role in the project
@@ -83,7 +84,6 @@ Then /^Ensure that I have a role of (.+) in the named project$/i do |role_name|
     # If you are project manager of named_project, you have a member role of @named_project
     # and have admin role of admin project.  
     role = identity_service.roles.find_by_name(RoleNameDictionary.db_name('Member'))
-    admin_project = identity_service.tenants.find { |t| t.name == 'admin' }
 
     if role.nil?
       raise "Role #{ role_name } couldn't be found. Make sure it's defined in " +
@@ -149,6 +149,7 @@ Then /^Ensure that I have a role of (.+) in the project$/i do |role_name|
   EnvironmentCleaner.register(:user, user.id)
 
   identity_service.revoke_all_user_roles(user, @project)
+  admin_project = identity_service.tenants.find { |t| t.name == 'admin' }
   identity_service.revoke_all_user_roles(user, admin_project)
 
   # Ensure user has the following role in the project
@@ -159,7 +160,6 @@ Then /^Ensure that I have a role of (.+) in the project$/i do |role_name|
     # If you are project manager of named_project, you have a member role of @project
     # and have admin role of admin project.  
     role = identity_service.roles.find_by_name(RoleNameDictionary.db_name('Member'))
-    admin_project = identity_service.tenants.find { |t| t.name == 'admin' }
 
     if role.nil?
       raise "Role #{ role_name } couldn't be found. Make sure it's defined in " +
