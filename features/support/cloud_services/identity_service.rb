@@ -88,16 +88,20 @@ class IdentityService < BaseCloudService
       raise "Unknown role '#{ role_name }'. Valid roles are #{ valid_roles.join(',') }"
     end
 
-    if ['System Admin', 'Project Manager'].include?(role_name)
-      admin_role   = roles.find_by_name('admin')
-      admin_tenant = tenants.find_by_name('admin')
-      admin_tenant.grant_user_role(user.id, admin_role.id)
-    end
+    revoke_all_user_roles(user, tenant) # It's for (None)
 
     if ['System Admin', 'Project Manager', 'Member'].include?(role_name)
+      admin_tenant = tenants.find_by_name('admin')
       member_role = roles.find_by_name('Member')
+      user.update_tenant(tenant.id)
       tenant.grant_user_role(user.id, member_role.id)
+      revoke_all_user_roles(user, admin_tenant)
+      if ['System Admin','Project Manager'].include?(role_name)
+        admin_role   = roles.find_by_name('admin')
+        admin_tenant.grant_user_role(user.id, admin_role.id)
+      end
     end
+
   end
 
   def ensure_tenant_does_not_exist(attributes)
@@ -169,6 +173,7 @@ class IdentityService < BaseCloudService
 
     unless user
       user = create_user(attributes)
+
 
       if admin_role
         admin_tenant = tenants.find_by_name('admin')
