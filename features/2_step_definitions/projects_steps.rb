@@ -509,6 +509,7 @@ Then /^the project will be [Cc]reated$/ do
   steps %{
     * Visit the projects page
     * The #{ @project_attrs.name } project should be visible
+    * Ensure that a project named #{ @project_attrs.name } exists
   }
 end
 
