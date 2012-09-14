@@ -435,18 +435,6 @@ class ComputeService < BaseCloudService
     raise "Couldn't ensure security group rule exists! The error returned was #{ e.inspect }"
   end
 
-  def create_security_group(project, attributes)
-    service.set_tenant project
-    security_groups = service.security_groups
-
-    find_security_group = security_groups.find_by_name(attributes[:name])
-    find_security_group.destroy if find_security_group
-
-    security_group = security_groups.new(attributes)
-    security_group.save
-    security_group
-  end
-
   def delete_security_group(security_group)
     security_group.destroy
   end

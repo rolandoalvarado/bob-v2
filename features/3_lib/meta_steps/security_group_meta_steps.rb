@@ -10,7 +10,7 @@ Then /^Ensure that a security group named (.+) exist$/i do |security_group_name|
                       :name     => Unique.name(security_group_name),
                       :description    => ('Security Group Description')
                     )
-  @security_group  = compute_service.create_security_group(@project, security_group_attrs)
+  @security_group  = compute_service.ensure_security_group_exists(@project, security_group_attrs)
 end
 
 Step /^Ensure that a security group exist$/i do
