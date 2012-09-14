@@ -765,9 +765,7 @@ TestCase /^A user with a role of (.+) in the project Can Unpause an instance$/i 
     * Click the Projects link
     * Click the #{ test_project_name } project
 
-    * Click the context button of instance #{ test_instance_name } in #{ test_project_name }
-    * Click the unpause button of instance #{ test_instance_name } in #{ test_project_name }
-
+    * Click the unpause action in the context menu for the instance named #{ test_instance_name }
     * The instance named #{ test_instance_name } should be in active status
   }
 
@@ -798,9 +796,7 @@ TestCase /^An authorized user can unpause an instance in the project$/i do
     * Click the Projects link
     * Click the #{ test_project_name } project
 
-    * Click the context button of instance #{ test_instance_name } in #{ test_project_name }
-    * Click the unpause button of instance #{ test_instance_name } in #{ test_project_name }
-
+    * Click the unpause action in the context menu for the instance named #{ test_instance_name }
     * The instance named #{ test_instance_name } should be in active status
   }
 
