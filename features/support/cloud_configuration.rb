@@ -45,6 +45,7 @@ module CloudConfiguration
   VOLUME_DELETE        = :volume_delete
   RESUME_INSTANCE      = :resume
   TUNNEL               = :tunnel
+  TUNNEL_USERNAME      = :tunnel_username
 
   class ConfigFile
     include Singleton
@@ -347,8 +348,8 @@ module CloudConfiguration
       self.instance[TUNNEL] == true
     end
 
-    def self.tunnel=(value)
-      self.instance[TUNNEL] = !!value
+    def self.tunnel_username
+      self.instance[TUNNEL_USERNAME]
     end
 
     def initialize
