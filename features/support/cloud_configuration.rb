@@ -254,6 +254,15 @@ module CloudConfiguration
       self.instance[REPEAT][FIFTEEN]
     end
 
+    def self.repeat_until_expected_page_is_visible
+      self.instance.ensure_repeat_and_wait_key
+      unless self.instance[REPEAT][FIFTEEN]
+        self.instance[REPEAT][FIFTEEN] = 15
+        self.instance.save
+      end
+      self.instance[REPEAT][FIFTEEN]
+    end
+
     def self.repeat_timing
       self.instance.ensure_repeat_and_wait_key
       unless self.instance[REPEAT][TIMING]

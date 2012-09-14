@@ -335,8 +335,10 @@ end
 
 Then /^Current page should(?:| still) be the (.+) page$/i do |page_name|
   @current_page = eval("#{ page_name.downcase.capitalize }Page").new
-  unless @current_page.has_expected_path?
-    raise "Expected #{ @current_page.expected_path } but another page was returned: #{ @current_page.actual_path }"
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_until_expected_page_is_visible).tries do
+    unless @current_page.has_expected_path?
+      raise "Expected #{ @current_page.expected_path } but another page was returned: #{ @current_page.actual_path }"
+    end
   end
 end
 
