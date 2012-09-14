@@ -1,4 +1,4 @@
-@jira-MCF-26 @projects
+@jira-MCF-26 @projects @wip
 Feature: Edit a Project
   As an authorized user, I want to edit a project's details
 
