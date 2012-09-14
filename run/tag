@@ -58,13 +58,19 @@ def create_tunnel
 end
 
 original_tunnel_config = ConfigFile.tunnel
-ConfigFile.tunnel = @options[TUNNEL]
-ConfigFile.instance.save
 
-if ConfigFile.tunnel
-  print "Connecting to #{@host} via SSH tunnel... "
-  @tunnel = create_tunnel
-  puts 'Connected.'
+# Added if condition to execute tunnel if config:tunnel = true
+if original_tunnel_config == true
+  ConfigFile.tunnel = @options[TUNNEL]
+  ConfigFile.instance.save
+
+  if ConfigFile.tunnel
+    print "Connecting to #{@host} via SSH tunnel... "
+    @tunnel = create_tunnel
+    puts 'Connected.'
+  end
+else
+  puts "Running bob without tunnel connection."    
 end
 
 puts "Verifying requirements tagged with #{ARGV[0]}"
