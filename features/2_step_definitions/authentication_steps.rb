@@ -1,6 +1,6 @@
 Then /^If my username is (.+) and my password is (.+), I can log in with the following credentials (.+), (.+)$/i do |username, password, typed_username, typed_password|
   steps %{
-    * Ensure that a user with username #{ username } and password #{ password } exists
+    * Ensure that a user with username #{ username } and password #{ password } has a role of System Admin
     * Register the user named #{ username } for deletion at exit
 
     * Click the Logout button if currently logged in
@@ -16,7 +16,7 @@ end
 
 Then /^If my username is (.+) and my password is (.+), I cannot log in with the following credentials (.+), (.+)$/i do |username, password, typed_username, typed_password|
   steps %{
-    * Ensure that a user with username #{ username } and password #{ password } exists
+    * Ensure that a user with username #{ username } and password #{ password } has a role of System Admin
     * Register the user named #{ username } for deletion at exit
 
     * Click the Logout button if currently logged in
@@ -70,7 +70,7 @@ Then /^Logging out redirects me to the Log In page$/ do
   }
 
   steps %{
-    * Ensure that a user with username #{ username } and password #{ password } exists
+    * Ensure that a user with username #{ username } and password #{ password } has a role of System Admin
     * Register the user named #{ username } for deletion at exit
 
     * Click the Logout button if currently logged in
@@ -94,7 +94,7 @@ Then /^Logging out clears my session$/ do
   }
 
   steps %{
-    * Ensure that a user with username #{ username } and password #{ password } exists
+    * Ensure that a user with username #{ username } and password #{ password } has a role of System Admin
     * Register the user named #{ username } for deletion at exit
 
     * Click the Logout button if currently logged in
