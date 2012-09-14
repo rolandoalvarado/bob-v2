@@ -17,3 +17,4 @@
 /features/support/config.yml
 /*localgems*
 /*screenshots_dir
+/features/support/tunnel_patch.rb
