@@ -1,4 +1,4 @@
-@jira-MCF-39 @volumes
+@jira-MCF-39 @volumes @wip
 Feature: Delete a Volume Snapshot
   As an authorized user, I want to delete a volume snapshot so that I can free
   up resources in my storage node.
