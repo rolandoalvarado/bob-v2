@@ -75,6 +75,8 @@ GEM
     net-scp (1.0.4)
       net-ssh (>= 1.99.1)
     net-ssh (2.5.2)
+    net-ssh-gateway (1.1.0)
+      net-ssh (>= 1.99.1)
     nokogiri (1.5.5)
     poltergeist (0.7.0)
       capybara (~> 1.1)
@@ -126,6 +128,7 @@ DEPENDENCIES
   guard-cucumber
   headless
   mcloud-fog!
+  net-ssh-gateway
   poltergeist
   pry
   rb-fsevent

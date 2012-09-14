@@ -1,4 +1,4 @@
-@jira-MCF-16 @instances
+@jira-MCF-16 @pause
 Feature: Pause an Instance
   As a user, I want to pause an instance so that I can do maintenance work on it
 

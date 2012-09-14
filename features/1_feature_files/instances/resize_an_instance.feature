@@ -1,4 +1,4 @@
-@jira-MCF-18 @instances @resize
+@jira-MCF-18 @resize
 Feature: Resize an Instance
   As a user, I want to resize an instance so that I can adjust its capacity
   according to its resource demands.

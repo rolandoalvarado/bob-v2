@@ -1,6 +1,7 @@
-@jira-DPBLOG-7 @format-v2 @authentication
+@jira-DPBLOG-7 @format-v2 @authentication @wip
 Feature: Log Out
 
+  @jira-DPBLOG-7-RM
   Scenario:
     * Logging out redirects me to the Log In page
     
