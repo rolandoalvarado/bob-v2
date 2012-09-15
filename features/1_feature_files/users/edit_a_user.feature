@@ -1,4 +1,4 @@
-@jira-MCF-44 @users
+@jira-MCF-44 @users @no_ci
 Feature: Edit a User
 
   @permissions
