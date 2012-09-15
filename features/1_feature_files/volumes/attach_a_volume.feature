@@ -1,4 +1,4 @@
-@jira-MCF-35 @format-v2 @volumes
+@jira-MCF-35 @format-v2 @volumes @no_ci
 Feature: Attach a Volume
   As a user, I want to attach a volume to my instance so that the instance will
   have a scalable, persistent storage.

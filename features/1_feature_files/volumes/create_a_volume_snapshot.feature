@@ -1,4 +1,4 @@
-@jira-MCF-37 @volumes @wip
+@jira-MCF-37 @volumes @no_ci
 Feature: Create a Volume Snapshot
   As an authorized user, I want to create a snapshot of one of my volumes so
   that I can revert to it as needed.
