@@ -1,4 +1,4 @@
-@jira-DPBLOG-7 @format-v2 @authentication @no_ci
+@jira-DPBLOG-7 @format-v2 @authentication
 Feature: Log Out
 
   @jira-DPBLOG-7-RM

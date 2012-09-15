@@ -31,6 +31,35 @@ Step /^Ensure that (?:a|another) user with username (.+) and password (.+) exist
   @existing_user = @user = user
 end
 
+Step /^Ensure that (?:a|another) user with username (.+) and password (.+) has a role of (.+)$/i do |username, password, role_name|
+  username         = Unique.username(username)
+  user_attrs       = CloudObjectBuilder.attributes_for(
+                       :user,
+                       :name => username,
+                       :password => password
+                     )
+
+  identity_service = IdentityService.session
+  user = identity_service.ensure_user_exists(user_attrs)
+  EnvironmentCleaner.register(:user, user.id)
+
+  #if user has project , reset roles for next steps
+  identity_service.revoke_all_user_roles(user, @project) if @project != nil
+  
+  # Ensure user has the following role in the project
+  unless role_name.downcase == "(none)"
+    begin
+      identity_service.ensure_tenant_role(user, @project, role_name)
+    rescue Fog::Identity::OpenStack::NotFound => e
+      raise "Couldn't add #{ user.name } to #{ @project.name } as #{ role_name }"
+    end
+  end
+  
+  # Make variable(s) available for use in succeeding steps
+  @existing_user = @user = user
+end
+
+
 Step /^Ensure that (?:a|another) user named (.+) exists$/i do |username|
   username           = Unique.username(username)
   @user_attrs        = CloudObjectBuilder.attributes_for(:user, :name => username, :password => bob_password || '123qwe')
@@ -104,6 +133,14 @@ Step /^Ensure that the user (.+) has a role of (.+) in the project (.+)$/ do |us
     role_name = "Member"
   end
   identity_service.ensure_project_role(user, project, role_name)
+
+  admin_project = identity_service.tenants.find { |t| t.name == 'admin' }  
+  if role_name.downcase != "user" or role_name.downcase != "(none)" 
+    identity_service.ensure_tenant_role(user, admin_project, role_name)
+  else
+    identity_service.revoke_all_user_roles(user, admin_project)
+  end
+
 end
 
 Step /^Ensure that the user (.+) (?:does not have a role in|is not a member of) the project (.+)$/ do |username, project_name|
