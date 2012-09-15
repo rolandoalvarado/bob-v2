@@ -78,7 +78,7 @@ module CloudConfiguration
     def self.timing
       self.instance.ensure_repeat_and_wait_key
       unless self.instance[REPEAT][TIMING]
-        self.instance[REPEAT][TIMING] = 3
+        self.instance[REPEAT][TIMING] = 10
         self.instance.save
       end
       self.instance[REPEAT][TIMING]
@@ -87,7 +87,7 @@ module CloudConfiguration
     def self.repeat_node
       self.instance.ensure_repeat_and_wait_key
       unless self.instance[REPEAT][NODE_QUERY_RETRIES]
-        self.instance[REPEAT][NODE_QUERY_RETRIES] = 3
+        self.instance[REPEAT][NODE_QUERY_RETRIES] = 10
         self.instance.save
       end
       self.instance[REPEAT][NODE_QUERY_RETRIES]
@@ -159,7 +159,7 @@ module CloudConfiguration
     def self.wait_short
       self.instance.ensure_repeat_and_wait_key
       unless self.instance[WAIT][SHORT]
-        self.instance[WAIT][SHORT] = 1
+        self.instance[WAIT][SHORT] = 2
         self.instance.save
       end
       self.instance[WAIT][SHORT]
@@ -177,7 +177,7 @@ module CloudConfiguration
     def self.wait_seconds
       self.instance.ensure_repeat_and_wait_key
       unless self.instance[WAIT][WAIT_IN_SECONDS]
-        self.instance[WAIT][WAIT_IN_SECONDS] = 3
+        self.instance[WAIT][WAIT_IN_SECONDS] = 5
         self.instance.save
       end
       self.instance[WAIT][WAIT_IN_SECONDS]
