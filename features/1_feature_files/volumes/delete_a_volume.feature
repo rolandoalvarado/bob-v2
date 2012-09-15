@@ -12,6 +12,7 @@ Feature: Delete a volume
 
   Background:
     * A project exists in the system
+    * The volume has 0 saved snapshot
     * The project has 1 available volume
 
   @permissions
@@ -24,5 +25,6 @@ Feature: Delete a volume
         | System Admin    | Can Delete           |
         | Project Manager | Can Delete           |
 
+  @pdeazeta
   Scenario:
     * Volumes that are attached to an instance cannot be deleted

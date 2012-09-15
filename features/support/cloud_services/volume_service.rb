@@ -184,7 +184,27 @@ class VolumeService < BaseCloudService
 
   def try_fixing_volume_count(project, desired_count)
     sleeping(ConfigFile.wait_volume_ready).seconds.between_tries.failing_after(ConfigFile.repeat_volume_ready).tries do
+      reload_volumes
       difference = (@volumes.count - desired_count).abs
+
+      #make sure volumes are not attached to any instance
+      @volumes.each do |volume|
+        if volume['status'] == 'in-use'
+          compute_service = ComputeService.session.service
+          compute_service.set_tenant project
+          server_id = volume['attachments'].first['server_id']
+          compute_service.detach_volume(server_id, volume['id'])
+        end
+      end
+
+      sleeping(ConfigFile.wait_volume_detach).seconds.between_tries.failing_after(ConfigFile.repeat_volume_detach).tries do
+        volumes = reload_volumes
+        attached_volumes = volumes.select{|volume| volume['status'] == 'in-use'}
+
+        unless attached_volumes.count == 0
+          raise 'Volumes are still attached.'
+        end
+      end
 
       if(@volumes.count > desired_count)
         difference.times do
@@ -195,6 +215,8 @@ class VolumeService < BaseCloudService
           create_volume
         end
       end
+
+      
 
       assert_volume_count(project, desired_count)
 
