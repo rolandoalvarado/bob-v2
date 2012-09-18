@@ -403,7 +403,7 @@ Then /^I can delete (?:that|the) project$/i do
     * The #{ (@project || @project_attrs).name } project should be visible
 
     * Delete the #{ (@project || @project_attrs).name } project
-
+    * Confirm the deletion of #{ (@project || @project_attrs).name } project
   }
 
   project =  IdentityService.session.tenants.find_by_name((@project || @project_attrs).name)
@@ -433,6 +433,37 @@ Then /^I failed to delete (?:that|the) project$/i do
     raise "The project deletng should be failed, but it seems to succeeed."
   end
 
+end
+
+Then /^I cannot delete (?:that|the) project$/i do
+  steps %{
+
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ @current_user.name }
+    * Fill in the Password field with #{ @current_user.password }
+    * Click the Login button
+
+    * Visit the projects page
+    * The #{ @project } project should be visible
+    * The Context Menu button for the project named #{ @project } should not be visible
+  }
+end
+
+Then /^(?:that|the) project cannot be deleted$/i do
+  steps %{
+
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ @current_user.name }
+    * Fill in the Password field with #{ @current_user.password }
+    * Click the Login button
+
+    * Visit the projects page
+    * The #{ @project } project should be visible
+    * Delete the #{ @project } project
+    * The error message "Unable to delete the project" should be displayed
+  }
 end
 
 Then /^I can edit (?:that|the) project$/i do
@@ -604,7 +635,7 @@ TestCase /^A user with a role of (.+) in a project cannot edit the instance quot
 
 end
 
-Then /^I [Cc]annot [Ee]dit (?:that|the) project$/ do
+TestCase /^I [Cc]annot [Ee]dit (?:that|the) project$/ do
   username      = Unique.username('bob')
   password      = '123qwe'
   project_name  = Unique.project_name('project')
@@ -633,35 +664,6 @@ Then /^I [Cc]annot [Ee]dit (?:that|the) project$/ do
     * The edit project link should be disabled with #{ project_name }
   }
 end
-
-
-TestCase /^I cannot delete (?:that|the) project$/i do
-  Preconditions %{
-    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
-    * Ensure that a project named #{ test_project_name } exists
-    * Ensure that the user #{ bob_username } has a role of Member in the system
-  }
-
-  Cleanup %{
-    * Register the project named #{ test_project_name } for deletion at exit
-    * Register the user named #{ bob_username } for deletion at exit
-  }
-  
-  Script %{
-
-    * Click the Logout button if currently logged in
-    * Visit the Login page
-    * Fill in the Username field with #{ bob_username }
-    * Fill in the Password field with #{ bob_password }
-    * Click the Login button
-
-    * Visit the projects page
-    * The #{ test_project_name } project should be visible
-    * The delete project link should be disabled with #{ test_project_name }
-  }
-end
-
-
 
 TestCase /^Project can be updated the quota of the project with (.+) , (.+) and (.+)$/i do |floating_ips,volumes,cores|
 
