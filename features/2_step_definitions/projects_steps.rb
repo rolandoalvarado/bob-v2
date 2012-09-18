@@ -496,6 +496,20 @@ Then /^I can edit (?:that|the) project$/i do
 
 end
 
+Then /^I cannot edit (?:that|the) project$/i do
+  steps %{
+
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ @current_user.name }
+    * Fill in the Password field with #{ @current_user.password }
+    * Click the Login button
+
+    * Visit the projects page
+    * The #{ @project } project should be visible
+    * The Context Menu button for the project named #{ @project } should not be visible
+  }
+end
 
 Then /^Arya Stark cannot view that project$/ do
   user_attrs       = CloudObjectBuilder.attributes_for(
@@ -600,7 +614,6 @@ TestCase /^A user with a role of (.+) in a project can edit the instance quota o
 
 end
 
-
 TestCase /^A user with a role of (.+) in a project cannot edit the instance quota of the project$/i do |role_name| 
   
   floating_ips  = 10
@@ -633,36 +646,6 @@ TestCase /^A user with a role of (.+) in a project cannot edit the instance quot
     * The quota modify link should be disabled
   }
 
-end
-
-TestCase /^I [Cc]annot [Ee]dit (?:that|the) project$/ do
-  username      = Unique.username('bob')
-  password      = '123qwe'
-  project_name  = Unique.project_name('project')
-
-  Preconditions %{
-    * Ensure that a user with username #{ username } and password #{ password } exists
-    * Ensure that a project named #{ project_name } exists
-    * Ensure that the user #{ username } has a role of Member in the system
-  }
-
-  Cleanup %{
-    * Register the project named #{ project_name } for deletion at exit
-    * Register the user named #{ username } for deletion at exit
-  }
-  
-  Script %{
-
-    * Click the Logout button if currently logged in
-    * Visit the Login page
-    * Fill in the Username field with #{ username }
-    * Fill in the Password field with #{ password }
-    * Click the Login button
-
-    * Visit the projects page
-    * The #{ project_name } project should be visible
-    * The edit project link should be disabled with #{ project_name }
-  }
 end
 
 TestCase /^Project can be updated the quota of the project with (.+) , (.+) and (.+)$/i do |floating_ips,volumes,cores|
