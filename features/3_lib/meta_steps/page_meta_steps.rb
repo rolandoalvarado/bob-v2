@@ -376,8 +376,10 @@ end
 
 
 Step /^Current page should(?:| still) have the security groups$/ do
-  unless @current_page.has_security_groups_element?
-    raise "Current page doesn't have security groups."
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_until_expected_page_is_visible).tries do
+    unless @current_page.has_security_groups_element?
+      raise "Current page doesn't have security groups."
+    end
   end
 end
 
@@ -401,12 +403,6 @@ Then /^Current page should have the new security group rule$/ do
     raise "Current page doesn't have security groups."
   end
 end
-
-#Then /^Current page should have the new (.+) security group$/ do |security_group|
-#  unless @current_page.has_security_groups_element?
-#    raise "Current page doesn't have the new #{security_group} security group."
-#  end
-#end
 
 Step /^Current page should display project details in the sidebar$/ do
   unless @current_page.has_project_element?
@@ -437,6 +433,7 @@ Then /^Current page should have the (.+) security group$/ do |security_group|
     raise "Current page doesn't have the #{security_group} security group."
   end
 end
+
 
 Then /^Drag the(?:| instance) flavor slider to a different flavor$/ do
   @current_page.session.execute_script %{
