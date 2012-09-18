@@ -1,4 +1,4 @@
-@jira-MCF-107 @volumes
+@jira-MCF-107 @volumes @no_ci
 Feature: Create a Volume on the Storage Node
   As an authorized user, I want to create a volume on the storage node so that
   I can use it with one of my instances.
@@ -12,6 +12,8 @@ Feature: Create a Volume on the Storage Node
 
   Background:
     * A project exists in the system
+    * The volume has 0 saved snapshot
+    * The project has 0 available volume
     * A storage node is available for use
 
 

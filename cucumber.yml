@@ -20,7 +20,7 @@ single_feature: --strict --tags ~@wip --require features --format 'Slowhandcuke:
 
 # Use this profile when running these tests in a
 # CI environment
-ci: --strict --tags ~@wip --require features --format pretty --format junit --out output/junit --format Cucumber::Formatter::Bob::Html --out output
+ci: --strict --tags ~@wip --tags ~@no_ci --require features --format pretty --format junit --out output/junit --format Cucumber::Formatter::Bob::Html --out output
 
 debug_formatter: --require features --format usage --dry-run
 

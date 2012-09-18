@@ -1,4 +1,4 @@
-@jira-MCF-124 @volumes
+@jira-MCF-124 @volumes  @no_ci
 Feature: Create a clone of a volume snapshot
   As an authorized user, I want to clone a volume on the storage node so that
   I can use it with one of my instances.

@@ -1,4 +1,4 @@
-@jira-MCF-25 @projects
+@jira-MCF-25 @projects @no_ci
 Feature: Delete a project
   As an authorized user, I want to delete a project so that I can free up
   unused resources.

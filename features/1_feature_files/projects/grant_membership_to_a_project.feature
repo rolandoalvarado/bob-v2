@@ -1,4 +1,4 @@
-@jira-MCF-28 @projects @wip
+@jira-MCF-28 @projects @no_ci
 Feature: Grant Membership to a Project
   As a project owner, I want to grant project membership to other users so
   that they can help me manage the resources in it.
