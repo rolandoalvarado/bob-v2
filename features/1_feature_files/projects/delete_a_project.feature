@@ -1,4 +1,4 @@
-@jira-MCF-25 @projects @no_ci
+@jira-MCF-25 @projects
 Feature: Delete a project
   As an authorized user, I want to delete a project so that I can free up
   unused resources.
@@ -25,5 +25,5 @@ Feature: Delete a project
   Scenario: Delete a Project with resource
     Given I am authorized to delete the project
       And The project has 1 active instance
-     Then I Cannot Delete the project
+     Then the project cannot be deleted
 
