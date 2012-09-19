@@ -1,4 +1,4 @@
-@jira-DPBLOG-10 @jira-MCF-27 @format_v2 @no_ci
+@jira-DPBLOG-10 @jira-MCF-27 @format_v2
 Feature: Edit a Project's Instance Quota
   As a project manager, I want to set the instance quota (aka maximum
   number of instances) in my project, so that I can control my project's
