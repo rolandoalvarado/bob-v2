@@ -1,4 +1,4 @@
-@jira-MCF-42 @users @no_ci
+@jira-MCF-42 @users
 Feature: Change a user's permissions
 
   @permissions
