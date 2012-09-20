@@ -10,7 +10,7 @@ Then /^Connect to (.+) instance with floating IP (.+) via (.+)$/ do |image_name,
     when 'RDP'
       %x{ rdesktop #{ ip_address } -u #{ username } -p #{ password } }
     when 'SSH'
-      Net::SSH.start(ip_address, username, password: password, port: 22, timeout: 10, user_known_hosts_file: '/dev/null') do |ssh|
+      Net::SSH.start(ip_address, username, password: password, port:  22, timeout: 10, user_known_hosts_file: '/dev/null') do |ssh|
         # Test connection and automatically close
       end
     end
