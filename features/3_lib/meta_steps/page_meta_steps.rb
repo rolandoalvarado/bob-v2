@@ -1152,7 +1152,7 @@ Then /^Wait at most (\d+) minutes until the instance named (.+) is in (.+) statu
   sleeping(5).seconds.between_tries.failing_after((60 * number_of_minutes.to_i) / 5).tries do
     actual_status = row.find('.status').text.strip
     unless actual_status == expected_status.upcase.gsub(' ', '_')
-      raise "Instance #{ instance_id } does not have or took to long to become #{ expected_status } status. " +
+      raise "Instance #{ instance_name } does not have or took to long to become #{ expected_status } status. " +
             "Instance is currently in #{ actual_status } status."
     end
   end
