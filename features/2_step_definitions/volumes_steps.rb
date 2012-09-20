@@ -458,8 +458,6 @@ TestCase /^A user with a role of (.+) in a project can detach any of its volumes
     * Click the detach button of the volume named #{ test_volume_name }
     * Click the volume detach confirmation button
 
-    * Wait for volume to finish detaching
-
     * The volume named #{ test_volume_name } should be detached to the instance named #{ test_instance_name } in project #{ test_project_name }
   }
 

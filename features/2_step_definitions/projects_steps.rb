@@ -356,7 +356,11 @@ Then /^I cannot grant project membership to (.+)$/i do |username|
     * Click the login button
 
     * Visit the projects page
-    * The #{ (@project || @project_attrs).name } project should not be visible
+    * The Users link should not be visible
+    * The #{ (@project || @project_attrs).name  } project should be visible
+    * Click the #{ (@project || @project_attrs).name } project
+    * The Collaborators tab should not be visible
+
    }
 
 end

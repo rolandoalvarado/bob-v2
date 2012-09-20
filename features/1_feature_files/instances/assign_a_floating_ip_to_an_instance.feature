@@ -11,7 +11,7 @@ Feature: Assign a Floating IP to an Instance
   dynamically added to a running virtual instance. OpenStack Compute uses
   Network Address Translation (NAT) to assign floating IPs to virtual instances.
 
-  @permissions
+  @permissions @jira-MCF-6-CUP
   Scenario Outline: Check User Permissions
     * A user with a role of <Role> in the project <Can or Cannot Assign> a floating IP to an instance
 
@@ -24,5 +24,6 @@ Feature: Assign a Floating IP to an Instance
         | Role            | Can or Cannot Assign |
         | (None)          | Cannot Assign        |
 
+  @jira-MCF-6-AFP
   Scenario: Assign Floating IP
     * An instance is publicly accessible via its assigned floating IP
