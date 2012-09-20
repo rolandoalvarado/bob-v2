@@ -30,6 +30,7 @@ Feature: Create an Instance
         | Role            | Can or Cannot Create |
         | (None)          | Cannot Create        |
 
+  @jira-MCF-14-CAI
   Scenario Outline: Create an Instance
     Given I am authorized to create instances in the project
      When I create an instance with attributes <Image>, <Name>, <Flavor>, <Keypair> and <Security Group>

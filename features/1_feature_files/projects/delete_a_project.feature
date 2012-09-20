@@ -7,6 +7,9 @@ Feature: Delete a project
 
   Background:
     * A project exists in the system
+    * A project does not have collaborator
+    * The project has 0 active instances
+
 
   @permissions @jira-MCF-25-CUP
   Scenario Outline: Check User Permissions

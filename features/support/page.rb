@@ -85,6 +85,9 @@ if ConfigFile.capybara_driver == :webkit
   Capybara.register_driver :webkit do |app|
     Capybara::Driver::Webkit.new(app, {:ignore_ssl_errors => true} )
   end
+  
+  # Added to make capybara-webkit run faster. value => { true or false }
+  Capybara.automatic_reload = false
 end
 
 if ConfigFile.capybara_driver == :poltergeist
@@ -92,6 +95,13 @@ if ConfigFile.capybara_driver == :poltergeist
 
   Capybara.register_driver :poltergeist do |app|
     Capybara::Poltergeist::Driver.new(app, {:phantomjs => (ENV['PHANTOMJS_PATH'] || "/usr/local/bin/phantomjs"), :debug => (ENV['POLTERGEIST_DEBUG'] || false)})
+  end
+end
+
+# Added this for testing Chrome Browser
+if ConfigFile.chrome == true
+  Capybara.register_driver :selenium do |app|
+    Capybara::Selenium::Driver.new(app, :browser => :chrome)
   end
 end
 
@@ -125,7 +135,7 @@ module NodeMethods
   end
 
   def find_by_xpath(selector)
-    n = retry_before_failing { self.node.find :xpath, selector }
+    n = retry_before_failing { self.node.find :xpath, selector, wait_for_dom }
     Node.new(n)
   end
 
@@ -393,7 +403,19 @@ class Page
   def actual_url
     "#{ session.current_host }#{ actual_path }"
   end
-
+  
+  # Fix for: (Selenium::WebDriver::Error::StaleElementReferenceError) 
+  # NEED TO DO MORE TEST for this fix.
+  def wait_for_dom(timeout = NODE_QUERY_WAIT_TIME)
+    uuid = SecureRandom.uuid
+    self.session.evaluate_script <<-EOS
+      _.defer(function() {
+        $('body').append("<div id='#{uuid}'></div>");
+      });
+    EOS
+    self.session.first("div", "##{uuid}")
+  end
+   
   #=====================
   # METHOD MISSING
   #=====================

@@ -741,6 +741,7 @@ Step /^The instance named (.+) should be (?:in|of) (.+) status$/ do |instance_na
       unless row
         next
       end
+      
       actual_status = row.find('.status').text.strip
         break if actual_status == expected_status.upcase.gsub(' ', '_')
         sleep ConfigFile.wait_short
@@ -917,6 +918,13 @@ Then /^The (.+) link should not be visible$/ do |link_name|
   link_name = link_name.split.join('_').downcase
   if @current_page.send("has_#{ link_name }_link?")
     raise "The '#{ link_name.gsub('_',' ') }' link should not be visible, but it is."
+  end
+end
+
+Then /^The (.+) tab should not be visible$/ do |tab_name|
+  tab_name = tab_name.split.join('_').downcase
+  if @current_page.send("has_#{ tab_name }_tab?")
+    raise "The '#{ tab_name.gsub('_',' ') }' link should not be visible, but it is."
   end
 end
 
@@ -1152,7 +1160,7 @@ Then /^Wait at most (\d+) minutes until the instance named (.+) is in (.+) statu
   sleeping(5).seconds.between_tries.failing_after((60 * number_of_minutes.to_i) / 5).tries do
     actual_status = row.find('.status').text.strip
     unless actual_status == expected_status.upcase.gsub(' ', '_')
-      raise "Instance #{ instance_id } does not have or took to long to become #{ expected_status } status. " +
+      raise "Instance #{ instance_name } does not have or took to long to become #{ expected_status } status. " +
             "Instance is currently in #{ actual_status } status."
     end
   end

@@ -20,9 +20,5 @@ Feature: Resize an Instance
         | Member          | Can Resize           |
         | Project Manager | Can Resize           |
 
-      Scenarios: Unauthorized Roles
-        | Role            | Can or Cannot Resize |
-        | (None)          | Cannot Resize        |
-
   Scenario: Resize an Instance
     * An instance resized by an authorized user will have a different flavor
