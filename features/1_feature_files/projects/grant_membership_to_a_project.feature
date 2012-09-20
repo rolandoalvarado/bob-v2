@@ -28,10 +28,10 @@ Feature: Grant Membership to a Project
         | Role            | Can or Cannot Grant |
         | System Admin    | Can Grant           |
         | Project Manager | Can Grant           |
-        | Member          | Can Grant           |
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Grant |
+        | Member          | Cannot Grant        |
         | (None)          | Cannot Grant        |
 
   Scenario: Add a Member to A Project
