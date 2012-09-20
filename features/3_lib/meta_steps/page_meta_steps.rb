@@ -920,6 +920,13 @@ Then /^The (.+) link should not be visible$/ do |link_name|
   end
 end
 
+Then /^The (.+) tab should not be visible$/ do |tab_name|
+  tab_name = tab_name.split.join('_').downcase
+  if @current_page.send("has_#{ tab_name }_tab?")
+    raise "The '#{ tab_name.gsub('_',' ') }' link should not be visible, but it is."
+  end
+end
+
 Step /^The (.+) button should not be visible$/ do |button_name|
   button_name = button_name.split.join('_').downcase
   if @current_page.send("has_#{ button_name }_button?")
