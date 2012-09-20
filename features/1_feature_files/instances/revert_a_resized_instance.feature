@@ -1,4 +1,4 @@
-@jira-MCF-20 @revert
+@jira-MCF-20 @resize @revert
 Feature: Revert a Resized Instance
   From the OpenStack docs (http://goo.gl/aqhti)
 
@@ -10,10 +10,6 @@ Feature: Revert a Resized Instance
         | Role            | Can or Cannot Revert |
         | Member          | Can Revert           |
         | Project Manager | Can Revert           |
-
-      Scenarios: Unauthorized Roles
-        | Role            | Can or Cannot Revert |
-        | (None)          | Cannot Revert        |
 
   Scenario: Revert a Resized Instance
     * An instance that has been resized by an authorized user can be reverted to its original flavor
