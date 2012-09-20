@@ -46,6 +46,7 @@ module CloudConfiguration
   RESUME_INSTANCE      = :resume
   TUNNEL               = :tunnel
   TUNNEL_USERNAME      = :tunnel_username
+  CHROME               = :chrome
 
   class ConfigFile
     include Singleton
@@ -347,9 +348,13 @@ module CloudConfiguration
     def self.tunnel
       self.instance[TUNNEL] == true
     end
-
+    
     def self.tunnel_username
       self.instance[TUNNEL_USERNAME]
+    end
+
+    def self.chrome
+      self.instance[CHROME] == true
     end
 
     def initialize

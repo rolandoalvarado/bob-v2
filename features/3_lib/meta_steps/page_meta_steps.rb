@@ -741,6 +741,7 @@ Step /^The instance named (.+) should be (?:in|of) (.+) status$/ do |instance_na
       unless row
         next
       end
+      
       actual_status = row.find('.status').text.strip
         break if actual_status == expected_status.upcase.gsub(' ', '_')
         sleep ConfigFile.wait_short
