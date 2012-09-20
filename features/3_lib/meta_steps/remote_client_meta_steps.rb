@@ -10,7 +10,7 @@ Then /^Connect to (.+) instance with floating IP (.+) via (.+)$/ do |image_name,
     when 'RDP'
       %x{ rdesktop #{ ip_address } -u #{ username } -p #{ password } }
     when 'SSH'
-      Net::SSH.start(ip_address, username, password: password, port: 2222, timeout: 10, user_known_hosts_file: '/dev/null') do |ssh|
+      Net::SSH.start(ip_address, username, password: password, port:  22, timeout: 10, user_known_hosts_file: '/dev/null') do |ssh|
         # Test connection and automatically close
       end
     end
@@ -37,7 +37,7 @@ Then /^Connect to instance with floating IP (.+) via (.+)$/ do |floating_ip, rem
       username   = ServerConfigFile.username(image_name)
       password   = ServerConfigFile.password(image_name)
 
-      Net::SSH.start(ip_address, username, password: password, port: 2222, timeout: 10, user_known_hosts_file: '/dev/null') do |ssh|
+      Net::SSH.start(ip_address, username, password: password, port: 22, timeout: 10, user_known_hosts_file: '/dev/null') do |ssh|
         # Test connection and automatically close
       end
     end
@@ -59,7 +59,7 @@ Then /^Fail connecting to (.+) instance with floating IP (.+) via (.+)$/ do |ima
     when 'RDP'
       %x{ rdesktop #{ ip_address } -u #{ username } -p #{ password } }
     when 'SSH'
-      Net::SSH.start(ip_address, username, password: password, port: 2222, timeout: 10, user_known_hosts_file: '/dev/null') do |ssh|
+      Net::SSH.start(ip_address, username, password: password, port: 22, timeout: 10, user_known_hosts_file: '/dev/null') do |ssh|
         # Test connection and automatically close
       end
     end
@@ -86,7 +86,7 @@ Then /^Fail connecting to instance with floating IP (.+) via (.+)$/ do |floating
       username   = ServerConfigFile.username(image_name)
       password   = ServerConfigFile.password(image_name)
 
-      Net::SSH.start(ip_address, username, password: password, port: 2222, timeout: 10, user_known_hosts_file: '/dev/null') do |ssh|
+      Net::SSH.start(ip_address, username, password: password, port: 22, timeout: 10, user_known_hosts_file: '/dev/null') do |ssh|
         # Test connection and automatically close
       end
     end
@@ -130,7 +130,7 @@ Step /^A new device file should have been created on the instance named (.+) in 
   raise "Couldn't find public ip for instance '#{ instance_name }'!" unless instance.addresses.first[1].count > 1
 
   begin
-    Net::SSH.start(ip_address, username, port: 2222, timeout: 30, key_data: [ private_key ], user_known_hosts_file: '/dev/null') do |ssh|
+    Net::SSH.start(ip_address, username, port: 22, timeout: 30, key_data: [ private_key ], user_known_hosts_file: '/dev/null') do |ssh|
       # Get a list of all device /dev/vd* files modified/created from x minutes ago
       device_file_list = ssh.exec!("find /dev/vd* -mmin -#{ delta_time }").split
     end
