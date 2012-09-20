@@ -202,7 +202,7 @@ class ProjectPage < SecurePage
   # Collaborators
   #==========================
   link      'collaborators email',                '.chzn-choices'
-  tab       'collaborators',                      '.nav-tabs .collaborators a'
+  tab       'collaborators',                      '.nav-tabs .collaborators:not(.disabled) a'
   tab       'disabled collaborators',             '.nav-tabs .collaborators.disabled'
   button    'add collaborator',                   '#add-collaborator:not(.disabled)'
   option    'collaborator',                       xpath: '//*[@class="chzn-drop"]//*[li[text()="<name>"]]'

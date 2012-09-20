@@ -32,7 +32,6 @@ Feature: Grant Membership to a Project
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Grant |
         | Member          | Cannot Grant        |
-        | (None)          | Cannot Grant        |
 
   Scenario: Add a Member to A Project
     Given I am authorized to grant project memberships
