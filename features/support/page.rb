@@ -86,7 +86,7 @@ if ConfigFile.capybara_driver == :webkit
     Capybara::Driver::Webkit.new(app, {:ignore_ssl_errors => true} )
   end
   
-  # Added to make capybara-webkit run faster. value => { true or false }
+  # Added to make capybara-webkit run faster. { defaul_value => true }
   Capybara.automatic_reload = false
 end
 
@@ -135,7 +135,7 @@ module NodeMethods
   end
 
   def find_by_xpath(selector)
-    n = retry_before_failing { self.node.find :xpath, selector, wait_for_dom }
+    n = retry_before_failing { self.node.find :xpath, selector }
     Node.new(n)
   end
 
@@ -404,18 +404,6 @@ class Page
     "#{ session.current_host }#{ actual_path }"
   end
   
-  # Fix for: (Selenium::WebDriver::Error::StaleElementReferenceError) 
-  # NEED TO DO MORE TEST for this fix.
-  def wait_for_dom(timeout = NODE_QUERY_WAIT_TIME)
-    uuid = SecureRandom.uuid
-    self.session.evaluate_script <<-EOS
-      _.defer(function() {
-        $('body').append("<div id='#{uuid}'></div>");
-      });
-    EOS
-    self.session.first("div", "##{uuid}")
-  end
-   
   #=====================
   # METHOD MISSING
   #=====================
@@ -464,3 +452,61 @@ class Node
   end
 
 end
+
+# ------------------------------------------------------------------------------
+# Fix for: StaleElementReferenceError and Webkit::NodeNotAttachedError
+# Overried node.find method
+Capybara::Selenium::Node.module_eval do
+  include Capybara::DSL
+  
+  # Override node.click method.
+  def click
+    retry_block do
+      if ConfigFile.capybara_driver == :webkit
+        native.click
+        wait_for_ajax
+        wait_for_dom
+      else
+        resynchronize { native.click }
+      end
+    end
+  end
+  
+  # Override node.find method.
+  def find(locator)
+    retry_block do
+      wait_for_ajax
+      native.find_elements(:xpath, locator).map { |n| self.class.new(driver, n) }
+    end
+  end
+  
+end
+
+# Retry block for node.find method above.
+def retry_block(n = 10, &block)
+  begin
+    block.call
+  rescue Selenium::WebDriver::Error::StaleElementReferenceError, Capybara::TimeoutError, Capybara::ElementNotFound, Selenium::WebDriver::Error::UnknownError, Capybara::Driver::Webkit::NodeNotAttachedError
+    sleep 30 / (n + 1)
+    n > 0 ? retry_block(n - 1, &block) : raise
+  end
+end
+
+# Integrate these 2 method if you are having problem with built-in node methods.
+# Especially with Selenium::WebDriver::Errors, Capybara::Driver::Webkit::Errors
+def wait_for_ajax(timeout = NODE_QUERY_WAIT_TIME)
+  self.wait_until(timeout) do
+    self.evaluate_script 'jQuery.active == 0'
+  end
+end
+
+def wait_for_dom(timeout = NODE_QUERY_WAIT_TIME)
+  uuid = SecureRandom.uuid
+  self.evaluate_script <<-EOS
+    _.defer(function() {
+      $('body').append("<div id='#{uuid}'></div>");
+    });
+  EOS
+  self.first("div", "##{uuid}")
+end
+# --------------------- END OF FIX ----------------------------------------
