@@ -9,10 +9,10 @@ def remote_client_connection(protocol, ip_address, username, options = {})
   when 'SSH'
     private_key = ComputeService.session.private_keys[test_keypair_name]
     raise "Couldn't find private key for keypair '#{ test_keypair_name }'!" unless private_key
-    options.merge!( port: 2222, timeout: 30, key_data: [ private_key ], user_known_hosts_file: '/dev/null' )
+    options.merge!( port: 22, timeout: 30, key_data: [ private_key ], user_known_hosts_file: '/dev/null' )
     begin
       Net::SSH.start(ip_address, username, options) do |ssh|
-        output = ssh.exec!('ls -a')
+        output = ssh.exec!(' hostame ;ip addr show ; top -n 1 ; ')
         puts "Output : #{output}"
       end
     rescue => e
