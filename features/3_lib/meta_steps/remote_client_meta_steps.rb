@@ -130,7 +130,7 @@ Step /^A new device file should have been created on the instance named (.+) in 
   raise "Couldn't find public ip for instance '#{ instance_name }'!" unless instance.addresses.first[1].count > 1
 
   begin
-    Net::SSH.start(ip_address, username, port: 22, timeout: 30, key_data: [ private_key ], user_known_hosts_file: '/dev/null') do |ssh|
+    Net::SSH.start(ip_address, username, port: 22, timeout: 10, key_data: [ private_key ], user_known_hosts_file: '/dev/null') do |ssh|
       # Get a list of all device /dev/vd* files modified/created from x minutes ago
       device_file_list = ssh.exec!("find /dev/vd* -mmin -#{ delta_time }").split
     end
