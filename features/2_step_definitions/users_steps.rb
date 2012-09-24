@@ -534,13 +534,13 @@ TestCase /^A user with a role of (Project Manager|Member) in the system can chan
 end
 
 
-TestCase /^A user with a role of \(None\) in the system cannot change user permissions$/i do
+TestCase /^A user with a role of (.+) in the system cannot change user permissions$/i do |role_name|
 
   username      = Unique.username('test')
 
   Preconditions %{
     * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
-    * Ensure that the user #{ bob_username } has a role of (None) in the system
+    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the system
 
     * Ensure that a project named #{ test_project_name } exists
     * Ensure that another user with username #{ username } and password #{ bob_password } exists

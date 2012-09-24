@@ -9,8 +9,7 @@ Feature: Change a user's permissions
         | Role            | Can or Cannot Change |
         | System Admin    | Can Change           |
         | Project Manager | Can Change           |
-        | Member          | Can Change           |
 
       Scenarios: Unauthorized Roles
         | Role         | Can or Cannot Change |
-        | (None)       | Cannot Change        |
+        | Member       | Cannot Change        |
