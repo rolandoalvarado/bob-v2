@@ -725,21 +725,14 @@ end
 
 
 Step /^The instance named (.+) should be (?:in|of) (.+) status$/ do |instance_name, expected_status|
-  wait_time = ConfigFile.wait_instance_launch + Time.now().to_i
+  sleeping(ConfigFile.wait_instance_in_status).seconds.between_tries.failing_after(ConfigFile.repeat_instance_in_status).tries do
+    status_cell = @current_page.instance_status_cell(name: instance_name)
+    actual_status = status_cell.text.strip
 
-  while wait_time >= Time.now().to_i
-    if status_cell = @current_page.instance_status_cell(name: instance_name)
-      actual_status = status_cell.text.strip
-      break if actual_status == expected_status.upcase.gsub(' ', '_')
-    else
-      next
-    end
-    sleep ConfigFile.wait_short
-  end
-
-  if wait_time < Time.now().to_i
-    raise "Instance #{ instance_name } is not or took too long to become #{ expected_status }. " +
+    unless actual_status == expected_status.upcase.gsub(' ', '_')
+      raise "Instance #{ instance_name } is not or took too long to become #{ expected_status }. " +
       "Current status is #{ actual_status }."
+    end
   end
 end
 
