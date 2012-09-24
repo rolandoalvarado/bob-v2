@@ -1160,7 +1160,7 @@ Then /^Wait for a few minutes until the instance named (.+) is in (.+) status$/ 
   sleeping(ConfigFile.wait_seconds).seconds.between_tries.failing_after((ConfigFile.minute * ConfigFile.repeat_timing) / ConfigFile.timing).tries do
     actual_status = row.find('.status').text.strip
     unless actual_status == expected_status.upcase.gsub(' ', '_')
-      raise "Instance #{ instance_id } does not have or took to long to become #{ expected_status } status. " +
+      raise "Instance #{ instance_name } does not have or took to long to become #{ expected_status } status. " +
             "Instance is currently in #{ actual_status } status."
     end
   end

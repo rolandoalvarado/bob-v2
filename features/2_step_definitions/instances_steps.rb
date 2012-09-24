@@ -971,7 +971,7 @@ TestCase /^A user with a role of (.+) in the project can revert a resized instan
     * Click the resize instance confirmation button
 
     * The instance named #{ test_instance_name } should be in resizing status
-    * Wait at most 3 minutes until the instance named #{ test_instance_name } is in active status
+    * Wait at most 5 minutes until the instance named #{ test_instance_name } is in active status
     * The context menu for the instance named #{ test_instance_name } should have the revert resize action
   }
 
@@ -1057,7 +1057,7 @@ TestCase /^An instance that has been resized by an authorized user can be revert
 
     * The instance named #{ test_instance_name } should be in resizing status
 
-    * Wait at most 3 minutes until the instance named #{ test_instance_name } is in active status
+    * Wait at most 5 minutes until the instance named #{ test_instance_name } is in active status
     * Click the revert resize action in the context menu for the instance named #{ test_instance_name }
 
     * The instance named #{ test_instance_name } should have flavor #{ original_flavor }
