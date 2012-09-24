@@ -169,6 +169,10 @@ class ProjectPage < SecurePage
   #row       'associated floating IP', xpath:      "//*[@id='floating-ip-list']//*[@class='floating-ip' and text()=\"<name>\"]/.."
   row       'associated floating IP',              xpath: "//*[@id='floating-ip-list']//td[contains(@class, 'instance') and normalize-space(text())=\"<name>\"]/.."
   row       'instance',                           '#instances-template .table-list #instance-item-<id>'
+  cell      'instance flavor',                    xpath: "//*[@id='instances-list']//*[contains(@class, 'name') and contains(text(), \"<name>\")]//..//*[@class='flavor']"
+  cell      'instance public ip',                 xpath: "//*[@id='instances-list']//*[contains(@class, 'name') and contains(text(), \"<name>\")]//..//*[@class='public-ipaddress']"
+  cell      'instance status',                    xpath: "//*[@id='instances-list']//*[contains(@class, 'name') and contains(text(), \"<name>\")]//..//*[@class='status']"
+  cell      'instance task',                      xpath: "//*[@id='instances-list']//*[contains(@class, 'name') and contains(text(), \"<name>\")]//..//*[@class='task']"
   form      'resize instance',                    '#resize-instance-modal'
 
   element   'console output',                     '#logsModal'

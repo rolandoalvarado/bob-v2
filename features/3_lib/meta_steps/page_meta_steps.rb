@@ -689,13 +689,9 @@ end
 
 
 Then /^The instance named (.+) should be performing task (.+)$/ do |instance_name, task|
-  # TODO To prevent conflict with other instance steps, temporarily forgo changing the selector,
-  # and instead finding it directly from the page object.
-  selector = "//*[@id='instances-list']//*[contains(@class, 'name') and contains(text(), \"#{ instance_name }\")]/.."
-  row = @current_page.find_by_xpath(selector)
-
   sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
-    actual_task = row.find('.task').text.to_s.strip
+    task_cell = @current_page.instance_task_cell(name: instance_name)
+    actual_task = task_cell.text.to_s.strip
     unless actual_task.include?(task)
       raise "Instance #{ instance_name } is not shown as performing task #{ task }. " +
             "It is currently #{ actual_task }."
@@ -704,13 +700,9 @@ Then /^The instance named (.+) should be performing task (.+)$/ do |instance_nam
 end
 
 Then /^The instance named (.+) should be idle$/ do |instance_name|
-  # TODO To prevent conflict with other instance steps, temporarily forgo changing the selector,
-  # and instead finding it directly from the page object.
-  selector = "//*[@id='instances-list']//*[contains(@class, 'name') and contains(text(), \"#{ instance_name }\")]/.."
-  row = @current_page.find_by_xpath(selector)
-
   sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
-    actual_task = row.find('.task').text.to_s.strip
+    task_cell = @current_page.instance_task_cell(name: instance_name)
+    actual_task = task_cell.text.to_s.strip
     unless actual_task.blank? || actual_task =~ /none/i
       raise "Instance #{ instance_name } is not idle. It is currently #{ actual_task }."
     end
@@ -736,18 +728,16 @@ Step /^The instance named (.+) should be (?:in|of) (.+) status$/ do |instance_na
   wait_time = ConfigFile.wait_instance_launch + Time.now().to_i
 
   while wait_time >= Time.now().to_i
-    selector = "//*[@id='instances-list']//*[contains(@class, 'name') and contains(text(), \"#{ instance_name }\")]/.."
-    row      = @current_page.find_by_xpath(selector)
-      unless row
-        next
-      end
-      
-      actual_status = row.find('.status').text.strip
-        break if actual_status == expected_status.upcase.gsub(' ', '_')
-        sleep ConfigFile.wait_short
+    if status_cell = @current_page.instance_status_cell(name: instance_name)
+      actual_status = status_cell.text.strip
+      break if actual_status == expected_status.upcase.gsub(' ', '_')
+    else
+      next
+    end
+    sleep ConfigFile.wait_short
   end
 
-  if (wait_time < Time.now().to_i) then
+  if wait_time < Time.now().to_i
     raise "Instance #{ instance_name } is not or took too long to become #{ expected_status }. " +
       "Current status is #{ actual_status }."
   end
@@ -765,14 +755,10 @@ end
 
 
 Step /^The instance named (.+) should have flavor (.+)$/ do |instance_name, flavor_name|
-  # TODO To prevent conflict with other instance steps, temporarily forgo changing the selector,
-  # and instead finding it directly from the page object.
-  selector = "//*[@id='instances-list']//*[contains(@class, 'name') and contains(text(), \"#{ instance_name }\")]/.."
-  row = @current_page.find_by_xpath(selector)
-
   sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
-    actual_flavor_name = row.find('.flavor').text.to_s.strip
-    unless row.find('.flavor').has_content?(flavor_name)
+    flavor_cell = @current_page.instance_flavor_cell(name: instance_name)
+    actual_flavor_name = flavor_cell.text.to_s.strip
+    unless flavor_cell.has_content?(flavor_name)
       raise "Expected flavor of instance #{ instance_name } to be #{ flavor_name }. " +
             "Current flavor is #{ actual_flavor_name }."
     end
@@ -780,13 +766,8 @@ Step /^The instance named (.+) should have flavor (.+)$/ do |instance_name, flav
 end
 
 Step /^The instance named (.+) should have a public IP$/ do |instance_name|
-  # TODO To prevent conflict with other instance steps, temporarily forgo changing the selector,
-  # and instead finding it directly from the page object.
-  selector = "//*[@id='instances-list']//*[contains(@class, 'name') and contains(text(), \"#{ instance_name }\")]/.."
-  row = @current_page.find_by_xpath(selector)
-
-  public_ip = row.find('.public-ipaddress')
-  if public_ip.text.to_s.strip.blank?
+  public_ip_cell = instance_public_ip_cell(name: instance_name)
+  if public_ip_cell.text.to_s.strip.blank?
     raise "Instance #{ instance_name } does not have a public IP."
   end
 end
