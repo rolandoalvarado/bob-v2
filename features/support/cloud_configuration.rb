@@ -38,6 +38,7 @@ module CloudConfiguration
   MINUTE               = :seconds
   INSTANCE             = :instance
   RESTART              = :restart
+  INSTANCE_IN_STATUS   = :instance_in_status
   INSTANCE_DELETE      = :instance_delete
   VOLUME_READY         = :volume_ready
   VOLUME_ATTACH        = :volume_attach
@@ -201,6 +202,24 @@ module CloudConfiguration
         self.instance.save
       end
       self.instance[WAIT][VOLUME_DELETE]
+    end
+
+    def self.wait_instance_in_status
+      self.instance.ensure_repeat_and_wait_key
+      unless self.instance[WAIT][INSTANCE_IN_STATUS]
+        self.instance[WAIT][INSTANCE_IN_STATUS] = 20
+        self.instance.save
+      end
+      self.instance[WAIT][INSTANCE_IN_STATUS]
+    end
+
+    def self.repeat_instance_in_status
+      self.instance.ensure_repeat_and_wait_key
+      unless self.instance[REPEAT][INSTANCE_IN_STATUS]
+        self.instance[REPEAT][INSTANCE_IN_STATUS] = 6
+        self.instance.save
+      end
+      self.instance[REPEAT][INSTANCE_IN_STATUS]
     end
 
     def self.repeat_volume_ready
