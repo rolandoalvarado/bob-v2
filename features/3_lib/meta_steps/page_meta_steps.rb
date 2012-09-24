@@ -1012,8 +1012,11 @@ end
 
 
 Then /^The (.+) project should not be visible$/ do |project_name|
-  if @current_page.has_project_row?( name: project_name )
-    raise "The project '#{ project_name }' should not be visible, but it is."
+  project_name.strip!
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+    if @current_page.has_project_row?( name: project_name )
+      raise "The project '#{ project_name }' should not be visible, but it is."
+    end
   end
 end
 

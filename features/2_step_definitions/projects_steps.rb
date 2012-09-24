@@ -408,14 +408,8 @@ Then /^I can delete (?:that|the) project$/i do
 
     * Delete the #{ (@project || @project_attrs).name } project
     * Confirm the deletion of #{ (@project || @project_attrs).name } project
+    * The #{ (@project || @project_attrs).name } project will be deleted
   }
-
-  project =  IdentityService.session.tenants.find_by_name((@project || @project_attrs).name)
-
-  if project != nil && project.id != nil
-     raise "Project #{ project.name } should be deleted. but it's not"
-  end
-
 end
 
 
@@ -559,6 +553,12 @@ Then /^the project will be [Cc]reated$/ do
     * Visit the projects page
     * The #{ @project_attrs.name } project should be visible
     * Ensure that a project named #{ @project_attrs.name } exists
+  }
+end
+
+Then /^the (.+) project will be deleted$/i do |project_name|
+  steps %{
+    * The #{ project_name } project should not be visible
   }
 end
 
