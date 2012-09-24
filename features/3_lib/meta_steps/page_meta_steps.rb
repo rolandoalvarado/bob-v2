@@ -42,7 +42,14 @@ end
 
 Then /^Choose the (\d+)(?:st|nd|rd|th) item in the (.+) dropdown$/ do |item_number, dropdown_name|
   dropdown_name = dropdown_name.split.join('_').downcase
-  @current_page.send("#{ dropdown_name }_dropdown_items")[item_number.to_i - 1].select_option
+  selected_item = nil
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+    selected_item = @current_page.send("#{ dropdown_name }_dropdown_items")[item_number.to_i - 1]
+    unless selected_item
+      raise "Couldn't find item in the dropdown list."
+    end
+  end
+  selected_item.select_option
 end
 
 
