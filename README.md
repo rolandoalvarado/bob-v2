@@ -22,24 +22,27 @@ Prerequisites for Mac OS X
  
 Prerequisites for Ubuntu
 -------------------------------------
-1. install those packages
-hbuild-essential openssl libreadline6 libreadline6-dev curl git-core zlib1g zlib1g-dev libssl-dev libyaml-dev libsqlite3-dev sqlite3 libxml2-dev libxslt-dev autoconf libc6-dev ncurses-dev automake libtool bison subversion
+1. Install the required packages:
 
-Stuff
+  * `$ sudo apt-get install build-essential openssl libreadline6 libreadline6-dev curl git-core zlib1g zlib1g-dev libssl-dev libyaml-dev libsqlite3-dev sqlite3 libxml2-dev libxslt-dev autoconf libc6-dev ncurses-dev automake libtool bison subversion xvfb`
+
+
+Common Requirements
 -------------
 1. [RVM](http://beginrescueend.com) (Highly recommended)
 
-  curl -L https://get.rvm.io | bash -s stable --ruby
-  source ~/.rvm/scripts/rvm
+  * `$ curl -L https://get.rvm.io | bash -s stable --ruby`
+  * `$ source ~/.rvm/scripts/rvm`
 
 2. [QT](http://qt.nokia.com/products/) (You'll need this to use the Capybara Webkit driver)
 
 
 Installation
 ------------
-1. `git clone git@github.com:[your forked repository]/bob.git`
-2. `cd bob`
-3. `run/setup`
+1. Make sure you have accomplished the steps indicated in the *Prerequisites* and *Common Requirements* section.
+2. `git clone git@github.com:[your forked repository]/bob.git`
+3. `cd bob`
+4. `run/setup`
 
 Having trouble in executing run/setup?
 ------------
