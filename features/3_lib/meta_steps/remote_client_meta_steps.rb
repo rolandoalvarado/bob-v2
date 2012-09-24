@@ -162,8 +162,11 @@ end
 
 Step /^Connect to the instance named (.+) in project (.+) via (SSH|RDP)$/ do |instance_name, project_name, remote_client|
   row         = @current_page.associated_floating_ip_row( name: instance_name )
-  ip_address  = row.find('.public-ip').text
-  raise "No public IP found for instance!" if ip_address.empty?
+  external_ip  = row.find('.public-ip').text
+  raise "No public external IP found for instance!" if external_ip.empty?
+
+  internal_ip = row.find('.ip-address').text
+  raise "No public internal IP found for instance!" if internal_ip.empty?
 
   project     = IdentityService.session.tenants.find { |p| p.name == project_name }
   raise "#{ project_name } couldn't be found!" unless project
@@ -178,7 +181,7 @@ Step /^Connect to the instance named (.+) in project (.+) via (SSH|RDP)$/ do |in
 
   username    = ServerConfigFile.username(image_name)
 
-  remote_client_connection( remote_client, ip_address, username )
+  remote_client_connection( remote_client, external_ip, internal_ip, username )
 end
 
 
