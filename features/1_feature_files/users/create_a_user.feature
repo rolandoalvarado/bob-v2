@@ -1,4 +1,4 @@
-@jira-MCF-7 @format-v2 @user
+@jira-MCF-7 @format-v2 @users
 Feature: Create a User
 
   @permissions @jira-MCF-7-CUP

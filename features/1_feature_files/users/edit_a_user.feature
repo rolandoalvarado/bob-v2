@@ -1,4 +1,4 @@
-@jira-MCF-44 @users
+@jira-MCF-44 @users @pending
 Feature: Edit a User
 
   @permissions
