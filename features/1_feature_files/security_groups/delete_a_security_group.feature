@@ -1,4 +1,4 @@
-@jira-MCF-33 @security_groups @pending
+@jira-MCF-33 @security_groups
 Feature: Delete a Security Group
   As an authorized user, I want to delete a security group
 
