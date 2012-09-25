@@ -100,7 +100,6 @@ class ComputeService < BaseCloudService
         return instance
       when /PAUSED|SUSPENDED|VERIFY_RESIZE/
         activate_instance(instance)
-        sleep ConfigFile.wait_short
       when /ERROR|SHUTOFF/
         break
       end
@@ -571,8 +570,12 @@ class ComputeService < BaseCloudService
       service.unpause_server(instance.id)
     when 'VERIFY_RESIZE'
       service.revert_resized_server(instance.id)
+    when 'ACTIVE', 'ERROR', 'SHUTOFF'
+      return true # no waiting required
     end
 
+    # wait for instances in transition (e.g., building or resizing)
+    sleep ConfigFile.wait_long
     true
   end
 
@@ -650,13 +653,14 @@ class ComputeService < BaseCloudService
 
   def remove_attached_instance_resources(project, instance)
     set_tenant project
-    associated_addresses = @addresses.reload.select { |a| a.instance_id == instance.id }
+
+    associated_addresses = @addresses.select { |a| a.instance_id == instance.id }
     associated_addresses.each do |address|
       instance.disassociate_address(address.ip)
       sleep(ConfigFile.wait_short)
     end
 
-    attached_volumes = service.volumes.select { |v| v.attachments.any? { |a| a['server_id'] == instance.id } }
+    attached_volumes = @volumes.select { |v| v.attachments.any? { |a| a['server_id'] == instance.id } }
     attached_volumes.each do |volume|
       volume.detach
       sleep(ConfigFile.wait_short)

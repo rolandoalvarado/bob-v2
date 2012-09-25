@@ -24,7 +24,7 @@ include CloudConfiguration
 
 @host = URI.parse(ConfigFile.web_client_url).host
 def create_tunnel
-  username = ConfigFile.tunnel_username || `whoami`.chomp
+  username = ConfigFile.server_username || `whoami`.chomp
   abort 'ERROR: Username must be specified!' if username.to_s.empty?
 
   gateway = Net::SSH::Gateway.new(@host, username)

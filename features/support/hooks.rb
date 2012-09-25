@@ -27,6 +27,8 @@ After do |scenario|
   [ComputeService, IdentityService, ImageService, VolumeService].each do |service|
     service.session.reset_credentials
   end
+
+  Cucumber.wants_to_quit = true if scenario.failed?
 end
 
 Around do |scenario, block|
@@ -39,4 +41,6 @@ end
 at_exit do
   FileUtils.rm_rf(tmp_screenshots_dir)
   EnvironmentCleaner.delete_test_objects
+  puts # blank line
+  EnvironmentCleaner.delete_orphans
 end
