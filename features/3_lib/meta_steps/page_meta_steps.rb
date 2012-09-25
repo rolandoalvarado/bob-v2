@@ -352,7 +352,7 @@ end
 
 Then /^Current page should(?:| still) have the (.+) (button|field|form|tile)$/ do |name, type|
   name = name.split.join('_').downcase
-  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+  sleeping(ConfigFile.wait_long).seconds.between_tries.failing_after(ConfigFile.repeat_long).tries do
     unless @current_page.send("has_#{ name }_#{type}?")
       raise "Current page doesn't have a #{ name } #{ type }"
     end
