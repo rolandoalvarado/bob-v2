@@ -207,7 +207,7 @@ module CloudConfiguration
     def self.wait_instance_in_status
       self.instance.ensure_repeat_and_wait_key
       unless self.instance[WAIT][INSTANCE_IN_STATUS]
-        self.instance[WAIT][INSTANCE_IN_STATUS] = 20
+        self.instance[WAIT][INSTANCE_IN_STATUS] = 30
         self.instance.save
       end
       self.instance[WAIT][INSTANCE_IN_STATUS]
