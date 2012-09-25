@@ -140,3 +140,11 @@ Helpful references for development
 1. [Gherkin Syntax](https://github.com/cucumber/cucumber/wiki/Gherkin) - If all you want is to write feature files, this is the only reference you need.
 1. [Cucumber](http://cukes.info) - Learn about the Cucumber framework. The Cucumber Book is highly recommended.
 1. [Cucumber Mailing List](https://groups.google.com/forum/?fromgroups#!forum/cukes) - Get help from the community.
+
+How to run bob using Tunnel
+----------------------------
+1. First add the lines below to config.yml
+   :tunnel: true
+   :tunnel_username: your_username
+
+2. Then save. 
