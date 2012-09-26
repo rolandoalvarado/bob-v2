@@ -52,7 +52,7 @@ class ComputeService < BaseCloudService
     end
 
     attributes[:name]           ||= Faker::Name.name
-    attributes[:password]       ||= test_instance_password || '123qwe'
+    attributes[:password]      ||= test_instance_password || '123qwe'
     attributes[:key_name]       ||= @key_pairs[0] && @key_pairs[0].name
 
     if attributes[:security_group]
@@ -77,6 +77,7 @@ class ComputeService < BaseCloudService
           attributes[:image] || @images.sample.id,
           attributes[:flavor],
           {
+            'adminPass'       => attributes[:password],
             'tenant_id'       => project.id,
             'key_name'        => attributes[:key_name],
             'security_groups' => @security_group_array,
