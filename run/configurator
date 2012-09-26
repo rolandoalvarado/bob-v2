@@ -139,7 +139,7 @@ if @config[TUNNEL]
   @config[SERVER_USERNAME] ||= `whoami`.chomp
   openstack_options[OPENSTACK_AUTH_URL] = "http://localhost:35357/v2.0/tokens"
 else
-  openstack_options[OPENSTACK_AUTH_URL] = "#{ @config[WEB_CLIENT_HOST] }:35357/v2.0/tokens"
+  openstack_options[OPENSTACK_AUTH_URL] = @options[OPENSTACK_AUTH_URL] || openstack_options[OPENSTACK_AUTH_URL] || "#{ @config[WEB_CLIENT_HOST] }:35357/v2.0/tokens"
 end
 
 puts "Writing #{config_path} with contents:"
