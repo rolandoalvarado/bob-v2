@@ -128,7 +128,7 @@ configure @config, CAPYBARA_DRIVER  , "capybara driver? (#{ available_capybara_d
 
 @config[TUNNEL] = case @options[TUNNEL] || @config[TUNNEL]
                   when true  then 'y'
-                  when false then 'n'
+                  else 'n'
                   end
 configure @config, TUNNEL, "connect via tunnel? (Yn) "
 @config[TUNNEL] = (@config[TUNNEL].downcase == 'y')
