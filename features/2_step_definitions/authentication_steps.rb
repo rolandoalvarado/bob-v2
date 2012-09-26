@@ -1,11 +1,11 @@
 Then /^If my username is (.+) and my password is (.+), I can log in with the following credentials (.+), (.+)$/i do |username, password, typed_username, typed_password|
   steps %{
-    * Ensure that a user with username #{ username } and password #{ password } exists
+    * Ensure that a user with username #{ username } and password #{ password } has a role of System Admin
     * Register the user named #{ username } for deletion at exit
 
     * Click the Logout button if currently logged in
     * Visit the login page
-    * Fill in the username field with #{ typed_username }
+    * Fill in the username field with #{ Unique.username(typed_username) }
     * Fill in the password field with #{ typed_password }
     * Click the login button
 
@@ -16,12 +16,12 @@ end
 
 Then /^If my username is (.+) and my password is (.+), I cannot log in with the following credentials (.+), (.+)$/i do |username, password, typed_username, typed_password|
   steps %{
-    * Ensure that a user with username #{ username } and password #{ password } exists
+    * Ensure that a user with username #{ username } and password #{ password } has a role of System Admin
     * Register the user named #{ username } for deletion at exit
 
     * Click the Logout button if currently logged in
     * Visit the login page
-    * Fill in the username field with #{ typed_username }
+    * Fill in the username field with #{ Unique.username(typed_username) }
     * Fill in the password field with #{ typed_password }
     * Click the login button
 
@@ -41,11 +41,13 @@ end
 
 
 Then /^Logging in after anonymously accessing (.+) redirects me back to it$/ do |page_name|
-  username = Unique.username('rstark')
+  project_name = Unique.project_name('bob-authentication')
+  username = Unique.username('bob-redirect')
   password = '123qwe'
 
   steps %{
-    * Ensure that a user with username #{ username } and password #{ password } exists
+    * Ensure that a project named bob-authentication exists
+    * Ensure that the project named #{ project_name } has a project manager named #{ username }
     * Register the user named #{ username } for deletion at exit
 
     * Click the Logout button if currently logged in
@@ -60,11 +62,15 @@ end
 
 
 Then /^Logging out redirects me to the Log In page$/ do
-  username = Unique.username('rstark')
+  username = Unique.username('bob-logout')
   password = '123qwe'
 
+  Preconditions %{
+    * A project exists in the system
+  }
+
   steps %{
-    * Ensure that a user with username #{ username } and password #{ password } exists
+    * Ensure that a user with username #{ username } and password #{ password } has a role of System Admin
     * Register the user named #{ username } for deletion at exit
 
     * Click the Logout button if currently logged in
@@ -80,11 +86,15 @@ end
 
 
 Then /^Logging out clears my session$/ do
-  username = Unique.username('rstark')
+  username = Unique.username('bob-logout')
   password = '123qwe'
+  
+  Preconditions %{
+    * A project exists in the system
+  }
 
   steps %{
-    * Ensure that a user with username #{ username } and password #{ password } exists
+    * Ensure that a user with username #{ username } and password #{ password } has a role of System Admin
     * Register the user named #{ username } for deletion at exit
 
     * Click the Logout button if currently logged in

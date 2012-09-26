@@ -85,6 +85,9 @@ if ConfigFile.capybara_driver == :webkit
   Capybara.register_driver :webkit do |app|
     Capybara::Driver::Webkit.new(app, {:ignore_ssl_errors => true} )
   end
+  
+  # Added to make capybara-webkit run faster. { defaul_value => true }
+  Capybara.automatic_reload = false
 end
 
 if ConfigFile.capybara_driver == :poltergeist
@@ -92,6 +95,13 @@ if ConfigFile.capybara_driver == :poltergeist
 
   Capybara.register_driver :poltergeist do |app|
     Capybara::Poltergeist::Driver.new(app, {:phantomjs => (ENV['PHANTOMJS_PATH'] || "/usr/local/bin/phantomjs"), :debug => (ENV['POLTERGEIST_DEBUG'] || false)})
+  end
+end
+
+# Added this for testing Chrome Browser
+if ConfigFile.chrome == true
+  Capybara.register_driver :selenium do |app|
+    Capybara::Selenium::Driver.new(app, :browser => :chrome)
   end
 end
 
@@ -108,9 +118,9 @@ Capybara.app_host = ConfigFile.web_client_url
 # tests will slow down to a crawl. Play around with the time between retries
 # instead, but always be mindful that the total waiting time doesn't get too
 # high or you'll be pulling your hair waiting for your tests to finish
-NODE_QUERY_WAIT_TIME       = 1
-MAX_NODE_QUERY_RETRIES     = 30
-Capybara.default_wait_time = 0  # Don't change this value unless you know the purpose
+NODE_QUERY_WAIT_TIME       = ConfigFile.wait_node
+MAX_NODE_QUERY_RETRIES     = ConfigFile.repeat_node
+Capybara.default_wait_time = 0    # OLD_VALUE: 0 Don't change this value unless you know the purpose
 
 module NodeMethods
   include Anticipate
@@ -199,7 +209,7 @@ end
 class Page
   include NodeMethods
 
-  ELEMENT_TYPES    = 'button|field|link|checkbox|form|table|span|element|row|option|message|tab|tile|graph'
+  ELEMENT_TYPES    = 'button|field|link|checkbox|form|table|span|element|row|cell|option|message|tab|tile|graph'
   RADIO_LIST_TYPES = 'radiolist'
   CHECK_LIST_TYPES = 'checklist'
   SELECTION_TYPES  = 'selection|dropdown'
@@ -393,7 +403,7 @@ class Page
   def actual_url
     "#{ session.current_host }#{ actual_path }"
   end
-
+  
   #=====================
   # METHOD MISSING
   #=====================
@@ -442,3 +452,61 @@ class Node
   end
 
 end
+
+# ------------------------------------------------------------------------------
+# Fix for: StaleElementReferenceError and Webkit::NodeNotAttachedError
+# Overried node.find method
+Capybara::Selenium::Node.module_eval do
+  include Capybara::DSL
+  
+  # Override node.click method.
+  def click
+    retry_block do
+      if ConfigFile.capybara_driver == :webkit
+        native.click
+        wait_for_ajax
+        wait_for_dom
+      else
+        resynchronize { native.click }
+      end
+    end
+  end
+  
+  # Override node.find method.
+  def find(locator)
+    retry_block do
+      wait_for_ajax
+      native.find_elements(:xpath, locator).map { |n| self.class.new(driver, n) }
+    end
+  end
+  
+end
+
+# Retry block for node.find method above.
+def retry_block(n = 10, &block)
+  begin
+    block.call
+  rescue Selenium::WebDriver::Error::StaleElementReferenceError, Capybara::TimeoutError, Capybara::ElementNotFound, Selenium::WebDriver::Error::UnknownError, Capybara::Driver::Webkit::NodeNotAttachedError
+    sleep 30 / (n + 1)
+    n > 0 ? retry_block(n - 1, &block) : raise
+  end
+end
+
+# Integrate these 2 method if you are having problem with built-in node methods.
+# Especially with Selenium::WebDriver::Errors, Capybara::Driver::Webkit::Errors
+def wait_for_ajax(timeout = NODE_QUERY_WAIT_TIME)
+  self.wait_until(timeout) do
+    self.evaluate_script 'jQuery.active == 0'
+  end
+end
+
+def wait_for_dom(timeout = NODE_QUERY_WAIT_TIME)
+  uuid = SecureRandom.uuid
+  self.evaluate_script <<-EOS
+    _.defer(function() {
+      $('body').append("<div id='#{uuid}'></div>");
+    });
+  EOS
+  self.first("div", "##{uuid}")
+end
+# --------------------- END OF FIX ----------------------------------------

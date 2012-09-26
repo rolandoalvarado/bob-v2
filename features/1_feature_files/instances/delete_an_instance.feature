@@ -6,17 +6,14 @@ Feature: Delete an Instance
   From the OpenStack docs (http://goo.gl/JGQGY):
   This operation deletes a specified cloud server instance from the system.
 
-  Background:
-    * A project exists in the system
-    * The project has 1 active instance
-
-
   @permissions
   Scenario Outline: Check User Permissions
-    Given I have a role of <Role> in the project
-     Then I <Can or Cannot Delete> an instance in the project
+    * A user with a role of <Role> in the project <Can or Cannot Delete> an instance
 
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Delete |
         | Member          | Can Delete           |
         | Project Manager | Can Delete           |
+
+  Scenario: Delete an Instance
+    * An instance deleted by an authorized user should not be visible

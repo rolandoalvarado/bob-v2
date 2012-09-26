@@ -13,7 +13,7 @@ Feature: Suspend an Instance
     * The project has 1 active instance
 
 
-  @permissions
+  @permissions @jira-MCF-21-CUP
   Scenario Outline: Check User Permissions
     Given I have a role of <Role> in the project
      Then I <Can or Cannot Suspend> the instance

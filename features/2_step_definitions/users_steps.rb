@@ -8,6 +8,12 @@ Given /^I have a role of (.+) in the system$/ do |role_name|
   }
 end
 
+Given /^a (system admin|project manager|member) is in the system$/i do |role_name|
+  steps %{
+    * Ensure that a #{role_name} is in the system
+  }
+end
+
 Given /^I am an? (System Admin|User)$/ do |role_name|
   steps %{
     * Ensure that I have a role of #{ role_name } in the system
@@ -279,12 +285,7 @@ end
 
 Then /^I can edit a user$/i do
   existing_user = CloudObjectBuilder.attributes_for(:user, :name => Unique.username('existing'), :password => '123qwe')
-  new_attrs     = CloudObjectBuilder.attributes_for(
-                    :user,
-                    :name     => ( Unique.username('NewUser') ),
-                    :email    => ( Unique.email('NewEmail@mail.com') ),
-                    :password => '123qwe'
-                  )
+  new_attrs     = CloudObjectBuilder.attributes_for(:user)
 
   IdentityService.session.ensure_user_does_not_exist(new_attrs)
   @existing_user = IdentityService.session.ensure_user_exists(existing_user)
@@ -296,7 +297,6 @@ Then /^I can edit a user$/i do
 
     * Ensure that a user with username #{ existing_user.name } and password #{ existing_user.password } exists
     * Ensure that a test project is available for use
-    * Ensure that I have a role of Project Manager in the named project
 
     * Click the Logout button if currently logged in
     * Visit the Login page
@@ -308,9 +308,9 @@ Then /^I can edit a user$/i do
     * Click the Edit button for the user named #{ @existing_user.name }
     * Fill in the Username field with #{ new_attrs.name }
     * Fill in the Email field with #{ new_attrs.email }
+    * Fill in the Password field with #{ new_attrs.password }
     * Choose the 2nd item in the Primary Project dropdown
     * Click the Update User button
-    * The Edit User form should not be visible
     * The #{ new_attrs.name } user row should be visible
   }
 end
@@ -360,7 +360,6 @@ Then /^I can update a user with attributes (.+), (.+), (.+), (.+), and (.+)$/i d
     * Choose the #{ primary_project_choice } item in the Primary Project dropdown
     * Choose the item with text #{ role } in the Role dropdown
     * Click the Update User button
-    * The Edit User form should not be visible
     * The #{ new_attrs.name } user row should be visible
   }
 end
@@ -535,13 +534,13 @@ TestCase /^A user with a role of (Project Manager|Member) in the system can chan
 end
 
 
-TestCase /^A user with a role of \(None\) in the system cannot change user permissions$/i do
+TestCase /^A user with a role of (.+) in the system cannot change user permissions$/i do |role_name|
 
   username      = Unique.username('test')
 
   Preconditions %{
     * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
-    * Ensure that the user #{ bob_username } has a role of (None) in the system
+    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the system
 
     * Ensure that a project named #{ test_project_name } exists
     * Ensure that another user with username #{ username } and password #{ bob_password } exists
@@ -599,7 +598,6 @@ TestCase /^A user with a role of (.+) in the system can create a user$/i do |rol
     * Choose the item with text #{ test_project_name } in the Primary Project dropdown
     * Choose the item with text Project Manager in the Role dropdown
     * Click the Create User button
-    * The New User form should be visible
     * The #{ user.name } user row should be visible
   }
 
@@ -666,7 +664,6 @@ TestCase /^An authorized user can create a user with attributes (.+), (.+), (.+)
     * Choose the item with text #{ primary_project } in the Primary Project dropdown
     * Choose the item with text #{ role } in the Role dropdown
     * Click the Create User button
-    * The New User form should not be visible
     * The #{ user.name } user row should be visible
   }
 end

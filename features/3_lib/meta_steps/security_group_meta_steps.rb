@@ -1,48 +1,25 @@
-Then /^Ensure that (.+) security group exist$/i do |security_group|
-  compute_service = ComputeService.session
-
-  security_groups = compute_service.security_groups
-  security_group  = compute_service.find_security_group_by_name(@project, security_group)
-
-  if security_group
-    compute_service.ensure_project_security_group_count(@project, security_groups.count)  
-  else
-    raise "Security Group couldn't be found!"
-  end
-  
-  EnvironmentCleaner.register(:project, @project.id)
-
-  @security_group = security_group
-end
-
-
 Then /^Ensure that (.+) security group does not exist$/i do |security_group|
   compute_service = ComputeService.session
-  compute_service.ensure_project_security_group_count(@project, 0)  
+  compute_service.ensure_project_security_group_count(@project, 0)
 end
 
-Then /^Ensure that a security group named Web Servers exist$/i do
+Then /^Ensure that a security group named (.+) exist$/i do |security_group_name|
   compute_service = ComputeService.session
   security_group_attrs = CloudObjectBuilder.attributes_for(
                       :security_group,
-                      :name     => Unique.name('Web Servers'),
-                      :description    => ('Web Servers Security Group')
+                      :name     => Unique.name(security_group_name),
+                      :description    => ('Security Group Description')
                     )
-  new_security_group  = compute_service.create_security_group(@project, security_group_attrs)
-
-  @new_security_group = new_security_group
+  @security_group  = compute_service.ensure_security_group_exists(@project, security_group_attrs)
 end
 
-Then /^Ensure that a security group named default exist$/i do
-  compute_service = ComputeService.session
-  security_group_attrs = CloudObjectBuilder.attributes_for(
-                      :security_group,
-                      :name     => Unique.name('default'),
-                      :description    => ('Default Security Group')
-                    )
-  default_security_group  = compute_service.create_security_group(@project, security_group_attrs)
-
-  @default_security_group = default_security_group
+Step /^Ensure that a security group exist$/i do
+  attrs = CloudObjectBuilder.attributes_for(
+            :security_group,
+            :name     => test_security_group_name,
+            :description    => test_security_group_description
+          )
+  @security_group  = ComputeService.session.create_security_group(@project, attrs)
 end
 
 Then /^the security group rules will be Added$/i do
@@ -108,4 +85,16 @@ Step /^Ensure that a security group rule exists for project (.+)$/ do |project_n
   raise "#{ project_name } couldn't be found!" unless project
 
   ComputeService.session.ensure_security_group_rule project
+end
+
+Then /^Ensure that a security group named default exist$/i do
+  compute_service = ComputeService.session
+  security_group_attrs = CloudObjectBuilder.attributes_for(
+                      :security_group,
+                      :name     => Unique.name('default'),
+                      :description    => ('Default Security Group')
+                    )
+  new_security_group  = compute_service.create_security_group(@project, security_group_attrs)
+
+  @new_security_group = new_security_group
 end

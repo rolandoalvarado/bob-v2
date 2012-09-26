@@ -56,11 +56,13 @@ class IdentityService < BaseCloudService
   end
 
   def create_user(attributes)
-    attributes[:tenant_id] = test_tenant.id
+    tenants.reload
+    project = tenants.find_by_id(attributes[:project_id]) rescue test_tenant
+    attributes[:tenant_id] = project.id
     user = users.new(attributes)
     user.save
     member_role = roles.find_by_name(RoleNameDictionary.db_name('Member'))
-    test_tenant.grant_user_role(user.id, member_role.id)
+    project.grant_user_role(user.id, member_role.id)
     user
   end
 
@@ -85,19 +87,23 @@ class IdentityService < BaseCloudService
     unless valid_roles.include?(role_name)
       raise "Unknown role '#{ role_name }'. Valid roles are #{ valid_roles.join(',') }"
     end
-
-    if ['System Admin', 'Project Manager'].include?(role_name)
-      admin_role   = roles.find_by_name('admin')
-      admin_tenant = tenants.find_by_name('admin')
-      admin_tenant.grant_user_role(user.id, admin_role.id)
-    end
-
+    
+    revoke_all_user_roles(user, tenant) # It's for (None)
+    
     if ['System Admin', 'Project Manager', 'Member'].include?(role_name)
+      admin_tenant = tenants.find_by_name('admin')
       member_role = roles.find_by_name('Member')
+      user.update_tenant(tenant.id)
       tenant.grant_user_role(user.id, member_role.id)
+      revoke_all_user_roles(user, admin_tenant)
+      if ['System Admin','Project Manager'].include?(role_name)
+        admin_role   = roles.find_by_name('admin')
+        admin_tenant.grant_user_role(user.id, admin_role.id)
+      end
     end
-  end
 
+  end
+  
   def ensure_tenant_does_not_exist(attributes)
     if tenant = tenants.find_by_name(attributes[:name])
       ComputeService.session.delete_instances_in_project(tenant)
@@ -153,11 +159,27 @@ class IdentityService < BaseCloudService
       delete_user(user)
     end
   end
-
+  
+  # OLD ensure_user_exists() method
+  #  def ensure_user_exists(attributes)
+  #    user = find_user_by_name(attributes[:name])
+  #    user = create_user(attributes) unless user
+  #    user.password = attributes[:password]
+  #    user
+  #  end
+  
   def ensure_user_exists(attributes)
     user = find_user_by_name(attributes[:name])
-    user = create_user(attributes) unless user
-    user.password = attributes[:password]
+    
+    unless user
+      user = create_user(attributes) 
+      user.password = attributes[:password]
+    else
+      if attributes[:password] != nil && user.password != attributes[:password]
+        user.password = attributes[:password]
+        user.update_password(attributes[:password])
+      end
+    end  
     user
   end
 
@@ -167,8 +189,7 @@ class IdentityService < BaseCloudService
 
     unless user
       user = create_user(attributes)
-      member_role = roles.find_by_name(RoleNameDictionary.db_name('Member'))
-      project.grant_user_role(user.id, member_role.id)
+
 
       if admin_role
         admin_tenant = tenants.find_by_name('admin')
@@ -176,6 +197,9 @@ class IdentityService < BaseCloudService
         admin_tenant.grant_user_role(user.id, admin_role.id)
       end
     end
+
+    member_role = roles.find_by_name(RoleNameDictionary.db_name('Member'))
+    project.grant_user_role(user.id, member_role.id)
 
     user.password = attributes[:password]
     user
@@ -197,6 +221,24 @@ class IdentityService < BaseCloudService
     sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_long).tries do
       raise "Roles for user #{ user.name } on tenant #{ tenant.name } took too long to revoke!" if user.roles(tenant.id).length > 0
     end
+  end
+
+  def get_generic_user(role)
+    if role.eql?('system_admin')
+      user = ensure_user_exists({ :name => ConfigFile.admin_username })
+      user.password = ConfigFile.admin_api_key
+    else
+      project = find_project_by_name(default_project_name)
+      unless project
+        project = ensure_tenant_exists(:name => default_project_name)
+      end
+
+      user_attrs       = CloudObjectBuilder.attributes_for(:user, :name => Unique.username(role, 32), :project_id => project.id)
+      user             = ensure_user_exists_in_project(user_attrs, project, admin_role?(role))
+      EnvironmentCleaner.register(:user, user.id)
+    end
+
+    user
   end
 
   #================================================

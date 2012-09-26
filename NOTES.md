@@ -1,25 +1,13 @@
-# Test Fog via console
+# Working on your local copy of Bob
 
-```
-bundle console
-irb > require File.expand_path('features/support/cloud_configuration.rb')
-irb > image_service    = Fog::Image.new(ConfigFile.cloud_credentials)
-irb > compute_service  = Fog::Compute.new(ConfigFile.cloud_credentials)
-irb > identity_service = Fog::Identity.new(ConfigFile.cloud_credentials)
-irb > volume_service   = Fog::Volume.new(ConfigFile.cloud_credentials)
-```
-You should now be able to interact with the OpenStack services in the target mCloud environment
+Add https://github.com/MorphGlobal/bob to your remote repos and nickname it as 'upstream'
 
-# Working on your local copy of MCF
-
-Add wdamarillo/bob to your remote repos and nickname it as 'upstream'
-
-    git remote add upstream git@bitbucket.org:wdamarillo/bob.git
+    git remote add upstream git@github.com:MorphGlobal/bob.git
 
 Create a topic branch where you will commit your local work
 
     git checkout master
-    git checkout -b create_a_project
+    git checkout -b topic_branch_name_here
 
 Get the latest changes from upstream
 
@@ -36,15 +24,27 @@ To merge upstream/master to your local master branch
 
 To sync your topic branch with your local master branch
 
-    git checkout create_a_project
+    git checkout topic_branch_name_here
     git merge master
 
 To push your topic branch to your remote repo
 
-    git push origin create_a_project
+    git push origin topic_branch_name_here
 
-After the above, you can then send a pull request to wdamarillo. Set the source branch to your topic branch's name and set the target branch to wdamarillo/master
+After the above, you can then send a pull request to MorphGlobal. Set the source branch to your topic branch's name and set the target branch to MorphGlobal/master
 
+
+# Test Fog via console
+
+```
+bundle console
+irb > require File.expand_path('features/support/cloud_configuration.rb')
+irb > image_service    = Fog::Image.new(ConfigFile.cloud_credentials)
+irb > compute_service  = Fog::Compute.new(ConfigFile.cloud_credentials)
+irb > identity_service = Fog::Identity.new(ConfigFile.cloud_credentials)
+irb > volume_service   = Fog::Volume.new(ConfigFile.cloud_credentials)
+```
+You should now be able to interact with the OpenStack services in the target mCloud environment
 
 
 # Testing CSS and XPath selectors using the Nokogiri gem
@@ -384,7 +384,7 @@ Move to bob directory and execute them.
 
 if you get error that require packages, please execute
 
-  bundle install 
+  bundle install
 
 In irb, you can call fog library like this.
 
@@ -392,3 +392,9 @@ In irb, you can call fog library like this.
   connect('admin', 'klnm12','<<tenant name>>','http://mc.cb-1-1.morphcloud.net:35357/')
   connection[:compute].volumes
 
+# Using Chrome instead of firefox for running bob as test browser.
+  # In Mac, use homebrew. For linux, download chromedriver from here:
+  # http://code.google.com/p/chromedriver/downloads/list
+  # Extract the file and copy to /usr/local/bin directory
+  # and set the permission to 755.
+  # Then set :chrome: true in config.yml

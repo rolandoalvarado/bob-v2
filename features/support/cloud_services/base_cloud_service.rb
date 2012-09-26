@@ -26,24 +26,33 @@ class BaseCloudService
   # INSTANCE METHODS
   #============================
 
-  attr_reader :service
+  attr_reader :service, :current_user
 
   def initialize
     raise "#{ self.class } should define an initialize method"
   end
 
+  def set_credentials(username=nil, password=nil)
+    credentials = ConfigFile.cloud_credentials
+    unless username.blank? || password.blank?
+      credentials.merge!(:openstack_username => username, :openstack_api_key  => password)
+      credentials.delete(:openstack_tenant)
+    end
+    if !@service || (@current_user && @current_user['username'] != credentials[:openstack_username])
+      @service = @service_type.new(credentials)
+      @current_user = @service.current_user
+    end
+  end
+
+  def reset_credentials
+    set_credentials # without parameters
+  end
+
   protected
 
   def initialize_service(service_type)
-    @service = service_type.new(ConfigFile.cloud_credentials)
+    @service_type = service_type
+    set_credentials
   end
 
-  def keep_trying(options={})
-    wait = (options[:wait] || 1).to_i
-    max  = (options[:max] || 5).to_i
-
-    sleeping(wait).seconds.between_tries.failing_after(max).tries do
-      yield
-    end
-  end
 end

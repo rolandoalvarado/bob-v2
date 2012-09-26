@@ -1,4 +1,4 @@
-@jira-DPBLOG-16 @jira-DPBLOG-17 @jira-MCF-7 @format-v2 @users
+@jira-MCF-7 @format-v2 @users
 Feature: Create a User
 
   @permissions @jira-MCF-7-CUP
@@ -17,15 +17,15 @@ Feature: Create a User
   Scenario Outline: Create a user with certain attributes
     * An authorized user <Can or Cannot Create> a user with attributes <Username>, <Email>, <Password>, <Primary Project>, and <Role>
 
+      @jira-MCF-7-vua
       Scenarios: Valid User Attributes
         | Username | Email                | Password | Primary Project | Role            | Can or Cannot Create |
         | astark   | astark@morphlabs.com | fkd2350a | (Any)           | Project Manager | Can Create           |
-        | astark   | astar2@morphlabs.com | ++afd]3b | (Any)           | Member          | Can Create           |
-
       @jira-MCF-7-iua
       Scenarios: Invalid User Attributes
         | Username | Email                | Password | Primary Project | Role            | Can or Cannot Create | Remarks                                           |
         | (None)   | astar3@morphlabs.com | fkd2350a | (Any)           | Project Manager | Cannot Create        | Username can't be empty                           |
         | astark   | (None)               | fkd2350a | (Any)           | Project Manager | Cannot Create        | Email can't be empty                              |
         | astark   | astark.com           | fkd2350a | (Any)           | Project Manager | Cannot Create        | Email format is invalid                           |
-        | astark   | astar4@morphlabs.com | fkd2350a | (None)          | Member          | Cannot Create        | User must have a primary project                  |
+        | astark   | astar4@morphlabs.com | fkd2350a | (None)          | Project Manager | Cannot Create        | User must have a primary project                  |
+	

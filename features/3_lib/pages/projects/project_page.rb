@@ -80,6 +80,7 @@ class ProjectPage < SecurePage
   field     'security group description',         "#new-security-description"
   button    'create security',                    "#create-security-group"
   message   'new security group form error',      "span.error[for='new-security-name'], span.error[for='new-security-description']"
+  message   'security group error',               '#alert-template .alert-error'
   span      'new security group form error',      "span.error[for='new-security-name'], span.error[for='new-security-description']"
   element   'security group form error message',  "#security-group-rules-form .error"
 
@@ -152,8 +153,9 @@ class ProjectPage < SecurePage
   #==========================
   # Monitoring-related elements
   #==========================
-  element  "project details",                      xpath: '//*[div[@name="<name>"]]'
-
+  element   "project details",                    xpath: "//*[@id='details_body']//*[div[@name='<name>']]"
+  tile      "project tile",                       xpath: '//*[div[@name="<name>"]]'
+  
   #==========================
   # Instance-related elements
   #==========================
@@ -167,6 +169,10 @@ class ProjectPage < SecurePage
   #row       'associated floating IP', xpath:      "//*[@id='floating-ip-list']//*[@class='floating-ip' and text()=\"<name>\"]/.."
   row       'associated floating IP',              xpath: "//*[@id='floating-ip-list']//td[contains(@class, 'instance') and normalize-space(text())=\"<name>\"]/.."
   row       'instance',                           '#instances-template .table-list #instance-item-<id>'
+  cell      'instance flavor',                    xpath: "//*[@id='instances-list']//*[contains(@class, 'name') and contains(text(), \"<name>\")]//..//*[@class='flavor']"
+  cell      'instance public ip',                 xpath: "//*[@id='instances-list']//*[contains(@class, 'name') and contains(text(), \"<name>\")]//..//*[@class='public-ipaddress']"
+  cell      'instance status',                    xpath: "//*[@id='instances-list']//*[contains(@class, 'name') and contains(text(), \"<name>\")]//..//*[@class='status']"
+  cell      'instance task',                      xpath: "//*[@id='instances-list']//*[contains(@class, 'name') and contains(text(), \"<name>\")]//..//*[@class='task']"
   form      'resize instance',                    '#resize-instance-modal'
 
   element   'console output',                     '#logsModal'
@@ -193,8 +199,6 @@ class ProjectPage < SecurePage
   button    'confirm instance reboot',            "#alert-template .okay"
   button    'resize instance confirmation',       "#resize-instance"
 
-  button    'confirm resize instance',            "#instance-item-<id> .confirm-resize"
-
   element   'image',                              xpath: "//*[@id='instances-list']//label[text()='<name>']"
 
 
@@ -202,11 +206,11 @@ class ProjectPage < SecurePage
   # Collaborators
   #==========================
   link      'collaborators email',                '.chzn-choices'
-  tab       'collaborators',                      '.nav-tabs .collaborators a'
+  tab       'collaborators',                      '.nav-tabs .collaborators:not(.disabled) a'
   tab       'disabled collaborators',             '.nav-tabs .collaborators.disabled'
   button    'add collaborator',                   '#add-collaborator:not(.disabled)'
   option    'collaborator',                       xpath: '//*[@class="chzn-drop"]//*[li[text()="<name>"]]'
-  button    'add collaborator',                   'a.btn-primary'
+  button    'add new collaborator',               '#add-collaborator-submit'
   table     'collaborators',                      xpath: "//*[tr[@class='user']]/td[normalize-space(text())='<name>']"
 
   dropdown  'Users',                              "#user-id"

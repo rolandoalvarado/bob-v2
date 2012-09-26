@@ -8,7 +8,7 @@ TTY:
   password: s3l3ct10n
 
 'Ubuntu':
-  username: root
+  username: ubuntu
   password: s3l3ct10n
 
 'Windows':

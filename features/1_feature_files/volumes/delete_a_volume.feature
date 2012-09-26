@@ -10,14 +10,21 @@ Feature: Delete a volume
   instances, you will have to use an NFS or SAMBA share from an existing
   instance.
 
+  Background:
+    * A project exists in the system
+    * The volume has 0 saved snapshot
+    * The project has 1 available volume
+
   @permissions
   Scenario Outline:
-    * A user with a role of <Role> in a project <Can or Cannot Delete> any of its volumes
+    Given I have a role of <Role> in the project
+    Then I <Can or Cannot Delete> a volume
 
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Delete |
         | System Admin    | Can Delete           |
         | Project Manager | Can Delete           |
 
+  @pdeazeta
   Scenario:
     * Volumes that are attached to an instance cannot be deleted

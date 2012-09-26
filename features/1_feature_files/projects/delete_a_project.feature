@@ -7,8 +7,11 @@ Feature: Delete a project
 
   Background:
     * A project exists in the system
+    * A project does not have collaborator
+    * The project has 0 active instances
 
-  @permissions
+
+  @permissions @jira-MCF-25-CUP
   Scenario Outline: Check User Permissions
     Given I have a role of <Role> in the project
      Then I <Can or Cannot Delete> the project
@@ -25,5 +28,5 @@ Feature: Delete a project
   Scenario: Delete a Project with resource
     Given I am authorized to delete the project
       And The project has 1 active instance
-     Then I Cannot Delete the project
+     Then the project cannot be deleted
 

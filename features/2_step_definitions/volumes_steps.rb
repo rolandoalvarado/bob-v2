@@ -272,41 +272,94 @@ Then /^I [Cc]an [Cc]reate a clone of the volume snapshot$/ do
     * Fill in the password field with #{ @current_user.password }
     * Click the login button
 
+    * Wait #{ ConfigFile.wait_long } seconds
+
     * Visit the projects page
+
+    * Wait #{ ConfigFile.wait_long } seconds
+
     * Click the #{ @project.name } project
 
-    * Wait 1 second
+    * Wait #{ ConfigFile.wait_seconds } seconds
 
     * Click the snapshots tab
+
+    * Wait #{ ConfigFile.wait_volume_ready } seconds
+
     * Click the clone volume snapshot button for volume snapshot named #{ snapshot["display_name"] }
+
+    * Wait #{ ConfigFile.wait_seconds } seconds
+
     * Current page should have the new volume form
     * Fill in the volume name field with #{ attrs.name }
     * Fill in the volume description field with #{ attrs.description }
-    * Fill in the volume size field with #{ attrs[:size] }
     * Click the create volume button
 
-    * Wait 1 second
+    * Wait #{ ConfigFile.wait_seconds } seconds
 
     * Click the volumes tab
+
+    * Wait #{ ConfigFile.wait_volume_ready } seconds
+
     * The volumes table should have a row for the volume named #{ attrs.name }
+
     * Remove the verified clone with the name #{ attrs.name } of the project #{ @project.name }
   }
 end
 
+Then /^I [Cc]an [Dd]elete a volume$/ do
+  volume_service = VolumeService.session
+  volume_service.set_tenant @project
+  volume = volume_service.volumes.first
+
+  steps %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ @current_user.name }
+    * Fill in the password field with #{ @current_user.password }
+    * Click the login button
+
+    * Wait #{ ConfigFile.wait_seconds } seconds
+
+    * Visit the projects page
+
+    * Wait #{ ConfigFile.wait_seconds } seconds
+
+    * Click the #{ @project.name } project
+
+    * Wait #{ ConfigFile.wait_long } seconds
+
+    * Click the Context Menu button of the volume named #{ volume['display_name'] }
+
+    * Wait #{ ConfigFile.wait_short } seconds
+
+    * Click the Delete button of the volume named #{ volume['display_name'] }
+
+    * Wait #{ ConfigFile.wait_seconds } seconds
+
+    * Click the Volume Delete confirmation button
+
+    * Wait #{ ConfigFile.wait_volume_delete } seconds
+
+    * The Volumes table should have 0 rows
+  }
+end
 
 
 TestCase /^A user with a role of (.+) in a project can attach any of its volumes$/i do |role_name|
 
   Preconditions %{
-    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+
     * Ensure that a project named #{ test_project_name } exists
-    * Ensure that the user with credentials #{ bob_username }/#{ bob_password } has a keypair named #{ test_keypair_name }
+    * Ensure that the project named #{ test_project_name } has a #{ role_name } named #{ bob_username }
     * Ensure that a security group rule exists for project #{ test_project_name }
-    * Ensure that the project named #{ test_project_name } has an instance named #{ test_instance_name }
+    * Ensure that the user with credentials #{ bob_username }/#{ bob_password } has a keypair named #{ test_keypair_name }
+    * Ensure that the project named #{ test_project_name } has an instance with name #{ test_instance_name } and keypair #{ test_keypair_name }
     * Ensure that the project named #{ test_project_name } has a volume named #{ test_volume_name }
     * Ensure that an instance named #{ test_instance_name } does not have any floating IPs
     * Ensure that the volume named #{ test_volume_name } is not attached to the instance named #{ test_instance_name } in the project #{ test_project_name }
-    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the project #{ test_project_name }
+
   }
 
   Cleanup %{
@@ -330,7 +383,6 @@ TestCase /^A user with a role of (.+) in a project can attach any of its volumes
     * Choose the item with text #{ test_instance_name } in the attachable instance dropdown
     * Click the volume attach confirmation button
 
-    * Wait for volume to finish attaching
     * The volume named #{ test_volume_name } should be attached to the instance named #{ test_instance_name }
   }
 
@@ -375,9 +427,9 @@ TestCase /^A user with a role of (.+) in a project can detach any of its volumes
   Preconditions %{
     * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
     * Ensure that a project named #{ test_project_name } exists
+    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the project #{ test_project_name }
     * Ensure that the project named #{ test_project_name } has an instance named #{ test_instance_name }
     * Ensure that the project named #{ test_project_name } has an available volume named #{ test_volume_name }
-    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the project #{ test_project_name }
   }
 
   Cleanup %{
@@ -395,17 +447,18 @@ TestCase /^A user with a role of (.+) in a project can detach any of its volumes
     * Click the Projects link
     * Click the #{ test_project_name } project
 
+    * Wait #{ ConfigFile.wait_seconds } seconds
+
     * Click the attach button of the volume named #{ test_volume_name }
     * Choose the item with text #{ test_instance_name } in the attachable instance dropdown
     * Click the volume attach confirmation button
 
     * The volume named #{ test_volume_name } should be attached to the instance named #{ test_instance_name }
 
-    * Click the context menu button of the volume named #{ test_volume_name }
     * Click the detach button of the volume named #{ test_volume_name }
     * Click the volume detach confirmation button
 
-    * The volume named #{ test_volume_name } should not be attached to the instance named #{ test_instance_name } in project #{ test_project_name }
+    * The volume named #{ test_volume_name } should be detached to the instance named #{ test_instance_name } in project #{ test_project_name }
   }
 
 end
@@ -476,6 +529,7 @@ TestCase /^Volumes that are attached to an instance cannot be deleted$/i do
     * Ensure that the project named #{ test_project_name } has an instance named #{ test_instance_name }
     * Ensure that the project named #{ test_project_name } has an available volume named #{ test_volume_name }
     * Ensure that the user #{ bob_username } has a role of Project Manager in the project #{ test_project_name }
+    * Ensure that the instance named #{ test_instance_name } has an attached volume named #{ test_volume_name } in the project #{ test_project_name }
 
   }
 
@@ -494,7 +548,6 @@ TestCase /^Volumes that are attached to an instance cannot be deleted$/i do
     * Click the Projects link
     * Click the #{ test_project_name } project
     * Click the context menu button of the volume named #{ test_volume_name }
-    * Click the delete button of the volume named #{ test_volume_name }
     * The delete button of the volume named #{ test_volume_name } should not be visible
   }
 
@@ -506,14 +559,17 @@ TestCase /^Volumes that are attached to an instance will be accessible from the 
   @time_started = Time.now
 
   Preconditions %{
-    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+
     * Ensure that a project named #{ test_project_name } exists
-    * Ensure that the user #{ bob_username } has a role of Member in the project #{ test_project_name }
-    * Ensure that the user with credentials #{ bob_username }/#{ bob_password } has a keypair named #{ test_keypair_name }
+    * Ensure that the project named #{ test_project_name } has 0 instances
+    * Ensure that the project named #{ test_project_name } has a member named #{ bob_username }
     * Ensure that a security group rule exists for project #{ test_project_name }
-    * Ensure that the project named #{ test_project_name } has an instance named #{ test_instance_name }
+    * Ensure that the user with credentials #{ bob_username }/#{ bob_password } has a keypair named #{ test_keypair_name }
+    * Ensure that the project named #{ test_project_name } has an instance with name #{ test_instance_name } and keypair #{ test_keypair_name }
     * Ensure that the project named #{ test_project_name } has a volume named #{ test_volume_name }
+    * Ensure that an instance named #{ test_instance_name } does not have any floating IPs
     * Ensure that the volume named #{ test_volume_name } is not attached to the instance named #{ test_instance_name } in the project #{ test_project_name }
+
   }
 
   Cleanup %{

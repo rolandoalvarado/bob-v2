@@ -18,7 +18,6 @@ Feature: Create a Security Group
   Background:
     * A project exists in the system
     * Ensure that the project has no security groups
-    * Ensure that a user exists in the project
 
 
   @permissions @jira-MCF-32-cup
@@ -39,20 +38,21 @@ Feature: Create a Security Group
   Scenario Outline: Create a Security Group
     Given I am authorized to create a security group in the project
     Then the security group with attributes <Name>, <Description> will be <Created or Not Created>
-
+      
+      @jira-MCF-32-csg-vv
       Scenarios: Valid Values
         | Name             | Description              | Created or Not Created  |
-        | Database Servers | Only port 443 is allowed | Created                 |
+        | Web Servers      | Only port 443 is allowed | Created                 |
 
       Scenarios: Invalid Values
         | Name             | Description              | Created or Not Created  | Reason                     |
         | (None)           | Only port 443 is allowed | Not Created             | Name can't be empty        |
-        | Database Servers | (None)                   | Not Created             | Description can't be empty |
+        | Web Servers      | (None)                   | Not Created             | Description can't be empty |
 
   @jira-MCF-32-ardc
   Scenario Outline: Add a Rule
     Given I am authorized to create a security group in the project
-      And the project has only one security group named Web Servers
+      And the project has a security group named Web Servers
     When I add the following rule: <Protocol>, <From Port>, <To Port>, <CIDR>
     Then the rule will be <Added or Not>
 

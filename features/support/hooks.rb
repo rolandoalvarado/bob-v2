@@ -22,13 +22,18 @@ After do |scenario|
   end
 
   embed(File.join(tmp_screenshots_dir, "scenario.#{__id__}.png"), "image/png", "Screenshot")
+
+  # Reset credentials for all services
+  [ComputeService, IdentityService, ImageService, VolumeService].each do |service|
+    service.session.reset_credentials
+  end
 end
 
 Around do |scenario, block|
   start_time = Time.now
   block.call
   end_time = Time.now
-  print " #{ "%.2f" % (end_time - start_time) }x"
+  print " #{start_time} #{ "%.2f" % (end_time - start_time) }x"
 end
 
 at_exit do

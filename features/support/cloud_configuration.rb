@@ -27,10 +27,27 @@ module CloudConfiguration
   WAIT                 = :wait
   SHORT                = :short
   LONG                 = :long
+  NODE_QUERY_WAIT      = :node
+  NODE_QUERY_RETRIES   = :node
   TEN                  = :ten
   FIFTEEN              = :fifteen
   TWENTY               = :twenty
   FORTY                = :forty
+  WAIT_IN_SECONDS      = :seconds
+  TIMING               = :timing
+  MINUTE               = :seconds
+  INSTANCE             = :instance
+  RESTART              = :restart
+  INSTANCE_IN_STATUS   = :instance_in_status
+  INSTANCE_DELETE      = :instance_delete
+  VOLUME_READY         = :volume_ready
+  VOLUME_ATTACH        = :volume_attach
+  VOLUME_DETACH        = :volume_detach
+  VOLUME_DELETE        = :volume_delete
+  RESUME_INSTANCE      = :resume
+  TUNNEL               = :tunnel
+  TUNNEL_USERNAME      = :tunnel_username
+  CHROME               = :chrome
 
   class ConfigFile
     include Singleton
@@ -44,14 +61,108 @@ module CloudConfiguration
       cloud_credentials[OPENSTACK_USERNAME]
     end
 
+    def self.admin_api_key
+      cloud_credentials[OPENSTACK_API_KEY]
+    end
+
     def self.web_client_url
       self.instance[WEB_CLIENT_HOST]
+    end
+
+    def self.minute
+      self.instance.ensure_repeat_and_wait_key
+      unless self.instance[REPEAT][MINUTE]
+        self.instance[REPEAT][MINUTE] = 60
+        self.instance.save
+      end
+      self.instance[REPEAT][MINUTE]
+    end
+
+    def self.timing
+      self.instance.ensure_repeat_and_wait_key
+      unless self.instance[REPEAT][TIMING]
+        self.instance[REPEAT][TIMING] = 10
+        self.instance.save
+      end
+      self.instance[REPEAT][TIMING]
+    end
+
+    def self.repeat_node
+      self.instance.ensure_repeat_and_wait_key
+      unless self.instance[REPEAT][NODE_QUERY_RETRIES]
+        self.instance[REPEAT][NODE_QUERY_RETRIES] = 10
+        self.instance.save
+      end
+      self.instance[REPEAT][NODE_QUERY_RETRIES]
+    end
+
+    def self.wait_instance_launch
+      self.instance.ensure_repeat_and_wait_key
+      unless self.instance[WAIT][INSTANCE]
+        self.instance[WAIT][INSTANCE] = 120
+        self.instance.save
+      end
+      self.instance[WAIT][INSTANCE]
+    end
+    
+    def self.wait_instance_resume
+      self.instance.ensure_repeat_and_wait_key
+      unless self.instance[WAIT][RESUME_INSTANCE]
+        self.instance[WAIT][RESUME_INSTANCE] = 60
+        self.instance.save
+      end
+      self.instance[WAIT][RESUME_INSTANCE]
+    end
+
+    def self.wait_restart
+      self.instance.ensure_repeat_and_wait_key
+      unless self.instance[WAIT][RESTART]
+        self.instance[WAIT][RESTART] = 90
+        self.instance.save
+      end
+      self.instance[WAIT][RESTART]
+    end
+
+    def self.wait_instance_delete
+      self.instance.ensure_repeat_and_wait_key
+      unless self.instance[WAIT][INSTANCE_DELETE]
+        self.instance[WAIT][INSTANCE_DELETE] = 10
+        self.instance.save
+      end
+      self.instance[WAIT][INSTANCE_DELETE]
+    end
+
+    def self.wait_volume_attach
+      self.instance.ensure_repeat_and_wait_key
+      unless self.instance[WAIT][VOLUME_ATTACH]
+        self.instance[WAIT][VOLUME_ATTACH] = 40
+        self.instance.save
+      end
+      self.instance[WAIT][VOLUME_ATTACH]
+    end
+
+    def self.wait_volume_detach
+      self.instance.ensure_repeat_and_wait_key
+      unless self.instance[WAIT][VOLUME_DETACH]
+        self.instance[WAIT][VOLUME_DETACH] = 40
+        self.instance.save
+      end
+      self.instance[WAIT][VOLUME_DETACH]
+    end
+
+    def self.wait_node
+      self.instance.ensure_repeat_and_wait_key
+      unless self.instance[WAIT][NODE_QUERY_WAIT]
+        self.instance[WAIT][NODE_QUERY_WAIT] = 10
+        self.instance.save
+      end
+      self.instance[WAIT][NODE_QUERY_WAIT]
     end
 
     def self.wait_short
       self.instance.ensure_repeat_and_wait_key
       unless self.instance[WAIT][SHORT]
-        self.instance[WAIT][SHORT] = 1
+        self.instance[WAIT][SHORT] = 2
         self.instance.save
       end
       self.instance[WAIT][SHORT]
@@ -66,6 +177,87 @@ module CloudConfiguration
       self.instance[WAIT][LONG]
     end
 
+    def self.wait_seconds
+      self.instance.ensure_repeat_and_wait_key
+      unless self.instance[WAIT][WAIT_IN_SECONDS]
+        self.instance[WAIT][WAIT_IN_SECONDS] = 5
+        self.instance.save
+      end
+      self.instance[WAIT][WAIT_IN_SECONDS]
+    end
+
+    def self.wait_volume_ready
+      self.instance.ensure_repeat_and_wait_key
+      unless self.instance[WAIT][VOLUME_READY]
+        self.instance[WAIT][VOLUME_READY] = 30
+        self.instance.save
+      end
+      self.instance[WAIT][VOLUME_READY]
+    end
+
+    def self.wait_volume_delete
+      self.instance.ensure_repeat_and_wait_key
+      unless self.instance[WAIT][VOLUME_DELETE]
+        self.instance[WAIT][VOLUME_DELETE] = 20
+        self.instance.save
+      end
+      self.instance[WAIT][VOLUME_DELETE]
+    end
+
+    def self.wait_instance_in_status
+      self.instance.ensure_repeat_and_wait_key
+      unless self.instance[WAIT][INSTANCE_IN_STATUS]
+        self.instance[WAIT][INSTANCE_IN_STATUS] = 30
+        self.instance.save
+      end
+      self.instance[WAIT][INSTANCE_IN_STATUS]
+    end
+
+    def self.repeat_instance_in_status
+      self.instance.ensure_repeat_and_wait_key
+      unless self.instance[REPEAT][INSTANCE_IN_STATUS]
+        self.instance[REPEAT][INSTANCE_IN_STATUS] = 6
+        self.instance.save
+      end
+      self.instance[REPEAT][INSTANCE_IN_STATUS]
+    end
+
+    def self.repeat_volume_ready
+      self.instance.ensure_repeat_and_wait_key
+      unless self.instance[REPEAT][VOLUME_READY]
+        self.instance[REPEAT][VOLUME_READY] = 2
+        self.instance.save
+      end
+      self.instance[REPEAT][VOLUME_READY]
+    end
+
+    def self.repeat_instance_launch
+      self.instance.ensure_repeat_and_wait_key
+      unless self.instance[REPEAT][INSTANCE]
+        self.instance[REPEAT][INSTANCE] = 3
+        self.instance.save
+      end
+      self.instance[REPEAT][INSTANCE]
+    end
+
+    def self.repeat_instance_delete
+      self.instance.ensure_repeat_and_wait_key
+      unless self.instance[REPEAT][INSTANCE_DELETE]
+        self.instance[REPEAT][INSTANCE_DELETE] = 6
+        self.instance.save
+      end
+      self.instance[REPEAT][INSTANCE_DELETE]
+    end
+
+    def self.repeat_volume_detach
+      self.instance.ensure_repeat_and_wait_key
+      unless self.instance[REPEAT][VOLUME_DETACH]
+        self.instance[REPEAT][VOLUME_DETACH] = 3
+        self.instance.save
+      end
+      self.instance[REPEAT][VOLUME_DETACH]
+    end
+
     def self.repeat_short
       self.instance.ensure_repeat_and_wait_key
       unless self.instance[REPEAT][SHORT]
@@ -75,6 +267,33 @@ module CloudConfiguration
       self.instance[REPEAT][SHORT]
     end
     
+    def self.repeat_until_project_is_visible
+      self.instance.ensure_repeat_and_wait_key
+      unless self.instance[REPEAT][FIFTEEN]
+        self.instance[REPEAT][FIFTEEN] = 15
+        self.instance.save
+      end
+      self.instance[REPEAT][FIFTEEN]
+    end
+
+    def self.repeat_until_expected_page_is_visible
+      self.instance.ensure_repeat_and_wait_key
+      unless self.instance[REPEAT][FIFTEEN]
+        self.instance[REPEAT][FIFTEEN] = 15
+        self.instance.save
+      end
+      self.instance[REPEAT][FIFTEEN]
+    end
+
+    def self.repeat_timing
+      self.instance.ensure_repeat_and_wait_key
+      unless self.instance[REPEAT][TIMING]
+        self.instance[REPEAT][TIMING] = 3
+        self.instance.save
+      end
+      self.instance[REPEAT][TIMING]
+    end
+
     def self.repeat_ten
       self.instance.ensure_repeat_and_wait_key
       unless self.instance[REPEAT][TEN]
@@ -83,7 +302,7 @@ module CloudConfiguration
       end
       self.instance[REPEAT][TEN]
     end
-    
+
     def self.repeat_fifteen
       self.instance.ensure_repeat_and_wait_key
       unless self.instance[REPEAT][FIFTEEN]
@@ -92,7 +311,7 @@ module CloudConfiguration
       end
       self.instance[REPEAT][FIFTEEN]
     end
-    
+
     def self.repeat_twenty
       self.instance.ensure_repeat_and_wait_key
       unless self.instance[REPEAT][TWENTY]
@@ -101,7 +320,7 @@ module CloudConfiguration
       end
       self.instance[REPEAT][TWENTY]
     end
-    
+
     def self.repeat_forty
       self.instance.ensure_repeat_and_wait_key
       unless self.instance[REPEAT][FORTY]
@@ -110,7 +329,7 @@ module CloudConfiguration
       end
       self.instance[REPEAT][FORTY]
     end
-    
+
 
     def self.repeat_long
       self.instance.ensure_repeat_and_wait_key
@@ -145,6 +364,18 @@ module CloudConfiguration
       self.instance[UNIQUE_HELPER_VALUES][NUMERIC]
     end
 
+    def self.tunnel
+      self.instance[TUNNEL] == true
+    end
+    
+    def self.tunnel_username
+      self.instance[TUNNEL_USERNAME]
+    end
+
+    def self.chrome
+      self.instance[CHROME] == true
+    end
+
     def initialize
       if File.exists?(PATH)
         @config = YAML.load_file( File.open(PATH, 'r+') )
@@ -161,6 +392,10 @@ module CloudConfiguration
 
     def [](key)
       @config[key]
+    end
+
+    def []=(key, value)
+      @config[key] = value
     end
 
     def ensure_unique_helper_key
