@@ -720,7 +720,21 @@ Then /^The instance named (.+) should be idle$/ do |instance_name|
 end
 
 
-Step /^The instance ((?:(?!named )).+) should be (?:in|of) (.+) status$/ do |instance_name, expected_status|
+Step /^The instance ((?:(?!named )).+) should be (?:in|of) (.+) status$/ do |instance_id, status|
+  row = @current_page.instance_row( id: instance_id )
+  unless row
+    raise "Couldn't find row for instance #{ instance_id } in the instances list!"
+  end
+
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_until_task_is_done).tries do
+    unless row.find('.status').has_content?(status.upcase.gsub(' ', '_'))
+      raise "Instance #{ instance_id } does not have or took to long to become #{ status } status."
+    end
+  end
+end
+
+
+Step /^The instance named (.+) should be (?:in|of) (.+) status$/ do |instance_name, expected_status|
   sleeping(ConfigFile.wait_instance_in_status).seconds.between_tries.failing_after(ConfigFile.repeat_instance_in_status).tries do
     status_cell = @current_page.instance_status_cell(name: instance_name)
     actual_status = status_cell.text.strip
