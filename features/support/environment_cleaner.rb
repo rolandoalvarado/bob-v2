@@ -31,6 +31,10 @@ class EnvironmentCleaner
     instance.delete_test_objects
   end
 
+  def self.delete_orphans
+    instance.delete_orphans
+  end
+
   #============================
   # INSTANCE METHODS
   #============================
@@ -62,6 +66,47 @@ class EnvironmentCleaner
     else
       puts "No test objects to delete."
     end
+  end
+
+  def delete_orphans
+    orphaned_count = 0
+    puts "Deleting orphaned resources (Cancel with Ctrl-C)"
+    IdentityService.session.reset_credentials
+    exempted_tenants = %w{ admin demo }
+    tenant_ids = @identity_service.tenants.reload.select { |t| exempted_tenants.include?(t.name) }.collect(&:id)
+
+    nova_options = { os_tenant_name: ConfigFile.admin_tenant,
+                     os_username: ConfigFile.admin_username,
+                     os_password: ConfigFile.admin_api_key,
+                     os_auth_url: 'http://127.0.0.1:5000/v2.0' }.map { |key, value| "--#{ key } #{ value }" }.join(' ')
+    host = URI.parse(ConfigFile.web_client_url).host
+    username = ConfigFile.server_username || `whoami`.chomp
+
+    begin
+      Net::SSH.start(host, username, port: 2222, timeout: 30) do |ssh|
+        table = ssh.exec!(%{ nova #{ nova_options } list --all | grep -G "^|" | tail -n +2 })
+        table.tr('|', ' ').each_line do |row|
+          id, name, status = row.split
+          if tenant_info = ssh.exec!(%{ nova #{ nova_options } show #{ id } | grep -G "^| tenant_id" })
+            tenant_id = tenant_info.tr('|', ' ').split.last
+            if !tenant_ids.include?(tenant_id) && status.to_s =~ /ACTIVE|ERROR|STATUS/
+              orphaned_count += 1
+              ssh.exec!("nova #{ nova_options } delete #{ id }") do |ch, stream, data|
+                if stream == :stderr
+                  puts "       FAILED: #{ name } (id: #{ id })"
+                else
+                  puts "      DELETED: #{ name } (id: #{ id })"
+                end
+              end
+            end
+          end
+        end
+      end
+    rescue Net::SSH::AuthenticationFailed => e
+      puts "\033[0;33m  Could not connect to #{ username }@#{ host }. The error returned was: " +
+           e.inspect + "\033[m"
+    end
+    puts "No orphaned resources found" if orphaned_count == 0
   end
 
 
@@ -100,13 +145,9 @@ class EnvironmentCleaner
 
         if @compute_service.instances.count > 0
           puts "    Deleting instances..."
-          # Needed when an instance is doing hard reboot. 
-          # Wait until an instance become in active state.
-          sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_long).tries do
-            deleted_instances = @compute_service.delete_instances_in_project(project)
-            deleted_instances.each do |instance|
-              puts "      DELETED: #{ instance[:name] } (id: #{ instance[:id] })"
-            end
+          deleted_instances = @compute_service.delete_instances_in_project(project)
+          deleted_instances.each do |instance|
+            puts "      DELETED: #{ instance[:name] } (id: #{ instance[:id] })"
           end
         end
 
