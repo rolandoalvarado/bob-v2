@@ -27,8 +27,6 @@ After do |scenario|
   [ComputeService, IdentityService, ImageService, VolumeService].each do |service|
     service.session.reset_credentials
   end
-
-  Cucumber.wants_to_quit = true if scenario.failed?
 end
 
 Around do |scenario, block|
