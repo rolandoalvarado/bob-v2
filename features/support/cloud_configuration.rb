@@ -46,7 +46,7 @@ module CloudConfiguration
   VOLUME_DELETE        = :volume_delete
   RESUME_INSTANCE      = :resume
   TUNNEL               = :tunnel
-  TUNNEL_USERNAME      = :tunnel_username
+  SERVER_USERNAME      = :server_username
   CHROME               = :chrome
 
   class ConfigFile
@@ -55,6 +55,10 @@ module CloudConfiguration
     def self.cloud_credentials
       inst = self.instance
       { :provider => 'OpenStack' }.merge inst[OPENSTACK_OPTIONS]
+    end
+
+    def self.admin_tenant
+      cloud_credentials[OPENSTACK_TENANT]
     end
 
     def self.admin_username
@@ -207,7 +211,7 @@ module CloudConfiguration
     def self.wait_instance_in_status
       self.instance.ensure_repeat_and_wait_key
       unless self.instance[WAIT][INSTANCE_IN_STATUS]
-        self.instance[WAIT][INSTANCE_IN_STATUS] = 20
+        self.instance[WAIT][INSTANCE_IN_STATUS] = 30
         self.instance.save
       end
       self.instance[WAIT][INSTANCE_IN_STATUS]
@@ -329,7 +333,15 @@ module CloudConfiguration
       end
       self.instance[REPEAT][FORTY]
     end
-
+    
+    def self.repeat_until_task_is_done
+      self.instance.ensure_repeat_and_wait_key
+      unless self.instance[REPEAT][FORTY]
+        self.instance[REPEAT][FORTY] = 40
+        self.instance.save
+      end
+      self.instance[REPEAT][FORTY]
+    end
 
     def self.repeat_long
       self.instance.ensure_repeat_and_wait_key
@@ -367,9 +379,9 @@ module CloudConfiguration
     def self.tunnel
       self.instance[TUNNEL] == true
     end
-    
-    def self.tunnel_username
-      self.instance[TUNNEL_USERNAME]
+
+    def self.server_username
+      self.instance[SERVER_USERNAME]
     end
 
     def self.chrome

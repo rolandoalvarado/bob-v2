@@ -39,4 +39,6 @@ end
 at_exit do
   FileUtils.rm_rf(tmp_screenshots_dir)
   EnvironmentCleaner.delete_test_objects
+  puts # blank line
+  EnvironmentCleaner.delete_orphans
 end

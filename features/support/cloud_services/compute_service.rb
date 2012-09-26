@@ -52,7 +52,7 @@ class ComputeService < BaseCloudService
     end
 
     attributes[:name]           ||= Faker::Name.name
-    attributes[:password]       ||= test_instance_password || '123qwe'
+    attributes[:password]      ||= test_instance_password || '123qwe'
     attributes[:key_name]       ||= @key_pairs[0] && @key_pairs[0].name
 
     if attributes[:security_group]
@@ -77,6 +77,7 @@ class ComputeService < BaseCloudService
           attributes[:image] || @images.sample.id,
           attributes[:flavor],
           {
+            'adminPass'       => attributes[:password],
             'tenant_id'       => project.id,
             'key_name'        => attributes[:key_name],
             'security_groups' => @security_group_array,
@@ -100,7 +101,6 @@ class ComputeService < BaseCloudService
         return instance
       when /PAUSED|SUSPENDED|VERIFY_RESIZE/
         activate_instance(instance)
-        sleep ConfigFile.wait_short
       when /ERROR|SHUTOFF/
         break
       end
@@ -398,7 +398,7 @@ class ComputeService < BaseCloudService
 
   def ensure_security_group_rule(project, ip_protocol='tcp', from_port=22, to_port=22, cidr='0.0.0.0/0')
     service.set_tenant project
-    security_group = service.security_groups.first
+    security_group = @security_groups.first
     parent_group_id = security_group.id
 
     # Ensure that there are no security group rule before adding anything
@@ -421,7 +421,7 @@ class ComputeService < BaseCloudService
 
   def ensure_security_group_rule_exist(project, ip_protocol='tcp', from_port=22, to_port=22, cidr='0.0.0.0/0')
     service.set_tenant project
-    security_group = service.security_groups.first
+    security_group = @security_groups.first
     parent_group_id = security_group.id
 
     # Ensure that there are no security group rule before adding anything
@@ -439,19 +439,9 @@ class ComputeService < BaseCloudService
     security_group.destroy
   end
 
-  def ensure_security_group_exists(project, attributes)
-    service.set_tenant project
-    find_security_group = service.security_groups.find_by_name(attributes[:name]) rescue nil
-
-    find_security_group.destroy if find_security_group
-
-    security_group = create_security_group(project, attributes)
-  end
-
   def ensure_project_security_group_count(project, desired_count)
     service.set_tenant project
-    security_groups = service.security_groups
-    security_groups_count = security_groups.count
+    security_groups_count = @security_groups.count
 
     if desired_count < security_groups_count
       i = security_groups_count
@@ -467,28 +457,24 @@ class ComputeService < BaseCloudService
   def ensure_security_group_does_not_exist(project, attributes)
     service.set_tenant project
 
-    security_groups = service.security_groups
-
-    if find_security_group = security_groups.find_by_name(attributes[:name])
+    if find_security_group = @security_groups.find_by_name(attributes[:name])
       delete_security_group(find_security_group)
     end
   end
 
   def find_security_group_by_name(project, name)
     service.set_tenant project
-    security_groups = service.security_groups
-    security_groups.find_by_name(name)
+    @security_groups.find_by_name(name)
     security_groups
   end
 
   def create_security_group(project, attributes)
     service.set_tenant project
-    security_groups = service.security_groups
-    find_security_group = security_groups.find_by_name(attributes[:name])
+    find_security_group = @security_groups.find_by_name(attributes[:name])
 
     find_security_group.destroy if find_security_group
 
-    security_group = security_groups.new(attributes)
+    security_group = @security_groups.new(attributes)
     security_group.save
     security_group
   end
@@ -499,8 +485,7 @@ class ComputeService < BaseCloudService
 
   def ensure_security_group_exists(project, attributes)
     service.set_tenant project
-    security_groups = service.security_groups
-    find_security_group = security_groups.find_by_name(attributes[:name]) rescue nil
+    find_security_group = @security_groups.find_by_name(attributes[:name]) rescue nil
 
     if find_security_group
       security_group = find_security_group
@@ -509,11 +494,10 @@ class ComputeService < BaseCloudService
     end
     security_group
   end
-
+  
   def ensure_project_security_group_count(project, desired_count)
     service.set_tenant project
-    security_groups = service.security_groups
-    security_groups_count = security_groups.count
+    security_groups_count = @security_groups.count
 
     if desired_count < security_groups_count
       i = security_groups_count
@@ -528,9 +512,8 @@ class ComputeService < BaseCloudService
 
   def ensure_security_group_does_not_exist(project, attributes)
     service.set_tenant project
-    security_groups = service.security_groups
 
-    if security_group = security_groups.find_by_name(attributes[:name])
+    if security_group = @security_groups.find_by_name(attributes[:name])
       delete_security_group(security_group)
     end
   end
@@ -588,8 +571,12 @@ class ComputeService < BaseCloudService
       service.unpause_server(instance.id)
     when 'VERIFY_RESIZE'
       service.revert_resized_server(instance.id)
+    when 'ACTIVE', 'ERROR', 'SHUTOFF'
+      return true # no waiting required
     end
 
+    # wait for instances in transition (e.g., building or resizing)
+    sleep ConfigFile.wait_long
     true
   end
 
@@ -667,13 +654,14 @@ class ComputeService < BaseCloudService
 
   def remove_attached_instance_resources(project, instance)
     set_tenant project
-    associated_addresses = @addresses.reload.select { |a| a.instance_id == instance.id }
+
+    associated_addresses = @addresses.select { |a| a.instance_id == instance.id }
     associated_addresses.each do |address|
       instance.disassociate_address(address.ip)
       sleep(ConfigFile.wait_short)
     end
 
-    attached_volumes = service.volumes.select { |v| v.attachments.any? { |a| a['server_id'] == instance.id } }
+    attached_volumes = @volumes.select { |v| v.attachments.any? { |a| a['server_id'] == instance.id } }
     attached_volumes.each do |volume|
       volume.detach
       sleep(ConfigFile.wait_short)
