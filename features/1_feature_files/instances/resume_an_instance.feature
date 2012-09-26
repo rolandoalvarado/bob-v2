@@ -12,7 +12,6 @@ Feature: Resume an Instance
     * A project exists in the system
     * The project has 1 suspended instance
 
-
   @permissions
   Scenario Outline: Check User Permissions
     Given I have a role of <Role> in the project
@@ -22,7 +21,6 @@ Feature: Resume an Instance
         | Role            | Can or Cannot Resume |
         | Member          | Can Resume           |
         | Project Manager | Can Resume           |
-
 
   Scenario: Resume an Instance
     Given I am authorized to resume instances in the project
