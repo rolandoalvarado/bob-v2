@@ -723,7 +723,7 @@ Then /^The instance ((?:(?!named )).+) should be (?:in|of) (.+) status$/ do |ins
     raise "Couldn't find row for instance #{ instance_id } in the instances list!"
   end
 
-  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_twenty).tries do
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_until_task_is_done).tries do
     unless row.find('.status').has_content?(status.upcase.gsub(' ', '_'))
       raise "Instance #{ instance_id } does not have or took to long to become #{ status } status."
     end
