@@ -333,7 +333,15 @@ module CloudConfiguration
       end
       self.instance[REPEAT][FORTY]
     end
-
+    
+    def self.repeat_until_task_is_done
+      self.instance.ensure_repeat_and_wait_key
+      unless self.instance[REPEAT][FORTY]
+        self.instance[REPEAT][FORTY] = 40
+        self.instance.save
+      end
+      self.instance[REPEAT][FORTY]
+    end
 
     def self.repeat_long
       self.instance.ensure_repeat_and_wait_key
