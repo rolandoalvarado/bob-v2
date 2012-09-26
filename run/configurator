@@ -54,6 +54,14 @@ OptionParser.new do |opts|
     @options[CAPYBARA_DRIVER] = v
   end
 
+  opts.on("--[no-]tunnel", "Connect to servers via SSH tunnel") do |v|
+    @options[TUNNEL] = v
+  end
+
+  opts.on("--server_username USERNAME", "(default: #{`whoami`.chomp}) SSH server username") do |v|
+    @options[SERVER_USERNAME] = v
+  end
+
 end.parse!
 
 # Remove old configuration file location
@@ -73,9 +81,17 @@ end
 
 def configure(hash, key, prompt, force = @options[:force])
   value = hash[key]
-  if value.nil? || value.empty? || force
+  if value.nil? || (value.respond_to?(:empty?) && value.empty?) || force
     print prompt
-    print "[#{value}] " if force && !value.nil?
+    if force
+      if value == true
+        print "[y] "
+      elsif value == false
+        print "[n] "
+      elsif !value.nil?
+        print "[#{value}] "
+      end
+    end
     hash[key] = STDIN.gets.chomp
     hash[key] = value if hash[key].empty?
   end
@@ -110,6 +126,21 @@ configure openstack_options, OPENSTACK_TENANT  , "tenant name for #{openstack_op
 @config[CAPYBARA_DRIVER] = @options[CAPYBARA_DRIVER] || @config[CAPYBARA_DRIVER] || 'selenium'
 configure @config, CAPYBARA_DRIVER  , "capybara driver? (#{ available_capybara_drivers })"
 
+@config[TUNNEL] = case @options[TUNNEL] || @config[TUNNEL]
+                  when true  then 'y'
+                  when false then 'n'
+                  end
+configure @config, TUNNEL, "connect via tunnel? (Yn) "
+@config[TUNNEL] = (@config[TUNNEL].downcase == 'y')
+
+@config[SERVER_USERNAME] = @options[SERVER_USERNAME] || @config[SERVER_USERNAME]
+if @config[TUNNEL]
+  configure @config, SERVER_USERNAME, "ssh server username? "
+  @config[SERVER_USERNAME] ||= `whoami`.chomp
+  openstack_options[OPENSTACK_AUTH_URL] = "http://localhost:35357/v2.0/tokens"
+else
+  openstack_options[OPENSTACK_AUTH_URL] = "#{ @config[WEB_CLIENT_HOST] }:35357/v2.0/tokens"
+end
 
 puts "Writing #{config_path} with contents:"
 puts @config.to_yaml

@@ -71,3 +71,9 @@ end
 #  Delete registered resources
 # ==============================
 EnvironmentCleaner.delete_test_objects
+
+
+# ==============================
+#  Delete orphaned resources
+# ==============================
+EnvironmentCleaner.delete_orphans
