@@ -402,8 +402,15 @@ class ComputeService < BaseCloudService
     parent_group_id = security_group.id
 
     # Ensure that there are no security group rule before adding anything
-    security_group.rules.each do |r|
-      service.delete_security_group_rule(r['id'])
+    sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+      security_group.rules.each do |r|
+        service.delete_security_group_rule(r['id'])
+      end
+
+      @security_groups.reload
+      unless @security_groups.first.rules.empty?
+        raise "Couldn't ensure security group is empty."
+      end
     end
 
     #Create Rule for SSH
@@ -425,8 +432,15 @@ class ComputeService < BaseCloudService
     parent_group_id = security_group.id
 
     # Ensure that there are no security group rule before adding anything
-    security_group.rules.each do |r|
-      service.delete_security_group_rule(r['id'])
+    sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+      security_group.rules.each do |r|
+        service.delete_security_group_rule(r['id'])
+      end
+
+      @security_groups.reload
+      unless @security_groups.first.rules.empty?
+        raise "Couldn't ensure security group is empty."
+      end
     end
 
     service.create_security_group_rule(parent_group_id, ip_protocol, from_port, to_port, cidr)
