@@ -126,9 +126,9 @@ configure openstack_options, OPENSTACK_TENANT  , "tenant name for #{openstack_op
 @config[CAPYBARA_DRIVER] = @options[CAPYBARA_DRIVER] || @config[CAPYBARA_DRIVER] || 'selenium'
 configure @config, CAPYBARA_DRIVER  , "capybara driver? (#{ available_capybara_drivers })"
 
-@config[TUNNEL] = case @options[TUNNEL] || @config[TUNNEL]
+@config[TUNNEL] = case @config[TUNNEL] || @options[TUNNEL]
                   when true  then 'y'
-                  else 'n'
+                  when false then 'n'
                   end
 configure @config, TUNNEL, "connect via tunnel? (Yn) "
 @config[TUNNEL] = (@config[TUNNEL].downcase == 'y')
