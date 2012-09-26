@@ -688,8 +688,11 @@ end
 
 Then /^The instance ((?:(?!named )).+) should be performing task (.+)$/ do |instance_id, task|
   sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_fifteen).tries do
-    unless @current_page.instance_row( id: instance_id ).find('.task').text.include?(task)
-      raise "Instance #{ instance_id } is not shown as performing task #{ task }."
+    task_cell = @current_page.find("#instance-item-#{ instance_id } .task")
+    actual_task = task_cell.text.strip
+    unless actual_task.include?(task)
+      raise "Instance #{ instance_id } is not shown as performing task #{ task }. " +
+            "It is currently #{ actual_task }."
     end
   end
 end
@@ -718,14 +721,12 @@ end
 
 
 Then /^The instance ((?:(?!named )).+) should be (?:in|of) (.+) status$/ do |instance_id, status|
-  row = @current_page.instance_row( id: instance_id )
-  unless row
-    raise "Couldn't find row for instance #{ instance_id } in the instances list!"
-  end
-
   sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_twenty).tries do
-    unless row.find('.status').has_content?(status.upcase.gsub(' ', '_'))
-      raise "Instance #{ instance_id } does not have or took to long to become #{ status } status."
+    status_cell = @current_page.find("#instance-item-#{ instance_id } .status")
+    actual_status = status_cell.text.strip
+    unless actual_status == expected_status.upcase.gsub(' ', '_')
+      raise "Instance #{ instance_id } does not have or took to long to become #{ status } status. " +
+      "Current status is #{ actual_status }."
     end
   end
 end
@@ -746,7 +747,8 @@ end
 
 Step /^The instance ((?:(?!named )).+) should not have flavor (.+)$/ do |instance_id, flavor_name|
   sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
-    if @current_page.instance_row( id: instance_id ).find('.flavor').has_content?(flavor_name)
+    flavor_cell = @current_page.find("#instance-item-#{ instance_id } .flavor")
+    if flavor_cell.has_content?(flavor_name)
       raise "Expected flavor of instance #{ instance_id } to change. " +
             "Current flavor is #{ flavor_name }."
     end
@@ -1135,14 +1137,9 @@ Then /^Wait (.+) second(?:s|)/i  do |wait_secs|
 end
 
 Then /^Wait at most (\d+) minutes until the instance named (.+) is in (.+) status$/ do |number_of_minutes, instance_name, expected_status|
-  # TODO To prevent conflict with other instance steps, temporarily forgo changing the selector,
-  # and instead finding it directly from the page object.
-  selector = "//*[@id='instances-list']//*[contains(@class, 'name') and contains(text(), \"#{ instance_name }\")]/.."
-  row = @current_page.find_by_xpath(selector)
-
-  # Retry every 5 seconds up to x minutes
   sleeping(5).seconds.between_tries.failing_after((60 * number_of_minutes.to_i) / 5).tries do
-    actual_status = row.find('.status').text.strip
+    status_cell = @current_page.instance_status_cell(name: instance_name)
+    actual_status = status_cell.text.strip
     unless actual_status == expected_status.upcase.gsub(' ', '_')
       raise "Instance #{ instance_name } does not have or took to long to become #{ expected_status } status. " +
             "Instance is currently in #{ actual_status } status."
@@ -1151,14 +1148,10 @@ Then /^Wait at most (\d+) minutes until the instance named (.+) is in (.+) statu
 end
 
 Then /^Wait for a few minutes until the instance named (.+) is in (.+) status$/ do |instance_name, expected_status|
-  # TODO To prevent conflict with other instance steps, temporarily forgo changing the selector,
-  # and instead finding it directly from the page object.
-  selector = "//*[@id='instances-list']//*[contains(@class, 'name') and contains(text(), \"#{ instance_name }\")]/.."
-  row = @current_page.find_by_xpath(selector)
-
   # Retry every 5 seconds up to x minutes
   sleeping(ConfigFile.wait_seconds).seconds.between_tries.failing_after((ConfigFile.minute * ConfigFile.repeat_timing) / ConfigFile.timing).tries do
-    actual_status = row.find('.status').text.strip
+    status_cell = @current_page.instance_status_cell(name: instance_name)
+    actual_status = status_cell.text.strip
     unless actual_status == expected_status.upcase.gsub(' ', '_')
       raise "Instance #{ instance_name } does not have or took to long to become #{ expected_status } status. " +
             "Instance is currently in #{ actual_status } status."
