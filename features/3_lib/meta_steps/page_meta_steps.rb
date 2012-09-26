@@ -720,12 +720,17 @@ Then /^The instance named (.+) should be idle$/ do |instance_name|
 end
 
 
-Then /^The instance ((?:(?!named )).+) should be (?:in|of) (.+) status$/ do |instance_id, status|
+Then /^The instance ((?:(?!named )).+) should be (?:in|of) (.+) status$/ do |instance_id, expected_status|
   sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_twenty).tries do
     status_cell = @current_page.find("#instance-item-#{ instance_id } .status")
     actual_status = status_cell.text.strip
+<<<<<<< Updated upstream
     unless actual_status == status.upcase.gsub(' ', '_')
       raise "Instance #{ instance_id } does not have or took to long to become #{ status } status. " +
+=======
+    unless actual_status == expected_status.upcase.gsub(' ', '_')
+      raise "Instance #{ instance_id } does not have or took to long to become #{ expected_status } status. " +
+>>>>>>> Stashed changes
       "Current status is #{ actual_status }."
     end
   end
