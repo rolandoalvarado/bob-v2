@@ -22,7 +22,6 @@ Feature: Resume an Instance
         | Member          | Can Resume           |
         | Project Manager | Can Resume           |
 
-
   Scenario: Resume an Instance
     Given I am authorized to resume instances in the project
      When I resume the instance in the project
