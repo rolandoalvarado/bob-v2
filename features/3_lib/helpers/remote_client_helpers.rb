@@ -30,6 +30,7 @@ def remote_client_connection(protocol, external_ip, internal_ip, username, optio
 end
 
 def remote_client_check_volume(ip_address, username, delta_time, options={})
+  device_file_list = Array.new
   Net::SSH.start(ip_address, username, options) do |ssh|
     # Get a list of all device /dev/vd* files modified/created from x minutes ago
     device_file_list = ssh.exec!("find /dev/vd* -mmin -#{ delta_time }").split
