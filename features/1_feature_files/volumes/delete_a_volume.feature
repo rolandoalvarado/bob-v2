@@ -25,6 +25,5 @@ Feature: Delete a volume
         | System Admin    | Can Delete           |
         | Project Manager | Can Delete           |
 
-  @pdeazeta
   Scenario:
     * Volumes that are attached to an instance cannot be deleted
