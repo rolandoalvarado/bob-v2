@@ -485,13 +485,12 @@ class ComputeService < BaseCloudService
 
   def create_security_group(project, attributes)
     service.set_tenant project
-    find_security_group = @security_groups.find_by_name(attributes[:name])
+    security_group = @security_groups.find_by_name(attributes[:name])
+    security_group.destroy if security_group
 
-    find_security_group.destroy if find_security_group
-
-    security_group = @security_groups.new(attributes)
-    security_group.save
-    security_group
+    service.create_security_group attributes[:name], attributes[:description]
+    @security_groups = service.security_groups
+    @security_groups.find_by_name(attributes[:name])
   end
 
   def delete_security_group(security_group)
@@ -509,7 +508,7 @@ class ComputeService < BaseCloudService
     end
     security_group
   end
-  
+
   def ensure_project_security_group_count(project, desired_count)
     service.set_tenant project
     security_groups_count = @security_groups.count
