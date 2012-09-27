@@ -46,35 +46,47 @@ Installation
 
 Having trouble in executing run/setup?
 ------------
-1. Edit $vi ~/.bashrc
-2. add these lines: 
+1.  Edit $vi ~/.bashrc
+2.  add these lines: 
 
-   if [[ -s $HOME/.rvm/scripts/rvm ]] then
-      source $HOME/.rvm/scripts/rvm
-   fi
+        if [[ -s $HOME/.rvm/scripts/rvm ]] then
+          source $HOME/.rvm/scripts/rvm
+        fi
 
 3. Still won’t work? Add this instead:
 
-   if [ -f /usr/share/ruby-rvm/scripts/rvm ]; then
-      source /usr/share/ruby-rvm/scripts/rvm
-   fi
+        if [ -f /usr/share/ruby-rvm/scripts/rvm ]; then
+          source /usr/share/ruby-rvm/scripts/rvm
+        fi
 
 4. Still won’t work? Sometimes, GEM_HOME environment variable may cause. So
 
-   export GEM_HOME=
+        export GEM_HOME=
    
 	
 Usage
 -----
 
-To test Bob :
+To test Bob:
 
     run/tag @jira-MCF-4
 
 If you want to execute full test (it takes 3 hours):
+
     run/verifier
 
-    The above command makes Bob generate a report in the `output` directory.
+The above command makes Bob generate a report in the `output` directory.
+
+
+How to run bob using Tunnel
+----------------------------
+
+1.  Run `run/configurator` to configure via CLI, or
+
+2.  Add the lines below to `features/support/config.yml`
+
+        :tunnel: true
+        :server_username: <<your_username>>
 
 
 Other useful commands
@@ -116,35 +128,28 @@ contributing on an ongoing basis, I highly recommend you follow this process.
 
 How to write Features
 ---------------------
-* Features are written as ordinary text files with a .feature extension under the `features/1_feature_files` directory
-* The simplest .feature file can be written as:
+*   Features are written as ordinary text files with a .feature extension under the `features/1_feature_files` directory
+
+*   The simplest .feature file can be written as:
 
   Listing 1. Sample .feature file
 
-      Feature: Withdraw Money
+        Feature: Withdraw Money
 
-        Scenario Outline: Withdraw an amount given a starting balance
-          Given my account has a balance of <Balance>
-           When I withdraw <Requested Amount>
-           Then the amount will be <Dispensed or Not>
+          Scenario Outline: Withdraw an amount given a starting balance
+            Given my account has a balance of <Balance>
+            When I withdraw <Requested Amount>
+            Then the amount will be <Dispensed or Not>
 
-          Scenarios:
-            | Balance | Requested Amount | Dispensed or Not |
-            |    $100 |              $50 | Dispensed        |
-            |    $100 |             $150 | Not Dispensed    |
+            Scenarios:
+              | Balance | Requested Amount | Dispensed or Not |
+              |    $100 |              $50 | Dispensed        |
+              |    $100 |             $150 | Not Dispensed    |
 
-* For more sample feature files, see [the actual feature files](https://github.com/MorphGlobal/bob/src/master/features/feature_files/).
+*   For more sample feature files, see [the actual feature files](https://github.com/MorphGlobal/bob/src/master/features/1_feature_files/).
 
 Helpful references for development
 ----------------------------------
 1. [Gherkin Syntax](https://github.com/cucumber/cucumber/wiki/Gherkin) - If all you want is to write feature files, this is the only reference you need.
 1. [Cucumber](http://cukes.info) - Learn about the Cucumber framework. The Cucumber Book is highly recommended.
 1. [Cucumber Mailing List](https://groups.google.com/forum/?fromgroups#!forum/cukes) - Get help from the community.
-
-How to run bob using Tunnel
-----------------------------
-1. First add the lines below to config.yml
-   :tunnel: true
-   :tunnel_username: your_username
-
-2. Then save. 
