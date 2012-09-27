@@ -129,16 +129,8 @@ Step /^Ensure that the user (.+) has a role of (.+) in the project (.+)$/ do |us
 
   identity_service.revoke_all_user_roles(user, project)
 
-  if role_name.downcase == "user"
-    role_name = "Member"
-  end
-  identity_service.ensure_project_role(user, project, role_name)
-
-  admin_project = identity_service.tenants.find { |t| t.name == 'admin' }  
-  if role_name.downcase != "user" or role_name.downcase != "(none)" 
-    identity_service.ensure_tenant_role(user, admin_project, role_name)
-  else
-    identity_service.revoke_all_user_roles(user, admin_project)
+  if role_name.downcase != "member" or role_name.downcase != "(none)" 
+    identity_service.ensure_tenant_role(user, project, role_name)
   end
 
 end

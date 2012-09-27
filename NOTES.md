@@ -393,7 +393,7 @@ In irb, you can call fog library like this.
   connection[:compute].volumes
 
 # Using Chrome instead of firefox for running bob as test browser.
-  # In Mac, use homebrew. For linux, download chromedriver from here:
+  # In Mac, use homebrew(terminal~$ brew install chromedriver ). For linux, download chromedriver from here:
   # http://code.google.com/p/chromedriver/downloads/list
   # Extract the file and copy to /usr/local/bin directory
   # and set the permission to 755.

@@ -430,79 +430,23 @@ Then /^I cannot update a user with attributes (.+), (.+), (.+), (.+), and (.+)$/
 end
 
 
-TestCase /^A user with a role of System Admin in the system can change user permissions$/i do
+TestCase /^A user with a role of (.+) in the system can change user permissions$/i do |role_name|
 
-  pm_username     = Unique.username('pm')
-  member_username = Unique.username('member')
-
-  Preconditions %{
-    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
-    * Ensure that the user #{ bob_username } has a role of System Admin in the system
-
-    * Ensure that a project named #{ test_project_name } exists
-    * Ensure that another user with username #{ pm_username } and password #{ bob_password } exists
-    * Ensure that the user #{ pm_username } has a role of Project Manager in the project #{ test_project_name }
-    * Ensure that another user with username #{ member_username } and password #{ bob_password } exists
-    * Ensure that the user #{ member_username } has a role of Member in the project #{ test_project_name }
-  }
-
-  Cleanup %{
-    * Register the project named #{ test_project_name } for deletion at exit
-    * Register the user named #{ bob_username } for deletion at exit
-    * Register the user named #{ pm_username } for deletion at exit
-    * Register the user named #{ member_username } for deletion at exit
-  }
-
-  Script %{
-    * Click the Logout button if currently logged in
-    * Visit the Login page
-    * Fill in the Username field with #{ bob_username }
-    * Fill in the Password field with #{ bob_password }
-    * Click the Login button
-
-    * Click the Users link
-
-    * Click the Edit button for the user named #{ pm_username }
-    * Current page should have the Edit User form
-
-    * Choose the item with text Member in the Role dropdown
-    * Click the Update User button
-
-    * The item with text Member should be default in the Role dropdown
-
-    * Click the Edit button for the user named #{ member_username }
-    * Current page should have the Edit User form
-
-    * Choose the item with text Project Manager in the Role dropdown
-    * Click the Update User button
-
-    * The item with text Project Manager should be default in the Role dropdown
-  }
-
-end
-
-
-TestCase /^A user with a role of (Project Manager|Member) in the system can change user permissions$/i do |role_name|
-
-  pm_username     = Unique.username('pm')
-  member_username = Unique.username('member')
+  other_username     = Unique.username('other')
 
   Preconditions %{
     * Ensure that a project named #{ test_project_name } exists
     * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
     * Ensure that the user #{ bob_username } has a role of #{ role_name } in the project #{ test_project_name }
 
-    * Ensure that another user with username #{ pm_username } and password #{ bob_password } exists
-    * Ensure that the user #{ pm_username } has a role of Project Manager in the project #{ test_project_name }
-    * Ensure that another user with username #{ member_username } and password #{ bob_password } exists
-    * Ensure that the user #{ member_username } has a role of Member in the project #{ test_project_name }
+    * Ensure that another user with username #{ other_username } and password #{ bob_password } exists
+    * Ensure that the user #{ other_username } has a role of Project Manager in the project #{ test_project_name }
   }
 
   Cleanup %{
     * Register the project named #{ test_project_name } for deletion at exit
     * Register the user named #{ bob_username } for deletion at exit
-    * Register the user named #{ pm_username } for deletion at exit
-    * Register the user named #{ member_username } for deletion at exit
+    * Register the user named #{ other_username } for deletion at exit
   }
 
   Script %{
@@ -514,23 +458,12 @@ TestCase /^A user with a role of (Project Manager|Member) in the system can chan
 
     * Click the Users link
 
-    * Click the Edit button for the user named #{ pm_username }
+    * Click the Edit button for the user named #{ other_username }
     * Current page should have the Edit User form
 
     * Choose the item with text Member in the Role dropdown
     * Click the Update User button
-
-    * The item with text Member should be default in the Role dropdown
-
-    * Click the Edit button for the user named #{ member_username }
-    * Current page should have the Edit User form
-
-    * Choose the item with text Project Manager in the Role dropdown
-    * Click the Update User button
-
-    * The item with text Project Manager should be default in the Role dropdown
   }
-
 end
 
 
