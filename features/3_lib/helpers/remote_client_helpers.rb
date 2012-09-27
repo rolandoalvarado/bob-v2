@@ -29,6 +29,17 @@ def remote_client_connection(protocol, external_ip, internal_ip, username, optio
   end
 end
 
+def remote_client_check_volume(ip_address, username, delta_time, options={})
+  Net::SSH.start(ip_address, username, options) do |ssh|
+    # Get a list of all device /dev/vd* files modified/created from x minutes ago
+    device_file_list = ssh.exec!("find /dev/vd* -mmin -#{ delta_time }").split
+  end
+
+  if device_file_list.empty?
+    raise "No new device file has been created on the instance."
+  end
+end
+
 def test_keypair_name
   'bob'
 end
