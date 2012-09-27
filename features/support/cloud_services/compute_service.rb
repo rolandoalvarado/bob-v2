@@ -398,15 +398,15 @@ class ComputeService < BaseCloudService
 
   def ensure_security_group_rule(project, ip_protocol='tcp', from_port=22, to_port=22, cidr='0.0.0.0/0')
     service.set_tenant project
-    security_group = @security_groups.first
+    security_group = @security_groups.reload.first
     parent_group_id = security_group.id
 
     # Ensure that there are no security group rule before adding anything
-    sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
-      security_group.rules.each do |r|
-        service.delete_security_group_rule(r['id'])
-      end
+    security_group.rules.each do |r|
+      service.delete_security_group_rule(r['id'])
+    end
 
+    sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
       @security_groups.reload
       unless @security_groups.first.rules.empty?
         raise "Couldn't ensure security group is empty."
@@ -428,15 +428,16 @@ class ComputeService < BaseCloudService
 
   def ensure_security_group_rule_exist(project, ip_protocol='tcp', from_port=22, to_port=22, cidr='0.0.0.0/0')
     service.set_tenant project
-    security_group = @security_groups.first
+    security_group = @security_groups.reload.first
     parent_group_id = security_group.id
 
     # Ensure that there are no security group rule before adding anything
-    sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
-      security_group.rules.each do |r|
-        service.delete_security_group_rule(r['id'])
-      end
 
+    security_group.rules.each do |r|
+      service.delete_security_group_rule(r['id'])
+    end
+
+    sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
       @security_groups.reload
       unless @security_groups.first.rules.empty?
         raise "Couldn't ensure security group is empty."
