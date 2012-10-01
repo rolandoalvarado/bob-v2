@@ -33,5 +33,6 @@ Feature: Attach a Volume
         | Role            | Can or Cannot Attach |
         | (None)          | Cannot Attach        |
 
+  @jira-MCF-144
   Scenario: Attach a Volume
     * Volumes that are attached to an instance will be accessible from the instance
