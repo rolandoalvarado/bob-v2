@@ -11,7 +11,7 @@ Feature: Create a User
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Create |
-        | User            | Cannot Create        |
+        | Member          | Cannot Create        |
 
   @jira-MCF-7-cuwca
   Scenario Outline: Create a user with certain attributes
