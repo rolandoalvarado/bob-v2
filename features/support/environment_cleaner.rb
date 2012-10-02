@@ -167,19 +167,18 @@ class EnvironmentCleaner
           end
         end
 
-        if project.users.reload.count > 0
+        users = project.users.reload
+        if users.count > 0
           puts "    Revoking memberships..."
-          project.users.reload.each do |user|
+          users.each do |user|
             next if user.name == "admin"
             @identity_service.revoke_all_user_roles(user, project)
-            puts "     REVOKED: #{ user.name } (id: #{ user.id })"
+            puts "      REVOKED: #{ user.name } (id: #{ user.id })"
           end
         end
 
         puts "    Deleting #{ project.name }..."
-        sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
-          @identity_service.delete_project(project)
-        end
+        @identity_service.delete_project(project)
         success = true
       rescue Exception => e
         puts "\033[0;33m  ERROR: #{ project.name } could not be deleted. The error returned was: " +
@@ -220,6 +219,14 @@ class EnvironmentCleaner
              e.inspect + "\033[m"
       end
     end
+  end
+
+  def say_with_time(message, &block)
+    start_time = Time.now
+    puts "    #{ message }... (started #{ start_time })"
+    yield
+    end_time = Time.now
+    puts "        (finished in #{ end_time - start_time } at #{ end_time })"
   end
 
 end

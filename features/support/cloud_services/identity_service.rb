@@ -43,15 +43,14 @@ class IdentityService < BaseCloudService
   end
 
   def delete_tenant(tenant)
-    tenants.reload
-    tenant = tenants.find_by_name(tenant.name)
-    users = tenant.users
-    users.reload.each do |user|
-      revoke_all_user_roles(user, tenant)
-    end
-
+    tenant_name = tenant.name
     sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_long).tries do
-      tenant.destroy
+      tenant = @tenants.reload.find_by_name(tenant_name)
+      begin
+        tenant.destroy
+      rescue
+        raise "Tenant #{ tenant_name } took too long to delete!"
+      end
     end
   end
 
@@ -105,9 +104,13 @@ class IdentityService < BaseCloudService
   end
   
   def ensure_tenant_does_not_exist(attributes)
-    if tenant = tenants.find_by_name(attributes[:name])
+    if tenant = @tenants.find_by_name(attributes[:name])
       ComputeService.session.delete_instances_in_project(tenant)
       VolumeService.session.delete_volumes_in_project(tenant)
+      users = tenant.users.reload
+      users.each do |user|
+        revoke_all_user_roles(user, tenant)
+      end
       delete_tenant(tenant)
     end
   end
@@ -218,7 +221,9 @@ class IdentityService < BaseCloudService
       tenant.revoke_user_role(user.id, role['id'])
     end
 
+    user_name = user.name
     sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_long).tries do
+      user = @users.reload.find_by_name(user_name)
       raise "Roles for user #{ user.name } on tenant #{ tenant.name } took too long to revoke!" if user.roles(tenant.id).length > 0
     end
   end
