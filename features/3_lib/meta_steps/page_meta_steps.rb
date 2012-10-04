@@ -709,6 +709,17 @@ Then /^The instance named (.+) should be performing task (.+)$/ do |instance_nam
   end
 end
 
+Step /^The instance snapshot named (.+) should be performing (.+) action$/ do |instance_snapshot_name, task|
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+    task_cell = @current_page.instance_task_cell(name: instance_snapshot_name)
+    actual_task = task_cell.text.to_s.strip
+    unless actual_task.include?(task)
+      raise "Instance Snapshot #{ instance_snapshot_name } is not shown as #{ task } task. " +
+            "It is currently #{ actual_task }."
+    end
+  end
+end
+
 Then /^The instance named (.+) should be idle$/ do |instance_name|
   sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
     task_cell = @current_page.instance_task_cell(name: instance_name)
@@ -740,6 +751,18 @@ Step /^The instance named (.+) should be (?:in|of) (.+) status$/ do |instance_na
 
     unless actual_status == expected_status.upcase.gsub(' ', '_')
       raise "Instance #{ instance_name } is not or took too long to become #{ expected_status }. " +
+      "Current status is #{ actual_status }."
+    end
+  end
+end
+
+Step /^The snapshot named (.+) should be (?:in|of) (.+) status$/ do |snapshot_name, expected_status|
+  sleeping(ConfigFile.wait_instance_in_status).seconds.between_tries.failing_after(ConfigFile.repeat_instance_in_status).tries do
+    status_cell = @current_page.snapshot_status_cell(name: snapshot_name)
+    actual_status = status_cell.text.strip
+
+    unless actual_status == expected_status.upcase.gsub(' ', '_')
+      raise "Snapshot #{ snapshot_name } is not or took too long to become #{ expected_status }. " +
       "Current status is #{ actual_status }."
     end
   end
@@ -1180,3 +1203,4 @@ Step /^Write the contents of the (.+) field to file (.+)$/i do |field_name, file
     file.puts field.value
   end
 end
+

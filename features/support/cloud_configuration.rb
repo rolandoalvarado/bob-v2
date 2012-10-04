@@ -48,6 +48,7 @@ module CloudConfiguration
   TUNNEL               = :tunnel
   SERVER_USERNAME      = :server_username
   CHROME               = :chrome
+  INSTANCE_SNAPSHOT    = :instance_snapshot
 
   class ConfigFile
     include Singleton
@@ -107,6 +108,15 @@ module CloudConfiguration
         self.instance.save
       end
       self.instance[WAIT][INSTANCE]
+    end
+    
+    def self.wait_instance_snapshot
+      self.instance.ensure_repeat_and_wait_key
+      unless self.instance[WAIT][INSTANCE_SNAPSHOT]
+        self.instance[WAIT][INSTANCE_SNAPSHOT] = 30
+        self.instance.save
+      end
+      self.instance[WAIT][INSTANCE_SNAPSHOT]
     end
     
     def self.wait_instance_resume

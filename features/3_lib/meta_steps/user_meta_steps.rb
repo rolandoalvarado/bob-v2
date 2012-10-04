@@ -118,7 +118,7 @@ Given /^Ensure that a (.*) is in the system$/i do |role_name|
 end
 
 Step /^Ensure that the user (.+) has a role of (.+) in the project (.+)$/ do |username, role_name, project_name|
-  user_attrs       = CloudObjectBuilder.attributes_for( :user, :name => Unique.username(username) )
+  user_attrs       = CloudObjectBuilder.attributes_for( :user, :name => username )
   identity_service = IdentityService.session
   user             = identity_service.ensure_user_exists(user_attrs)
 
@@ -129,10 +129,14 @@ Step /^Ensure that the user (.+) has a role of (.+) in the project (.+)$/ do |us
 
   identity_service.revoke_all_user_roles(user, project)
 
-  if role_name.downcase != "member" or role_name.downcase != "(none)" 
-    identity_service.ensure_tenant_role(user, project, role_name)
-  end
-
+  # Ensure user has the following role in the project
+  unless role_name.downcase == "(none)"
+    begin
+      identity_service.ensure_tenant_role(user, project, role_name)
+    rescue Fog::Identity::OpenStack::NotFound => e
+      raise "Couldn't add #{ user.name } to #{ @project.name } as #{ role_name }"
+    end
+  end  
 end
 
 Step /^Ensure that the user (.+) (?:does not have a role in|is not a member of) the project (.+)$/ do |username, project_name|
