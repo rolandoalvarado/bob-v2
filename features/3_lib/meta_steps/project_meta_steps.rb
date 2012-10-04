@@ -26,7 +26,7 @@ Step /^Ensure that a project named (.+) exists$/i do |project_name|
     raise "Test project couldn't be initialized!"
   end
 
-  @named_project = project
+  @project = @named_project = project
 end
 
 Step /^Ensure that a project named (.+) does not exists$/i do |project_name|
@@ -248,3 +248,4 @@ Step /^Ensure that the project named (.+) has (?:an|a) (member|project manager) 
 
   EnvironmentCleaner.register(:user, user.id)
 end
+

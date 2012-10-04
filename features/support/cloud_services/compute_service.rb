@@ -18,6 +18,57 @@ class ComputeService < BaseCloudService
     @private_keys = {}
   end
 
+  def ensure_instance_has_a_snapshot(project, instance, snapshot)
+    service.set_tenant project
+    sleep(2)
+
+    if instance.state == 'ACTIVE'      
+      service.create_image(instance.id, snapshot)  
+    elsif instance.state == 'ERROR'
+       raise "Instance in ERROR state. Please check." 
+    end
+  rescue
+    raise "An error occured in your instance #{instance.state}!"  
+  end
+
+  def ensure_instance_does_not_have_a_snapshot(project, instance, snapshot)
+    service.set_tenant project
+    service.delete_image(snapshot.id)
+  end
+  
+  def ensure_snapshot_does_not_exists(project, snapshot)
+    service.set_tenant project
+    snapshot = find_snapshot_by_name(project, snapshot)
+    
+    if snapshot
+      begin
+          delete_snapshot_in_project(project, snapshot['id'])
+      rescue => e
+        raise "Couldn't delete snapshot #{ snapshot['name'] } in #{ project.name }. " +
+              "The error returned was: #{ e.inspect }."
+      end
+    end
+  end
+  
+  def delete_snapshot_in_project(project, snapshot)
+    service.set_tenant project
+    service.delete_image(snapshot)
+  end
+  
+  def find_snapshot_by_name(project, name)
+    service.set_tenant project
+    service.list_images.body['images'].find { |i| i['name'] == name }
+  end
+
+  def create_volume_in_project(project, attributes)
+    attrs = CloudObjectBuilder.attributes_for(:volume, attributes)
+    set_tenant project
+    if service.list_volumes.body['volumes'].none? { |v| v['id'] == attrs.name }
+      service.create_volume(attrs.name, attrs.description, attrs.size)
+    end
+    set_tenant 'admin'
+  end
+
   def attach_volume_to_instance_in_project(project, instance, volume)
     set_tenant project, false
 

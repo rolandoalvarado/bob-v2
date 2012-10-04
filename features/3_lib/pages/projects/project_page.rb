@@ -173,6 +173,7 @@ class ProjectPage < SecurePage
   cell      'instance public ip',                 xpath: "//*[@id='instances-list']//*[contains(@class, 'name') and contains(text(), \"<name>\")]//..//*[@class='public-ipaddress']"
   cell      'instance status',                    xpath: "//*[@id='instances-list']//*[contains(@class, 'name') and contains(text(), \"<name>\")]//..//*[@class='status']"
   cell      'instance task',                      xpath: "//*[@id='instances-list']//*[contains(@class, 'name') and contains(text(), \"<name>\")]//..//*[@class='task']"
+  cell      'snapshot status',                    xpath: "//*[@id='instance-snapshot-list']//*[contains(text(), \"<name>\")]//..//*[@class='status']"
   form      'resize instance',                    '#resize-instance-modal'
 
   element   'console output',                     '#logsModal'
@@ -185,6 +186,7 @@ class ProjectPage < SecurePage
   button    'soft reboot instance',               "#instance-item-<id> .soft-reboot"
   button    'hard reboot instance',               "#instance-item-<id> .hard-reboot"
   button    'pause instance',                     "#instance-item-<id> .pause"
+  button    'snapshot instance',                  "#instance-item-<id> .snapshot"
   button    'resize instance',                    "#instance-item-<id> .resize"
   button    'resume instance',                    "#instance-item-<id> .resume"
   button    'suspend instance',                   "#instance-item-<id> .suspend"
@@ -200,7 +202,10 @@ class ProjectPage < SecurePage
   button    'resize instance confirmation',       "#resize-instance"
 
   element   'image',                              xpath: "//*[@id='instances-list']//label[text()='<name>']"
-
+  tab       'images and snapshots',               '.nav-tabs .snapshots a'
+  field     'snapshot name',                      '#name'
+  form      'new instance snapshot',              '#instance-snapshot-modal'
+  button    'create instance snapshot',           '#create-snapshot'
 
   #==========================
   # Collaborators

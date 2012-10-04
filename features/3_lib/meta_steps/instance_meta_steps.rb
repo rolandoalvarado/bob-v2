@@ -14,6 +14,8 @@ Step /^Ensure that the project named (.+) has an instance named (.+)$/ do |proje
 
   instance = ComputeService.session.create_instance_in_project(project, name: instance_name)
   raise "Instance #{ instance_name } couldn't be found!" unless instance
+  
+  @instance = instance
 end
 
 
@@ -75,4 +77,9 @@ end
 Step /^Ensure that an instance named (.+) does not have any floating IPs$/ do |instance|
   compute_service = ComputeService.session
   compute_service.ensure_project_floating_ip_count(@named_project, 0, instance)
+end
+
+Step /^Ensure that the snapshot named (.+) does not exists$/ do |snapshot|
+  compute_service = ComputeService.session
+  compute_service.ensure_snapshot_does_not_exists(@project, snapshot)
 end
