@@ -3,25 +3,32 @@ def remote_client_connection(protocol, external_ip, internal_ip, username, optio
   when 'RDP'
     result = `rdesktop #{ external_ip } -u #{ username } -p #{ options[:password] } 2>&1`
     unless $? == 0  # command exited with error/s
-      raise "The instance is not publicly accessible on #{ ip_address } via RDP. " +
+      raise "The instance is not publicly accessible on #{ external_ip } via RDP. " +
             "The error returned was: #{ result }"
     end
   when 'SSH'
     private_key = ComputeService.session.private_keys[test_keypair_name]
     raise "Couldn't find private key for keypair '#{ test_keypair_name }'!" unless private_key
-    options.merge!( port: 22, timeout: 60, key_data: [ private_key ], user_known_hosts_file: '/dev/null', verbose: 0)
+    options.merge!( port: 22, timeout: 60, key_data: [ private_key ], user_known_hosts_file: '/dev/null')
+
     begin
+      print "Connecting to external IP #{ external_ip }... "
       Net::SSH.start(external_ip, username, options) do |ssh|
+        print "Connected.\n"
         output = ssh.exec!(' hostname ;ip addr show ; top -n 1 ; ')
-        puts "Output : #{output}"
+        puts "Output: #{ output }"
       end
     rescue
+      print "Failed.\n"
       begin
+        print "Connecting to internal IP #{ internal_ip }... "
         Net::SSH.start(internal_ip, username, options) do |ssh|
+          print "Connected.\n"
           output = ssh.exec!(' hostname ;ip addr show ; top -n 1 ; ')
-          puts "Output : #{output}"
+          puts "Output: #{ output }"
         end
-      rescue => e
+      rescue Exception => e
+        print "Failed.\n"
         raise "The instance is not publicly accessible on both #{ external_ip } and #{ internal_ip } via SSH. " +
               "The error returned was: #{ e.inspect }"
       end
