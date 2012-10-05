@@ -69,6 +69,7 @@ class EnvironmentCleaner
   end
 
   def delete_orphans
+    return unless ConfigFile.server_username
     orphaned_count = 0
     puts "Deleting orphaned resources (Cancel with Ctrl-C)"
     IdentityService.session.reset_credentials
@@ -131,6 +132,7 @@ class EnvironmentCleaner
       puts "  #{ project.name }..."
 
       success = false
+      retried = false
       begin
         @compute_service.set_tenant project
         @volume_service.set_tenant project
@@ -183,6 +185,12 @@ class EnvironmentCleaner
       rescue Exception => e
         puts "\033[0;33m  ERROR: #{ project.name } could not be deleted. The error returned was: " +
              e.inspect + "\033[m"
+        unless retried
+          retried = true
+          sleep(ConfigFile.wait_short)
+          puts "Restarting deleting test projects and their resources..."
+          retry
+        end
       ensure
         unless success
           failed_at = Time.now
@@ -212,11 +220,18 @@ class EnvironmentCleaner
       next if user.nil? || user.name == 'admin'
       puts "  #{ user.name }..."
 
+      retried = false
       begin
         @identity_service.delete_user(user)
       rescue Exception => e
         puts "\033[0;33m  ERROR: #{ user.name } could not be deleted. The error returned was: " +
              e.inspect + "\033[m"
+        unless retried
+          retried = true
+          sleep(ConfigFile.wait_short)
+          puts "Restarting deleting test users and their memberships..."
+          retry
+        end
       end
     end
   end
