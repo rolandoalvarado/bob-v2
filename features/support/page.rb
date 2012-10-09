@@ -483,12 +483,16 @@ Capybara::Selenium::Node.module_eval do
 end
 
 # Retry block for node.find method above.
-def retry_block(n = 10, &block)
+def retry_block(n = MAX_NODE_QUERY_RETRIES, &block)
   begin
     block.call
   rescue Selenium::WebDriver::Error::StaleElementReferenceError, Capybara::TimeoutError, Capybara::ElementNotFound, Selenium::WebDriver::Error::UnknownError, Capybara::Driver::Webkit::NodeNotAttachedError
-    sleep 30 / (n + 1)
-    n > 0 ? retry_block(n - 1, &block) : raise
+    if (n -= 1) >= 0
+      sleep(30 / (n + 1))
+      retry
+    else
+      raise
+    end
   end
 end
 

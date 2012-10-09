@@ -840,12 +840,13 @@ Then /^The volume named (.+) should be (?:in|of) (.+) status$/ do |volume_name, 
   volume = VolumeService.session.volumes.find { |v| v['display_name'] == volume_name }
   raise "Couldn't find a volume named '#{ volume_name }'" unless volume
 
-  status.downcase!
-  sleeping(1).seconds.between_tries.failing_after(15).tries do
-    volume_row    = @current_page.volume_row( id: volume['id'] ).find('.volume-status')
-    volume_status = volume_row.text.to_s.strip.downcase
+  status = status.downcase.tr(' ', '_')
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+    volume_status_cell = @current_page.volume_status_cell( id: volume['id'] )
+    volume_status = volume_status_cell.text.to_s.strip.downcase
     unless volume_status == status
-      raise "Volume #{ volume_name } took to long to become #{ status }."
+      raise "Volume #{ volume_name } took to long to become #{ status }. It is " +
+            "currently #{ volume_status }."
     end
   end
 end
@@ -862,7 +863,8 @@ Then /^The volume named (.+) should be attached to the instance named (.+)$/ do 
   end
 
   sleeping(ConfigFile.wait_volume_attach).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
-    attachment = @current_page.volume_row(id: volume['id']).find('.attachments').text.to_s.strip
+    volume_attachments_cell = @current_page.volume_attachments_cell( id: volume['id'] )
+    attachment = volume_attachments_cell[:title]
     if attachment != instance_name
       raise "Expected volume #{ volume_name } to be attached to instance #{ instance_name }, " +
             "but it's not."
@@ -881,7 +883,8 @@ Then /^The volume named (.+) should not be attached to the instance named (.+)$/
       raise "Could not find row for the volume named #{ volume_name }!"
     end
 
-    attachment = @current_page.volume_row(id: volume['id']).find('.attachments').text.to_s.strip
+    volume_attachments_cell = @current_page.volume_attachments_cell( id: volume['id'] )
+    attachment = volume_attachments_cell[:title]
     if attachment == instance_name
       raise "Expected volume #{ volume_name } to not be attached to instance #{ instance_name }, but it is."
     end
@@ -905,8 +908,9 @@ Step /^The volume named (.+) should be detached to the instance named (.+) in pr
       raise "Could not find row for the volume named #{ volume_name }!"
     end
 
-    attachment_id = @current_page.volume_row(id: volume['id']).find('.attachments')[:title]
-    if attachment_id == instance.id
+    volume_attachments_cell = @current_page.volume_attachments_cell( id: volume['id'] )
+    attachment = volume_attachments_cell[:title]
+    if attachment == instance_name
       raise "Expected volume #{ volume_name } to not be attached to instance #{ instance_name }, but it is."
     end
   end

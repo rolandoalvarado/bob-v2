@@ -27,6 +27,7 @@ class VolumeService < BaseCloudService
   end
 
   def create_volume_snapshot(volume, attributes = {})
+    volume = @volumes.find { |v| v['id'] == volume['id'] }
     raise "Volume couldn't be found!" unless volume
 
     attrs = CloudObjectBuilder.attributes_for(:snapshot)
@@ -128,31 +129,29 @@ class VolumeService < BaseCloudService
   end
 
   def ensure_volume_snapshot_count(project, volume, desired_count, strict = true)
-    set_tenant(project, false)
+    set_tenant project
 
-    sleeping(5).seconds.between_tries.failing_after(10).tries do
-      reload_snapshots
-
-      count_difference = (snapshots.count - desired_count).abs
-      if snapshots.count < desired_count
-        count_difference.times do
-          create_volume_snapshot(volume)
-          sleep(0.5)
-        end
-      elsif strict && snapshots.count > desired_count
-        count_difference.times do |i|
-          service.delete_snapshot(snapshots[i]['id'])
-          sleep(0.5)
-        end
+    count_difference = (@snapshots.count - desired_count).abs
+    if @snapshots.count < desired_count
+      count_difference.times do
+        create_volume_snapshot(volume)
+        sleep(ConfigFile.wait_short)
       end
+    elsif strict && @snapshots.count > desired_count
+      count_difference.times do
+        service.delete_snapshot(@snapshots.pop['id'])
+        sleep(ConfigFile.wait_short)
+      end
+    end
 
+    sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
       reload_snapshots
-      if snapshots.count != desired_count
+      if @snapshots.count != desired_count
         raise "Couldn't ensure that #{ project.name } has #{ desired_count } " +
-          "volume snapshots. Current number of volume snapshots is #{ snapshots.count }."
+              "volume snapshots. Current number of volume snapshots is #{ @snapshots.count }."
       end
 
-      return snapshots.count
+      return @snapshots.count
     end
   end
 
@@ -182,50 +181,51 @@ class VolumeService < BaseCloudService
 
   private
 
+  def make_available_volume(volume)
+    case volume['status']
+    when 'in-use'
+      server_id = volume['attachments'].first['server_id']
+      @compute_service.detach_volume(server_id, volume['id'])
+      sleep(ConfigFile.wait_volume_detach)
+    when 'attaching', 'detaching'
+      sleep(ConfigFile.wait_volume_ready)
+    when /error/
+      service.delete_volume(volume['id'])
+      sleep(ConfigFile.wait_volume_ready)
+    end
+
+    true
+  end
+
   def try_fixing_volume_count(project, desired_count)
-    sleeping(ConfigFile.wait_volume_ready).seconds.between_tries.failing_after(ConfigFile.repeat_volume_ready).tries do
-      reload_volumes
-      difference = (@volumes.count - desired_count).abs
+    reload_volumes
+    difference = (@volumes.count - desired_count).abs
 
-      #make sure volumes are not attached to any instance
-      @volumes.each do |volume|
-        if volume['status'] == 'in-use'
-          compute_service = ComputeService.session.service
-          compute_service.set_tenant project
-          server_id = volume['attachments'].first['server_id']
-          compute_service.detach_volume(server_id, volume['id'])
-        end
+    @compute_service = ComputeService.session.service
+    @compute_service.set_tenant project
+
+    @volumes.each do |volume|
+      make_available_volume(volume)
+    end
+
+    reload_volumes
+    if @volumes.count > desired_count
+      difference.times do
+        service.delete_volume @volumes.pop['id']
+        sleep(ConfigFile.wait_short)
       end
-
-      sleeping(ConfigFile.wait_volume_detach).seconds.between_tries.failing_after(ConfigFile.repeat_volume_detach).tries do
-        volumes = reload_volumes
-        attached_volumes = volumes.select{|volume| volume['status'] == 'in-use'}
-
-        unless attached_volumes.count == 0
-          raise 'Volumes are still attached.'
-        end
+    elsif @volumes.count < desired_count
+      difference.times do
+        create_volume
+        sleep(ConfigFile.wait_volume_ready)
       end
+    end
 
-      if(@volumes.count > desired_count)
-        difference.times do
-          service.delete_volume(@volumes.pop['id'])
-        end
-      elsif(@volumes.count < desired_count)
-        difference.times do
-          create_volume
-        end
-      end
-
-      
-
-      assert_volume_count(project, desired_count)
-
-      volumes = reload_volumes
-      creating = volumes.select {|volume| volume['status'] != 'available'}
-
-      if(creating.count > 0)
-        raise 'Volumes are still being created. Time ran out.'
-      end
+    reload_volumes
+    volumes = @volumes.select { |volume| volume['status'] == 'available' }
+    if volumes.count != desired_count
+      raise "Couldn't ensure that #{ project.name } has #{ desired_count } " +
+        "volumes. Current number of available volumes is #{ volumes.length }."
     end
   end
 end
