@@ -21,7 +21,9 @@ class ComputeService < BaseCloudService
   def ensure_instance_has_a_snapshot(project, instance, snapshot)
     service.set_tenant project
     sleep(2)
-
+    
+    ensure_snapshot_does_not_exists(project, snapshot)
+    
     if instance.state == 'ACTIVE'      
       service.create_image(instance.id, snapshot)  
     elsif instance.state == 'ERROR'
@@ -48,6 +50,42 @@ class ComputeService < BaseCloudService
               "The error returned was: #{ e.inspect }."
       end
     end
+  end
+  
+  def ensure_public_snapshot(project, instance, snapshot, is_public)
+    service.set_tenant project
+    sleep(2)
+    
+    ensure_snapshot_does_not_exists(project, snapshot)
+    
+    if instance.state == 'ACTIVE'
+    
+      if is_public == '(Default)' || 'Private'      
+        data = {
+                "x-image-meta-name" => snapshot,
+                "x-image-meta-disk-format" => /^a[rk]i$/,
+                "x-image-meta-container-format" => 'BARE',
+                "x-image-meta-size" => 10,
+                "x-image-meta-is-public" => false,
+                "x-image-meta-owner" => instance.name
+            }
+      else
+        data = {
+                "x-image-meta-name" => snapshot,
+                "x-image-meta-disk-format" => /^a[rk]i$/,
+                "x-image-meta-container-format" => 'BARE',
+                "x-image-meta-size" => 10,
+                "x-image-meta-is-public" => true,
+                "x-image-meta-owner" => instance.name
+            }
+      end
+      
+      service.create_image(instance.id, snapshot, data)  
+    elsif instance.state == 'ERROR'
+       raise "Instance in ERROR state. Please check." 
+    end
+  rescue
+    raise "An error occured in your instance #{instance.state}!"  
   end
   
   def delete_snapshot_in_project(project, snapshot)
