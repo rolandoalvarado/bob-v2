@@ -149,6 +149,8 @@ class ProjectPage < SecurePage
   button    'volume detach confirmation',         '#alert-template .okay'
   button    'volume delete confirmation',         '#alert-template .okay'
   row       'volume',                             '#volume-item-<id>'
+  cell      'volume status',                      '#volume-item-<id> .volume-status'
+  cell      'volume attachments',                 '#volume-item-<id> .attachments'
 
   #==========================
   # Monitoring-related elements
