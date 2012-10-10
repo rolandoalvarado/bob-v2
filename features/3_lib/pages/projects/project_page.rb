@@ -176,6 +176,11 @@ class ProjectPage < SecurePage
   cell      'instance status',                    xpath: "//*[@id='instances-list']//*[contains(@class, 'name') and contains(text(), \"<name>\")]//..//*[@class='status']"
   cell      'instance task',                      xpath: "//*[@id='instances-list']//*[contains(@class, 'name') and contains(text(), \"<name>\")]//..//*[@class='task']"
   cell      'snapshot status',                    xpath: "//*[@id='instance-snapshot-list']//*[contains(text(), \"<name>\")]//..//*[@class='status']"
+  
+  cell      'snapshot public',                    xpath: "//*[@id='instance-snapshot-list']//..//*[td[normalize-space(text())='Yes']]"
+  
+  cell      'snapshot not public',                xpath: "//*[@id='instance-snapshot-list']//..//*[td[normalize-space(text())='No']]"
+  
   form      'resize instance',                    '#resize-instance-modal'
 
   element   'console output',                     '#logsModal'

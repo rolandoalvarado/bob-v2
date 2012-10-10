@@ -769,6 +769,35 @@ Step /^The snapshot named (.+) should be (?:in|of) (.+) status$/ do |snapshot_na
 end
 
 
+Given /^The snapshot named (.+) should have the visibility of (\(Default\)|Private|Public)$/ do |snapshot, visibility|
+
+  if visibility == '(Default)' || 'Private'
+    sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(15).tries do
+       not_public_cell = @current_page.snapshot_not_public_cell(name: snapshot)
+       is_public = not_public_cell.text.to_s.strip
+       
+       if is_public.include?('Yes')
+        raise "Snapshot #{ snapshot } to be not public. " +
+              "Current value of is_public is #{ is_public }."
+       end  
+    end
+  end
+  
+  if visibility == 'Public'
+    sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(30).tries do
+      public_cell = @current_page.snapshot_public_cell(name: snapshot)
+       is_public = public_cell.text.to_s.strip
+       
+       if is_public.include?('No')
+        raise "Snapshot #{ snapshot } to be public. " +
+              "Current value of is_public is #{ is_public }."
+       end
+    end   
+  end 
+   
+end
+
+
 Step /^The instance ((?:(?!named )).+) should not have flavor (.+)$/ do |instance_id, flavor_name|
   sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
     flavor_cell = @current_page.find("#instance-item-#{ instance_id } .flavor")

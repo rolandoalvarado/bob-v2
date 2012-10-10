@@ -104,6 +104,37 @@ TestCase /^A user with a role of (.+) in a project cannot create an image from a
   
 end
 
+TestCase /^Image that will be created from the instance will have the visibility of (.+) and should be visible to (.+)$/i do |visibility, visible_to|
+
+  Preconditions %{
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that the project named #{ test_project_name } has an instance named #{ test_instance_name }
+    * Ensure that the user #{ bob_username } has a role of Project Manager in the project #{ test_project_name }
+    * Ensure that a snapshot named #{ test_instance_snapshot_name } has a visibility of #{ visibility }
+  }
+
+  Cleanup %{
+    * Register the project named #{ test_project_name } for deletion at exit
+    * Register the user named #{ bob_username } for deletion at exit
+  }
+
+  Script %{
+    * Click the logout button if currently logged in   
+    
+    * Visit the login page
+    * Fill in the username field with #{ bob_username }
+    * Fill in the password field with #{ bob_password }
+    * Click the login button
+
+    * Click the projects link
+    * Click the #{ test_project_name } project
+
+    * Click the images and snapshots tab
+    * The snapshot named #{ test_instance_snapshot_name } should have the visibility of #{ visibility } 
+  }
+  
+end
 
 
 TestCase /^A user with a role of (.+) in a project can create an image$/i do |role_name|
