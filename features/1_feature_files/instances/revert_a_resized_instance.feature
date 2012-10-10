@@ -1,4 +1,4 @@
-@jira-MCF-20 @resize @revert
+@jira-MCF-20 @resize @revert @wip
 Feature: Revert a Resized Instance
   From the OpenStack docs (http://goo.gl/aqhti)
 
