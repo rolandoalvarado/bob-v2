@@ -1,4 +1,4 @@
-@jira-MCF-10 @format-v2 @images @pending
+@jira-MCF-10 @format-v2 @images
 Feature: Create an Image from a Running Instance
   As an authorized user, I want to create an image from a runnning instance, so that
   I can easily create one or more exact copies.
@@ -33,8 +33,6 @@ Feature: Create an Image from a Running Instance
         | Private    | Project    |
         | Public     | Everyone   |
 
-  Scenario Outline:
-    * Image that will be created will be written in the OVF format
 
   Scenario Outline:
-    * Image that will be created will have a meta-data
+    * Image that will be created will be written in BARE format
