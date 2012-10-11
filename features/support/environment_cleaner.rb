@@ -125,6 +125,7 @@ class EnvironmentCleaner
     @identity_service = IdentityService.session
     @compute_service  = ComputeService.session
     @volume_service   = VolumeService.session
+    @image_service    = ImageService.session
 
     project_ids.uniq.each do |project_id|
       project = @identity_service.tenants.reload.find { |t| t.id == project_id }
@@ -148,11 +149,21 @@ class EnvironmentCleaner
         if @compute_service.instances.count > 0
           puts "    Deleting instances..."
           deleted_instances = @compute_service.delete_instances_in_project(project)
+            
           deleted_instances.each do |instance|
             puts "      DELETED: #{ instance[:name] } (id: #{ instance[:id] })"
+          end          
+        end
+        
+        if @image_service.get_instance_snapshots.count > 0
+          puts "    Deleting instance snapshots..."
+          deleted_instance_snapshots = @image_service.delete_instance_snapshots(project)
+            
+          deleted_instance_snapshots.each do |snapshot|
+            puts "      DELETED: #{ snapshot[:name] } (id: #{ snapshot[:id] })"
           end
         end
-
+                
         if @volume_service.snapshots.count > 0
           puts "    Deleting volume snapshots..."
           deleted_volume_snapshots = @volume_service.delete_volume_snapshots_in_project(project)
@@ -179,7 +190,7 @@ class EnvironmentCleaner
           end
         end
 
-        puts "    Deleting #{ project.name }..."
+        puts "    Deleting #{ project.id } #{ project.name }..."
         @identity_service.delete_project(project)
         success = true
       rescue Exception => e

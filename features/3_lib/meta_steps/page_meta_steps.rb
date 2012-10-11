@@ -768,11 +768,30 @@ Step /^The snapshot named (.+) should be (?:in|of) (.+) status$/ do |snapshot_na
   end
 end
 
+Step /^Click the (.+) button for snapshot named (.+)$/ do |button_name, snapshot_name|
+  button_name = button_name.split.join('_').downcase
+  @current_page.send("#{ button_name }_button", name: snapshot_name).click
+end
 
-Given /^The snapshot named (.+) should have the visibility of (\(Default\)|Private|Public)$/ do |snapshot, visibility|
 
-  if visibility == '(Default)' || 'Private'
-    sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(15).tries do
+Step /^The snapshot named #{ test_instance_snapshot_name } should be in (.+) format$/ do |format|
+
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_long).tries do
+    format_cell = @current_page.snapshot_format_cell(name: snapshot)
+    format = format_cell.text.to_s.strip
+       
+    unless format.include?('Bare')
+      raise "Snapshot Format #{ format } should be BARE. " +
+            "Current Format is #{ format }."
+    end
+  end
+   
+end
+
+Step /^The snapshot named (.+) should have the visibility of (\(Default\)|Private|Public) and visible to (.+)$/ do |snapshot, visibility, visible_to|
+
+  if ((visibility == '(Default)' || visibility == 'Private') && visible_to == 'Project')
+    sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_long).tries do
        not_public_cell = @current_page.snapshot_not_public_cell(name: snapshot)
        is_public = not_public_cell.text.to_s.strip
        
@@ -783,16 +802,25 @@ Given /^The snapshot named (.+) should have the visibility of (\(Default\)|Priva
     end
   end
   
-  if visibility == 'Public'
-    sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(30).tries do
+  if (visibility == 'Public' && visible_to == 'Everyone')
+    
+    step "Wait #{ConfigFile.wait_instance_snapshot} seconds"
+    step "Click the snapshot menu button for snapshot named #{ snapshot }"
+    step "Click the edit snapshot button for snapshot named #{ snapshot }"
+    step "Current page should have the edit instance snapshot form"
+    step "Check the is public checkbox"
+    step "Click the update instance snapshot button"
+ 
+    sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
       public_cell = @current_page.snapshot_public_cell(name: snapshot)
-       is_public = public_cell.text.to_s.strip
+      is_public = public_cell.text.to_s.strip
        
-       if is_public.include?('No')
+      if is_public.include?('No')
         raise "Snapshot #{ snapshot } to be public. " +
               "Current value of is_public is #{ is_public }."
-       end
-    end   
+      end
+    end
+    
   end 
    
 end

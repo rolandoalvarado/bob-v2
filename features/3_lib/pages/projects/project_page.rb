@@ -181,6 +181,8 @@ class ProjectPage < SecurePage
   
   cell      'snapshot not public',                xpath: "//*[@id='instance-snapshot-list']//..//*[td[normalize-space(text())='No']]"
   
+  cell      'snapshot format',                    xpath: "//*[@id='instance-snapshot-list']//..//*[td[normalize-space(text())='Bare']]"
+  
   form      'resize instance',                    '#resize-instance-modal'
 
   element   'console output',                     '#logsModal'
@@ -207,12 +209,17 @@ class ProjectPage < SecurePage
   button    'confirm instance deletion',          '#alert-template .okay'
   button    'confirm instance reboot',            "#alert-template .okay"
   button    'resize instance confirmation',       "#resize-instance"
-
-  element   'image',                              xpath: "//*[@id='instances-list']//label[text()='<name>']"
+    
+  element   'image',                                xpath: "//*[@id='instances-list']//label[text()='<name>']"
   tab       'images and snapshots',               '.nav-tabs .snapshots a'
-  field     'snapshot name',                      '#name'
+  field     'snapshot name',                       '#name'
   form      'new instance snapshot',              '#instance-snapshot-modal'
+  form      'edit instance snapshot',             '#image-update-modal'
   button    'create instance snapshot',           '#create-snapshot'
+  button    'update instance snapshot',           '#update-image'
+  button    'snapshot menu',                        xpath: "//*[@id='instance-snapshot-list']//td[@class='name' and @title=\"<name>\"]/..//*[@class='dropdown-toggle']"
+  button    'edit snapshot',                        xpath: "//*[@id='instance-snapshot-list']//td[@class='name' and @title=\"<name>\"]/..//*[@class='edit']"
+  checkbox  'is public',                            '#is-public'
 
   #==========================
   # Collaborators

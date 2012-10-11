@@ -14,7 +14,8 @@ class ComputeService < BaseCloudService
     @volumes   = service.volumes
     @security_groups = service.security_groups
     @key_pairs = service.key_pairs
-
+    @snapshots = service.list_images.body['images']
+    
     @private_keys = {}
   end
 
@@ -52,35 +53,19 @@ class ComputeService < BaseCloudService
     end
   end
   
-  def ensure_public_snapshot(project, instance, snapshot, is_public)
+  def find_snapshot_by_name(project, name)
+    service.set_tenant project
+    return service.list_images.body['images'].find { |i| i['name'] == name }
+  end
+  
+  def ensure_public_snapshot(project, instance, snapshot, visibility)
     service.set_tenant project
     sleep(2)
     
     ensure_snapshot_does_not_exists(project, snapshot)
     
-    if instance.state == 'ACTIVE'
-    
-      if is_public == '(Default)' || 'Private'      
-        data = {
-                "x-image-meta-name" => snapshot,
-                "x-image-meta-disk-format" => /^a[rk]i$/,
-                "x-image-meta-container-format" => 'BARE',
-                "x-image-meta-size" => 10,
-                "x-image-meta-is-public" => false,
-                "x-image-meta-owner" => instance.name
-            }
-      else
-        data = {
-                "x-image-meta-name" => snapshot,
-                "x-image-meta-disk-format" => /^a[rk]i$/,
-                "x-image-meta-container-format" => 'BARE',
-                "x-image-meta-size" => 10,
-                "x-image-meta-is-public" => true,
-                "x-image-meta-owner" => instance.name
-            }
-      end
-      
-      service.create_image(instance.id, snapshot, data)  
+    if instance.state == 'ACTIVE'      
+      service.create_image(instance.id, snapshot)  
     elsif instance.state == 'ERROR'
        raise "Instance in ERROR state. Please check." 
     end
@@ -93,11 +78,7 @@ class ComputeService < BaseCloudService
     service.delete_image(snapshot)
   end
   
-  def find_snapshot_by_name(project, name)
-    service.set_tenant project
-    service.list_images.body['images'].find { |i| i['name'] == name }
-  end
-
+  
   def create_volume_in_project(project, attributes)
     attrs = CloudObjectBuilder.attributes_for(:volume, attributes)
     set_tenant project
