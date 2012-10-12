@@ -14,7 +14,7 @@ class ComputeService < BaseCloudService
     @volumes   = service.volumes
     @security_groups = service.security_groups
     @key_pairs = service.key_pairs
-    @snapshots = service.list_images.body['images']
+    @snapshots = ImageService.session.get_instance_snapshots
     
     @private_keys = {}
   end
@@ -77,7 +77,6 @@ class ComputeService < BaseCloudService
     service.set_tenant project
     service.delete_image(snapshot)
   end
-  
   
   def create_volume_in_project(project, attributes)
     attrs = CloudObjectBuilder.attributes_for(:volume, attributes)

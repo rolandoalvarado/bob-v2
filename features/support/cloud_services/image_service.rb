@@ -17,11 +17,11 @@ class ImageService < BaseCloudService
     images.public.select {|i| i.disk_format !~ /^a[rk]i$/ && i.status == 'active'}
   end
   
-  def get_instance_snapshots
+  def get_instance_snapshots # Get Images with snapshot image_type.
     images.public.select {|i| i.disk_format !~ /^a[rk]i$/ && i.status == 'active' && i.properties['image_type'] == 'snapshot'}
   end
   
-  def delete_instance_snapshots(project)
+  def delete_instance_snapshots(project) # Delete Instance Snapshots
     deleted_snapshots = []
               
     get_instance_snapshots.each do |snapshot|

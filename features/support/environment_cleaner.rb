@@ -155,6 +155,7 @@ class EnvironmentCleaner
           end          
         end
         
+        # Clean-up Instance Snapshots
         if @image_service.get_instance_snapshots.count > 0
           puts "    Deleting instance snapshots..."
           deleted_instance_snapshots = @image_service.delete_instance_snapshots(project)

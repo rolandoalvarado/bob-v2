@@ -773,7 +773,6 @@ Step /^Click the (.+) button for snapshot named (.+)$/ do |button_name, snapshot
   @current_page.send("#{ button_name }_button", name: snapshot_name).click
 end
 
-
 Step /^The snapshot named #{ test_instance_snapshot_name } should be in (.+) format$/ do |format|
 
   sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_long).tries do

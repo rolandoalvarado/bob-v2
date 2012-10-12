@@ -23,6 +23,7 @@ Feature: Create an Image from a Running Instance
         | Role            | Can or Cannot Create |
         | (None)          | Cannot Create        |
 
+
   @jira-MCF-10-visibility
   Scenario Outline:
     * Image that will be created from the instance will have the visibility of <Visibility> and should be visible to <Visible To>
@@ -34,5 +35,6 @@ Feature: Create an Image from a Running Instance
         | Public     | Everyone   |
 
 
+  @jira-MCF-10-format
   Scenario Outline:
     * Image that will be created will be written in BARE format
