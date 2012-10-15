@@ -91,7 +91,6 @@ end
 
 Step /^Ensure that a snapshot named (.+) has a visibility of (.+)$/ do |snapshot, visibility|
   compute_service = ComputeService.session
-  #@snapshot = compute_service.ensure_public_snapshot(@project, @instance, snapshot, visibility)
   @snapshot = compute_service.ensure_instance_has_a_snapshot(@project, @instance, snapshot)
 end
 
