@@ -21,7 +21,7 @@ class ComputeService < BaseCloudService
 
   def ensure_instance_has_a_snapshot(project, instance, snapshot)
     service.set_tenant project
-    sleep(2)
+    sleep(10)
     
     ensure_snapshot_does_not_exists(project, snapshot)
     
