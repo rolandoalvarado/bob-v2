@@ -17,6 +17,22 @@ Then /^A new window should show the instance's VNC console$/ do
   unless @current_page.has_popup_window?('noVNC')
     raise "A new window with the instance's VNC console was not shown!"
   end
+
+  main, popup = @current_page.session.driver.browser.window_handles
+  @current_page.session.driver.within_window(popup)
+
+  # Wait for VNC Console to Connect
+  sleep ConfigFile.wait_short
+
+  unless @current_page.has_css_selector?("#VNC_screen")
+    raise "The VNC console was not shown!"
+  end
+
+  if @current_page.has_css_selector?('.VNC_status_error')
+    raise "An error has occurred with the VNC console!"
+  end
+
+  @current_page.session.driver.within_window(main)
 end
 
 
