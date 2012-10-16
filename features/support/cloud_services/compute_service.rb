@@ -648,6 +648,8 @@ class ComputeService < BaseCloudService
 
   def activate_instance(instance)
     case instance.state
+    when 'BUILDING'
+      sleep ConfigFile.wait_instance_in_status
     when 'SUSPENDED'
       service.resume_server(instance.id)
     when 'PAUSED'
