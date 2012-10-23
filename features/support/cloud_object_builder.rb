@@ -32,6 +32,15 @@ module CloudObjectBuilder
     attributes_for_tenant(attributes)
   end
 
+  def self.attributes_for_image(attributes)
+    attributes[:name]             ||= attributes.delete('name') || Faker::Company.name
+    attributes[:is_public]        ||= attributes.delete('is_public') || true
+    attributes[:copy_from]        ||= attributes.delete('copy_from')
+    attributes[:disk_format]      ||= attributes.delete('disk_format')
+    attributes[:container_format] ||= attributes.delete('container_format') || 'bare'
+    BetterHash.new.merge(attributes)
+  end
+
   def self.attributes_for_volume(attributes)
     attributes[:name]        ||= attributes.delete('name') || Faker::Company.name
     attributes[:description] ||= attributes.delete('description') || Faker::Lorem.paragraph

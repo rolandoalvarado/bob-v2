@@ -41,7 +41,7 @@ module Unique
   def self.instance_name(value = '', length = 25)
     self.string_with_whitespace(value, length)
   end
-  
+
   def self.security_group_name(value = '', length = 25)
     self.string_with_whitespace(value, length)
   end
@@ -69,8 +69,12 @@ module Unique
   def self.instance_name(value = '', length = 16)
     self.string_with_whitespace(value, length)
   end
-  
+
   def self.snapshot_name(value = '', length = 16)
+    self.string_with_whitespace(value, length)
+  end
+
+  def self.image_name(value = '', length = 16)
     self.string_with_whitespace(value, length)
   end
 
