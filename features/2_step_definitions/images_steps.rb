@@ -5,13 +5,13 @@ TestCase /^A user with a role of (.+) in a project can delete a snapshot$/i do |
   project_name = Unique.project_name('project')
   instance_name = Unique.instance_name('instance')
   snapshot_name = Unique.snapshot_name('snapshot')
-  
+
   Preconditions %{
     * Ensure that a user with username #{ username } and password #{ password } exists
     * Ensure that a project named #{ project_name } exists
     * Ensure that the project named #{ project_name } has an instance named #{ instance_name }
     * Ensure that the user #{ username } has a role of #{ role_name } in the project
-    * Ensure that the instance named #{ instance_name } has a snapshot named #{ snapshot_name }$/ 
+    * Ensure that the instance named #{ instance_name } has a snapshot named #{ snapshot_name }$/
   }
 
   Cleanup %{
@@ -20,8 +20,8 @@ TestCase /^A user with a role of (.+) in a project can delete a snapshot$/i do |
   }
 
   Script %{
-    * Click the logout button if currently logged in   
-    
+    * Click the logout button if currently logged in
+
     * Visit the login page
     * Fill in the username field with #{ username }
     * Fill in the password field with #{ password }
@@ -56,8 +56,8 @@ TestCase /^A user with a role of (.+) in a project can create an image from an i
   }
 
   Script %{
-    * Click the logout button if currently logged in   
-    
+    * Click the logout button if currently logged in
+
     * Visit the login page
     * Fill in the username field with #{ bob_username }
     * Fill in the password field with #{ bob_password }
@@ -75,7 +75,7 @@ TestCase /^A user with a role of (.+) in a project can create an image from an i
     * Click the images and snapshots tab
     * The snapshot named #{ test_instance_snapshot_name } should be in active status
   }
-  
+
 end
 
 TestCase /^A user with a role of (.+) in a project cannot create an image from an instance$/i do |role_name|
@@ -91,8 +91,8 @@ TestCase /^A user with a role of (.+) in a project cannot create an image from a
   }
 
   Script %{
-    * Click the logout button if currently logged in   
-    
+    * Click the logout button if currently logged in
+
     * Visit the login page
     * Fill in the username field with #{ bob_username }
     * Fill in the password field with #{ bob_password }
@@ -101,7 +101,7 @@ TestCase /^A user with a role of (.+) in a project cannot create an image from a
     * Click the projects link
     * The #{ test_project_name } project should not be visible
   }
-  
+
 end
 
 TestCase /^Image that will be created from the instance will have the visibility of (.+) and should be visible to (.+)$/i do |visibility, visible_to|
@@ -120,8 +120,8 @@ TestCase /^Image that will be created from the instance will have the visibility
   }
 
   Script %{
-    * Click the logout button if currently logged in   
-    
+    * Click the logout button if currently logged in
+
     * Visit the login page
     * Fill in the username field with #{ bob_username }
     * Fill in the password field with #{ bob_password }
@@ -133,7 +133,7 @@ TestCase /^Image that will be created from the instance will have the visibility
     * Click the images and snapshots tab
     * The snapshot named #{ test_instance_snapshot_name } should have the visibility of #{ visibility } and visible to #{ visible_to }
   }
-  
+
 end
 
 TestCase /^Image that will be created will be written in (.+) format$/i do |format|
@@ -152,8 +152,8 @@ TestCase /^Image that will be created will be written in (.+) format$/i do |form
   }
 
   Script %{
-    * Click the logout button if currently logged in   
-    
+    * Click the logout button if currently logged in
+
     * Visit the login page
     * Fill in the username field with #{ bob_username }
     * Fill in the password field with #{ bob_password }
@@ -165,7 +165,7 @@ TestCase /^Image that will be created will be written in (.+) format$/i do |form
     * Click the images and snapshots tab
     * The snapshot named #{ test_instance_snapshot_name } should be in #{ format } format
   }
-  
+
 end
 
 
@@ -176,7 +176,7 @@ TestCase /^A user with a role of (.+) in a project can create an image$/i do |ro
   project_name = Unique.project_name('project')
   instance_name = Unique.instance_name('instance')
   snapshot_name = Unique.snapshot_name('snapshot')
-  
+
   Preconditions %{
     * Ensure that a user with username #{ username } and password #{ password } exists
     * Ensure that a project named #{ project_name } exists
@@ -190,8 +190,8 @@ TestCase /^A user with a role of (.+) in a project can create an image$/i do |ro
   }
 
   Script %{
-    * Click the logout button if currently logged in   
-    
+    * Click the logout button if currently logged in
+
     * Visit the login page
     * Fill in the username field with #{ username }
     * Fill in the password field with #{ password }
@@ -210,11 +210,103 @@ TestCase /^A user with a role of (.+) in a project can create an image$/i do |ro
 
 end
 
+
+TestCase /^A user with a role of (.+) in a project can delete an image$/i do |role_name|
+
+  Preconditions %{
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the project #{ test_project_name }
+    * Ensure that the image named #{ test_image_name } exists for project #{ test_project_name }
+  }
+
+  Cleanup %{
+    * Register the project named #{ test_project_name } for deletion at exit
+    * Register the image named #{ test_image_name } for deletion at exit
+    * Register the user named #{ bob_username } for deletion at exit
+  }
+
+  Script %{
+
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ bob_username }
+    * Fill in the password field with #{ bob_password }
+    * Click the login button
+
+    * Click the images link
+    * The context menu for the image named #{ test_image_name } should have the delete action
+
+  }
+
+end
+
+
+TestCase /^A user with a role of (.+) in a project can import an image$/i do |role_name|
+
+  Preconditions %{
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the project #{ test_project_name }
+  }
+
+  Cleanup %{
+    * Register the project named #{ test_project_name } for deletion at exit
+    * Register the user named #{ bob_username } for deletion at exit
+  }
+
+  Script %{
+
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ bob_username }
+    * Fill in the password field with #{ bob_password }
+    * Click the login button
+
+    * Click the images link
+    * The upload image button should not be disabled
+
+  }
+
+end
+
+
+TestCase /^A user with a role of (.+) in a project cannot (?:delete|import) an image$/i do |role_name|
+
+  Preconditions %{
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the project #{ test_project_name }
+  }
+
+  Cleanup %{
+    * Register the project named #{ test_project_name } for deletion at exit
+    * Register the user named #{ bob_username } for deletion at exit
+  }
+
+  Script %{
+
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ bob_username }
+    * Fill in the password field with #{ bob_password }
+    * Click the login button
+
+    * Current page should not have the images link
+
+  }
+
+end
+
+
 TestCase /^A user with a role of (.+) in a project Cannot Delete a snapshot$/ do |role_name|
   username     = Unique.username('bob')
   password     = '123qwe'
   project_name = Unique.project_name('project')
-  
+
   Preconditions %{
     * Ensure that a user with username #{ username } and password #{ password } exists
     * Ensure that a project named #{ project_name } exists
@@ -240,6 +332,99 @@ TestCase /^A user with a role of (.+) in a project Cannot Delete a snapshot$/ do
 
 end
 
+
+TestCase /^An authorized user can import an image with a format of AKI$/ do
+
+  Preconditions %{
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that the user #{ bob_username } has a role of Project Manager in the project #{ test_project_name }
+    * Ensure that an image named #{ test_image_name } does not exist
+  }
+
+  Cleanup %{
+    * Register the project named #{ test_project_name } for deletion at exit
+    * Register the user named #{ bob_username } for deletion at exit
+  }
+
+  Script %{
+
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ bob_username }
+    * Fill in the password field with #{ bob_password }
+    * Click the login button
+
+    * Click the images link
+    * Click the upload image button
+
+    * Current page should have the upload image form
+    * Fill in the image name field with #{ test_image_name }
+    * Choose the item with text aki in the image disk format dropdown
+    * Fill in the image url field with #{ test_image_url('aki') }
+    * Fill in the AMI url field with #{ test_image_url('ami') }
+    * Fill in the ARI url field with #{ test_image_url('ari') }
+    * Choose the item with text #{ test_project_name } in the project dropdown
+    * Click the confirm upload button
+
+    * The images table should have a row for the image named #{ test_image_name } Kernel Image
+    * The images table should have a row for the image named #{ test_image_name } Ramdisk Image
+    * The images table should have a row for the image named #{ test_image_name }
+
+    * The image #{ test_image_name } Kernel Image should be in active status
+    * The image #{ test_image_name } Ramdisk Image should be in active status
+    * The image #{ test_image_name } should be in active status
+
+  }
+
+end
+
+
+TestCase /^An authorized user can import an image with a format of (?:ARI|AMI)$/ do
+  pending
+end
+
+
+TestCase /^An image deleted in the project can no longer be used by that project$/ do
+
+  Preconditions %{
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that the user #{ bob_username } has a role of Project Manager in the project #{ test_project_name }
+    * Ensure that the image named #{ test_image_name } exists for project #{ test_project_name }
+  }
+
+  Cleanup %{
+    * Register the project named #{ test_project_name } for deletion at exit
+    * Register the image named #{ test_image_name } for deletion at exit
+    * Register the user named #{ bob_username } for deletion at exit
+  }
+
+  Script %{
+
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ bob_username }
+    * Fill in the password field with #{ bob_password }
+    * Click the login button
+
+    * Click the images link
+    * Click and confirm the delete action in the context menu for the image named #{ test_image_name }
+
+    * Click the projects link
+    * Click the #{ test_project_name } project
+
+    * Click the new instance button
+    * Current page should have the new instance form
+    * The images radio list should not have the item #{ test_image_name }
+
+  }
+
+end
+
+
 TestCase /^Snapshot that are attached to a running instance cannot be deleted$/ do
   username     = Unique.username('bob')
   password     = '123qwe'
@@ -252,14 +437,14 @@ TestCase /^Snapshot that are attached to a running instance cannot be deleted$/ 
     * Ensure that a user with username #{ username } and password #{ password } exists
     * Ensure that a project named #{ project_name } exists
     * Ensure that the project named #{ project_name } has an instance named #{ instance_name }
-    * Ensure that the instance named #{ instance_name } has a snapshot named #{ snapshot_name }$/ 
+    * Ensure that the instance named #{ instance_name } has a snapshot named #{ snapshot_name }$/
     * Ensure that the user #{ username } has a role of #{ role_name } in the project
   }
 
   Cleanup %{
     * Register the project named #{ project_name } for deletion at exit
     * Register the user named #{ username } for deletion at exit
-  }   
+  }
 
   steps %{
     * Visit the login page

@@ -16,6 +16,7 @@ class EnvironmentCleaner
   # Use constants so that we can detect typos at 'compile' time
   USER    = :user
   PROJECT = :project
+  IMAGE   = :image
 
   attr_accessor :registry
 
@@ -44,7 +45,7 @@ class EnvironmentCleaner
   end
 
   def register(object_type, options)
-    object_types = [USER, PROJECT]
+    object_types = [USER, PROJECT, IMAGE]
 
     if object_types.include?(object_type)
       registry[object_type] ||= []
@@ -70,6 +71,7 @@ class EnvironmentCleaner
 
   def delete_orphans
     return unless ConfigFile.server_username
+    @identity_service ||= IdentityService.session
     orphaned_count = 0
     puts "Deleting orphaned resources (Cancel with Ctrl-C)"
     IdentityService.session.reset_credentials
@@ -88,11 +90,11 @@ class EnvironmentCleaner
         table = ssh.exec!(%{ nova #{ nova_options } list --all | grep -G "^|" | tail -n +2 })
         table.tr('|', ' ').each_line do |row|
           id, name, status = row.split
-          if tenant_info = ssh.exec!(%{ nova #{ nova_options } show #{ id } | grep -G "^| tenant_id" })
+          if tenant_info = ssh.exec!(%{ sudo nova #{ nova_options } show #{ id } | grep -G "^| tenant_id" })
             tenant_id = tenant_info.tr('|', ' ').split.last
             if !tenant_ids.include?(tenant_id) && status.to_s =~ /ACTIVE|ERROR|STATUS/
               orphaned_count += 1
-              ssh.exec!("nova #{ nova_options } delete #{ id }") do |ch, stream, data|
+              ssh.exec!("sudo nova #{ nova_options } delete #{ id }") do |ch, stream, data|
                 if stream == :stderr
                   puts "       FAILED: #{ name } (id: #{ id })"
                 else
@@ -116,6 +118,34 @@ class EnvironmentCleaner
   #============================
 
   private
+
+  def delete_test_images
+    image_ids = registry[IMAGE]
+    return unless image_ids
+
+    puts "Deleting test images..."
+    @image_service ||= ImageService.session
+
+    image_ids.uniq.each do |image_id|
+      image = @image_service.images.reload.find { |i| i.id == image_id }
+      next if image.nil?
+      puts "  #{ image.name }..."
+
+      retried = false
+      begin
+        @image_service.delete_image(image)
+      rescue Exception => e
+        puts "\033[0;33m  ERROR: #{ image.name } could not be deleted. The error returned was: " +
+             e.inspect + "\033[m"
+        unless retried
+          retried = true
+          sleep(ConfigFile.wait_short)
+          puts "Restarting deleting test images..."
+          retry
+        end
+      end
+    end
+  end
 
   def delete_test_projects
     project_ids = registry[PROJECT]
@@ -149,22 +179,22 @@ class EnvironmentCleaner
         if @compute_service.instances.count > 0
           puts "    Deleting instances..."
           deleted_instances = @compute_service.delete_instances_in_project(project)
-            
+
           deleted_instances.each do |instance|
             puts "      DELETED: #{ instance[:name] } (id: #{ instance[:id] })"
-          end          
+          end
         end
-        
+
         # Clean-up Instance Snapshots
         if @image_service.get_instance_snapshots.count > 0
           puts "    Deleting instance snapshots..."
           deleted_instance_snapshots = @image_service.delete_instance_snapshots(project)
-            
+
           deleted_instance_snapshots.each do |snapshot|
             puts "      DELETED: #{ snapshot[:name] } (id: #{ snapshot[:id] })"
           end
         end
-                
+
         if @volume_service.snapshots.count > 0
           puts "    Deleting volume snapshots..."
           deleted_volume_snapshots = @volume_service.delete_volume_snapshots_in_project(project)
@@ -191,7 +221,7 @@ class EnvironmentCleaner
           end
         end
 
-        puts "    Deleting #{ project.id } #{ project.name }..."
+        puts "    Deleting #{ project.name } (id: #{ project.id })..."
         @identity_service.delete_project(project)
         success = true
       rescue Exception => e

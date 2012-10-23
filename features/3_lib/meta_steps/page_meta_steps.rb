@@ -226,6 +226,55 @@ Then /^The context menu for the instance named (.+) should have the (.+) action$
 end
 
 
+Then /^The context menu for the image named (.+) should have the (.+) action$/i do |image_name, image_action|
+  image_action = image_action.split.join('_').downcase
+
+  image = ImageService.session.images.find { |i| i.name == image_name }
+  raise "Couldn't find image #{ image_name }!" unless image
+  image_id = image.id
+
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+    @current_page.image_menu_button(id: image_id).click
+
+    unless @current_page.send("has_#{ image_action }_image_button?", id: image_id)
+      raise "Couldn't find #{ image_action } action in the context menu for image " +
+            "#{ image_name }!"
+    end
+  end
+end
+
+Then /^Click the (.+) action in the context menu for the image named (.+)$/i do |image_action, image_name|
+  image_action = image_action.split.join('_').downcase
+
+  image = ImageService.session.images.find { |i| i.name == image_name }
+  raise "Couldn't find image #{ image_name }!" unless image
+  image_id = image.id
+
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+    @current_page.image_menu_button(id: image_id).click
+    @current_page.send("#{ image_action }_image_button", id: image_id).click
+  end
+end
+
+Then /^Click and confirm the (.+) action in the context menu for the image named (.+)$/i do |image_action, image_name|
+  image_action = image_action.split.join('_').downcase
+
+  image = ImageService.session.images.find { |i| i.name == image_name }
+  raise "Couldn't find image #{ image_name }!" unless image
+  image_id = image.id
+
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+    @current_page.image_menu_button(id: image_id).click
+    @current_page.send("#{ image_action }_image_button", id: image_id).click
+
+    confirm_action = case image_action
+                     when /delete/  then 'deletion'
+                     end
+    @current_page.send("confirm_image_#{ confirm_action }_button").click unless confirm_action.blank?
+  end
+end
+
+
 # Match "Click the <text1> button for volume <text2>",
 # but not when $text2 starts with the string "snapshot named"
 Then /^Click the (.+) button for volume (?:(?!snapshot named ))(.+)$/ do |button_name, volume_id|
@@ -457,6 +506,13 @@ Then /^Current page should have the (.+) security group$/ do |security_group|
   end
 end
 
+Then /^Current page should not have the (.+)$/ do |element|
+  if @current_page.send("has_#{ element.downcase.tr(' ', '_') }?")
+    raise "Expected current page to not have the #{ element }, " +
+          "but it is."
+  end
+end
+
 
 Then /^Drag the(?:| instance) flavor slider to a different flavor$/ do
   @current_page.session.execute_script %{
@@ -645,6 +701,13 @@ Then /^The (.+) button should be disabled$/ do |button_name|
   end
 end
 
+Then /^The (.+) button should not be disabled$/ do |button_name|
+  button_name = button_name.split.join('_').downcase
+  if @current_page.send("has_disabled_#{ button_name }_button?")
+    raise "Expected the #{ button_name } button to not be disabled, but it is."
+  end
+end
+
 Then /^The (.+) dropdown should not have the item with text (.+)$/ do |dropdown_name, item_text|
   dropdown_name = dropdown_name.split.join('_').downcase
   if @current_page.send("#{ dropdown_name }_dropdown_items").find { |d| d.text == item_text }
@@ -664,6 +727,13 @@ Then /^The (.+) link should be disabled with (.+)$/i do |link_name,name|
 
   unless @current_page.send("has_disabled_#{ link_name.gsub(' ','_') }_link?", name: name)
     raise "Couldn't find disabled #{ link_name } link."
+  end
+end
+
+Then /^The (.+) (?:radio list|radiolist) should not have the item (.+)$/ do |radiolist_name, item_text|
+  radiolist_name = radiolist_name.split.join('_').downcase
+  if @current_page.send("#{ radiolist_name }_radiolist").has_content?(item_text)
+    raise "Expected to not find the radiolist item '#{ item_text }'."
   end
 end
 
@@ -701,6 +771,17 @@ Step /^(?:A|The) floating IP should not be associated to instance (.+)$/i do |in
   end
 end
 
+Step /^The image named (.+) should be (?:in|of) (.+) status$/ do |image_name, expected_status|
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_long).tries do
+    status_cell = @current_page.image_status_cell(name: image_name)
+    actual_status = status_cell.text.strip
+
+    unless actual_status == expected_status.upcase.gsub(' ', '_')
+      raise "Image #{ image_name } is not or took too long to become #{ expected_status }. " +
+            "Current status is #{ actual_status }."
+    end
+  end
+end
 
 Then /^The instance ((?:(?!named )).+) should be performing task (.+)$/ do |instance_id, task|
   sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_fifteen).tries do
@@ -784,6 +865,19 @@ Step /^The snapshot named (.+) should be (?:in|of) (.+) status$/ do |snapshot_na
   end
 end
 
+Step /^The (.+) image (.+) should be (?:in|of) (.+) status$/ do |disk_format, image_name, expected_status|
+  disk_format.upcase!
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_long).tries do
+    status_cell = @current_page.image_status_cell(name: image_name, format: disk_format)
+    actual_status = status_cell.text.strip
+
+    unless actual_status == expected_status.upcase.tr(' ', '_')
+      raise "#{ disk_format } image #{ image_name } is not or took too long to become " +
+            "#{ expected_status }. Current status is #{ actual_status }."
+    end
+  end
+end
+
 Step /^Click the (.+) button for snapshot named (.+)$/ do |button_name, snapshot_name|
   button_name = button_name.split.join('_').downcase
   @current_page.send("#{ button_name }_button", name: snapshot_name).click
@@ -794,13 +888,13 @@ Step /^The snapshot named #{ test_instance_snapshot_name } should be in (.+) for
   sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_long).tries do
     format_cell = @current_page.snapshot_format_cell(name: snapshot)
     format = format_cell.text.to_s.strip
-       
+
     unless format.include?('Bare')
       raise "Snapshot Format #{ format } should be BARE. " +
             "Current Format is #{ format }."
     end
   end
-   
+
 end
 
 Step /^The snapshot named (.+) should have the visibility of (\(Default\)|Private|Public) and visible to (.+)$/ do |snapshot, visibility, visible_to|
@@ -809,35 +903,35 @@ Step /^The snapshot named (.+) should have the visibility of (\(Default\)|Privat
     sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_long).tries do
        not_public_cell = @current_page.snapshot_not_public_cell(name: snapshot)
        is_public = not_public_cell.text.to_s.strip
-       
+
        if is_public.include?('Yes')
         raise "Snapshot #{ snapshot } to be not public. " +
               "Current value of is_public is #{ is_public }."
-       end  
+       end
     end
   end
-  
+
   if (visibility == 'Public' && visible_to == 'Everyone')
-    
+
     step "Wait #{ConfigFile.wait_instance_snapshot} seconds"
     step "Click the snapshot menu button for snapshot named #{ snapshot }"
     step "Click the edit snapshot button for snapshot named #{ snapshot }"
     step "Current page should have the edit instance snapshot form"
     step "Check the is public checkbox"
     step "Click the update instance snapshot button"
- 
+
     sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
       public_cell = @current_page.snapshot_public_cell(name: snapshot)
       is_public = public_cell.text.to_s.strip
-       
+
       if is_public.include?('No')
         raise "Snapshot #{ snapshot } to be public. " +
               "Current value of is_public is #{ is_public }."
       end
     end
-    
-  end 
-   
+
+  end
+
 end
 
 
@@ -1158,6 +1252,26 @@ Then /^The (.+) table's last row should not include the text (.+)$/ do |table_na
     unless table_rows.last.has_no_content?(text)
       raise "Found the text '#{ text }' in the last row of the #{ table_name } table."
     end
+  end
+end
+
+Then /^The images table should have a row for the image named (.+)$/ do |image_name|
+  image = ImageService.session.images.reload.find { |i| i.name == image_name }
+  raise "Couldn't find an image named '#{ image_name }'" unless image
+
+  unless @current_page.has_image_row?( id: image.id )
+    raise "Expected to find a row for image #{ image_name } in the " +
+          "images table."
+  end
+end
+
+Then /^The images table should not have a row for the image named (.+)$/ do |image_name|
+  image = ImageService.session.images.find { |i| i.name == image_name }
+  raise "Couldn't find an image named '#{ image_name }'" unless image
+
+  if @current_page.has_image_row?( id: image.id )
+    raise "Expected to not find a row for image #{ image_name } in the " +
+          "images table."
   end
 end
 
