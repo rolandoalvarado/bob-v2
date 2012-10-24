@@ -499,7 +499,7 @@ TestCase /^A user with a role of (.+) in the system cannot change user permissio
 end
 
 
-TestCase /^A user with a role of (.+) in the system can create a user$/i do |role_name|
+TestCase /^A user with a role of (.+) in the system can create a user with (.+) permission$/i do |role_name, permission|
 
   user         = CloudObjectBuilder.attributes_for(:user, :name => Unique.username('test'))
 
@@ -528,16 +528,14 @@ TestCase /^A user with a role of (.+) in the system can create a user$/i do |rol
     * Fill in the Username field with #{ user.name }
     * Fill in the Email field with #{ user.email }
     * Fill in the Password field with #{ user.password }
-    * Choose the item with text #{ test_project_name } in the Primary Project dropdown
-    * Choose the item with text Project Manager in the Role dropdown
-    * Click the Create User button
-    * The #{ user.name } user row should be visible
+    
+    * The newly created #{ user.name } user should have #{ permission } permission
   }
 
 end
 
 
-TestCase /^A user with a role of (.+) in the system cannot create a user$/i do |role_name|
+TestCase /^A user with a role of (.+) in the system Cannot Create a user with (.+) permission$/i do |role_name, permission|
 
   Preconditions %{
     * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
@@ -594,10 +592,8 @@ TestCase /^An authorized user can create a user with attributes (.+), (.+), (.+)
     * Fill in the Username field with #{ user.name }
     * Fill in the Email field with #{ user.email }
     * Fill in the Password field with #{ user.password }
-    * Choose the item with text #{ primary_project } in the Primary Project dropdown
-    * Choose the item with text #{ role } in the Role dropdown
-    * Click the Create User button
-    * The #{ user.name } user row should be visible
+    
+    * The newly created #{ user.name } user should have #{ role } permission
   }
 end
 
@@ -635,10 +631,7 @@ TestCase /^An authorized user cannot create a user with attributes (.+), (.+), (
     * Fill in the Username field with #{ user.name }
     * Fill in the Email field with #{ user.email }
     * Fill in the Password field with #{ user.password }
-    * Choose the item with text #{ primary_project } in the Primary Project dropdown
-    * Choose the item with text #{ role } in the Role dropdown
-    * Click the Create User button
-    * The New User form should be visible
-    * A New User Form Error Message element should be visible
+    
+    * A user with a role of #{ role } in a project #{ primary_project } will not be created
   }
 end
