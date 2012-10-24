@@ -254,7 +254,7 @@ class Html
       filepath = File.join(screenshots_dir, filename)
       FileUtils.cp(src, filepath)
       page = Capybara.current_session
-      url = page.current_host + page.current_path
+      url = (page.current_host + page.current_path) rescue page.current_url
 
       if is_scenario_outline?(@current_feature_element)
         @current_row.each do |cell|

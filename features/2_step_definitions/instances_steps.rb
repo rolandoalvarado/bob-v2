@@ -463,7 +463,7 @@ Then /^I [Cc]an [Rr]esume the instance$/ do
     * Click the instance menu button for instance #{ @instance.id }
     * Click the resume instance button for instance #{ @instance.id }
 
-     * Wait #{ConfigFile.wait_instance_resume} seconds
+    * Wait #{ConfigFile.wait_instance_resume} seconds
     * The instance #{ @instance.id } should be of active status
   }
 end
@@ -687,7 +687,9 @@ TestCase /^A user with a role of (.+) in the project can assign a floating IP to
 
 end
 
-TestCase /^A user with a role of \(None\) in the project cannot assign a floating IP to an instance$/i do
+# Applies to e.g. "A user with a role of (None) in the project cannot assign a floating IP to an instance"
+# A user with no roles does not belong to a/the project.
+TestCase /^A user with a role of \(None\) in the project cannot .+$/i do
 
   Preconditions %{
     * Ensure that a user named #{ member_username } exists
@@ -765,9 +767,7 @@ TestCase /^A user with a role of (.+) in the project Can Unpause an instance$/i 
     * Click the Projects link
     * Click the #{ test_project_name } project
 
-    * Click the context button of instance #{ test_instance_name } in #{ test_project_name }
-    * Click the unpause button of instance #{ test_instance_name } in #{ test_project_name }
-
+    * Click the unpause action in the context menu for the instance named #{ test_instance_name }
     * The instance named #{ test_instance_name } should be in active status
   }
 
@@ -798,36 +798,8 @@ TestCase /^An authorized user can unpause an instance in the project$/i do
     * Click the Projects link
     * Click the #{ test_project_name } project
 
-    * Click the context button of instance #{ test_instance_name } in #{ test_project_name }
-    * Click the unpause button of instance #{ test_instance_name } in #{ test_project_name }
-
+    * Click the unpause action in the context menu for the instance named #{ test_instance_name }
     * The instance named #{ test_instance_name } should be in active status
-  }
-
-end
-
-
-TestCase /^A user with a role of (.+) in the project cannot unpause an instance$/i do |role_name|
-
-  Preconditions %{
-    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
-    * Ensure that a project named #{ test_project_name } does not exists
-  }
-
-  Cleanup %{
-    * Register the project named #{ test_project_name } for deletion at exit
-    * Register the user named #{ bob_username } for deletion at exit
-  }
-
-  Script %{
-    * Click the Logout button if currently logged in
-    * Visit the Login page
-    * Fill in the Username field with #{ bob_username }
-    * Fill in the Password field with #{ bob_password }
-    * Click the Login button
-
-    * Visit the projects page
-    * The #{ test_project_name } project should not be visible
   }
 
 end
@@ -966,32 +938,6 @@ TestCase /^A user with a role of (.+) in the project can resize an instance$/i d
 
 end
 
-TestCase /^A user with a role of (.+) in the project cannot resize an instance$/i do |role_name|
-
-  Preconditions %{
-    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
-    * Ensure that a project named #{ test_project_name } exists
-    * Ensure that the project named #{ test_project_name } has an instance named #{ test_instance_name }
-    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the project #{ test_project_name }
-  }
-
-  Cleanup %{
-    * Register the user named #{ bob_username } for deletion at exit
-  }
-
-  Script %{
-    * Click the Logout button if currently logged in
-    * Visit the Login page
-    * Fill in the Username field with #{ bob_username }
-    * Fill in the Password field with #{ bob_password }
-    * Click the Login button
-
-    * Click the Projects link
-    * The #{ test_project_name } project should not be visible
-  }
-
-end
-
 TestCase /^A user with a role of (.+) in the project can revert a resized instance$/i do |role_name|
 
   original_flavor = 'm1.small'
@@ -1025,35 +971,8 @@ TestCase /^A user with a role of (.+) in the project can revert a resized instan
     * Click the resize instance confirmation button
 
     * The instance named #{ test_instance_name } should be in resizing status
-
-    * Wait at most 3 minutes until the instance named #{ test_instance_name } is in active status
+    * Wait at most 5 minutes until the instance named #{ test_instance_name } is in active status
     * The context menu for the instance named #{ test_instance_name } should have the revert resize action
-  }
-
-end
-
-TestCase /^A user with a role of (.+) in the project cannot revert a resized instance$/i do |role_name|
-
-  Preconditions %{
-    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
-    * Ensure that a project named #{ test_project_name } exists
-    * Ensure that the project named #{ test_project_name } has an instance named #{ test_instance_name }
-    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the project #{ test_project_name }
-  }
-
-  Cleanup %{
-    * Register the user named #{ bob_username } for deletion at exit
-  }
-
-  Script %{
-    * Click the Logout button if currently logged in
-    * Visit the Login page
-    * Fill in the Username field with #{ bob_username }
-    * Fill in the Password field with #{ bob_password }
-    * Click the Login button
-
-    * Click the Projects link
-    * The #{ test_project_name } project should not be visible
   }
 
 end
@@ -1138,7 +1057,7 @@ TestCase /^An instance that has been resized by an authorized user can be revert
 
     * The instance named #{ test_instance_name } should be in resizing status
 
-    * Wait at most 3 minutes until the instance named #{ test_instance_name } is in active status
+    * Wait at most 5 minutes until the instance named #{ test_instance_name } is in active status
     * Click the revert resize action in the context menu for the instance named #{ test_instance_name }
 
     * The instance named #{ test_instance_name } should have flavor #{ original_flavor }

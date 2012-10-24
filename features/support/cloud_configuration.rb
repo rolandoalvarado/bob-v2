@@ -38,6 +38,7 @@ module CloudConfiguration
   MINUTE               = :seconds
   INSTANCE             = :instance
   RESTART              = :restart
+  INSTANCE_IN_STATUS   = :instance_in_status
   INSTANCE_DELETE      = :instance_delete
   VOLUME_READY         = :volume_ready
   VOLUME_ATTACH        = :volume_attach
@@ -45,6 +46,9 @@ module CloudConfiguration
   VOLUME_DELETE        = :volume_delete
   RESUME_INSTANCE      = :resume
   TUNNEL               = :tunnel
+  SERVER_USERNAME      = :server_username
+  CHROME               = :chrome
+  INSTANCE_SNAPSHOT    = :instance_snapshot
 
   class ConfigFile
     include Singleton
@@ -52,6 +56,10 @@ module CloudConfiguration
     def self.cloud_credentials
       inst = self.instance
       { :provider => 'OpenStack' }.merge inst[OPENSTACK_OPTIONS]
+    end
+
+    def self.admin_tenant
+      cloud_credentials[OPENSTACK_TENANT]
     end
 
     def self.admin_username
@@ -78,7 +86,7 @@ module CloudConfiguration
     def self.timing
       self.instance.ensure_repeat_and_wait_key
       unless self.instance[REPEAT][TIMING]
-        self.instance[REPEAT][TIMING] = 3
+        self.instance[REPEAT][TIMING] = 10
         self.instance.save
       end
       self.instance[REPEAT][TIMING]
@@ -87,7 +95,7 @@ module CloudConfiguration
     def self.repeat_node
       self.instance.ensure_repeat_and_wait_key
       unless self.instance[REPEAT][NODE_QUERY_RETRIES]
-        self.instance[REPEAT][NODE_QUERY_RETRIES] = 3
+        self.instance[REPEAT][NODE_QUERY_RETRIES] = 10
         self.instance.save
       end
       self.instance[REPEAT][NODE_QUERY_RETRIES]
@@ -100,6 +108,15 @@ module CloudConfiguration
         self.instance.save
       end
       self.instance[WAIT][INSTANCE]
+    end
+    
+    def self.wait_instance_snapshot
+      self.instance.ensure_repeat_and_wait_key
+      unless self.instance[WAIT][INSTANCE_SNAPSHOT]
+        self.instance[WAIT][INSTANCE_SNAPSHOT] = 30
+        self.instance.save
+      end
+      self.instance[WAIT][INSTANCE_SNAPSHOT]
     end
     
     def self.wait_instance_resume
@@ -159,7 +176,7 @@ module CloudConfiguration
     def self.wait_short
       self.instance.ensure_repeat_and_wait_key
       unless self.instance[WAIT][SHORT]
-        self.instance[WAIT][SHORT] = 1
+        self.instance[WAIT][SHORT] = 2
         self.instance.save
       end
       self.instance[WAIT][SHORT]
@@ -177,7 +194,7 @@ module CloudConfiguration
     def self.wait_seconds
       self.instance.ensure_repeat_and_wait_key
       unless self.instance[WAIT][WAIT_IN_SECONDS]
-        self.instance[WAIT][WAIT_IN_SECONDS] = 3
+        self.instance[WAIT][WAIT_IN_SECONDS] = 5
         self.instance.save
       end
       self.instance[WAIT][WAIT_IN_SECONDS]
@@ -199,6 +216,24 @@ module CloudConfiguration
         self.instance.save
       end
       self.instance[WAIT][VOLUME_DELETE]
+    end
+
+    def self.wait_instance_in_status
+      self.instance.ensure_repeat_and_wait_key
+      unless self.instance[WAIT][INSTANCE_IN_STATUS]
+        self.instance[WAIT][INSTANCE_IN_STATUS] = 30
+        self.instance.save
+      end
+      self.instance[WAIT][INSTANCE_IN_STATUS]
+    end
+
+    def self.repeat_instance_in_status
+      self.instance.ensure_repeat_and_wait_key
+      unless self.instance[REPEAT][INSTANCE_IN_STATUS]
+        self.instance[REPEAT][INSTANCE_IN_STATUS] = 6
+        self.instance.save
+      end
+      self.instance[REPEAT][INSTANCE_IN_STATUS]
     end
 
     def self.repeat_volume_ready
@@ -308,7 +343,15 @@ module CloudConfiguration
       end
       self.instance[REPEAT][FORTY]
     end
-
+    
+    def self.repeat_until_task_is_done
+      self.instance.ensure_repeat_and_wait_key
+      unless self.instance[REPEAT][FORTY]
+        self.instance[REPEAT][FORTY] = 40
+        self.instance.save
+      end
+      self.instance[REPEAT][FORTY]
+    end
 
     def self.repeat_long
       self.instance.ensure_repeat_and_wait_key
@@ -347,8 +390,12 @@ module CloudConfiguration
       self.instance[TUNNEL] == true
     end
 
-    def self.tunnel=(value)
-      self.instance[TUNNEL] = !!value
+    def self.server_username
+      self.instance[SERVER_USERNAME]
+    end
+
+    def self.chrome
+      self.instance[CHROME] == true
     end
 
     def initialize

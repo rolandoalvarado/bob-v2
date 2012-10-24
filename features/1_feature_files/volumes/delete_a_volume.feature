@@ -12,6 +12,7 @@ Feature: Delete a volume
 
   Background:
     * A project exists in the system
+    * The volume has 0 saved snapshot
     * The project has 1 available volume
 
   @permissions

@@ -8,6 +8,7 @@ class SecurePage < WebClientPage
   # Left menu items shared by all secure pages
   link 'monitoring', '.main-nav *:not(.disabled) a[href="/monitoring"]'
   link 'projects',  '.main-nav *:not(.disabled) a[href="/projects"]'
+  link 'images',    '.main-nav *:not(.disabled) a[href="/images"]'
   link 'users',     '.main-nav *:not(.disabled) a[href="/users"]'
   link 'usage',     '.main-nav *:not(.disabled) a[href="/usage"]'
   link 'support',   '.main-nav *:not(.disabled) a[href="http://www.morphlabs.com/support"]'

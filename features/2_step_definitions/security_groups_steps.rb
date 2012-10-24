@@ -34,7 +34,7 @@ Given /^the security group has an attributes of (.+), (.+)$/ do |name, descripti
   }
 end
 
-Given /^the project has only one security group named Web Servers$/ do
+Given /^the project has a security group named Web Servers$/ do
   steps %{
     * Ensure that a security group named Web Servers exist
   }
@@ -134,17 +134,7 @@ When /^I edit a security group with the following rule: (.+), (.+), (.+), (\d+\.
 end
 
 When /^I add the following rule: (.+), (.+), (.+), (\d+\.\d+\.\d+\.\d+(?:|\/\d+)|\(None\)|\(Random\))$/ do |protocol, from_port, to_port, cidr|
-
-  compute_service = ComputeService.session
-
-  attrs           = CloudObjectBuilder.attributes_for(
-                    :security_group,
-                    :name => Unique.name('Web Servers'),
-                    :description => 'Web Servers Security Group'
-                  )
-
-  security_group  = compute_service.ensure_security_group_exists(@project, attrs)
-
+  
   steps %{
     * Click the logout button if currently logged in
 
@@ -164,7 +154,7 @@ When /^I add the following rule: (.+), (.+), (.+), (\d+\.\d+\.\d+\.\d+(?:|\/\d+)
 
     * Current page should have the security groups
 
-    * Click the edit security group button for security group #{ security_group.id }
+    * Click the edit security group button for security group #{ @security_group.id }
     * Current page should have the security group rules form
 
     * Click the new security group rule button
@@ -211,8 +201,7 @@ Then /^I [Cc]an [Cc]reate a security group in the project$/ do
 
     * Wait 1 second
 
-    * Current page should have the new #{security_group.name} security group
-    * The #{security_group.name} security group row should be visible
+    * Current page should have the new #{security_group} security group
   }
 end
 
@@ -414,7 +403,6 @@ Then /^the security group with attributes (.+), (.+) will be [Cc]reated$/ do |na
     * Wait 1 second
 
     * Current page should have the new #{security_group.name} security group
-    * The #{security_group.name} security group row should be visible
   }
 end
 

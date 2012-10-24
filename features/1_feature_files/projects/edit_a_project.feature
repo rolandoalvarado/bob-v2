@@ -1,4 +1,4 @@
-@jira-MCF-26 @projects @wip
+@jira-MCF-26 @projects
 Feature: Edit a Project
   As an authorized user, I want to edit a project's details
 
@@ -11,18 +11,17 @@ Feature: Edit a Project
 
   @permissions @jira-MCF-26-CUP
   Scenario Outline: Check User Permissions
-    Given I am a <System Admin or User>
-      And I have a role of <Role> in the project
+    Given I have a role of <Role> in the project
      Then I <Can or Cannot Edit> the project
 
       Scenarios: Authorized Roles
-        | Role            | System Admin or User | Can or Cannot Edit |
-        | Project Manager | System Admin         | Can Edit           |
-        | Member          | System Admin         | Can Edit           |
+        | Role            | Can or Cannot Edit |
+        | System Admin    | Can Edit           |
+        | Project Manager | Can Edit           |
 
       Scenarios: Unauthorized Roles
-        | Role            | System Admin or User | Can or Cannot Edit |
-        | Member          | User                 | Cannot Edit        |
+        | Role            | Can or Cannot Edit |
+        | Member          | Cannot Edit        |
 
   @jira-MCF-26-EAP
   Scenario Outline: Edit a Project

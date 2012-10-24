@@ -1,4 +1,4 @@
-@jira-DPBLOG-17 @jira-MCF-7 @format-v2
+@jira-MCF-7 @format-v2 @users
 Feature: Create a User
 
   @permissions @jira-MCF-7-CUP
@@ -11,7 +11,7 @@ Feature: Create a User
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Create |
-        | User            | Cannot Create        |
+        | Member          | Cannot Create        |
 
   @jira-MCF-7-cuwca
   Scenario Outline: Create a user with certain attributes

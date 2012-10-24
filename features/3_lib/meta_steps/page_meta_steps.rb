@@ -17,6 +17,22 @@ Then /^A new window should show the instance's VNC console$/ do
   unless @current_page.has_popup_window?('noVNC')
     raise "A new window with the instance's VNC console was not shown!"
   end
+
+  main, popup = @current_page.session.driver.browser.window_handles
+  @current_page.session.driver.within_window(popup)
+
+  # Wait for VNC Console to Connect
+  sleep ConfigFile.wait_short
+
+  unless @current_page.has_css_selector?("#VNC_screen")
+    raise "The VNC console was not shown!"
+  end
+
+  if @current_page.has_css_selector?('.VNC_status_error')
+    raise "An error has occurred with the VNC console!"
+  end
+
+  @current_page.session.driver.within_window(main)
 end
 
 
@@ -42,7 +58,14 @@ end
 
 Then /^Choose the (\d+)(?:st|nd|rd|th) item in the (.+) dropdown$/ do |item_number, dropdown_name|
   dropdown_name = dropdown_name.split.join('_').downcase
-  @current_page.send("#{ dropdown_name }_dropdown_items")[item_number.to_i - 1].select_option
+  selected_item = nil
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+    selected_item = @current_page.send("#{ dropdown_name }_dropdown_items")[item_number.to_i - 1]
+    unless selected_item
+      raise "Couldn't find item in the dropdown list."
+    end
+  end
+  selected_item.select_option
 end
 
 
@@ -203,6 +226,55 @@ Then /^The context menu for the instance named (.+) should have the (.+) action$
 end
 
 
+Then /^The context menu for the image named (.+) should have the (.+) action$/i do |image_name, image_action|
+  image_action = image_action.split.join('_').downcase
+
+  image = ImageService.session.images.find { |i| i.name == image_name }
+  raise "Couldn't find image #{ image_name }!" unless image
+  image_id = image.id
+
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+    @current_page.image_menu_button(id: image_id).click
+
+    unless @current_page.send("has_#{ image_action }_image_button?", id: image_id)
+      raise "Couldn't find #{ image_action } action in the context menu for image " +
+            "#{ image_name }!"
+    end
+  end
+end
+
+Then /^Click the (.+) action in the context menu for the image named (.+)$/i do |image_action, image_name|
+  image_action = image_action.split.join('_').downcase
+
+  image = ImageService.session.images.find { |i| i.name == image_name }
+  raise "Couldn't find image #{ image_name }!" unless image
+  image_id = image.id
+
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+    @current_page.image_menu_button(id: image_id).click
+    @current_page.send("#{ image_action }_image_button", id: image_id).click
+  end
+end
+
+Then /^Click and confirm the (.+) action in the context menu for the image named (.+)$/i do |image_action, image_name|
+  image_action = image_action.split.join('_').downcase
+
+  image = ImageService.session.images.find { |i| i.name == image_name }
+  raise "Couldn't find image #{ image_name }!" unless image
+  image_id = image.id
+
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+    @current_page.image_menu_button(id: image_id).click
+    @current_page.send("#{ image_action }_image_button", id: image_id).click
+
+    confirm_action = case image_action
+                     when /delete/  then 'deletion'
+                     end
+    @current_page.send("confirm_image_#{ confirm_action }_button").click unless confirm_action.blank?
+  end
+end
+
+
 # Match "Click the <text1> button for volume <text2>",
 # but not when $text2 starts with the string "snapshot named"
 Then /^Click the (.+) button for volume (?:(?!snapshot named ))(.+)$/ do |button_name, volume_id|
@@ -345,7 +417,7 @@ end
 
 Then /^Current page should(?:| still) have the (.+) (button|field|form|tile)$/ do |name, type|
   name = name.split.join('_').downcase
-  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+  sleeping(ConfigFile.wait_long).seconds.between_tries.failing_after(ConfigFile.repeat_long).tries do
     unless @current_page.send("has_#{ name }_#{type}?")
       raise "Current page doesn't have a #{ name } #{ type }"
     end
@@ -376,8 +448,10 @@ end
 
 
 Step /^Current page should(?:| still) have the security groups$/ do
-  unless @current_page.has_security_groups_element?
-    raise "Current page doesn't have security groups."
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_until_expected_page_is_visible).tries do
+    unless @current_page.has_security_groups_element?
+      raise "Current page doesn't have security groups."
+    end
   end
 end
 
@@ -401,12 +475,6 @@ Then /^Current page should have the new security group rule$/ do
     raise "Current page doesn't have security groups."
   end
 end
-
-#Then /^Current page should have the new (.+) security group$/ do |security_group|
-#  unless @current_page.has_security_groups_element?
-#    raise "Current page doesn't have the new #{security_group} security group."
-#  end
-#end
 
 Step /^Current page should display project details in the sidebar$/ do
   unless @current_page.has_project_element?
@@ -437,6 +505,14 @@ Then /^Current page should have the (.+) security group$/ do |security_group|
     raise "Current page doesn't have the #{security_group} security group."
   end
 end
+
+Then /^Current page should not have the (.+)$/ do |element|
+  if @current_page.send("has_#{ element.downcase.tr(' ', '_') }?")
+    raise "Expected current page to not have the #{ element }, " +
+          "but it is."
+  end
+end
+
 
 Then /^Drag the(?:| instance) flavor slider to a different flavor$/ do
   @current_page.session.execute_script %{
@@ -625,6 +701,13 @@ Then /^The (.+) button should be disabled$/ do |button_name|
   end
 end
 
+Then /^The (.+) button should not be disabled$/ do |button_name|
+  button_name = button_name.split.join('_').downcase
+  if @current_page.send("has_disabled_#{ button_name }_button?")
+    raise "Expected the #{ button_name } button to not be disabled, but it is."
+  end
+end
+
 Then /^The (.+) dropdown should not have the item with text (.+)$/ do |dropdown_name, item_text|
   dropdown_name = dropdown_name.split.join('_').downcase
   if @current_page.send("#{ dropdown_name }_dropdown_items").find { |d| d.text == item_text }
@@ -644,6 +727,13 @@ Then /^The (.+) link should be disabled with (.+)$/i do |link_name,name|
 
   unless @current_page.send("has_disabled_#{ link_name.gsub(' ','_') }_link?", name: name)
     raise "Couldn't find disabled #{ link_name } link."
+  end
+end
+
+Then /^The (.+) (?:radio list|radiolist) should not have the item (.+)$/ do |radiolist_name, item_text|
+  radiolist_name = radiolist_name.split.join('_').downcase
+  if @current_page.send("#{ radiolist_name }_radiolist").has_content?(item_text)
+    raise "Expected to not find the radiolist item '#{ item_text }'."
   end
 end
 
@@ -681,24 +771,34 @@ Step /^(?:A|The) floating IP should not be associated to instance (.+)$/i do |in
   end
 end
 
+Step /^The image named (.+) should be (?:in|of) (.+) status$/ do |image_name, expected_status|
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_long).tries do
+    status_cell = @current_page.image_status_cell(name: image_name)
+    actual_status = status_cell.text.strip
+
+    unless actual_status == expected_status.upcase.gsub(' ', '_')
+      raise "Image #{ image_name } is not or took too long to become #{ expected_status }. " +
+            "Current status is #{ actual_status }."
+    end
+  end
+end
 
 Then /^The instance ((?:(?!named )).+) should be performing task (.+)$/ do |instance_id, task|
   sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_fifteen).tries do
-    unless @current_page.instance_row( id: instance_id ).find('.task').text.include?(task)
-      raise "Instance #{ instance_id } is not shown as performing task #{ task }."
+    task_cell = @current_page.find("#instance-item-#{ instance_id } .task")
+    actual_task = task_cell.text.strip
+    unless actual_task.include?(task)
+      raise "Instance #{ instance_id } is not shown as performing task #{ task }. " +
+            "It is currently #{ actual_task }."
     end
   end
 end
 
 
 Then /^The instance named (.+) should be performing task (.+)$/ do |instance_name, task|
-  # TODO To prevent conflict with other instance steps, temporarily forgo changing the selector,
-  # and instead finding it directly from the page object.
-  selector = "//*[@id='instances-list']//*[contains(@class, 'name') and contains(text(), \"#{ instance_name }\")]/.."
-  row = @current_page.find_by_xpath(selector)
-
   sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
-    actual_task = row.find('.task').text.to_s.strip
+    task_cell = @current_page.instance_task_cell(name: instance_name)
+    actual_task = task_cell.text.to_s.strip
     unless actual_task.include?(task)
       raise "Instance #{ instance_name } is not shown as performing task #{ task }. " +
             "It is currently #{ actual_task }."
@@ -706,14 +806,21 @@ Then /^The instance named (.+) should be performing task (.+)$/ do |instance_nam
   end
 end
 
-Then /^The instance named (.+) should be idle$/ do |instance_name|
-  # TODO To prevent conflict with other instance steps, temporarily forgo changing the selector,
-  # and instead finding it directly from the page object.
-  selector = "//*[@id='instances-list']//*[contains(@class, 'name') and contains(text(), \"#{ instance_name }\")]/.."
-  row = @current_page.find_by_xpath(selector)
-
+Step /^The instance snapshot named (.+) should be performing (.+) action$/ do |instance_snapshot_name, task|
   sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
-    actual_task = row.find('.task').text.to_s.strip
+    task_cell = @current_page.instance_task_cell(name: instance_snapshot_name)
+    actual_task = task_cell.text.to_s.strip
+    unless actual_task.include?(task)
+      raise "Instance Snapshot #{ instance_snapshot_name } is not shown as #{ task } task. " +
+            "It is currently #{ actual_task }."
+    end
+  end
+end
+
+Then /^The instance named (.+) should be idle$/ do |instance_name|
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+    task_cell = @current_page.instance_task_cell(name: instance_name)
+    actual_task = task_cell.text.to_s.strip
     unless actual_task.blank? || actual_task =~ /none/i
       raise "Instance #{ instance_name } is not idle. It is currently #{ actual_task }."
     end
@@ -722,43 +829,116 @@ end
 
 
 Then /^The instance ((?:(?!named )).+) should be (?:in|of) (.+) status$/ do |instance_id, status|
-  row = @current_page.instance_row( id: instance_id )
-  unless row
-    raise "Couldn't find row for instance #{ instance_id } in the instances list!"
-  end
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_until_task_is_done).tries do
+    status_cell = @current_page.find("#instance-item-#{ instance_id } .status")
+    actual_status = status_cell.text.strip
 
-  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_twenty).tries do
-    unless row.find('.status').has_content?(status.upcase.gsub(' ', '_'))
-      raise "Instance #{ instance_id } does not have or took to long to become #{ status } status."
+    unless actual_status == status.upcase.gsub(' ', '_')
+      raise "Instance #{ instance_id } does not have or took to long to become #{ status } status. " +
+      "Current status is #{ actual_status }."
     end
   end
 end
 
 
 Step /^The instance named (.+) should be (?:in|of) (.+) status$/ do |instance_name, expected_status|
-  wait_time = ConfigFile.wait_instance_launch + Time.now().to_i
+  sleeping(ConfigFile.wait_instance_in_status).seconds.between_tries.failing_after(ConfigFile.repeat_instance_in_status).tries do
+    status_cell = @current_page.instance_status_cell(name: instance_name)
+    actual_status = status_cell.text.strip
 
-  while wait_time >= Time.now().to_i
-    selector = "//*[@id='instances-list']//*[contains(@class, 'name') and contains(text(), \"#{ instance_name }\")]/.."
-    row      = @current_page.find_by_xpath(selector)
-      unless row
-        next
-      end
-      actual_status = row.find('.status').text.strip
-        break if actual_status == expected_status.upcase.gsub(' ', '_')
-        sleep ConfigFile.wait_short
-  end
-
-  if (wait_time < Time.now().to_i) then
-    raise "Instance #{ instance_name } is not or took too long to become #{ expected_status }. " +
+    unless actual_status == expected_status.upcase.gsub(' ', '_')
+      raise "Instance #{ instance_name } is not or took too long to become #{ expected_status }. " +
       "Current status is #{ actual_status }."
+    end
   end
+end
+
+Step /^The snapshot named (.+) should be (?:in|of) (.+) status$/ do |snapshot_name, expected_status|
+  sleeping(ConfigFile.wait_instance_in_status).seconds.between_tries.failing_after(ConfigFile.repeat_instance_in_status).tries do
+    status_cell = @current_page.snapshot_status_cell(name: snapshot_name)
+    actual_status = status_cell.text.strip
+
+    unless actual_status == expected_status.upcase.gsub(' ', '_')
+      raise "Snapshot #{ snapshot_name } is not or took too long to become #{ expected_status }. " +
+      "Current status is #{ actual_status }."
+    end
+  end
+end
+
+Step /^The (.+) image (.+) should be (?:in|of) (.+) status$/ do |disk_format, image_name, expected_status|
+  disk_format.upcase!
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_long).tries do
+    status_cell = @current_page.image_status_cell(name: image_name, format: disk_format)
+    actual_status = status_cell.text.strip
+
+    unless actual_status == expected_status.upcase.tr(' ', '_')
+      raise "#{ disk_format } image #{ image_name } is not or took too long to become " +
+            "#{ expected_status }. Current status is #{ actual_status }."
+    end
+  end
+end
+
+Step /^Click the (.+) button for snapshot named (.+)$/ do |button_name, snapshot_name|
+  button_name = button_name.split.join('_').downcase
+  @current_page.send("#{ button_name }_button", name: snapshot_name).click
+end
+
+Step /^The snapshot named #{ test_instance_snapshot_name } should be in (.+) format$/ do |format|
+
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_long).tries do
+    format_cell = @current_page.snapshot_format_cell(name: snapshot)
+    format = format_cell.text.to_s.strip
+
+    unless format.include?('Bare')
+      raise "Snapshot Format #{ format } should be BARE. " +
+            "Current Format is #{ format }."
+    end
+  end
+
+end
+
+Step /^The snapshot named (.+) should have the visibility of (\(Default\)|Private|Public) and visible to (.+)$/ do |snapshot, visibility, visible_to|
+
+  if ((visibility == '(Default)' || visibility == 'Private') && visible_to == 'Project')
+    sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_long).tries do
+       not_public_cell = @current_page.snapshot_not_public_cell(name: snapshot)
+       is_public = not_public_cell.text.to_s.strip
+
+       if is_public.include?('Yes')
+        raise "Snapshot #{ snapshot } to be not public. " +
+              "Current value of is_public is #{ is_public }."
+       end
+    end
+  end
+
+  if (visibility == 'Public' && visible_to == 'Everyone')
+
+    step "Wait #{ConfigFile.wait_instance_snapshot} seconds"
+    step "Click the snapshot menu button for snapshot named #{ snapshot }"
+    step "Click the edit snapshot button for snapshot named #{ snapshot }"
+    step "Current page should have the edit instance snapshot form"
+    step "Check the is public checkbox"
+    step "Click the update instance snapshot button"
+
+    sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+      public_cell = @current_page.snapshot_public_cell(name: snapshot)
+      is_public = public_cell.text.to_s.strip
+
+      if is_public.include?('No')
+        raise "Snapshot #{ snapshot } to be public. " +
+              "Current value of is_public is #{ is_public }."
+      end
+    end
+
+  end
+
 end
 
 
 Step /^The instance ((?:(?!named )).+) should not have flavor (.+)$/ do |instance_id, flavor_name|
   sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
-    if @current_page.instance_row( id: instance_id ).find('.flavor').has_content?(flavor_name)
+    flavor_cell = @current_page.find("#instance-item-#{ instance_id } .flavor")
+    if flavor_cell.has_content?(flavor_name)
       raise "Expected flavor of instance #{ instance_id } to change. " +
             "Current flavor is #{ flavor_name }."
     end
@@ -767,14 +947,10 @@ end
 
 
 Step /^The instance named (.+) should have flavor (.+)$/ do |instance_name, flavor_name|
-  # TODO To prevent conflict with other instance steps, temporarily forgo changing the selector,
-  # and instead finding it directly from the page object.
-  selector = "//*[@id='instances-list']//*[contains(@class, 'name') and contains(text(), \"#{ instance_name }\")]/.."
-  row = @current_page.find_by_xpath(selector)
-
   sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
-    actual_flavor_name = row.find('.flavor').text.to_s.strip
-    unless row.find('.flavor').has_content?(flavor_name)
+    flavor_cell = @current_page.instance_flavor_cell(name: instance_name)
+    actual_flavor_name = flavor_cell.text.to_s.strip
+    unless flavor_cell.has_content?(flavor_name)
       raise "Expected flavor of instance #{ instance_name } to be #{ flavor_name }. " +
             "Current flavor is #{ actual_flavor_name }."
     end
@@ -782,13 +958,8 @@ Step /^The instance named (.+) should have flavor (.+)$/ do |instance_name, flav
 end
 
 Step /^The instance named (.+) should have a public IP$/ do |instance_name|
-  # TODO To prevent conflict with other instance steps, temporarily forgo changing the selector,
-  # and instead finding it directly from the page object.
-  selector = "//*[@id='instances-list']//*[contains(@class, 'name') and contains(text(), \"#{ instance_name }\")]/.."
-  row = @current_page.find_by_xpath(selector)
-
-  public_ip = row.find('.public-ipaddress')
-  if public_ip.text.to_s.strip.blank?
+  public_ip_cell = instance_public_ip_cell(name: instance_name)
+  if public_ip_cell.text.to_s.strip.blank?
     raise "Instance #{ instance_name } does not have a public IP."
   end
 end
@@ -835,12 +1006,13 @@ Then /^The volume named (.+) should be (?:in|of) (.+) status$/ do |volume_name, 
   volume = VolumeService.session.volumes.find { |v| v['display_name'] == volume_name }
   raise "Couldn't find a volume named '#{ volume_name }'" unless volume
 
-  status.downcase!
-  sleeping(1).seconds.between_tries.failing_after(15).tries do
-    volume_row    = @current_page.volume_row( id: volume['id'] ).find('.volume-status')
-    volume_status = volume_row.text.to_s.strip.downcase
+  status = status.downcase.tr(' ', '_')
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+    volume_status_cell = @current_page.volume_status_cell( id: volume['id'] )
+    volume_status = volume_status_cell.text.to_s.strip.downcase
     unless volume_status == status
-      raise "Volume #{ volume_name } took to long to become #{ status }."
+      raise "Volume #{ volume_name } took to long to become #{ status }. It is " +
+            "currently #{ volume_status }."
     end
   end
 end
@@ -857,7 +1029,8 @@ Then /^The volume named (.+) should be attached to the instance named (.+)$/ do 
   end
 
   sleeping(ConfigFile.wait_volume_attach).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
-    attachment = @current_page.volume_row(id: volume['id']).find('.attachments').text.to_s.strip
+    volume_attachments_cell = @current_page.volume_attachments_cell( id: volume['id'] )
+    attachment = volume_attachments_cell[:title]
     if attachment != instance_name
       raise "Expected volume #{ volume_name } to be attached to instance #{ instance_name }, " +
             "but it's not."
@@ -876,7 +1049,8 @@ Then /^The volume named (.+) should not be attached to the instance named (.+)$/
       raise "Could not find row for the volume named #{ volume_name }!"
     end
 
-    attachment = @current_page.volume_row(id: volume['id']).find('.attachments').text.to_s.strip
+    volume_attachments_cell = @current_page.volume_attachments_cell( id: volume['id'] )
+    attachment = volume_attachments_cell[:title]
     if attachment == instance_name
       raise "Expected volume #{ volume_name } to not be attached to instance #{ instance_name }, but it is."
     end
@@ -900,8 +1074,9 @@ Step /^The volume named (.+) should be detached to the instance named (.+) in pr
       raise "Could not find row for the volume named #{ volume_name }!"
     end
 
-    attachment_id = @current_page.volume_row(id: volume['id']).find('.attachments')[:title]
-    if attachment_id == instance.id
+    volume_attachments_cell = @current_page.volume_attachments_cell( id: volume['id'] )
+    attachment = volume_attachments_cell[:title]
+    if attachment == instance_name
       raise "Expected volume #{ volume_name } to not be attached to instance #{ instance_name }, but it is."
     end
   end
@@ -923,6 +1098,13 @@ Then /^The (.+) link should not be visible$/ do |link_name|
   end
 end
 
+Then /^The (.+) tab should not be visible$/ do |tab_name|
+  tab_name = tab_name.split.join('_').downcase
+  if @current_page.send("has_#{ tab_name }_tab?")
+    raise "The '#{ tab_name.gsub('_',' ') }' link should not be visible, but it is."
+  end
+end
+
 Step /^The (.+) button should not be visible$/ do |button_name|
   button_name = button_name.split.join('_').downcase
   if @current_page.send("has_#{ button_name }_button?")
@@ -933,6 +1115,13 @@ end
 Step /^The Context Menu button for the user named (.+) should not be visible$/i do |username|
   if @current_page.send("has_context_menu_button?", name: username)
     raise "The context menu button for user #{ username } should not be visible, but it is."
+  end
+end
+
+Step /^The Context Menu button for the project named (.+) should not be visible$/i do |project_name|
+  project_name.strip!
+  if @current_page.send("has_context_menu_button?", name: project_name)
+    raise "The context menu button for project #{ project_name } should not be visible, but it is."
   end
 end
 
@@ -1019,8 +1208,11 @@ end
 
 
 Then /^The (.+) project should not be visible$/ do |project_name|
-  if @current_page.has_project_row?( name: project_name )
-    raise "The project '#{ project_name }' should not be visible, but it is."
+  project_name.strip!
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+    if @current_page.has_project_row?( name: project_name )
+      raise "The project '#{ project_name }' should not be visible, but it is."
+    end
   end
 end
 
@@ -1063,6 +1255,26 @@ Then /^The (.+) table's last row should not include the text (.+)$/ do |table_na
   end
 end
 
+Then /^The images table should have a row for the image named (.+)$/ do |image_name|
+  image = ImageService.session.images.reload.find { |i| i.name == image_name }
+  raise "Couldn't find an image named '#{ image_name }'" unless image
+
+  unless @current_page.has_image_row?( id: image.id )
+    raise "Expected to find a row for image #{ image_name } in the " +
+          "images table."
+  end
+end
+
+Then /^The images table should not have a row for the image named (.+)$/ do |image_name|
+  image = ImageService.session.images.find { |i| i.name == image_name }
+  raise "Couldn't find an image named '#{ image_name }'" unless image
+
+  if @current_page.has_image_row?( id: image.id )
+    raise "Expected to not find a row for image #{ image_name } in the " +
+          "images table."
+  end
+end
+
 Then /^The volumes table should have a row for the volume named (.+)$/ do |volume_name|
   sleeping(ConfigFile.wait_long).seconds.between_tries.failing_after(ConfigFile.repeat_long).tries do
     VolumeService.session.reload_volumes
@@ -1078,16 +1290,20 @@ Then /^The volumes table should have a row for the volume named (.+)$/ do |volum
 end
 
 Then /^The volume snapshots table should have a row for the volume snapshot named (.+)$/ do |volume_snapshot_name|
-  unless @current_page.has_volume_snapshot_row?( name: volume_snapshot_name )
-    raise "Expected to find a row for volume snapshot #{ volume_snapshot_name } in the " +
-          "volume snapshots table, but couldn't find it."
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+    unless @current_page.has_volume_snapshot_row?( name: volume_snapshot_name )
+      raise "Expected to find a row for volume snapshot #{ volume_snapshot_name } in the " +
+            "volume snapshots table, but couldn't find it."
+    end
   end
 end
 
 Then /^The volume snapshots table should not have a row for the volume snapshot named (.+)$/ do |volume_snapshot_name|
-  if @current_page.has_volume_snapshot_row?( name: volume_snapshot_name )
-    raise "Expected not to find a row for volume snapshot #{ volume_snapshot_name } in the " +
-          "volume snapshots table, but found it."
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+    if @current_page.has_volume_snapshot_row?( name: volume_snapshot_name )
+      raise "Expected not to find a row for volume snapshot #{ volume_snapshot_name } in the " +
+            "volume snapshots table, but found it."
+    end
   end
 end
 
@@ -1135,32 +1351,23 @@ Then /^Wait (.+) second(?:s|)/i  do |wait_secs|
 end
 
 Then /^Wait at most (\d+) minutes until the instance named (.+) is in (.+) status$/ do |number_of_minutes, instance_name, expected_status|
-  # TODO To prevent conflict with other instance steps, temporarily forgo changing the selector,
-  # and instead finding it directly from the page object.
-  selector = "//*[@id='instances-list']//*[contains(@class, 'name') and contains(text(), \"#{ instance_name }\")]/.."
-  row = @current_page.find_by_xpath(selector)
-
-  # Retry every 5 seconds up to x minutes
   sleeping(5).seconds.between_tries.failing_after((60 * number_of_minutes.to_i) / 5).tries do
-    actual_status = row.find('.status').text.strip
+    status_cell = @current_page.instance_status_cell(name: instance_name)
+    actual_status = status_cell.text.strip
     unless actual_status == expected_status.upcase.gsub(' ', '_')
-      raise "Instance #{ instance_id } does not have or took to long to become #{ expected_status } status. " +
+      raise "Instance #{ instance_name } does not have or took to long to become #{ expected_status } status. " +
             "Instance is currently in #{ actual_status } status."
     end
   end
 end
 
 Then /^Wait for a few minutes until the instance named (.+) is in (.+) status$/ do |instance_name, expected_status|
-  # TODO To prevent conflict with other instance steps, temporarily forgo changing the selector,
-  # and instead finding it directly from the page object.
-  selector = "//*[@id='instances-list']//*[contains(@class, 'name') and contains(text(), \"#{ instance_name }\")]/.."
-  row = @current_page.find_by_xpath(selector)
-
   # Retry every 5 seconds up to x minutes
   sleeping(ConfigFile.wait_seconds).seconds.between_tries.failing_after((ConfigFile.minute * ConfigFile.repeat_timing) / ConfigFile.timing).tries do
-    actual_status = row.find('.status').text.strip
+    status_cell = @current_page.instance_status_cell(name: instance_name)
+    actual_status = status_cell.text.strip
     unless actual_status == expected_status.upcase.gsub(' ', '_')
-      raise "Instance #{ instance_id } does not have or took to long to become #{ expected_status } status. " +
+      raise "Instance #{ instance_name } does not have or took to long to become #{ expected_status } status. " +
             "Instance is currently in #{ actual_status } status."
     end
   end
@@ -1186,3 +1393,4 @@ Step /^Write the contents of the (.+) field to file (.+)$/i do |field_name, file
     file.puts field.value
   end
 end
+

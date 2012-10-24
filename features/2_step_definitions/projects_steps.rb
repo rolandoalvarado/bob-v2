@@ -356,7 +356,11 @@ Then /^I cannot grant project membership to (.+)$/i do |username|
     * Click the login button
 
     * Visit the projects page
-    * The #{ (@project || @project_attrs).name } project should not be visible
+    * The Users link should not be visible
+    * The #{ (@project || @project_attrs).name  } project should be visible
+    * Click the #{ (@project || @project_attrs).name } project
+    * The Collaborators tab should not be visible
+
    }
 
 end
@@ -403,15 +407,9 @@ Then /^I can delete (?:that|the) project$/i do
     * The #{ (@project || @project_attrs).name } project should be visible
 
     * Delete the #{ (@project || @project_attrs).name } project
-
+    * Confirm the deletion of #{ (@project || @project_attrs).name } project
+    * The #{ (@project || @project_attrs).name } project will be deleted
   }
-
-  project =  IdentityService.session.tenants.find_by_name((@project || @project_attrs).name)
-
-  if project != nil && project.id != nil
-     raise "Project #{ project.name } should be deleted. but it's not"
-  end
-
 end
 
 
@@ -433,6 +431,37 @@ Then /^I failed to delete (?:that|the) project$/i do
     raise "The project deletng should be failed, but it seems to succeeed."
   end
 
+end
+
+Then /^I cannot delete (?:that|the) project$/i do
+  steps %{
+
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ @current_user.name }
+    * Fill in the Password field with #{ @current_user.password }
+    * Click the Login button
+
+    * Visit the projects page
+    * The #{ @project } project should be visible
+    * The Context Menu button for the project named #{ @project } should not be visible
+  }
+end
+
+Then /^(?:that|the) project cannot be deleted$/i do
+  steps %{
+
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ @current_user.name }
+    * Fill in the Password field with #{ @current_user.password }
+    * Click the Login button
+
+    * Visit the projects page
+    * The #{ @project } project should be visible
+    * Delete the #{ @project } project
+    * The error message "Unable to delete the project" should be displayed
+  }
 end
 
 Then /^I can edit (?:that|the) project$/i do
@@ -465,6 +494,20 @@ Then /^I can edit (?:that|the) project$/i do
 
 end
 
+Then /^I cannot edit (?:that|the) project$/i do
+  steps %{
+
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ @current_user.name }
+    * Fill in the Password field with #{ @current_user.password }
+    * Click the Login button
+
+    * Visit the projects page
+    * The #{ @project } project should be visible
+    * The Context Menu button for the project named #{ @project } should not be visible
+  }
+end
 
 Then /^Arya Stark cannot view that project$/ do
   user_attrs       = CloudObjectBuilder.attributes_for(
@@ -510,6 +553,12 @@ Then /^the project will be [Cc]reated$/ do
     * Visit the projects page
     * The #{ @project_attrs.name } project should be visible
     * Ensure that a project named #{ @project_attrs.name } exists
+  }
+end
+
+Then /^the (.+) project will be deleted$/i do |project_name|
+  steps %{
+    * The #{ project_name } project should not be visible
   }
 end
 
@@ -569,7 +618,6 @@ TestCase /^A user with a role of (.+) in a project can edit the instance quota o
 
 end
 
-
 TestCase /^A user with a role of (.+) in a project cannot edit the instance quota of the project$/i do |role_name| 
   
   floating_ips  = 10
@@ -603,65 +651,6 @@ TestCase /^A user with a role of (.+) in a project cannot edit the instance quot
   }
 
 end
-
-Then /^I [Cc]annot [Ee]dit (?:that|the) project$/ do
-  username      = Unique.username('bob')
-  password      = '123qwe'
-  project_name  = Unique.project_name('project')
-
-  Preconditions %{
-    * Ensure that a user with username #{ username } and password #{ password } exists
-    * Ensure that a project named #{ project_name } exists
-    * Ensure that the user #{ username } has a role of Member in the system
-  }
-
-  Cleanup %{
-    * Register the project named #{ project_name } for deletion at exit
-    * Register the user named #{ username } for deletion at exit
-  }
-  
-  Script %{
-
-    * Click the Logout button if currently logged in
-    * Visit the Login page
-    * Fill in the Username field with #{ username }
-    * Fill in the Password field with #{ password }
-    * Click the Login button
-
-    * Visit the projects page
-    * The #{ project_name } project should be visible
-    * The edit project link should be disabled with #{ project_name }
-  }
-end
-
-
-TestCase /^I cannot delete (?:that|the) project$/i do
-  Preconditions %{
-    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
-    * Ensure that a project named #{ test_project_name } exists
-    * Ensure that the user #{ bob_username } has a role of Member in the system
-  }
-
-  Cleanup %{
-    * Register the project named #{ test_project_name } for deletion at exit
-    * Register the user named #{ bob_username } for deletion at exit
-  }
-  
-  Script %{
-
-    * Click the Logout button if currently logged in
-    * Visit the Login page
-    * Fill in the Username field with #{ bob_username }
-    * Fill in the Password field with #{ bob_password }
-    * Click the Login button
-
-    * Visit the projects page
-    * The #{ test_project_name } project should be visible
-    * The delete project link should be disabled with #{ test_project_name }
-  }
-end
-
-
 
 TestCase /^Project can be updated the quota of the project with (.+) , (.+) and (.+)$/i do |floating_ips,volumes,cores|
 

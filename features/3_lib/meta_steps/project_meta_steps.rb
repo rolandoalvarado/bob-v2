@@ -26,7 +26,7 @@ Step /^Ensure that a project named (.+) exists$/i do |project_name|
     raise "Test project couldn't be initialized!"
   end
 
-  @named_project = project
+  @project = @named_project = project
 end
 
 Step /^Ensure that a project named (.+) does not exists$/i do |project_name|
@@ -63,7 +63,9 @@ end
 
 Then /^Ensure that I have a role of (.+) in the named project$/i do |role_name|
 
-  if @named_project.nil?
+  project = @named_project || @project
+
+  if project.nil?
     raise "No test project is available. You need to call " +
           "'* Ensure that a test project is available for use' " +
           "before this step."
@@ -72,7 +74,7 @@ Then /^Ensure that I have a role of (.+) in the named project$/i do |role_name|
   identity_service = IdentityService.session
   user             = @current_user
 
-  identity_service.revoke_all_user_roles(user, @named_project)
+  identity_service.revoke_all_user_roles(user, project)
   admin_project = identity_service.tenants.find { |t| t.name == 'admin' }
   identity_service.revoke_all_user_roles(user, admin_project)
 
@@ -95,7 +97,7 @@ Then /^Ensure that I have a role of (.+) in the named project$/i do |role_name|
       if RoleNameDictionary.db_name(role_name) == "admin"  then
         identity_service.ensure_tenant_role(user, admin_project, 'System Admin')
       end
-      role.add_to_user(user,@named_project)
+      role.add_to_user(user, project)
     rescue Fog::Identity::OpenStack::NotFound => e
       raise "Couldn't add #{ user.name } to #{ @project.name } as #{ role.name }"
     end
@@ -134,11 +136,10 @@ end
 Then /^Ensure that I have a role of (.+) in the project$/i do |role_name|
 
   if @project.nil?
-    raise "No Project is available. You need to call " +
-          "'* Ensure that a project is available for use' " +
-          "before this step."
+    raise "No project was defined. You might need to add '* A project exists in the system' " +
+          "in the feature file."
   end
-
+  
   user_attrs       = CloudObjectBuilder.attributes_for(
                        :user,
                        :name => bob_username
@@ -149,31 +150,13 @@ Then /^Ensure that I have a role of (.+) in the project$/i do |role_name|
   EnvironmentCleaner.register(:user, user.id)
 
   identity_service.revoke_all_user_roles(user, @project)
-  admin_project = identity_service.tenants.find { |t| t.name == 'admin' }
-  identity_service.revoke_all_user_roles(user, admin_project)
 
   # Ensure user has the following role in the project
   unless role_name.downcase == "(none)"
-    # 2012-09-12
-    # mcloud implement project role like this
-    # If you are member. only have a member role of @project.
-    # If you are project manager of named_project, you have a member role of @project
-    # and have admin role of admin project.  
-    role = identity_service.roles.find_by_name(RoleNameDictionary.db_name('Member'))
-
-    if role.nil?
-      raise "Role #{ role_name } couldn't be found. Make sure it's defined in " +
-        "features/support/role_name_dictionary.rb and that it exists in " +
-        "#{ ConfigFile.web_client_url }."
-    end
-
     begin
-      if RoleNameDictionary.db_name(role_name) == "admin"  then
-        identity_service.ensure_tenant_role(user, admin_project, 'System Admin')
-      end
-      role.add_to_user(user,project)
+      identity_service.ensure_tenant_role(user, @project, role_name)
     rescue Fog::Identity::OpenStack::NotFound => e
-      raise "Couldn't add #{ user.name } to #{ @project.name } as #{ role.name }"
+      raise "Couldn't add #{ user.name } to #{ @project.name } as #{ role_name }"
     end
   end
 
@@ -246,8 +229,13 @@ Then /^Delete the (.+) project$/i do |project_name|
   project_name.strip!
   @current_page.project_menu_button( name: project_name ).click
   @current_page.delete_project_link( name: project_name ).click
+end
+
+Then /^Confirm the deletion of (.+) project$/i do |project_name|
+  project_name.strip!
   @current_page.delete_confirmation_button.click
 end
+
 
 Step /^Ensure that the project named (.+) has (?:an|a) (member|project manager) named (.+)$/i do |project_name, role, username|
   project_name.strip!
@@ -260,3 +248,4 @@ Step /^Ensure that the project named (.+) has (?:an|a) (member|project manager) 
 
   EnvironmentCleaner.register(:user, user.id)
 end
+

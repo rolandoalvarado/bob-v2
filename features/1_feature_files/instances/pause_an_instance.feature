@@ -16,6 +16,7 @@ Feature: Pause an Instance
     Given I have a role of <Role> in the project
      Then I <Can or Cannot Pause> the instance in the project
 
+      @jira-MCF-16-AR
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Pause |
         | Member          | Can Pause           |

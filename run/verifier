@@ -1,24 +1,68 @@
-#!/usr/bin/env bash
-description="Verifies all features"
+#!/usr/bin/env ruby
+description = 'Verifies all features'
 
-if [ $# -eq 2 ] && [ $1 == 'describe' ]; then
-  printf "  %-0$2s - $description\n" `basename $0`
+basename = File.basename(__FILE__).to_s
+if ARGV[0] == 'describe'
+  puts "  #{basename.ljust(ARGV[1].to_i)} - #{description}"
   exit 0
-elif [ $# -eq 1 ] && [ $1 == '--help' ]; then
-  printf "run/`basename $0` <profile>\n"
-  printf "\nExamples:\n"
-  printf "  run/`basename $0`\n"
-  printf "  run/`basename $0` ci\n"
-  printf "  run/`basename $0` wip\n"
-  printf "\nSee cucumber.yml for available profiles\n"
+elsif ARGV.length == 1 && ARGV[0] == '--help'
+  puts <<HELP
+Usage: run/#{basename} [profile] [tag]
+Example:
+  run/#{basename}
+  run/#{basename} ci
+  run/#{basename} wip
+See cucumber.yml for available purposes
+HELP
   exit 0
-fi
+end
 
-rm -rf output/*
-if [ $# -eq 1 ]; then
-  bundle exec cucumber --profile $1 --t ~@future --t ~@pending
-elif [ $# -eq 2 ]; then
-  bundle exec cucumber --profile $1 --t ~@future --t ~@pending --t $2
+require 'rubygems'
+require 'yaml'
+require 'fileutils'
+require 'uri'
+require 'net/ssh/gateway'
+require File.expand_path('../../features/support/cloud_configuration.rb', __FILE__)
+
+include CloudConfiguration
+
+@host = URI.parse(ConfigFile.web_client_url).host
+def create_tunnel
+  username = ConfigFile.server_username || `whoami`.chomp
+  abort 'ERROR: Username must be specified!' if username.to_s.empty?
+
+  gateway = Net::SSH::Gateway.new(@host, username)
+  gateway.open(@host, 35357, 35357)
+  gateway.open(@host, 8776, 8776)
+  gateway.open(@host, 9292, 9292)
+  gateway.open(@host, 8774, 8774)
+  gateway.open(@host, 8773, 8773)
+  gateway.open(@host, 5000, 5000)
+  gateway
+end
+
+if ConfigFile.tunnel
+  begin
+    print "Connecting to #{@host} via SSH tunnel... "
+    @tunnel = create_tunnel
+    puts 'Connected.'
+  rescue => e
+    abort "ERROR: #{e.inspect}"
+  end
+end
+
+FileUtils.rm_rf Dir['output/*']
+puts "Start at #{Time.now}"
+if ARGV.length == 1
+  system "bundle exec cucumber --profile #{ARGV[0]} --t ~@future --t ~@pending"
+elsif ARGV.length == 2
+  system "bundle exec cucumber --profile #{ARGV[0]} --t ~@future --t ~@pending --t #{ARGV[1]}"
 else
-  bundle exec cucumber --profile default --t ~@future --t ~@pending
-fi
+  system "bundle exec cucumber --profile default --t ~@future --t ~@pending"
+end
+puts "Finished at #{Time.now}"
+
+if @tunnel
+  @tunnel.shutdown!
+  puts "SSH tunnel closed."
+end

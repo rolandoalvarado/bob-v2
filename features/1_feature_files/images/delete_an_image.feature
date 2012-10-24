@@ -1,4 +1,4 @@
-@pending @images
+@images
 Feature: Delete an Image
   As a user, I want to delete an image in my project so that I can keep my list
   of images manageable
@@ -9,27 +9,20 @@ Feature: Delete an Image
   including operating system information and file system information.
 
 
-  Background:
-    * A project exists in the system
-    * The project has an image
-
-
   @permissions
   Scenario Outline: Check User Permissions
-    Given I have a role of <Role> in the project
-     Then I <Can or Cannot Delete> the image in the project
+    * A user with a role of <Role> in a project <Can or Cannot Delete> an image
 
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Delete |
-        | Member          | Can Delete           |
-        | Admin           | Can Delete           |
+        | System Admin    | Can Delete           |
+        | Project Manager | Can Delete           |
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Delete |
+        | Member          | Cannot Delete        |
         | (None)          | Cannot Delete        |
 
 
   Scenario: Delete an Image
-    Given I am authorized to delete images in the project
-     When I delete the image in the project
-     Then I can no longer user that image
+    * An image deleted in the project can no longer be used by that project

@@ -149,6 +149,8 @@ class ProjectPage < SecurePage
   button    'volume detach confirmation',         '#alert-template .okay'
   button    'volume delete confirmation',         '#alert-template .okay'
   row       'volume',                             '#volume-item-<id>'
+  cell      'volume status',                      '#volume-item-<id> .volume-status'
+  cell      'volume attachments',                 '#volume-item-<id> .attachments'
 
   #==========================
   # Monitoring-related elements
@@ -169,6 +171,18 @@ class ProjectPage < SecurePage
   #row       'associated floating IP', xpath:      "//*[@id='floating-ip-list']//*[@class='floating-ip' and text()=\"<name>\"]/.."
   row       'associated floating IP',              xpath: "//*[@id='floating-ip-list']//td[contains(@class, 'instance') and normalize-space(text())=\"<name>\"]/.."
   row       'instance',                           '#instances-template .table-list #instance-item-<id>'
+  cell      'instance flavor',                    xpath: "//*[@id='instances-list']//*[contains(@class, 'name') and contains(text(), \"<name>\")]//..//*[@class='flavor']"
+  cell      'instance public ip',                 xpath: "//*[@id='instances-list']//*[contains(@class, 'name') and contains(text(), \"<name>\")]//..//*[@class='public-ipaddress']"
+  cell      'instance status',                    xpath: "//*[@id='instances-list']//*[contains(@class, 'name') and contains(text(), \"<name>\")]//..//*[@class='status']"
+  cell      'instance task',                      xpath: "//*[@id='instances-list']//*[contains(@class, 'name') and contains(text(), \"<name>\")]//..//*[@class='task']"
+  cell      'snapshot status',                    xpath: "//*[@id='instance-snapshot-list']//*[contains(text(), \"<name>\")]//..//*[@class='status']"
+  
+  cell      'snapshot public',                    xpath: "//*[@id='instance-snapshot-list']//..//*[td[normalize-space(text())='Yes']]"
+  
+  cell      'snapshot not public',                xpath: "//*[@id='instance-snapshot-list']//..//*[td[normalize-space(text())='No']]"
+  
+  cell      'snapshot format',                    xpath: "//*[@id='instance-snapshot-list']//..//*[td[normalize-space(text())='Bare']]"
+  
   form      'resize instance',                    '#resize-instance-modal'
 
   element   'console output',                     '#logsModal'
@@ -181,6 +195,7 @@ class ProjectPage < SecurePage
   button    'soft reboot instance',               "#instance-item-<id> .soft-reboot"
   button    'hard reboot instance',               "#instance-item-<id> .hard-reboot"
   button    'pause instance',                     "#instance-item-<id> .pause"
+  button    'snapshot instance',                  "#instance-item-<id> .snapshot"
   button    'resize instance',                    "#instance-item-<id> .resize"
   button    'resume instance',                    "#instance-item-<id> .resume"
   button    'suspend instance',                   "#instance-item-<id> .suspend"
@@ -194,15 +209,23 @@ class ProjectPage < SecurePage
   button    'confirm instance deletion',          '#alert-template .okay'
   button    'confirm instance reboot',            "#alert-template .okay"
   button    'resize instance confirmation',       "#resize-instance"
-
-  element   'image',                              xpath: "//*[@id='instances-list']//label[text()='<name>']"
-
+    
+  element   'image',                                xpath: "//*[@id='instances-list']//label[text()='<name>']"
+  tab       'images and snapshots',               '.nav-tabs .snapshots a'
+  field     'snapshot name',                       '#name'
+  form      'new instance snapshot',              '#instance-snapshot-modal'
+  form      'edit instance snapshot',             '#image-update-modal'
+  button    'create instance snapshot',           '#create-snapshot'
+  button    'update instance snapshot',           '#update-image'
+  button    'snapshot menu',                        xpath: "//*[@id='instance-snapshot-list']//td[@class='name' and @title=\"<name>\"]/..//*[@class='dropdown-toggle']"
+  button    'edit snapshot',                        xpath: "//*[@id='instance-snapshot-list']//td[@class='name' and @title=\"<name>\"]/..//*[@class='edit']"
+  checkbox  'is public',                            '#is-public'
 
   #==========================
   # Collaborators
   #==========================
   link      'collaborators email',                '.chzn-choices'
-  tab       'collaborators',                      '.nav-tabs .collaborators a'
+  tab       'collaborators',                      '.nav-tabs .collaborators:not(.disabled) a'
   tab       'disabled collaborators',             '.nav-tabs .collaborators.disabled'
   button    'add collaborator',                   '#add-collaborator:not(.disabled)'
   option    'collaborator',                       xpath: '//*[@class="chzn-drop"]//*[li[text()="<name>"]]'

@@ -1,24 +1,50 @@
-def remote_client_connection(protocol, ip_address, username, options = {})
+def remote_client_connection(protocol, external_ip, internal_ip, username, options = {})
   case protocol.upcase
   when 'RDP'
-    result = `rdesktop #{ ip_address } -u #{ username } -p #{ options[:password] } 2>&1`
+    result = `rdesktop #{ external_ip } -u #{ username } -p #{ options[:password] } 2>&1`
     unless $? == 0  # command exited with error/s
-      raise "The instance is not publicly accessible on #{ ip_address } via RDP. " +
+      raise "The instance is not publicly accessible on #{ external_ip } via RDP. " +
             "The error returned was: #{ result }"
     end
   when 'SSH'
     private_key = ComputeService.session.private_keys[test_keypair_name]
     raise "Couldn't find private key for keypair '#{ test_keypair_name }'!" unless private_key
-    options.merge!( port: 2222, timeout: 30, key_data: [ private_key ], user_known_hosts_file: '/dev/null' )
+    options.merge!( port: 22, timeout: 60, key_data: [ private_key ], user_known_hosts_file: '/dev/null')
+
     begin
-      Net::SSH.start(ip_address, username, options) do |ssh|
-        output = ssh.exec!('ls -a')
-        puts "Output : #{output}"
+      print "Connecting to external IP #{ external_ip }... "
+      Net::SSH.start(external_ip, username, options) do |ssh|
+        print "Connected.\n"
+        output = ssh.exec!(' hostname ;ip addr show ; top -n 1 ; ')
+        puts "Output: #{ output }"
       end
-    rescue => e
-      raise "The instance is not publicly accessible on #{ ip_address } via SSH. " +
-            "The error returned was: #{ e.inspect }"
+    rescue
+      print "Failed.\n"
+      begin
+        print "Connecting to internal IP #{ internal_ip }... "
+        Net::SSH.start(internal_ip, username, options) do |ssh|
+          print "Connected.\n"
+          output = ssh.exec!(' hostname ;ip addr show ; top -n 1 ; ')
+          puts "Output: #{ output }"
+        end
+      rescue Exception => e
+        print "Failed.\n"
+        raise "The instance is not publicly accessible on both #{ external_ip } and #{ internal_ip } via SSH. " +
+              "The error returned was: #{ e.inspect }"
+      end
     end
+  end
+end
+
+def remote_client_check_volume(ip_address, username, delta_time, options={})
+  device_file_list = Array.new
+  Net::SSH.start(ip_address, username, options) do |ssh|
+    # Get a list of all device /dev/vd* files modified/created from x minutes ago
+    device_file_list = ssh.exec!("find /dev/vd* -mmin -#{ delta_time }").split
+  end
+
+  if device_file_list.empty?
+    raise "No new device file has been created on the instance."
   end
 end
 
