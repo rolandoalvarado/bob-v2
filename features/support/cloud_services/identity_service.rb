@@ -81,7 +81,7 @@ class IdentityService < BaseCloudService
   # Project Manager = 'admin' in admin tenant, 'Member' in the tenant
   # Member          = 'Member' in the tenant
   def ensure_tenant_role(user, tenant, role_name)
-    valid_roles = ['System Admin', 'Project Manager', 'Member', '(None)']
+    valid_roles = ['System Admin', 'Admin', 'Project Manager', 'Member', '(None)']
 
     unless valid_roles.include?(role_name)
       raise "Unknown role '#{ role_name }'. Valid roles are #{ valid_roles.join(',') }"
@@ -89,13 +89,13 @@ class IdentityService < BaseCloudService
     
     revoke_all_user_roles(user, tenant) # It's for (None)
     
-    if ['System Admin', 'Project Manager', 'Member'].include?(role_name)
+    if ['System Admin', 'Admin', 'Project Manager', 'Member'].include?(role_name)
       admin_tenant = tenants.find_by_name('admin')
       member_role = roles.find_by_name('Member')
       user.update_tenant(tenant.id)
       tenant.grant_user_role(user.id, member_role.id)
       revoke_all_user_roles(user, admin_tenant)
-      if ['System Admin','Project Manager'].include?(role_name)
+      if ['System Admin', 'Admin','Project Manager'].include?(role_name)
         admin_role   = roles.find_by_name('admin')
         admin_tenant.grant_user_role(user.id, admin_role.id)
       end

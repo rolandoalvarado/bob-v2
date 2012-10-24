@@ -68,11 +68,23 @@ Then /^Choose the (\d+)(?:st|nd|rd|th) item in the (.+) dropdown$/ do |item_numb
   selected_item.select_option
 end
 
+Then /^Choose the item with text in the (.+) dropdown$/ do |item_number, dropdown_name|
+  dropdown_name = dropdown_name.split.join('_').downcase
+  selected_item = nil
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+    selected_item = @current_page.send("#{ dropdown_name }_dropdown_items")[item_number.to_i - 1]
+    unless selected_item
+      raise "Couldn't find item in the dropdown list."
+    end
+  end
+  selected_item.select_option
+end
+
 
 Then /^Choose the item with text (.+) in the (.+) dropdown$/ do |item_text, dropdown_name|
   dropdown_name  = dropdown_name.split.join('_').downcase
   dropdown_items = @current_page.send("#{ dropdown_name }_dropdown_items")
-
+  
   item = case item_text.downcase
          when '(none)'
            dropdown_items.find { |d| d.value.blank? }
@@ -934,6 +946,35 @@ Step /^The snapshot named (.+) should have the visibility of (\(Default\)|Privat
 
 end
 
+
+Step /^The newly created (.+) user should have (.+) permission$/ do |username, permission|
+  if (permission.downcase == 'admin')
+    step "Check the admin checkbox"
+    step "Click the Create User button"
+    step "The #{ username } user row should be visible"
+  else
+    step "Choose the item with text #{ @project.name } in the Primary Project dropdown"
+    step "Choose the item with text Project Manager in the Role dropdown"
+    step "Click the Create User button"
+    step "The #{ username } user row should be visible"
+  end
+end
+
+
+Step /^A user with a role of (.+) in a project (.+) will not be created$/ do |role, primary_project|
+  if (role.downcase == 'admin')
+    step "Check the admin checkbox"
+    step "Click the Create User button"
+    step "The New User form should be visible"
+    step "A New User Form Error Message element should be visible"
+  else
+    step "Choose the item with text #{ primary_project } in the Primary Project dropdown"
+    step "Choose the item with text #{ role } in the Role dropdown"
+    step "Click the Create User button"
+    step "The New User form should be visible"
+    step "A New User Form Error Message element should be visible"
+  end
+end
 
 Step /^The instance ((?:(?!named )).+) should not have flavor (.+)$/ do |instance_id, flavor_name|
   sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
