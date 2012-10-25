@@ -10,7 +10,7 @@ Feature: Create a User
       Scenarios: Authorized Roles
         | Role          | Admin or Not Admin  | Can or Cannot Create |
         | System Admin  | Admin               | Can Create           |
-        | System Admin  | Not Admin           | Can Create           |
+        | Admin         | Not Admin           | Can Create           |
 
 
       Scenarios: Unauthorized Roles

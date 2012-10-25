@@ -8,7 +8,7 @@ Given /^I have a role of (.+) in the system$/ do |role_name|
   }
 end
 
-Given /^a (system admin|project manager|member) is in the system$/i do |role_name|
+Given /^a (system admin|admin|project manager|member) is in the system$/i do |role_name|
   steps %{
     * Ensure that a #{role_name} is in the system
   }
@@ -316,7 +316,7 @@ Then /^I can edit a user$/i do
 end
 
 
-Then /^I can update a user with attributes (.+), (.+), (.+), (.+), and (.+)$/i do |username, email, password, primary_project, is_pm_or_not|
+Then /^I Can Update a user with attributes (.+), (.+), (.+), (.+), (.+) and (.+)$/ do |username, email, password, primary_project, is_pm_or_not, is_admin|
   existing_user = CloudObjectBuilder.attributes_for(:user, :name => Unique.username('existing'), :password => '123qwe')
   new_attrs     = CloudObjectBuilder.attributes_for(
                     :user,
@@ -334,7 +334,7 @@ Then /^I can update a user with attributes (.+), (.+), (.+), (.+), and (.+)$/i d
   role = (is_pm_or_not == "Yes" ? "Project Manager" : "Member")
 
   IdentityService.session.ensure_user_does_not_exist(new_attrs)
-  @existing_user = IdentityService.session.ensure_user_exists(existing_user)
+  @existing_user = IdentityService.session.ensure_user_exists_is_admin_or_not(existing_user, is_admin)
   me = @current_user
 
   steps %{
@@ -357,11 +357,17 @@ Then /^I can update a user with attributes (.+), (.+), (.+), (.+), and (.+)$/i d
     * Fill in the Username field with #{ new_attrs.name }
     * Fill in the Email field with #{ new_attrs.email }
     * Fill in the Password field with #{ new_attrs.password }
-    * Choose the #{ primary_project_choice } item in the Primary Project dropdown
-    * Choose the item with text #{ role } in the Role dropdown
+  }  
+    
+  if !(is_admin.downcase == 'yes')
+    step "Choose the #{ primary_project_choice } item in the Primary Project dropdown"
+    step "Choose the item with text #{ role } in the Role dropdown"
+  end
+  
+  steps %{
     * Click the Update User button
     * The #{ new_attrs.name } user row should be visible
-  }
+  } 
 end
 
 
@@ -380,8 +386,7 @@ Then /^I cannot edit a user$/i do
   }
 end
 
-
-Then /^I cannot update a user with attributes (.+), (.+), (.+), (.+), and (.+)$/i do |username, email, password, primary_project, is_pm_or_not|
+Then /^I Cannot Update a user with attributes (.+), (.+), (.+), (.+), (.+) and (.+)$/i do |username, email, password, primary_project, is_pm_or_not, is_admin|
   existing_user = CloudObjectBuilder.attributes_for(:user, :name => Unique.username('existing'))
   new_attrs     = CloudObjectBuilder.attributes_for(
                     :user,
@@ -398,7 +403,7 @@ Then /^I cannot update a user with attributes (.+), (.+), (.+), (.+), and (.+)$/
 
   role = (is_pm_or_not == "Yes" ? "Project Manager" : "Member")
 
-  @existing_user = IdentityService.session.ensure_user_exists(existing_user)
+  @existing_user = IdentityService.session.ensure_user_exists_is_admin_or_not(existing_user, is_admin)
   me = @current_user
 
   steps %{
@@ -421,8 +426,14 @@ Then /^I cannot update a user with attributes (.+), (.+), (.+), (.+), and (.+)$/
     * Fill in the Username field with #{ new_attrs.name }
     * Fill in the Email field with #{ new_attrs.email }
     * Fill in the Password field with #{ new_attrs.password }
-    * Choose the #{ primary_project_choice } item in the Primary Project dropdown
-    * Choose the item with text #{ role } in the Role dropdown
+  }
+  
+  if !(is_admin.downcase == 'yes')
+    step "Choose the #{ primary_project_choice } item in the Primary Project dropdown"
+    step "Choose the item with text #{ role } in the Role dropdown"
+  end
+  
+  steps %{
     * Click the Update User button
     * The Edit User form should be visible
     * An Edit User Form Error Message element should be visible

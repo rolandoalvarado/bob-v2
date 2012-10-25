@@ -976,6 +976,7 @@ Step /^A user with a role of (.+) in a project (.+) will not be created$/ do |ro
   end
 end
 
+
 Step /^The instance ((?:(?!named )).+) should not have flavor (.+)$/ do |instance_id, flavor_name|
   sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
     flavor_cell = @current_page.find("#instance-item-#{ instance_id } .flavor")
