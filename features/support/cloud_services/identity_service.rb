@@ -185,6 +185,28 @@ class IdentityService < BaseCloudService
     end  
     user
   end
+  
+  def ensure_user_exists_is_admin_or_not(attributes, is_admin)
+    user = find_user_by_name(attributes[:name])
+    
+    unless user
+      user = create_user(attributes) 
+      user.password = attributes[:password]
+      
+      if (is_admin.downcase == 'yes')
+        admin_tenant = tenants.find_by_name('admin')
+        admin_role = roles.find_by_name(RoleNameDictionary.db_name('Project Manager'))
+        admin_tenant.grant_user_role(user.id, admin_role.id)
+      end
+      
+    else
+      if attributes[:password] != nil && user.password != attributes[:password]
+        user.password = attributes[:password]
+        user.update_password(attributes[:password])
+      end
+    end  
+    user
+  end
 
   def ensure_user_exists_in_project(attributes, project, admin_role = false)
     attributes[:project_id] = project.is_a?(Fixnum) ? project : project.id
@@ -229,7 +251,7 @@ class IdentityService < BaseCloudService
   end
 
   def get_generic_user(role)
-    if role.eql?('system_admin')
+    if ( role.eql?('system_admin') || role.eql?('admin') )
       user = ensure_user_exists({ :name => ConfigFile.admin_username })
       user.password = ConfigFile.admin_api_key
     else
