@@ -66,8 +66,7 @@ TestCase /^A user with a role of (.+) in a project can create an image from an i
     * Click the projects link
     * Click the #{ test_project_name } project
 
-    * Click the instance menu button for instance #{ @instance.id }
-    * Click the snapshot instance button for instance #{ @instance.id }
+    * Click the snapshot action in the context menu for the instance named #{ test_instance_name }
     * Current page should have the new instance snapshot form
     * Fill in the snapshot name field with #{ test_instance_snapshot_name }
     * Click the create instance snapshot button
@@ -82,6 +81,7 @@ TestCase /^A user with a role of (.+) in a project cannot create an image from a
 
   Preconditions %{
     * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that no projects exist in the system
     * Ensure that a project named #{ test_project_name } exists
   }
 
@@ -339,7 +339,7 @@ TestCase /^An authorized user can import an image with a format of AKI$/ do
     * Ensure that a project named #{ test_project_name } exists
     * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
     * Ensure that the user #{ bob_username } has a role of Project Manager in the project #{ test_project_name }
-    * Ensure that an image named #{ test_image_name } does not exist
+    * Ensure that the image named #{ test_image_name } does not exist
   }
 
   Cleanup %{

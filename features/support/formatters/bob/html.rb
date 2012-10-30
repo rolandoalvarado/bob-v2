@@ -345,7 +345,8 @@ class Html
     @results.keys.each do |category_name|
       @results[category_name].each do |feature|
         @feature          = feature
-        underscored_name  = feature[:name].split.join('_').downcase.gsub(/[^A-Za-z]/, '_')
+        underscored_name  = feature[:name].split(/[^A-Za-z]+/).join('_').to_s.downcase
+        next if underscored_name.empty?
 
         template = File.open(File.expand_path("../templates/feature.html.erb", __FILE__), 'r')
         erb      = ERB.new(template.read)

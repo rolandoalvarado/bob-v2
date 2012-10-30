@@ -36,7 +36,8 @@ class IdentityService < BaseCloudService
 
   #=================================================
 
-  def create_tenant(attributes)
+  def create_tenant(attributes = {})
+    attributes = CloudObjectBuilder.attributes_for(:tenant, attributes)
     tenant = tenants.new(attributes)
     tenant.save
     tenant
@@ -74,6 +75,33 @@ class IdentityService < BaseCloudService
     # of all foreign key constraints. So we have to keep trying
     sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_long).tries do
       user.destroy
+    end
+  end
+
+  def ensure_project_count(desired_count)
+    @tenants.reload
+    return if @tenants.count == desired_count
+    delta_count = (@tenants.count - desired_count).abs
+
+    if @tenants.count > desired_count
+      delta_count.times do
+        tenant = @tenants.pop
+        tenant.destroy
+        sleep(ConfigFile.wait_short)
+      end
+    elsif @tenants.count < desired_count
+      delta_count.times do
+        create_tenant
+        sleep(ConfigFile.wait_short)
+      end
+    end
+
+    sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+      @tenants.reload
+      if @tenants.count != desired_count
+        raise "Could not ensure #{ desired_count } projects exist in the system! " +
+              "Current count is #{ @tenants.count }."
+      end
     end
   end
 

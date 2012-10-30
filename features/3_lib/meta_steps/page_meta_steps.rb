@@ -871,8 +871,9 @@ Step /^The snapshot named (.+) should be (?:in|of) (.+) status$/ do |snapshot_na
     actual_status = status_cell.text.strip
 
     unless actual_status == expected_status.upcase.gsub(' ', '_')
+      sleep(ConfigFile.wait_short) if actual_status =~ /QUEUED|SAVING/
       raise "Snapshot #{ snapshot_name } is not or took too long to become #{ expected_status }. " +
-      "Current status is #{ actual_status }."
+            "Current status is #{ actual_status }."
     end
   end
 end
@@ -895,15 +896,15 @@ Step /^Click the (.+) button for snapshot named (.+)$/ do |button_name, snapshot
   @current_page.send("#{ button_name }_button", name: snapshot_name).click
 end
 
-Step /^The snapshot named #{ test_instance_snapshot_name } should be in (.+) format$/ do |format|
+Step /^The snapshot named (.+) should be in (.+) format$/ do |snapshot_name, expected_format|
 
   sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_long).tries do
-    format_cell = @current_page.snapshot_format_cell(name: snapshot)
-    format = format_cell.text.to_s.strip
+    format_cell = @current_page.snapshot_format_cell(name: snapshot_name)
+    actual_format = format_cell.text.to_s.upcase.strip
 
-    unless format.include?('Bare')
-      raise "Snapshot Format #{ format } should be BARE. " +
-            "Current Format is #{ format }."
+    unless actual_format.include?(expected_format.upcase.tr(' ', '_'))
+      raise "Expected snapshot #{ snapshot_name } to be in #{ expected_format }. " +
+            "Current format is #{ actual_format }."
     end
   end
 
