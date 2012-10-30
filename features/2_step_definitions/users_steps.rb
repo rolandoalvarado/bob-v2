@@ -14,7 +14,7 @@ Given /^a (system admin|admin|project manager|member) is in the system$/i do |ro
   }
 end
 
-Given /^I am an? (System Admin|User)$/ do |role_name|
+Given /^I am an? (System Admin|Member)$/ do |role_name|
   steps %{
     * Ensure that I have a role of #{ role_name } in the system
   }
@@ -258,8 +258,8 @@ Then /^I [Cc]an [Dd]elete (?:that|the) user (.+)$/ do |username|
     * Click the logout button if currently logged in
 
     * Visit the login page
-    * Fill in the username field with #{ @current_user.name }
-    * Fill in the password field with #{ @current_user.password }
+    * Fill in the username field with #{ bob_username }
+    * Fill in the password field with #{ bob_password }
     * Click the login button
 
     * Click the users link
@@ -275,8 +275,8 @@ Then /^I [Cc]annot [Dd]elete (?:that|the) user (.+)$/ do |user_name|
     * Click the logout button if currently logged in
 
     * Visit the login page
-    * Fill in the username field with #{ @current_user.name }
-    * Fill in the password field with #{ @current_user.password }
+    * Fill in the username field with #{ bob_username }
+    * Fill in the password field with #{ bob_password }
     * Click the login button
     * The Users link should not be visible
   }
