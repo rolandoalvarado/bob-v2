@@ -443,15 +443,13 @@ end
 
 TestCase /^A user with a role of (.+) in the system can change user permissions$/i do |role_name|
 
-  other_username     = Unique.username('other')
-
   Preconditions %{
     * Ensure that a project named #{ test_project_name } exists
     * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
     * Ensure that the user #{ bob_username } has a role of #{ role_name } in the project #{ test_project_name }
 
     * Ensure that another user with username #{ other_username } and password #{ bob_password } exists
-    * Ensure that the user #{ other_username } has a role of Project Manager in the project #{ test_project_name }
+    * Ensure that the user #{ other_username } has a role of Member in the project #{ test_project_name }
   }
 
   Cleanup %{
@@ -472,7 +470,7 @@ TestCase /^A user with a role of (.+) in the system can change user permissions$
     * Click the Edit button for the user named #{ other_username }
     * Current page should have the Edit User form
 
-    * Choose the item with text Member in the Role dropdown
+    * Choose the item with text Project Manager in the Role dropdown
     * Click the Update User button
   }
 end

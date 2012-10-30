@@ -14,6 +14,10 @@ def member_username
   Unique.username('member')
 end
 
+def other_username
+  Unique.username('other')
+end
+
 def admin_role?(role)
   !!role.match(/project[ _]manager|system[ _]admin/i)
 end
