@@ -6,18 +6,21 @@ Feature: Delete a user
     * A user named astark exists in the system
 
 
-  @permissions
+  @permissions @jira-MCF-43-CUP
   Scenario Outline: Check User Permissions
     Given I have a role of <Role> in the system
      Then I <Can or Cannot Delete> the user astark
 
+
+      @jira-MCF-43-AR
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Delete |
         | System Admin    | Can Delete           |
+        | Admin           | Can Delete           |
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Delete |
-        | User            | Cannot Delete        |
+        | Member          | Cannot Delete        |
 
 
   Scenario: Delete a User

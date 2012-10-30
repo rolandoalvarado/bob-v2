@@ -77,7 +77,7 @@ Then /^Ensure that the user (.+) has a role of (.+) in the system$/i do |user_na
 end
 
 Then /^Ensure that I have a role of (.+) in the system$/i do |role_name|
-  user_attrs = CloudObjectBuilder.attributes_for(:user, name: Unique.username('bob'))
+  user_attrs = CloudObjectBuilder.attributes_for(:user, name: bob_username, password: bob_password )
   identity_service = IdentityService.session
 
   user = identity_service.ensure_user_exists(user_attrs)
@@ -91,7 +91,7 @@ Then /^Ensure that I have a role of (.+) in the system$/i do |role_name|
   identity_service.revoke_all_user_roles(user, admin_project)
 
   # Ensure user has the following role in the system
-  if role_name.downcase == "user"
+  if role_name.downcase == "member"
     role_name = "Member"
   end
 
