@@ -38,6 +38,10 @@ Step /^Ensure that a project named (.+) does not exists$/i do |project_name|
   end
 end
 
+Step /^Ensure that no projects exist in the system$/ do
+  IdentityService.session.ensure_project_count(0)
+end
+
 Step /^Ensure that the project named (.+) has (\d+) instances?$/i do |project_name, instance_count|
   instance_count   = instance_count.to_i
   project          = IdentityService.session.ensure_project_exists(:name => project_name)
