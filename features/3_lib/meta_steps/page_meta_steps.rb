@@ -758,7 +758,7 @@ end
 
 
 Then /^The (.+) user row should be visible$/ do |username|
-  sleeping(1).seconds.between_tries.failing_after(15).tries do
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
     unless @current_page.has_user_row?( name: username )
       raise "The row for user #{ username } should exist, but it doesn't."
     end
