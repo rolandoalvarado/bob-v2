@@ -317,7 +317,6 @@ end
 
 
 Then /^I Can Update a user with attributes (.+), (.+), (.+), (.+), (.+) and (.+)$/ do |username, email, password, primary_project, is_pm_or_not, is_admin|
-  existing_user = CloudObjectBuilder.attributes_for(:user, :name => Unique.username('existing'), :password => '123qwe')
   new_attrs     = CloudObjectBuilder.attributes_for(
                     :user,
                     :name     => ( username.downcase == "(none)" ? username : Unique.username(username) ),
@@ -333,18 +332,22 @@ Then /^I Can Update a user with attributes (.+), (.+), (.+), (.+), (.+) and (.+)
 
   role = (is_pm_or_not == "Yes" ? "Project Manager" : "Member")
 
-  IdentityService.session.ensure_user_does_not_exist(new_attrs)
-  @existing_user = IdentityService.session.ensure_user_exists_is_admin_or_not(existing_user, is_admin)
   me = @current_user
-
+  
+  if (is_admin.downcase == 'yes')
+    role_name = 'Admin'
+  else
+    role_name = (is_pm_or_not == "Yes" ? "Project Manager" : "Member")
+  end
+  
   steps %{
-    * Register the user named #{ existing_user.name } for deletion at exit
+    * Register the user named #{ existing_username } for deletion at exit
     * Register the user named #{ new_attrs.name } for deletion at exit
 
-    * Ensure that a user with username #{ existing_user.name } and password #{ existing_user.password } exists
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that a user with username #{ existing_username } and password #{ bob_password } has a role of #{ role_name }
     * Ensure that a user with username #{ new_attrs.name } does not exist
-    * Ensure that a test project is available for use
-    * Ensure that I have a role of Project Manager in the named project
+    * Ensure that I have a role of Project Manager in the project
 
     * Click the Logout button if currently logged in
     * Visit the Login page
@@ -353,12 +356,12 @@ Then /^I Can Update a user with attributes (.+), (.+), (.+), (.+), (.+) and (.+)
     * Click the Login button
 
     * Click the Users link
-    * Click the Edit button for the user named #{ @existing_user.name }
+    * Click the Edit button for the user named #{ existing_username }
     * Fill in the Username field with #{ new_attrs.name }
     * Fill in the Email field with #{ new_attrs.email }
     * Fill in the Password field with #{ new_attrs.password }
   }  
-    
+  
   if !(is_admin.downcase == 'yes')
     step "Choose the #{ primary_project_choice } item in the Primary Project dropdown"
     step "Choose the item with text #{ role } in the Role dropdown"
