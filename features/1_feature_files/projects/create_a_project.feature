@@ -19,11 +19,16 @@ Feature: Create a Project
     Given I have a role of <Role> in the system
      Then I <Can or Cannot Create> a project
 
+      
+      @jira-MCF-4-AR
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Create |
         | System Admin    | Can Create           |
+        | Admin           | Can Create           |
         | Project Manager | Can Create           |
 
+      
+      @jira-MCF-4-UR
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Create |
         | Member          | Cannot Create        |
@@ -34,6 +39,8 @@ Feature: Create a Project
      When I create a project with attributes <Name>, <Description>
      Then the project will be <Created or Not>
 
+
+      @jira-MCF-4-VA
       Scenarios: Valid Values
         | Name            | Description     | Created or Not |
         | MCF-4-CAP       | Another project | Created        |

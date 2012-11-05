@@ -215,13 +215,13 @@ When /^I create a project$/ do
     * Visit the projects page
 
     * Click the create project button
-    * Fill in the project name field with #{ attrs.name }
-    * Fill in the project description field with #{ attrs.description }
+    * Fill in the project name field with #{ test_project_name }
+    * Fill in the project description field with #{ test_project_desc }
     * Click the save project button
   }
 
   # Register created project for post-test deletion
-  created_project = IdentityService.session.find_project_by_name(attrs.name)
+  created_project = IdentityService.session.find_project_by_name(test_project_name)
   EnvironmentCleaner.register(:project, created_project.id) if created_project
 
   # Make the project name available to subsequent steps
@@ -279,7 +279,7 @@ end
 Then /^I Can Create a project$/ do
   attrs = CloudObjectBuilder.attributes_for(
             :project,
-            :name => Unique.project_name('project')
+            :name => test_project_name
           )
 
   steps %{
@@ -293,12 +293,12 @@ Then /^I Can Create a project$/ do
     * Visit the projects page
 
     * Click the create project button
-    * Fill in the project name field with #{ attrs.name }
-    * Fill in the project description field with #{ attrs.description }
+    * Fill in the project name field with #{ test_project_name }
+    * Fill in the project description field with #{  test_project_desc }
     * Click the save project button
 
     * Visit the projects page
-    * The #{ attrs.name } project should be visible
+    * The #{ test_project_name } project should be visible
   }
 
   # Register created project for post-test deletion
