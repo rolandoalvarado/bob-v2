@@ -131,6 +131,30 @@ class IdentityService < BaseCloudService
 
   end
   
+  def ensure_user_role_is_admin(user, role_name)
+    tenants.reload
+    valid_roles = ['System Admin', 'Admin']
+
+    unless valid_roles.include?(role_name)
+      raise "Unknown role '#{ role_name }'. Valid roles are #{ valid_roles.join(',') }"
+    end
+    
+    if ['System Admin', 'Admin'].include?(role_name)
+      admin_tenant = tenants.find{|t| t.name == 'admin'}
+      revoke_all_user_roles(user, admin_tenant)
+      
+      admin_role   = roles.find_by_name('admin')
+      admin_tenant.grant_user_role(user.id, admin_role.id)
+        
+      pm_role = roles.find_by_name(RoleNameDictionary.db_name('Project Manager'))
+      tenants.each do |tenant|
+        tenant.grant_user_role(user.id, pm_role.id)
+      end
+    end
+
+    tenants.reload
+  end
+  
   def ensure_tenant_does_not_exist(attributes)
     if tenant = @tenants.find_by_name(attributes[:name])
       ComputeService.session.delete_instances_in_project(tenant)
@@ -223,8 +247,8 @@ class IdentityService < BaseCloudService
       
       if (is_admin.downcase == 'yes')
         admin_tenant = tenants.find_by_name('admin')
-        admin_role = roles.find_by_name(RoleNameDictionary.db_name('Project Manager'))
-        admin_tenant.grant_user_role(user.id, admin_role.id)
+        revoke_all_user_roles(user, admin_tenant)
+        ensure_tenant_role(user, admin_tenant, 'Admin')
       end
       
     else

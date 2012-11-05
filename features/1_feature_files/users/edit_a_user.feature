@@ -1,7 +1,6 @@
 @jira-MCF-44 @users 
 Feature: Edit a User
 
-  
   @permissions @jira-MCF-44-roles
   Scenario Outline: Check User Permissions
     Given a <Role> is in the system
@@ -25,9 +24,9 @@ Feature: Edit a User
      @jira-MCF-44-vua       
      Scenarios: Valid User Attributes
        | Username   | Email                 | Password | Primary Project | Is PM or Not| Is Admin or Not | Can or Cannot Update | Remarks                                           |
-       | astarkPM   | astark@morphlabs.com  | fkd2350a | (Any)           | Yes         | No              | Can Update           |                                                 |
-       | astarkME   | astar2@morphlabs.com  | ++afd]2b | (Any)           | No          | No              | Can Update           |                                                 |
-       | astarkAD   | astarAD@morphlabs.com | ++afd]3b | (Any)           | No          | Yes             | Can Update           |                                                 |
+       | astarkAD   | astark@morphlabs.com  | fkd2350a | (Any)           | No          | Yes             | Can Update           |                                                 |
+       | astarkPM   | astar2@morphlabs.com  | ++afd]2b | (Any)           | Yes         | No              | Can Update           |                                                 |
+       | astarkME   | astarme@morphlabs.com | ++afd]3b | (Any)           | No          | No              | Can Update           |                                                 |
 
      Scenarios: Invalid User Attributes
        | Username | Email                | Password | Primary Project | Is PM or Not | Is Admin or Not    | Can or Cannot Update | Remarks                                           |

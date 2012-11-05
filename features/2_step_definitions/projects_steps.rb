@@ -201,7 +201,7 @@ end
 When /^I create a project$/ do
   attrs = CloudObjectBuilder.attributes_for(
             :project,
-            :name => Unique.project_name('project')
+            :name => test_project_name
           )
 
   steps %{
