@@ -42,7 +42,7 @@ end
 
 Then /^Logging in after anonymously accessing (.+) redirects me back to it$/ do |page_name|
   steps %{
-    * Ensure that a project named bob-authentication exists
+    * Ensure that a project named #{ test_project_auth } exists
     * Ensure that the project named #{ test_project_auth } has a project manager named #{ bob_redirect_username }
     * Register the user named #{ bob_redirect_username } for deletion at exit
 
