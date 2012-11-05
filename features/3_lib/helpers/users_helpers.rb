@@ -10,6 +10,14 @@ def bob_username
   Unique.username('bob')
 end
 
+def bob_logout_username
+  Unique.username('bob-logout')
+end
+
+def bob_redirect_username
+  Unique.username('bob-redirect')
+end
+
 def member_username
   Unique.username('member')
 end
