@@ -11,7 +11,7 @@ TestCase /^A user with a role of (.+) in a project can delete a snapshot$/i do |
     * Ensure that a project named #{ project_name } exists
     * Ensure that the project named #{ project_name } has an instance named #{ instance_name }
     * Ensure that the user #{ username } has a role of #{ role_name } in the project
-    * Ensure that the instance named #{ instance_name } has a snapshot named #{ snapshot_name }$/
+    * Ensure that the instance named #{ instance_name } has a snapshot named #{ snapshot_name }
   }
 
   Cleanup %{
@@ -104,14 +104,14 @@ TestCase /^A user with a role of (.+) in a project cannot create an image from a
 
 end
 
-TestCase /^Image that will be created from the instance will have the visibility of (.+) and should be visible to (.+)$/i do |visibility, visible_to|
+TestCase /^Image that will be created from the instance will have the visibility of (\(Default\)|Private) and should be visible to Project$/i do |visibility|
 
   Preconditions %{
     * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
     * Ensure that a project named #{ test_project_name } exists
     * Ensure that the project named #{ test_project_name } has an instance named #{ test_instance_name }
     * Ensure that the user #{ bob_username } has a role of Project Manager in the project #{ test_project_name }
-    * Ensure that a snapshot named #{ test_instance_snapshot_name } has a visibility of #{ visibility }
+    * Ensure that the instance named #{ test_instance_name } has a snapshot named #{ test_instance_snapshot_name } with visibility #{ visibility } in the project #{ test_project_name }
   }
 
   Cleanup %{
@@ -131,7 +131,39 @@ TestCase /^Image that will be created from the instance will have the visibility
     * Click the #{ test_project_name } project
 
     * Click the images and snapshots tab
-    * The snapshot named #{ test_instance_snapshot_name } should have the visibility of #{ visibility } and visible to #{ visible_to }
+    * The snapshot named #{ test_instance_snapshot_name } should not be public
+  }
+
+end
+
+TestCase /^Image that will be created from the instance will have the visibility of Public and should be visible to Everyone$/i do
+
+  Preconditions %{
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that the project named #{ test_project_name } has an instance named #{ test_instance_name }
+    * Ensure that the user #{ bob_username } has a role of Project Manager in the project #{ test_project_name }
+    * Ensure that the instance named #{ test_instance_name } has a snapshot named #{ test_instance_snapshot_name } with visibility Public in the project #{ test_project_name }
+  }
+
+  Cleanup %{
+    * Register the project named #{ test_project_name } for deletion at exit
+    * Register the user named #{ bob_username } for deletion at exit
+  }
+
+  Script %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ bob_username }
+    * Fill in the password field with #{ bob_password }
+    * Click the login button
+
+    * Click the projects link
+    * Click the #{ test_project_name } project
+
+    * Click the images and snapshots tab
+    * The snapshot named #{ test_instance_snapshot_name } should be public
   }
 
 end

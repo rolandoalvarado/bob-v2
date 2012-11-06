@@ -910,37 +910,24 @@ Step /^The snapshot named (.+) should be in (.+) format$/ do |snapshot_name, exp
 
 end
 
-Step /^The snapshot named (.+) should have the visibility of (\(Default\)|Private|Public) and visible to (.+)$/ do |snapshot, visibility, visible_to|
+Step /^The snapshot named (.+) should not be public$/ do |snapshot|
 
-  if ((visibility == '(Default)' || visibility == 'Private') && visible_to == 'Project')
-    sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_long).tries do
-       not_public_cell = @current_page.snapshot_not_public_cell(name: snapshot)
-       is_public = not_public_cell.text.to_s.strip
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_long).tries do
 
-       if is_public.include?('Yes')
-        raise "Snapshot #{ snapshot } to be not public. " +
-              "Current value of is_public is #{ is_public }."
-       end
+    if @current_page.has_snapshot_public_cell?(name: snapshot)
+      raise "Expected snapshot #{ snapshot } to be not public, but it is."
     end
+
   end
 
-  if (visibility == 'Public' && visible_to == 'Everyone')
+end
 
-    step "Wait #{ConfigFile.wait_instance_snapshot} seconds"
-    step "Click the snapshot menu button for snapshot named #{ snapshot }"
-    step "Click the edit snapshot button for snapshot named #{ snapshot }"
-    step "Current page should have the edit instance snapshot form"
-    step "Check the is public checkbox"
-    step "Click the update instance snapshot button"
+Step /^The snapshot named (.+) should be public$/ do |snapshot|
 
-    sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
-      public_cell = @current_page.snapshot_public_cell(name: snapshot)
-      is_public = public_cell.text.to_s.strip
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
 
-      if is_public.include?('No')
-        raise "Snapshot #{ snapshot } to be public. " +
-              "Current value of is_public is #{ is_public }."
-      end
+    if @current_page.has_snapshot_not_public_cell?(name: snapshot)
+      raise "Expected snapshot #{ snapshot } to be public, but it is not."
     end
 
   end

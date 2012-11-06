@@ -60,7 +60,7 @@ class ImageService < BaseCloudService
   end
 
   def get_instance_snapshots # Get Images with snapshot image_type.
-    images.public.select {|i| i.disk_format !~ /^a[rk]i$/ && i.status == 'active' && i.properties['image_type'] == 'snapshot'}
+    service.images.all.select { |i| i.disk_format !~ /^a[rk]i$/ && i.properties['image_type'] == 'snapshot' }
   end
 
   def delete_instance_snapshots(project) # Delete Instance Snapshots
