@@ -36,7 +36,8 @@ class IdentityService < BaseCloudService
 
   #=================================================
 
-  def create_tenant(attributes)
+  def create_tenant(attributes = {})
+    attributes = CloudObjectBuilder.attributes_for(:tenant, attributes)
     tenant = tenants.new(attributes)
     tenant.save
     tenant
@@ -77,6 +78,33 @@ class IdentityService < BaseCloudService
     end
   end
 
+  def ensure_project_count(desired_count)
+    @tenants.reload
+    return if @tenants.count == desired_count
+    delta_count = (@tenants.count - desired_count).abs
+
+    if @tenants.count > desired_count
+      delta_count.times do
+        tenant = @tenants.pop
+        tenant.destroy
+        sleep(ConfigFile.wait_short)
+      end
+    elsif @tenants.count < desired_count
+      delta_count.times do
+        create_tenant
+        sleep(ConfigFile.wait_short)
+      end
+    end
+
+    sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+      @tenants.reload
+      if @tenants.count != desired_count
+        raise "Could not ensure #{ desired_count } projects exist in the system! " +
+              "Current count is #{ @tenants.count }."
+      end
+    end
+  end
+
   # System Admin    = 'admin' in admin tenant, 'Member' in all tenants
   # Project Manager = 'admin' in admin tenant, 'Member' in the tenant
   # Member          = 'Member' in the tenant
@@ -101,6 +129,30 @@ class IdentityService < BaseCloudService
       end
     end
 
+  end
+  
+  def ensure_user_role_is_admin(user, role_name)
+    tenants.reload
+    valid_roles = ['System Admin', 'Admin']
+
+    unless valid_roles.include?(role_name)
+      raise "Unknown role '#{ role_name }'. Valid roles are #{ valid_roles.join(',') }"
+    end
+    
+    if ['System Admin', 'Admin'].include?(role_name)
+      admin_tenant = tenants.find{|t| t.name == 'admin'}
+      revoke_all_user_roles(user, admin_tenant)
+      
+      admin_role   = roles.find_by_name('admin')
+      admin_tenant.grant_user_role(user.id, admin_role.id)
+        
+      pm_role = roles.find_by_name(RoleNameDictionary.db_name('Project Manager'))
+      tenants.each do |tenant|
+        tenant.grant_user_role(user.id, pm_role.id)
+      end
+    end
+
+    tenants.reload
   end
   
   def ensure_tenant_does_not_exist(attributes)
@@ -195,8 +247,8 @@ class IdentityService < BaseCloudService
       
       if (is_admin.downcase == 'yes')
         admin_tenant = tenants.find_by_name('admin')
-        admin_role = roles.find_by_name(RoleNameDictionary.db_name('Project Manager'))
-        admin_tenant.grant_user_role(user.id, admin_role.id)
+        revoke_all_user_roles(user, admin_tenant)
+        ensure_tenant_role(user, admin_tenant, 'Admin')
       end
       
     else

@@ -38,6 +38,10 @@ Step /^Ensure that a project named (.+) does not exists$/i do |project_name|
   end
 end
 
+Step /^Ensure that no projects exist in the system$/ do
+  IdentityService.session.ensure_project_count(0)
+end
+
 Step /^Ensure that the project named (.+) has (\d+) instances?$/i do |project_name, instance_count|
   instance_count   = instance_count.to_i
   project          = IdentityService.session.ensure_project_exists(:name => project_name)
@@ -50,7 +54,7 @@ end
 
 Then /^Ensure that a test project is available for use$/i do
   identity_service = IdentityService.session
-  project          = identity_service.ensure_project_exists(:name => 'project')
+  project          = identity_service.ensure_project_exists(:name => test_project_name)
 
   EnvironmentCleaner.register(:project, project.id)
 
@@ -134,34 +138,45 @@ Step /^Ensure that a user exists in the project$/ do
 end
 
 Then /^Ensure that I have a role of (.+) in the project$/i do |role_name|
+  project = @named_project || @project
 
-  if @project.nil?
-    raise "No project was defined. You might need to add '* A project exists in the system' " +
-          "in the feature file."
+  if project.nil?
+    raise "No test project is available. You need to call " +
+          "'* Ensure that a test project is available for use' " +
+          "before this step."
   end
-  
-  user_attrs       = CloudObjectBuilder.attributes_for(
-                       :user,
-                       :name => bob_username
-                     )
 
   identity_service = IdentityService.session
-  user             = identity_service.ensure_user_exists(user_attrs)
-  EnvironmentCleaner.register(:user, user.id)
+  user             = @current_user
 
-  identity_service.revoke_all_user_roles(user, @project)
+  identity_service.revoke_all_user_roles(user, project)
+  admin_project = identity_service.tenants.find { |t| t.name == 'admin' }
+  identity_service.revoke_all_user_roles(user, admin_project)
 
   # Ensure user has the following role in the project
   unless role_name.downcase == "(none)"
+    # 2012-09-12
+    # mcloud implement project role like this
+    # If you are member. only have a member role of @named_project.
+    # If you are project manager of named_project, you have a member role of @named_project
+    # and have admin role of admin project.  
+    role = identity_service.roles.find_by_name(RoleNameDictionary.db_name('Member'))
+
+    if role.nil?
+      raise "Role #{ role_name } couldn't be found. Make sure it's defined in " +
+        "features/support/role_name_dictionary.rb and that it exists in " +
+        "#{ ConfigFile.web_client_url }."
+    end
+
     begin
-      identity_service.ensure_tenant_role(user, @project, role_name)
+      if RoleNameDictionary.db_name(role_name) == "admin"  then
+        identity_service.ensure_tenant_role(user, admin_project, 'System Admin')
+      end
+      role.add_to_user(user, project)
     rescue Fog::Identity::OpenStack::NotFound => e
-      raise "Couldn't add #{ user.name } to #{ @project.name } as #{ role_name }"
+      raise "Couldn't add #{ user.name } to #{ @project.name } as #{ role.name }"
     end
   end
-
-  # Make variable(s) available for use in succeeding steps
-  @current_user = user
 end
 
 Then /^Ensure that the project has no security groups$/i do

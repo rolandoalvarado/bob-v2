@@ -9,3 +9,7 @@ end
 def default_project_name
   Unique.project_name('project')
 end
+
+def test_project_auth
+  Unique.project_name('bob-authentication')
+end
