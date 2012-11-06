@@ -93,10 +93,15 @@ Then /^Ensure that I have a role of (.+) in the system$/i do |role_name|
   # Ensure user has the following role in the system
   if role_name.downcase == "member"
     role_name = "Member"
+    step "A project exists in the system"
   end
 
   begin
-    identity_service.ensure_tenant_role(user, admin_project, role_name)
+    if role_name.downcase == "member"
+      identity_service.ensure_tenant_role(user,  @project, role_name)
+    else
+      identity_service.ensure_tenant_role(user, admin_project, role_name)
+    end
   rescue Fog::Identity::OpenStack::NotFound => e
     raise "Couldn't add #{ user.name } to #{ admin_project.name } as #{ role_name }"
   end
