@@ -56,7 +56,7 @@ class ImageService < BaseCloudService
   end
 
   def get_bootable_images
-    images.public.select {|i| i.disk_format !~ /^a[rk]i$/ && i.status == 'active'}
+    images.public.select {|i| i.disk_format !~ /^a[rk]i$/ && i.status == 'active' && i.properties.empty?}
   end
 
   def get_instance_snapshots # Get Images with snapshot image_type.
