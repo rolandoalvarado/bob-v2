@@ -141,9 +141,10 @@ class ComputeService < BaseCloudService
 
     unless instance
       begin
+        test_image = @images.find{|image| image.name == ConfigFile.test_image} if ConfigFile.test_image
         response = service.create_server(
           attributes[:name],
-          attributes[:image] || @images.sample.id,
+          attributes[:image] || (test_image.id if test_image) || @images.sample.id,
           attributes[:flavor],
           {
             'adminPass'       => attributes[:password],

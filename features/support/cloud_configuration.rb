@@ -49,6 +49,7 @@ module CloudConfiguration
   SERVER_USERNAME      = :server_username
   CHROME               = :chrome
   INSTANCE_SNAPSHOT    = :instance_snapshot
+  TEST_IMAGE           = :test_image
 
   class ConfigFile
     include Singleton
@@ -396,6 +397,10 @@ module CloudConfiguration
 
     def self.chrome
       self.instance[CHROME] == true
+    end
+
+    def self.test_image
+      self.instance[TEST_IMAGE]
     end
 
     def initialize
