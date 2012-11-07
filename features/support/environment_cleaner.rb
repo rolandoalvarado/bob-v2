@@ -88,7 +88,7 @@ class EnvironmentCleaner
     begin
       Net::SSH.start(host, username, port: 2222, timeout: 30) do |ssh|
         table = ssh.exec!(%{ nova #{ nova_options } list --all | grep -G "^|" | tail -n +2 })
-        table.tr('|', ' ').each_line do |row|
+        table.to_s.tr('|', ' ').each_line do |row|
           id, name, status = row.split
           if tenant_info = ssh.exec!(%{ sudo nova #{ nova_options } show #{ id } | grep -G "^| tenant_id" })
             tenant_id = tenant_info.tr('|', ' ').split.last

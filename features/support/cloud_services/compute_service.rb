@@ -15,69 +15,84 @@ class ComputeService < BaseCloudService
     @security_groups = service.security_groups
     @key_pairs = service.key_pairs
     @snapshots = ImageService.session.get_instance_snapshots
-    
+
     @private_keys = {}
   end
 
-  def ensure_instance_has_a_snapshot(project, instance, snapshot)
-    service.set_tenant project
-    sleep(10)
-    
-    ensure_snapshot_does_not_exists(project, snapshot)
-    
-    if instance.state == 'ACTIVE'      
-      service.create_image(instance.id, snapshot)  
-    elsif instance.state == 'ERROR'
-       raise "Instance in ERROR state. Please check." 
+  def ensure_instance_has_a_snapshot(project, instance, attributes)
+    set_tenant project
+    ensure_snapshot_does_not_exists(project, attributes[:name])
+
+    if instance.state == 'ACTIVE'
+      begin
+        response = service.create_image(instance.id, attributes[:name])
+        image_id = response.body['image']['id']
+      rescue Exception => e
+        raise "There was an error creating snapshot #{ attributes[:name] }. " +
+              "The error was: #{ e.inspect }"
+      end
+
+      visibility = (attributes[:visibility] == 'public')
+      if visibility
+        image_service = ImageService.session
+        image_service.set_credentials(attributes[:credentials][:username], attributes[:credentials][:password])
+
+        snapshot = image_service.service.images.all.find { |i| i.id == image_id }
+        raise "Snapshot #{ attributes[:name] } couldn't be found!" unless snapshot
+        snapshot.is_public = visibility
+        snapshot.save
+
+        image_service.reset_credentials
+      end
+    else
+      raise "Could not create snapshot for instance in #{ instance.state } state. Please check."
     end
-  rescue
-    raise "An error occured in your instance #{instance.state}!"  
   end
 
   def ensure_instance_does_not_have_a_snapshot(project, instance, snapshot)
     service.set_tenant project
     service.delete_image(snapshot.id)
   end
-  
+
   def ensure_snapshot_does_not_exists(project, snapshot)
     service.set_tenant project
     snapshot = find_snapshot_by_name(project, snapshot)
-    
+
     if snapshot
       begin
-          delete_snapshot_in_project(project, snapshot['id'])
+        delete_snapshot_in_project(project, snapshot['id'])
       rescue => e
         raise "Couldn't delete snapshot #{ snapshot['name'] } in #{ project.name }. " +
               "The error returned was: #{ e.inspect }."
       end
     end
   end
-  
+
   def find_snapshot_by_name(project, name)
     service.set_tenant project
     return service.list_images.body['images'].find { |i| i['name'] == name }
   end
-  
+
   def ensure_public_snapshot(project, instance, snapshot, visibility)
     service.set_tenant project
     sleep(2)
-    
+
     ensure_snapshot_does_not_exists(project, snapshot)
-    
-    if instance.state == 'ACTIVE'      
-      service.create_image(instance.id, snapshot)  
+
+    if instance.state == 'ACTIVE'
+      service.create_image(instance.id, snapshot)
     elsif instance.state == 'ERROR'
-       raise "Instance in ERROR state. Please check." 
+       raise "Instance in ERROR state. Please check."
     end
   rescue
-    raise "An error occured in your instance #{instance.state}!"  
+    raise "An error occured in your instance #{instance.state}!"
   end
-  
+
   def delete_snapshot_in_project(project, snapshot)
     service.set_tenant project
     service.delete_image(snapshot)
   end
-  
+
   def create_volume_in_project(project, attributes)
     attrs = CloudObjectBuilder.attributes_for(:volume, attributes)
     set_tenant project
@@ -240,7 +255,6 @@ class ComputeService < BaseCloudService
     deleted_instances = []
     set_tenant project
     project_instances = instances.find_all{ |i| i.tenant_id == project.id }
-    attached_volumes  = service.volumes.select{ |v| !v.attachments.empty? && v.attachments.none?(&:empty?) }
 
     # There seems to be a bug in OpenStack. Sometimes this fails,
     # sometimes this works just fine.
@@ -351,7 +365,7 @@ class ComputeService < BaseCloudService
 
     response = service.create_key_pair(key_name)
     @private_keys[key_name] = response.body['keypair']['private_key']
-    return keypairs.reload.find { |keypair| keypair.name == key_name }
+    return keypairs.reload.find { |kp| kp.name == key_name }
   rescue => e
     raise "Couldn't create keypair '#{ key_name }'! The error returned " +
           "was: #{ e.inspect }"

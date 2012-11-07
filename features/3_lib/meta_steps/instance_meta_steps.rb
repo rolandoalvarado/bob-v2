@@ -14,7 +14,7 @@ Step /^Ensure that the project named (.+) has an instance named (.+)$/ do |proje
 
   instance = ComputeService.session.create_instance_in_project(project, name: instance_name)
   raise "Instance #{ instance_name } couldn't be found!" unless instance
-  
+
   @instance = instance
 end
 
@@ -89,8 +89,19 @@ Step /^Ensure that an instance has a snapshot named (.+)$/ do |snapshot|
   @snapshot = compute_service.ensure_instance_has_a_snapshot(@project, @instance, snapshot)
 end
 
-Step /^Ensure that a snapshot named (.+) has a visibility of (.+)$/ do |snapshot, visibility|
-  compute_service = ComputeService.session
-  @snapshot = compute_service.ensure_instance_has_a_snapshot(@project, @instance, snapshot)
-end
+Step /^Ensure that the instance named (.+) has a snapshot named (.+) with visibility (.+) in the project (.+)$/ do |instance_name, snapshot_name, visibility, project_name|
+  project = IdentityService.session.find_project_by_name(project_name)
+  raise "#{ project_name } couldn't be found!" unless project
 
+  compute_service = ComputeService.session
+  compute_service.set_tenant project
+
+  instance = compute_service.find_instance_by_name(project, instance_name)
+  raise "Instance #{ instance_name } couldn't be found!" unless instance
+
+  attributes = { name: snapshot_name,
+                 visibility: visibility.downcase,
+                 credentials: { username: bob_username,
+                                password: bob_password } }
+  compute_service.ensure_instance_has_a_snapshot(project, instance, attributes)
+end
