@@ -110,6 +110,7 @@ TestCase /^Image that will be created from the instance will have the visibility
     * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
     * Ensure that a project named #{ test_project_name } exists
     * Ensure that the project named #{ test_project_name } has an instance named #{ test_instance_name }
+    * Ensure that the snapshot named #{ test_instance_snapshot_name } does not exists
     * Ensure that the user #{ bob_username } has a role of Project Manager in the project #{ test_project_name }
     * Ensure that the instance named #{ test_instance_name } has a snapshot named #{ test_instance_snapshot_name } with visibility #{ visibility } in the project #{ test_project_name }
   }
@@ -142,6 +143,7 @@ TestCase /^Image that will be created from the instance will have the visibility
     * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
     * Ensure that a project named #{ test_project_name } exists
     * Ensure that the project named #{ test_project_name } has an instance named #{ test_instance_name }
+    * Ensure that the snapshot named #{ test_instance_snapshot_name } does not exists
     * Ensure that the user #{ bob_username } has a role of Project Manager in the project #{ test_project_name }
     * Ensure that the instance named #{ test_instance_name } has a snapshot named #{ test_instance_snapshot_name } with visibility Public in the project #{ test_project_name }
   }
@@ -174,6 +176,7 @@ TestCase /^Image that will be created will be written in (.+) format$/i do |form
     * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
     * Ensure that a project named #{ test_project_name } exists
     * Ensure that the project named #{ test_project_name } has an instance named #{ test_instance_name }
+    * Ensure that the snapshot named #{ test_instance_snapshot_name } does not exists
     * Ensure that the user #{ bob_username } has a role of Project Manager in the project #{ test_project_name }
     * Ensure that an instance has a snapshot named #{ test_instance_snapshot_name }
   }

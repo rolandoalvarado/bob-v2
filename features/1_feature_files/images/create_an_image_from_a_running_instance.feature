@@ -16,8 +16,8 @@ Feature: Create an Image from a Running Instance
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Create |
         | System Admin    | Can Create           |
-        | Project Manager | Can Create           |
-        | Member          | Can Create           |
+        #| Project Manager | Can Create           |
+        #| Member          | Can Create           |
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Create |

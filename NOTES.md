@@ -114,9 +114,7 @@ More info about the Nokogiri gem and its methods at [http://nokogiri.org/](http:
     - root@cn43.la-1-9:~# list=`virsh list --all|grep 'shut off' | awk '{print $2}'`
 
   B. Update state to `undefine`.
-    - root@cn43.la-1-9:~# for i in $list; do 
-                          > virsh undefine $i;
-                          > done
+    - root@cn43.la-1-9:~# for i in $list; do  virsh undefine $i; done
                           
   C. Check if `shut off` instances are gone.
     - root@cn43.la-1-9:~# virsh list --all                        
@@ -137,6 +135,13 @@ More info about the Nokogiri gem and its methods at [http://nokogiri.org/](http:
       RESULT: UPDATE XX
       
     - nova=> \q or < Ctrl + D >
+    
+# How to clean snapshots using nova command.
+1. Store snaphots with specified `name` in a list
+    - root@mc.la-1-9:~# list=`nova image-list | grep 'test-snapshot R' | awk '{print $2}'`
+  
+2. Delete image using image_id
+    - root@mc.la-1-9:~# for i in $list; do nova image-delete $i; done
     
 ## -----------------------------------------------------------------------------      
 ## Resetting instances when encountering failed to start instance
