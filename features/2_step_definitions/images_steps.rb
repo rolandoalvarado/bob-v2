@@ -81,7 +81,6 @@ TestCase /^A user with a role of (.+) in a project cannot create an image from a
 
   Preconditions %{
     * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
-    * Ensure that no projects exist in the system
     * Ensure that a project named #{ test_project_name } exists
   }
 

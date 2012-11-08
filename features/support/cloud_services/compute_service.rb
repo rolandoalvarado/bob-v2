@@ -73,20 +73,17 @@ class ComputeService < BaseCloudService
     return service.list_images.body['images'].find { |i| i['name'] == name }
   end
   
-  def get_instance_snapshots(project)
+  def get_nova_images(project)
     service.set_tenant project
-    #return service.list_images.body['images'].select { |i| i['metadata']['image_type'] == 'snapshot' }
-    return service.list_images.body['images']
+    return service.list_images.body['images'].select { |i| ((i['name'].to_s) != '64Bit Ubuntu 12.04') }
   end
   
   def delete_instance_snapshots(project) # Delete Instance Snapshots
     deleted_snapshots = []
 
-    get_instance_snapshots(project).each do |snapshot|
-      if !((snapshot['name'].to_s) == '64Bit Ubuntu 12.04')
-        deleted_snapshots << { name: snapshot['name'], id: snapshot['id'] }
-        #ComputeService.session.delete_snapshot_in_project(project, snapshot['id'])
-      end
+    get_nova_images(project).each do |snapshot|
+      deleted_snapshots << { name: snapshot['name'], id: snapshot['id'] }
+      delete_snapshot_in_project(project, snapshot['id'])
     end
 
     deleted_snapshots

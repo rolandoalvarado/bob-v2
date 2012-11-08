@@ -1,4 +1,4 @@
-@jira-MCF-10 @format-v2 @images
+@jira-MCF-10 @format-v2 @images @wip
 Feature: Create an Image from a Running Instance
   As an authorized user, I want to create an image from a runnning instance, so that
   I can easily create one or more exact copies.
@@ -16,9 +16,10 @@ Feature: Create an Image from a Running Instance
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Create |
         | System Admin    | Can Create           |
-        #| Project Manager | Can Create           |
-        #| Member          | Can Create           |
+        | Project Manager | Can Create           |
+        | Member          | Can Create           |
 
+      @jira-MCF-10-UR
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Create |
         | (None)          | Cannot Create        |
