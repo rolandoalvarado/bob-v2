@@ -164,6 +164,7 @@ class EnvironmentCleaner
 
       success = false
       retried = false
+      error = ''
       begin
         @compute_service.set_tenant project
         @volume_service.set_tenant project
@@ -240,14 +241,15 @@ class EnvironmentCleaner
         unless retried
           retried = true
           sleep(ConfigFile.wait_short)
-          puts "Restarting deleting test projects and their resources..."
+          puts "Trying to delete again test project #{ project.name } and its resources..."
           retry
         end
+        error = e.message
       ensure
         unless success
           failed_at = Time.now
           project.update(name: "failed delete #{ failed_at.strftime('%Y%m%d%H%M%S') }",
-                         description: "Failed to delete #{ project.name } on #{ failed_at }. #{ project.description }") rescue nil
+                         description: "Delete #{ project.name } failed #{ failed_at }. #{ error }") rescue nil
         end
       end
     end
@@ -281,7 +283,7 @@ class EnvironmentCleaner
         unless retried
           retried = true
           sleep(ConfigFile.wait_short)
-          puts "Restarting deleting test users and their memberships..."
+          puts "Trying to delete again test user #{ user.name } and their memberships..."
           retry
         end
       end

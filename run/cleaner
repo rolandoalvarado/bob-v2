@@ -26,6 +26,8 @@ exit 0 if STDIN.gets.chomp != 'Yes'
 
 require 'bundler/setup'
 require 'fog'
+require 'uri'
+require 'net/ssh/gateway'
 
 ['environment_cleaner',
  'cloud_configuration',
@@ -33,13 +35,38 @@ require 'fog'
  'cloud_services/compute_service',
  'cloud_services/identity_service',
  'cloud_services/image_service',
- 'cloud_services/volume_service'
+ 'cloud_services/volume_service',
+ 'tunnel_patch'
 ].each do |file|
   require_relative "./../features/support/#{ file }"
 end
 
-identity_service = IdentityService.session
+@host = URI.parse(ConfigFile.web_client_url).host
+def create_tunnel
+  username = ConfigFile.server_username || `whoami`.chomp
+  abort 'ERROR: Username must be specified!' if username.to_s.empty?
 
+  gateway = Net::SSH::Gateway.new(@host, username)
+  gateway.open(@host, 35357, 35357)
+  gateway.open(@host, 8776, 8776)
+  gateway.open(@host, 9292, 9292)
+  gateway.open(@host, 8774, 8774)
+  gateway.open(@host, 8773, 8773)
+  gateway.open(@host, 5000, 5000)
+  gateway
+end
+
+if ConfigFile.tunnel
+  begin
+    print "Connecting to #{@host} via SSH tunnel... "
+    @tunnel = create_tunnel
+    puts 'Connected.'
+  rescue => e
+    abort "ERROR: #{e.inspect}"
+  end
+end
+
+identity_service = IdentityService.session
 
 # ==============================
 #  Register resources to delete
@@ -50,6 +77,7 @@ exempted_users    = %w{ admin demo nova glance }
 
 puts 'Projects to delete:'
 identity_service.tenants.each do |project|
+  next unless project.name.start_with? 'failed'
   unless exempted_projects.include? project.name
     puts "  #{project.name}"
     EnvironmentCleaner.register(:project, project.id)
