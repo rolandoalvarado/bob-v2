@@ -1,0 +1,106 @@
+#!/usr/bin/env ruby
+description="Detect OpenStack Resource Leaks"
+
+if ARGV.first == "describe" then
+  printf "  %-12s - #{description}\n",__FILE__.gsub(/\w+\//,"")
+  exit 0
+end
+
+# =============================================
+#  Setup required gems, classes, and variable
+# =============================================
+
+require 'bundler/setup'
+require 'fog'
+require 'uri'
+require 'net/ssh/gateway'
+
+['cloud_configuration',
+ 'fog_monkey_patch',
+ 'cloud_services/compute_service',
+ 'cloud_services/identity_service',
+ 'cloud_services/image_service',
+ 'cloud_services/volume_service',
+ 'tunnel_patch'
+].each do |file|
+  require_relative "./../features/support/#{ file }"
+end
+
+@host = URI.parse(ConfigFile.web_client_url).host
+def create_tunnel
+  username = ConfigFile.server_username || `whoami`.chomp
+  abort 'ERROR: Username must be specified!' if username.to_s.empty?
+
+  gateway = Net::SSH::Gateway.new(@host, username)
+  gateway.open(@host, 35357, 35357)
+  gateway.open(@host, 8776, 8776)
+  gateway.open(@host, 9292, 9292)
+  gateway.open(@host, 8774, 8774)
+  gateway.open(@host, 8773, 8773)
+  gateway.open(@host, 5000, 5000)
+  gateway
+end
+
+if ConfigFile.tunnel
+  begin
+    print "Connecting to #{@host} via SSH tunnel... "
+    @tunnel = create_tunnel
+    puts 'Connected.'
+  rescue => e
+    abort "ERROR: #{e.inspect}"
+  end
+end
+
+# ==========================
+#  Collect Host Summary
+# ==========================
+
+compute_session = ComputeService.session
+hosts_names = compute_session.service.list_hosts.body['hosts'].map{|h|h['host_name']}.uniq
+
+# For now we are tracking VCPUs only
+host_summary = {
+  vcpu: 0
+}
+
+hosts_names.each do |host|
+  host_details = compute_session.service.get_host_details(host).body['host']
+  summary = host_details.find{|r|r['resource']['project'] == '(used_max)'}['resource']
+  host_summary[:vcpu] += summary['cpu'].to_i
+end
+
+# =========================================
+#  Manual Resource Summary Computation
+# =========================================
+
+computed_summary = {
+  vcpu: 0
+}
+
+servers = compute_session.service.request({method: 'GET', path: 'servers/detail.json', query: {'all_tenants' => 'True'}}).body['servers']
+flavors = Hash[compute_session.service.list_flavors_detail.body['flavors'].map{|f|[f['id'], f]}]
+
+servers.each do |server|
+  server_flavor = flavors[server['flavor']['id']]
+  computed_summary[:vcpu] += server_flavor['vcpus'].to_i
+end
+
+puts 'Host Summary:'
+puts "VCPUs                  #{host_summary[:vcpu]}"
+
+puts # Create Space
+
+puts 'Computed Summary:'
+puts "VCPUs                  #{computed_summary[:vcpu]}"
+
+puts # Create Space
+
+# =========================================
+#  Compare Summary
+# =========================================
+
+def compare_value(resource_type, host_value, computed_value)
+  abort("Memory Leak Detected in #{resource_type} resource") if host_value != computed_value
+end
+
+compare_value('VCPU', host_summary[:vcpu], computed_summary[:vcpu])
