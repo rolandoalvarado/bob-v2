@@ -165,8 +165,8 @@ end
 Then /^Click the (.+) action in the context menu for the instance named (.+)$/i do |instance_action, instance_name|
   instance_action = instance_action.split.join('_').downcase
 
-  instance = ComputeService.session.instances.find { |i| i.name == instance_name }
-  raise "Couldn't find instance #{ instance_name }!" unless instance
+  instance = ComputeService.session.find_instance_by_name(@project, instance_name)
+  raise "[Page_Meta_Steps] Couldn't find instance #{ instance_name }!" unless instance
   instance_id = instance.id
 
   sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do

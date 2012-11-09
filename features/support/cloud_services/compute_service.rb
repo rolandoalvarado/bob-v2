@@ -166,7 +166,7 @@ class ComputeService < BaseCloudService
       @security_group_array = [{ :name => @security_groups[0].name }]
     end
 
-    instance = @instances.find do |i|
+    instance = service.servers.find do |i|
       # ensure flavor is also the same (currently only for @resize tests)
       i.name == attributes[:name] and i.flavor['id'] == attributes[:flavor]
     end
@@ -186,7 +186,7 @@ class ComputeService < BaseCloudService
             'user_id'         => service.current_user['id']
           }
         )
-        instance = @instances.reload.get(response.body['server']['id'])
+        instance = service.servers.reload.get(response.body['server']['id'])
       rescue => e
         raise "Couldn't initialize instance in #{ project.name }. " +
               "The error returned was: #{ e.inspect }"
@@ -213,13 +213,13 @@ class ComputeService < BaseCloudService
 
   def create_instances_in_project(project, desired_count, attributes = {})
     service.set_tenant project
-    @instances.reload
+    service.servers.reload
 
     active_instances = []
-    if @instances.count > 0
+    if service.servers.count > 0
       # Delete any error or shutoff instances first
-      error_instances    = @instances.select { |i| i.state =~ /^ERROR|SHUTOFF$/ }
-      inactive_instances = @instances.select { |i| i.state !~ /^ACTIVE|ERROR|SHUTOFF$/ }
+      error_instances    = service.servers.select { |i| i.state =~ /^ERROR|SHUTOFF$/ }
+      inactive_instances = service.servers.select { |i| i.state !~ /^ACTIVE|ERROR|SHUTOFF$/ }
 
       error_instances.each do |instance|
         instance.destroy
@@ -230,7 +230,7 @@ class ComputeService < BaseCloudService
         activate_instance(instance)
       end
 
-      active_instances = @instances.reload.select{ |i| i.state == 'ACTIVE' }
+      active_instances = service.servers.reload.select{ |i| i.state == 'ACTIVE' }
     end
 
     if active_instances.count < desired_count
@@ -238,7 +238,7 @@ class ComputeService < BaseCloudService
         create_instance_in_project(project, attributes)
       end
 
-      active_instances = @instances.reload.select{ |i| i.state == 'ACTIVE' }
+      active_instances = service.servers.reload.select{ |i| i.state == 'ACTIVE' }
     end
 
     active_instances
@@ -635,7 +635,7 @@ class ComputeService < BaseCloudService
 
   def find_instance_by_name(project, name)
     set_tenant project, false
-    @instances.reload.find_by_name(name)
+    service.servers.reload.find_by_name(name)
   end
 
   def find_security_group_by_name(project, name)
@@ -645,7 +645,7 @@ class ComputeService < BaseCloudService
 
   def get_project_instances(project)
     set_tenant project, false
-    @instances.reload
+    service.servers.reload
   end
 
   def set_tenant(project, reload = true)
@@ -655,7 +655,7 @@ class ComputeService < BaseCloudService
     end
     if reload
       @addresses.reload
-      @instances.reload
+      service.servers.reload
       @volumes.reload
     end
   end
@@ -665,7 +665,7 @@ class ComputeService < BaseCloudService
     service.set_tenant(project)
 
     @addresses.reload
-    @instances.reload
+    service.servers.reload
     @volumes.reload
   end
 
