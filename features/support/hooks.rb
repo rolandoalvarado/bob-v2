@@ -11,6 +11,13 @@ AfterConfiguration do |config|
   puts "Your Unique.alpha value is #{ Unique.alpha }"
 end
 
+Before do |scenario|
+  # Reset credentials for all services
+  [ComputeService, IdentityService, ImageService, VolumeService].each do |service|
+    service.session.reset_credentials
+  end
+end
+
 After do |scenario|
   page = Capybara.current_session
 
@@ -22,11 +29,6 @@ After do |scenario|
   end
 
   embed(File.join(tmp_screenshots_dir, "scenario.#{__id__}.png"), "image/png", "Screenshot")
-
-  # Reset credentials for all services
-  [ComputeService, IdentityService, ImageService, VolumeService].each do |service|
-    service.session.reset_credentials
-  end
 end
 
 Around do |scenario, block|

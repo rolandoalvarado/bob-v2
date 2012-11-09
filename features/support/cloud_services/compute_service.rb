@@ -8,6 +8,7 @@ class ComputeService < BaseCloudService
 
   def initialize
     initialize_service Compute
+    @current_project = service.tenants.find_by_id(service.current_tenant['id'])
 
     @addresses = service.addresses
     @instances = service.servers
