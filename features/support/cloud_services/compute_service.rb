@@ -22,12 +22,15 @@ class ComputeService < BaseCloudService
 
   def ensure_instance_has_a_snapshot(project, instance, attributes)
     set_tenant project
+    
     ensure_snapshot_does_not_exists(project, attributes[:name])
 
     if instance.state == 'ACTIVE'
       begin
         response = service.create_image(instance.id, attributes[:name])
         image_id = response.body['image']['id']
+        image_name = response.body['image']['name']
+        #puts "image : #{image_id} #{image_name}"
       rescue Exception => e
         raise "There was an error creating snapshot #{ attributes[:name] }. " +
               "The error was: #{ e.inspect }"
@@ -35,15 +38,17 @@ class ComputeService < BaseCloudService
 
       visibility = (attributes[:visibility] == 'public')
       if visibility
-        image_service = ImageService.session
-        image_service.set_credentials(attributes[:credentials][:username], attributes[:credentials][:password])
+        sleep(2)
+        snapshot = find_snapshot_by_name(project, image_name)
+        
+        if snapshot
+          # Create Public Image in Glance.
+          image_service = ImageService.session
+          glance_image = image_service.create_image(name: image_name, is_public: true, disk_format: 'qcow2', container_format: 'bare', size: 681836544, owner: project.id)
+          sleep(2)
+          raise "Snapshot #{ attributes[:name] } couldn't be found!" unless glance_image        
+        end
 
-        snapshot = image_service.service.images.all.find { |i| i.id == image_id }
-        raise "Snapshot #{ attributes[:name] } couldn't be found!" unless snapshot
-        snapshot.is_public = visibility
-        snapshot.save
-
-        image_service.reset_credentials
       end
     else
       raise "Could not create snapshot for instance in #{ instance.state } state. Please check."
@@ -271,6 +276,7 @@ class ComputeService < BaseCloudService
   def delete_instances_in_project(project)
     deleted_instances = []
     set_tenant project
+    instances = service.servers
     project_instances = instances.find_all{ |i| i.tenant_id == project.id }
 
     # There seems to be a bug in OpenStack. Sometimes this fails,

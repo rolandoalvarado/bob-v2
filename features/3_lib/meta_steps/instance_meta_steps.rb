@@ -85,9 +85,10 @@ Step /^Ensure that the snapshot named (.+) does not exists$/ do |snapshot|
   compute_service.ensure_snapshot_does_not_exists(@project, snapshot)
 end
 
-Step /^Ensure that an instance has a snapshot named (.+)$/ do |snapshot|
+Step /^Ensure that an instance has a snapshot named (.+)$/ do |snapshot_name|
   compute_service = ComputeService.session
-  @snapshot = compute_service.ensure_instance_has_a_snapshot(@project, @instance, snapshot)
+  attributes = { name: snapshot_name }
+  @snapshot = compute_service.ensure_instance_has_a_snapshot(@project, @instance, attributes)
 end
 
 Step /^Ensure that the instance named (.+) has a snapshot named (.+) with visibility (.+) in the project (.+)$/ do |instance_name, snapshot_name, visibility, project_name|

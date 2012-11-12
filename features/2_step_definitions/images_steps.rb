@@ -71,6 +71,16 @@ TestCase /^A user with a role of (.+) in a project can create an image from an i
     * Fill in the snapshot name field with #{ test_instance_snapshot_name }
     * Click the create instance snapshot button
 
+    * Click the logout button if currently logged in
+    
+    * Visit the login page
+    * Fill in the username field with #{ bob_username }
+    * Fill in the password field with #{ bob_password }
+    * Click the login button
+
+    * Click the projects link
+    * Click the #{ test_project_name } project    
+    
     * Click the images and snapshots tab
     * The snapshot named #{ test_instance_snapshot_name } should be in active status
   }
