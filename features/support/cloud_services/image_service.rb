@@ -56,7 +56,8 @@ class ImageService < BaseCloudService
   end
 
   def get_bootable_images
-    images.public.select {|i| i.disk_format !~ /^a[rk]i$/ && i.status == 'active' && i.properties.empty?}
+    #images.public.select {|i| i.disk_format !~ /^a[rk]i$/ && i.status == 'active' && i.properties.empty?}
+    images.public.select {|i| i.disk_format !~ /^a[rk]i$/ && i.status == 'active' }
   end
 
   def get_instance_snapshots # Get Images with snapshot image_type.
@@ -64,7 +65,8 @@ class ImageService < BaseCloudService
   end
   
   def get_glance_images
-    service.images.all.select { |i| i.name.to_s != '64Bit Ubuntu 12.04' && i.disk_format != 'qcow2' }
+    #service.images.all.select { |i| i.name.to_s != '64Bit Ubuntu 12.04' && (i.disk_format != 'ami' || i.disk_format != 'qcow2') }
+    service.images.all.select { |i| i.name.to_s != '64Bit Ubuntu 12.04' }
   end
 
   def delete_images(project) # Delete Images

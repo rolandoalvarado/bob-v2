@@ -177,7 +177,7 @@ class EnvironmentCleaner
           end
         end
 
-        if @compute_service.instances.count > 0
+        if @compute_service.service.servers.count > 0
           puts "    Deleting instances..."
           deleted_instances = @compute_service.delete_instances_in_project(project)
 
@@ -186,15 +186,15 @@ class EnvironmentCleaner
           end
         end
 
-        # Clean-up Images in Glance
-        if @image_service.get_glance_images.count > 0
-          puts "    [Glance] Deleting Images..."
-          deleted_images = @image_service.delete_images(project)
+#        # Clean-up Images in Glance
+#        if @image_service.get_glance_images.count > 0
+#          puts "    [Glance] Deleting Images..."
+#          deleted_images = @image_service.delete_images(project)
 
-          deleted_images.each do |deleted_image|
-            puts "      DELETED: #{ deleted_image[:name] } (id: #{ deleted_image[:id] })"
-          end
-        end
+#          deleted_images.each do |deleted_image|
+#            puts "      DELETED: #{ deleted_image[:name] } (id: #{ deleted_image[:id] })"
+#          end
+#        end
         
         # Clean-up Instance Snapshots in Nova
         if @compute_service.get_nova_images(project).count > 0
