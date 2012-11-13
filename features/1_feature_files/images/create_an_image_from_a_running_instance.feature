@@ -1,4 +1,4 @@
-@jira-MCF-10 @format-v2 @images @wip
+@jira-MCF-10 @format-v2 @images
 Feature: Create an Image from a Running Instance
   As an authorized user, I want to create an image from a runnning instance, so that
   I can easily create one or more exact copies.
