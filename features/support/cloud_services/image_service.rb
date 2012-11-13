@@ -66,6 +66,7 @@ class ImageService < BaseCloudService
   
   def get_glance_images
     #service.images.all.select { |i| i.name.to_s != '64Bit Ubuntu 12.04' && (i.disk_format != 'ami' || i.disk_format != 'qcow2') }
+    # NOTE: Please revise this script if you will have additional default images
     service.images.all.select { |i| i.name.to_s != '64Bit Ubuntu 12.04' }
   end
 

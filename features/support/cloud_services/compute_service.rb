@@ -81,6 +81,7 @@ class ComputeService < BaseCloudService
   
   def get_nova_images(project)
     service.set_tenant project
+    # NOTE: Please revise this script if you will have additional default images
     return service.list_images.body['images'].select { |i| ((i['name'].to_s) != '64Bit Ubuntu 12.04') }
   end
   
