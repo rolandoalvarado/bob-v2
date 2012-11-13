@@ -179,12 +179,14 @@ class ProjectPage < SecurePage
   cell      'snapshot status',                    xpath: "//*[@id='instance-snapshot-list']//*[contains(text(), \"<name>\")]//..//*[@class='status']"
   cell      'snapshot public',                    xpath: "//*[@id='instance-snapshot-list']//..//*[td[normalize-space(text())='Yes']]"
   cell      'snapshot not public',                xpath: "//*[@id='instance-snapshot-list']//..//*[td[normalize-space(text())='No']]"
-  cell      'snapshot format',                    xpath: "//*[@id='instance-snapshot-list']//..//*[td[normalize-space(text())='Bare']]"
-
+  
+  cell      'snapshot format',                    xpath:  "//table[@id='instance-snapshot-list']" +
+                                                          "//td[@class='name' and contains(text(), \"<name>\")]//.." +
+                                                          "//td[normalize-space(text())='<format>']"
+                                                          
   form      'resize instance',                    '#resize-instance-modal'
 
   element   'console output',                     '#logsModal'
-
 
   # These buttons are accessible via 'Click the <name> button for instance <instance id>'
   button    'instance menu',                      "#instance-item-<id> .dropdown-toggle"
