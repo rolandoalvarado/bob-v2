@@ -4,7 +4,7 @@ Feature: Import an Image
   created from other cloud providers.
 
 
-  @jira-MCF-12 @images @permissions
+  @jira-MCF-12-CUP @permissions
   Scenario Outline: Check User Permissions
     * A user with a role of <Role> in a project <Can or Cannot Import> an image
 
@@ -23,7 +23,7 @@ Feature: Import an Image
         | (None)          | Cannot Import        |
 
 
-  @jira-MCF-12-II @images
+  @jira-MCF-12-II
   Scenario Outline: Import an Image
     * An authorized user can import an image with a format of <Image Format>
 
@@ -42,7 +42,7 @@ Feature: Import an Image
         | AMI          | 
 
 
-  @future @images
+  @future
   Scenario: Add Meta-data on Import
     NOTE: Users should be able to add arbitrary meta-data when they create an
     image. This meta-data should be in key-value pairs. For example:
