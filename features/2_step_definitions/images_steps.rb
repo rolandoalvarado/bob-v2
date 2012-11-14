@@ -407,26 +407,124 @@ TestCase /^An authorized user can import an image with a format of AKI$/ do
     * Fill in the image name field with #{ test_image_name }
     * Choose the item with text aki in the image disk format dropdown
     * Fill in the image url field with #{ test_image_url('aki') }
-    * Fill in the AMI url field with #{ test_image_url('ami') }
     * Fill in the ARI url field with #{ test_image_url('ari') }
+    * Fill in the AMI url field with #{ test_image_url('ami') }
     * Choose the item with text #{ test_project_name } in the project dropdown
     * Click the confirm upload button
+    
+    * Click the logout button if currently logged in
+    
+    * Visit the login page
+    * Fill in the username field with #{ bob_username }
+    * Fill in the password field with #{ bob_password }
+    * Click the login button
+
+    * Click the images link
 
     * The images table should have a row for the image named #{ test_image_name } Kernel Image
     * The images table should have a row for the image named #{ test_image_name } Ramdisk Image
     * The images table should have a row for the image named #{ test_image_name }
 
-    * The image #{ test_image_name } Kernel Image should be in active status
-    * The image #{ test_image_name } Ramdisk Image should be in active status
-    * The image #{ test_image_name } should be in active status
+    * The image named #{ test_image_name } Kernel Image should be in active status
+    * The image named #{ test_image_name } Ramdisk Image should be in active status
+    * The image named #{ test_image_name } should be in active status
 
   }
 
 end
 
+TestCase /^An authorized user can import an image with a format of AMI$/ do
 
-TestCase /^An authorized user can import an image with a format of (?:ARI|AMI)$/ do
-  pending
+  Preconditions %{
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that the user #{ bob_username } has a role of Project Manager in the project #{ test_project_name }
+    * Ensure that the image named #{ test_image_name } does not exist
+  }
+
+  Cleanup %{
+    * Register the project named #{ test_project_name } for deletion at exit
+    * Register the user named #{ bob_username } for deletion at exit
+  }
+
+  Script %{
+
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ bob_username }
+    * Fill in the password field with #{ bob_password }
+    * Click the login button
+
+    * Click the images link
+    * Click the upload image button
+
+    * Current page should have the upload image form
+    * Fill in the image name field with #{ test_image_name }
+    * Choose the item with text ami in the image disk format dropdown
+    * Fill in the image url field with #{ test_image_url('ami') }
+    * Fill in the AKI url field with #{ test_image_url('aki') }
+    * Fill in the ARI url field with #{ test_image_url('ari') }
+    * Choose the item with text #{ test_project_name } in the project dropdown
+    * Click the confirm upload button
+
+    * The images table should have a row for the image named #{ test_image_name }
+    * The images table should have a row for the image named #{ test_image_name } Kernel Image
+    * The images table should have a row for the image named #{ test_image_name } Ramdisk Image
+    
+    * The image named #{ test_image_name } Kernel Image should be in active status
+    * The image named #{ test_image_name } Ramdisk Image should be in active status
+    * The image named #{ test_image_name } should be in active status
+
+  }
+
+end
+
+TestCase /^An authorized user can import an image with a format of ARI$/ do
+
+  Preconditions %{
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that the user #{ bob_username } has a role of Project Manager in the project #{ test_project_name }
+    * Ensure that the image named #{ test_image_name } does not exist
+  }
+
+  Cleanup %{
+    * Register the project named #{ test_project_name } for deletion at exit
+    * Register the user named #{ bob_username } for deletion at exit
+  }
+
+  Script %{
+
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ bob_username }
+    * Fill in the password field with #{ bob_password }
+    * Click the login button
+
+    * Click the images link
+    * Click the upload image button
+
+    * Current page should have the upload image form
+    * Fill in the image name field with #{ test_image_name }
+    * Choose the item with text ari in the image disk format dropdown
+    * Fill in the image url field with #{ test_image_url('ari') }
+    * Fill in the AMI url field with #{ test_image_url('ami') }
+    * Fill in the AKI url field with #{ test_image_url('aki') }
+    * Choose the item with text #{ test_project_name } in the project dropdown
+    * Click the confirm upload button
+
+    * The images table should have a row for the image named #{ test_image_name } Ramdisk Image
+    * The images table should have a row for the image named #{ test_image_name } Kernel Image
+    * The images table should have a row for the image named #{ test_image_name }
+
+    * The image named #{ test_image_name } Kernel Image should be in active status
+    * The image named #{ test_image_name } Ramdisk Image should be in active status
+    * The image named #{ test_image_name } should be in active status
+
+  }
+
 end
 
 
