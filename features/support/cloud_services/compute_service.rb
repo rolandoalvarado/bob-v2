@@ -30,7 +30,7 @@ class ComputeService < BaseCloudService
         response = service.create_image(instance.id, attributes[:name])
         image_id = response.body['image']['id']
         image_name = response.body['image']['name']
-        #puts "image : #{image_id} #{image_name}"
+        sleep(5)
       rescue Exception => e
         raise "There was an error creating snapshot #{ attributes[:name] }. " +
               "The error was: #{ e.inspect }"
@@ -211,6 +211,8 @@ class ComputeService < BaseCloudService
       when /PAUSED|SUSPENDED|VERIFY_RESIZE/
         activate_instance(instance)
       when /ERROR|SHUTOFF/
+        sleep(5)
+        delete_instance_in_project(project, instance)
         break
       end
     end
@@ -269,6 +271,7 @@ class ComputeService < BaseCloudService
 
     begin
       instance.destroy
+      puts "Instance #{instance.name} is deleted."
     rescue => e
       raise "Couldn't delete instance #{ instance.name } in #{ project.name }. " +
             "The error returned was: #{ e.inspect }."
