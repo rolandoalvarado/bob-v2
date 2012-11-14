@@ -1,5 +1,5 @@
 Step /^Ensure that the image named (.+) does not exist$/ do |image_name|
-  ImageService.session.ensure_image_does_not_exist(name: image_name)
+  ImageService.session.ensure_image_does_not_exist(@project, name: image_name)
 end
 
 Step /^Ensure that the image named (.+) exists for project (.+)$/ do |image_name, project_name|

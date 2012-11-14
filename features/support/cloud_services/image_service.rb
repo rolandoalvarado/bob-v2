@@ -27,7 +27,7 @@ class ImageService < BaseCloudService
 
   def delete_image(image)
     sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_long).tries do
-      image = @images.reload.find { |i| i.id == image.id }
+      image = service.images.reload.find { |i| i.id == image.id }
       if image.status == 'saving'
         raise "Image #{ image.name } took too long to be ready for deletion. " +
               "It is currently #{ image.status }."
@@ -35,7 +35,7 @@ class ImageService < BaseCloudService
     end
 
     compute_service = ComputeService.session
-    attached_instances = compute_service.instances.select { |i| i.image == image }
+    attached_instances = compute_service.service.servers.select { |i| i.image == image }
     attached_instances.each do |instance|
       compute_service.delete_instance_in_project(compute_service.current_tenant)
       sleep(ConfigFile.wait_short)
@@ -44,13 +44,14 @@ class ImageService < BaseCloudService
     service.delete_image(image.id)
   end
 
-  def ensure_image_does_not_exist(attributes)
-    if image = @images.reload.find { |i| i.name == attributes[:name] }
-      delete_image(image)
+  def ensure_image_does_not_exist(project, attributes)
+    compute_service = ComputeService.session
+    compute_service.get_nova_images(project).each do |snapshot|
+      compute_service.delete_snapshot_in_project(project, snapshot['id'])
       sleep(ConfigFile.wait_long)
     end
   end
-
+  
   def get_public_images
     images.public
   end

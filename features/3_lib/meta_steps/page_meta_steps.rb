@@ -784,7 +784,7 @@ Step /^(?:A|The) floating IP should not be associated to instance (.+)$/i do |in
 end
 
 Step /^The image named (.+) should be (?:in|of) (.+) status$/ do |image_name, expected_status|
-  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_long).tries do
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(10).tries do
     status_cell = @current_page.image_status_cell(name: image_name)
     actual_status = status_cell.text.strip
 
@@ -1284,12 +1284,15 @@ Then /^The (.+) table's last row should not include the text (.+)$/ do |table_na
 end
 
 Then /^The images table should have a row for the image named (.+)$/ do |image_name|
-  image = ImageService.session.images.reload.find { |i| i.name == image_name }
-  raise "Couldn't find an image named '#{ image_name }'" unless image
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+    image = ImageService.session.images.reload.find { |i| i.name == image_name }
+    raise "Couldn't find an image named '#{ image_name }'" unless image
 
-  unless @current_page.has_image_row?( id: image.id )
-    raise "Expected to find a row for image #{ image_name } in the " +
-          "images table."
+    #unless @current_page.has_image_row?( id: image.id )
+    unless @current_page.has_image_row?( name: image.name )
+      raise "Expected to find a row for image #{ image_name } in the " +
+            "images table."
+    end
   end
 end
 
