@@ -1,16 +1,21 @@
-Feature: Import an Image @wip
+@jira-MCF-12
+Feature: Import an Image
   As a user, I want to import an image so that I can re-use the images that I
   created from other cloud providers.
 
 
-  @images @permissions
+  @jira-MCF-12 @images @permissions
   Scenario Outline: Check User Permissions
     * A user with a role of <Role> in a project <Can or Cannot Import> an image
 
+
+      @jira-MCF-12-AR
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Import |
-        | Project Manager | Can Import           |
         | System Admin    | Can Import           |
+        | Admin           | Can Import           |
+        | Project Manager | Can Import           |
+        
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Import |
@@ -18,7 +23,7 @@ Feature: Import an Image @wip
         | (None)          | Cannot Import        |
 
 
-  @images
+  @jira-MCF-12-II @images
   Scenario Outline: Import an Image
     * An authorized user can import an image with a format of <Image Format>
 
@@ -34,9 +39,7 @@ Feature: Import an Image @wip
       # | qcow2        |
         | AKI          |
         | ARI          |
-      #  | AMI          | # Comment-out because it will stuck in saving state 
-                          # and probably the cause of Failed to delete project
-        
+        | AMI          | 
 
 
   @future @images

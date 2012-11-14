@@ -28,7 +28,7 @@ class ImagesPage < SecurePage
                                             "//td[@class='container-format']"
   cell     'image status',           xpath: "//table[@id='images-list']" +
                                             "//td[@class='name' and contains(text(), \"<name>\")]//.." +
-                                            "///td[@class='status']"
+                                            "//td[@class='status']"
 
   button   'image menu',             "#image-<id> .dropdown-toggle"
   button   'edit image',             "#image-<id> .edit"

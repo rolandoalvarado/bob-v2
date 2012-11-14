@@ -57,7 +57,8 @@ class ComputeService < BaseCloudService
 
   def ensure_instance_does_not_have_a_snapshot(project, instance, snapshot)
     service.set_tenant project
-    service.delete_image(snapshot.id)
+    snapshot_id = snapshot.id || snapshot['id']
+    service.delete_image(snapshot_id)
   end
 
   def ensure_snapshot_does_not_exists(project, snapshot)
