@@ -47,6 +47,19 @@ class BaseCloudService
     set_credentials # without parameters
   end
 
+  def set_tenant(project, reload = true)
+    if @current_project != project || reload
+      @current_project = project
+      service.set_tenant(project)
+    end
+    load_resources(reload)
+  end
+
+  def set_tenant!(project)
+    set_tenant(project, true)
+  end
+
+
   protected
 
   def initialize_service(service_type)

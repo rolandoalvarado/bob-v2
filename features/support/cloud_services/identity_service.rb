@@ -6,12 +6,25 @@ class IdentityService < BaseCloudService
 
   def initialize
     initialize_service Identity
-    @users   = service.users
-    @tenants = service.tenants
-    @roles   = service.roles
+    load_resources
+  end
 
-    test_tenant_name = 'admin'
-    @test_tenant = find_test_tenant(test_tenant_name) || create_test_tenant(test_tenant_name)
+  def load_resources(reload = false)
+    if reload
+      @users   = service.users
+      @tenants = service.tenants
+      @roles   = service.roles
+
+      test_tenant_name = 'admin'
+      @test_tenant = find_test_tenant(test_tenant_name) || create_test_tenant(test_tenant_name)
+    else
+      @users   ||= service.users
+      @tenants ||= service.tenants
+      @roles   ||= service.roles
+
+      test_tenant_name ||= 'admin'
+      @test_tenant ||= find_test_tenant(test_tenant_name) || create_test_tenant(test_tenant_name)
+    end
   end
 
 
@@ -114,9 +127,9 @@ class IdentityService < BaseCloudService
     unless valid_roles.include?(role_name)
       raise "Unknown role '#{ role_name }'. Valid roles are #{ valid_roles.join(',') }"
     end
-    
+
     revoke_all_user_roles(user, tenant) # It's for (None)
-    
+
     if ['System Admin', 'Admin', 'Project Manager', 'Member'].include?(role_name)
       admin_tenant = tenants.find_by_name('admin')
       member_role = roles.find_by_name('Member')
@@ -130,7 +143,7 @@ class IdentityService < BaseCloudService
     end
 
   end
-  
+
   def ensure_user_role_is_admin(user, role_name)
     tenants.reload
     valid_roles = ['System Admin', 'Admin']
@@ -138,14 +151,14 @@ class IdentityService < BaseCloudService
     unless valid_roles.include?(role_name)
       raise "Unknown role '#{ role_name }'. Valid roles are #{ valid_roles.join(',') }"
     end
-    
+
     if ['System Admin', 'Admin'].include?(role_name)
       admin_tenant = tenants.find{|t| t.name == 'admin'}
       revoke_all_user_roles(user, admin_tenant)
-      
+
       admin_role   = roles.find_by_name('admin')
       admin_tenant.grant_user_role(user.id, admin_role.id)
-        
+
       pm_role = roles.find_by_name(RoleNameDictionary.db_name('Project Manager'))
       tenants.each do |tenant|
         tenant.grant_user_role(user.id, pm_role.id)
@@ -154,7 +167,7 @@ class IdentityService < BaseCloudService
 
     tenants.reload
   end
-  
+
   def ensure_tenant_does_not_exist(attributes)
     if tenant = @tenants.find_by_name(attributes[:name])
       ComputeService.session.delete_instances_in_project(tenant)
@@ -210,7 +223,7 @@ class IdentityService < BaseCloudService
       delete_user(user)
     end
   end
-  
+
   # OLD ensure_user_exists() method
   #  def ensure_user_exists(attributes)
   #    user = find_user_by_name(attributes[:name])
@@ -218,41 +231,41 @@ class IdentityService < BaseCloudService
   #    user.password = attributes[:password]
   #    user
   #  end
-  
+
   def ensure_user_exists(attributes)
     user = find_user_by_name(attributes[:name])
-    
+
     unless user
-      user = create_user(attributes) 
+      user = create_user(attributes)
       user.password = attributes[:password]
     else
       if attributes[:password] != nil && user.password != attributes[:password]
         user.password = attributes[:password]
         user.update_password(attributes[:password])
       end
-    end  
+    end
     user
   end
-  
+
   def ensure_user_exists_is_admin_or_not(attributes, is_admin)
     user = find_user_by_name(attributes[:name])
-    
+
     unless user
-      user = create_user(attributes) 
+      user = create_user(attributes)
       user.password = attributes[:password]
-      
+
       if (is_admin.downcase == 'yes')
         admin_tenant = tenants.find_by_name('admin')
         revoke_all_user_roles(user, admin_tenant)
         ensure_tenant_role(user, admin_tenant, 'Admin')
       end
-      
+
     else
       if attributes[:password] != nil && user.password != attributes[:password]
         user.password = attributes[:password]
         user.update_password(attributes[:password])
       end
-    end  
+    end
     user
   end
 

@@ -6,7 +6,15 @@ class ImageService < BaseCloudService
 
   def initialize
     initialize_service Image
-    @images = service.images
+    load_resources
+  end
+
+  def load_resources(reload = false)
+    if reload
+      @images = service.images
+    else
+      @images ||= service.images
+    end
   end
 
   def create_image(attributes = {})
@@ -51,7 +59,7 @@ class ImageService < BaseCloudService
       sleep(ConfigFile.wait_long)
     end
   end
-  
+
   def get_public_images
     images.public
   end
@@ -64,7 +72,7 @@ class ImageService < BaseCloudService
   def get_instance_snapshots # Get Images with snapshot image_type.
     service.images.all.select { |i| i.disk_format !~ /^a[rk]i$/ && i.properties['image_type'] == 'snapshot' }
   end
-  
+
   def get_glance_images
     #service.images.all.select { |i| i.name.to_s != '64Bit Ubuntu 12.04' && (i.disk_format != 'ami' || i.disk_format != 'qcow2') }
     # NOTE: Please revise this script if you will have additional default images
@@ -76,7 +84,7 @@ class ImageService < BaseCloudService
 
     get_glance_images.each do |deleted_image|
       deleted_images << { name: deleted_image.name, id: deleted_image.id }
-      delete_image(deleted_image)   
+      delete_image(deleted_image)
     end
 
     deleted_images

@@ -166,8 +166,8 @@ class EnvironmentCleaner
       retried = false
       error = ''
       begin
-        @compute_service.set_tenant project
-        @volume_service.set_tenant project
+        @compute_service.set_tenant! project
+        @volume_service.set_tenant! project
 
         if @compute_service.addresses.count > 0
           puts "    Releasing addresses..."
@@ -195,7 +195,7 @@ class EnvironmentCleaner
 #            puts "      DELETED: #{ deleted_image[:name] } (id: #{ deleted_image[:id] })"
 #          end
 #        end
-        
+
         # Clean-up Instance Snapshots and Images in Nova
         if @compute_service.get_nova_images(project).count > 0
           puts "    [NOVA] Deleting instance snapshots and images..."
@@ -205,7 +205,7 @@ class EnvironmentCleaner
             puts "      DELETED: #{ snapshot[:name] } (id: #{ snapshot[:id] })"
           end
         end
-        
+
         if @volume_service.snapshots.count > 0
           puts "    Deleting volume snapshots..."
           deleted_volume_snapshots = @volume_service.delete_volume_snapshots_in_project(project)

@@ -6,8 +6,17 @@ class VolumeService < BaseCloudService
 
   def initialize
     initialize_service Volume
-    @volumes   = service.list_volumes.body['volumes']
-    @snapshots = service.list_snapshots.body['snapshots']
+    load_resources
+  end
+
+  def load_resources(reload = false)
+    if reload
+      @volumes   = service.list_volumes.body['volumes']
+      @snapshots = service.list_snapshots.body['snapshots']
+    else
+      @volumes   ||= service.list_volumes.body['volumes']
+      @snapshots ||= service.list_snapshots.body['snapshots']
+    end
   end
 
   def assert_volume_count(project, desired_count)
@@ -166,17 +175,6 @@ class VolumeService < BaseCloudService
 
   def reload_volumes
     @volumes = service.list_volumes.body['volumes']
-  end
-
-  def set_tenant(project, reload = true)
-    if @current_project != project
-      @current_project = project
-      service.set_tenant(project)
-    end
-    if reload
-      reload_volumes
-      reload_snapshots
-    end
   end
 
   private

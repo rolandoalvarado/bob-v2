@@ -8,21 +8,34 @@ class ComputeService < BaseCloudService
 
   def initialize
     initialize_service Compute
-    @current_project = service.tenants.find_by_id(service.current_tenant['id'])
+    load_resources
+  end
 
-    @addresses = service.addresses
-    @instances = service.servers
-    @volumes   = service.volumes
-    @security_groups = service.security_groups
-    @key_pairs = service.key_pairs
-    @snapshots = ImageService.session.get_instance_snapshots
-
-    @private_keys = {}
+  def load_resources(reload = false)
+    if reload
+      @current_project = service.tenants.find_by_id(service.current_tenant['id'])
+      @addresses = service.addresses
+      @instances = service.servers
+      @volumes   = service.volumes
+      @security_groups = service.security_groups
+      @key_pairs = service.key_pairs
+      @snapshots = ImageService.session.get_instance_snapshots
+      @private_keys = {}
+    else
+      @current_project ||= service.tenants.find_by_id(service.current_tenant['id'])
+      @addresses ||= service.addresses
+      @instances ||= service.servers
+      @volumes   ||= service.volumes
+      @security_groups ||= service.security_groups
+      @key_pairs ||= service.key_pairs
+      @snapshots ||= ImageService.session.get_instance_snapshots
+      @private_keys ||= {}
+    end
   end
 
   def ensure_instance_has_a_snapshot(project, instance, attributes)
     set_tenant project
-    
+
     ensure_snapshot_does_not_exists(project, attributes[:name])
 
     if instance.state == 'ACTIVE'
@@ -40,13 +53,13 @@ class ComputeService < BaseCloudService
       if visibility
         sleep(2)
         snapshot = find_snapshot_by_name(project, image_name)
-        
+
         if snapshot
           # Create Public Image in Glance.
           image_service = ImageService.session
           glance_image = image_service.create_image(name: image_name, is_public: true, disk_format: 'qcow2', container_format: 'bare', size: 681836544, owner: project.id)
           sleep(2)
-          raise "Snapshot #{ attributes[:name] } couldn't be found!" unless glance_image        
+          raise "Snapshot #{ attributes[:name] } couldn't be found!" unless glance_image
         end
 
       end
@@ -79,13 +92,13 @@ class ComputeService < BaseCloudService
     service.set_tenant project
     return service.list_images.body['images'].find { |i| i['name'] == name }
   end
-  
+
   def get_nova_images(project)
     service.set_tenant project
     # NOTE: Please revise this script if you will have additional default images
     return service.list_images.body['images'].select { |i| ((i['name'].to_s) != '64Bit Ubuntu 12.04') }
   end
-  
+
   def delete_instance_snapshots(project) # Delete Instance Snapshots
     deleted_snapshots = []
 
@@ -657,27 +670,6 @@ class ComputeService < BaseCloudService
   def get_project_instances(project)
     set_tenant project, false
     service.servers.reload
-  end
-
-  def set_tenant(project, reload = true)
-    if @current_project != project
-      @current_project = project
-      service.set_tenant(project)
-    end
-    if reload
-      @addresses.reload
-      service.servers.reload
-      @volumes.reload
-    end
-  end
-
-  def set_tenant!(project)
-    @current_project = project
-    service.set_tenant(project)
-
-    @addresses.reload
-    service.servers.reload
-    @volumes.reload
   end
 
   def pause_an_instance(project, instance)
