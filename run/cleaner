@@ -6,7 +6,9 @@ if ARGV.first == "describe" then
   exit 0
 end
 
-with_users = ARGV.first === '--with_users'
+with_users  = ARGV.include?('--with_users')
+with_images = ARGV.include?('--with_images')
+failed      = ARGV.include?('--failed')
 
 # ===========================
 #  Warning and Confirmation
@@ -41,30 +43,11 @@ require 'net/ssh/gateway'
   require_relative "./../features/support/#{ file }"
 end
 
-@host = URI.parse(ConfigFile.web_client_url).host
-def create_tunnel
-  username = ConfigFile.server_username || `whoami`.chomp
-  abort 'ERROR: Username must be specified!' if username.to_s.empty?
+include CloudConfiguration
 
-  gateway = Net::SSH::Gateway.new(@host, username)
-  gateway.open(@host, 35357, 35357)
-  gateway.open(@host, 8776, 8776)
-  gateway.open(@host, 9292, 9292)
-  gateway.open(@host, 8774, 8774)
-  gateway.open(@host, 8773, 8773)
-  gateway.open(@host, 5000, 5000)
-  gateway
-end
-
-if ConfigFile.tunnel
-  begin
-    print "Connecting to #{@host} via SSH tunnel... "
-    @tunnel = create_tunnel
-    puts 'Connected.'
-  rescue => e
-    abort "ERROR: #{e.inspect}"
-  end
-end
+host = URI.parse(ConfigFile.web_client_url).host
+username = ConfigFile.server_username || `whoami`.chomp
+tunnel = create_tunnel(host, username) if ConfigFile.tunnel
 
 identity_service = IdentityService.session
 
@@ -72,12 +55,16 @@ identity_service = IdentityService.session
 #  Register resources to delete
 # ==============================
 
-exempted_projects = %w{ admin demo }
-exempted_users    = %w{ admin demo nova glance }
+exempted_projects = ConfigFile.cleanup_exemptions[:projects]
+exempted_users    = ConfigFile.cleanup_exemptions[:users]
+exempted_images   = ConfigFile.cleanup_exemptions[:images]
 
 puts 'Projects to delete:'
-identity_service.tenants.each do |project|
-  next unless project.name.start_with? 'failed'
+puts 'Only removing projects that failed to delete...' if failed
+
+tenants = identity_service.tenants
+tenants.delete_if { |tenant| !tenant.name.start_with?('failed') } if failed
+tenants.each do |project|
   unless exempted_projects.include? project.name
     puts "  #{project.name}"
     EnvironmentCleaner.register(:project, project.id)
@@ -94,6 +81,15 @@ if with_users
   end
 end
 
+if with_images
+  puts 'Images to delete:'
+  image_service.images.each do |image|
+    unless exempted_images.include? image.name
+      puts "  #{ image.name }"
+      EnvironmentCleaner.register(:image, image.id)
+    end
+  end
+end
 
 # ==============================
 #  Delete registered resources
@@ -105,3 +101,5 @@ EnvironmentCleaner.delete_test_objects
 #  Delete orphaned resources
 # ==============================
 EnvironmentCleaner.delete_orphans
+
+destroy_tunnel(tunnel) if ConfigFile.tunnel

@@ -18,38 +18,23 @@ HELP
 end
 
 require 'rubygems'
+require 'bundler/setup'
+require 'fog'
 require 'yaml'
 require 'fileutils'
 require 'uri'
-require 'net/ssh/gateway'
-require File.expand_path('../../features/support/cloud_configuration.rb', __FILE__)
+['cloud_configuration',
+ 'fog_monkey_patch',
+ 'tunnel_patch'
+].each do |file|
+  require_relative File.expand_path("../../features/support/#{ file }", __FILE__)
+end
 
 include CloudConfiguration
 
-@host = URI.parse(ConfigFile.web_client_url).host
-def create_tunnel
-  username = ConfigFile.server_username || `whoami`.chomp
-  abort 'ERROR: Username must be specified!' if username.to_s.empty?
-
-  gateway = Net::SSH::Gateway.new(@host, username)
-  gateway.open(@host, 35357, 35357)
-  gateway.open(@host, 8776, 8776)
-  gateway.open(@host, 9292, 9292)
-  gateway.open(@host, 8774, 8774)
-  gateway.open(@host, 8773, 8773)
-  gateway.open(@host, 5000, 5000)
-  gateway
-end
-
-if ConfigFile.tunnel
-  begin
-    print "Connecting to #{@host} via SSH tunnel... "
-    @tunnel = create_tunnel
-    puts 'Connected.'
-  rescue => e
-    abort "ERROR: #{e.inspect}"
-  end
-end
+host = URI.parse(ConfigFile.web_client_url).host
+username = ConfigFile.server_username || `whoami`.chomp
+tunnel = create_tunnel(host, username) if ConfigFile.tunnel
 
 FileUtils.rm_rf Dir['output/*']
 puts "Start at #{Time.now}"
@@ -60,9 +45,5 @@ elsif ARGV.length == 2
 else
   system "bundle exec cucumber --profile default --t ~@future --t ~@pending"
 end
+destroy_tunnel(tunnel) if ConfigFile.tunnel
 puts "Finished at #{Time.now}"
-
-if @tunnel
-  @tunnel.shutdown!
-  puts "SSH tunnel closed."
-end

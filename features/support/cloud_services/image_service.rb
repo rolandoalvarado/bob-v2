@@ -74,12 +74,11 @@ class ImageService < BaseCloudService
   end
 
   def get_glance_images
-    #service.images.all.select { |i| i.name.to_s != '64Bit Ubuntu 12.04' && (i.disk_format != 'ami' || i.disk_format != 'qcow2') }
-    # NOTE: Please revise this script if you will have additional default images
-    service.images.all.select { |i| i.name.to_s != '64Bit Ubuntu 12.04' }
+    default_images = CloudConfiguration::ConfigFile.cleanup_exemptions[:images]
+    service.images.all.select { |i| !default_images.include?(i.name) }
   end
 
-  def delete_images(project) # Delete Images
+  def delete_images(project)
     deleted_images = []
 
     get_glance_images.each do |deleted_image|
