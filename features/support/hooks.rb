@@ -5,10 +5,17 @@ def tmp_screenshots_dir
 end
 
 AfterConfiguration do |config|
-  FileUtils.rm_rf(tmp_screenshots_dir) if Dir.exists?(tmp_screenshots_dir)
-  Dir.mkdir(tmp_screenshots_dir)
-  puts "Verifying requirements against #{ ConfigFile.web_client_url }"
-  puts "Your Unique.alpha value is #{ Unique.alpha }"
+  failed_count = IdentityService.session.tenants.count { |t| t.name.start_with?('failed delete') }
+  if true #failed_count > ConfigFile.failed_tenant_limit
+    puts "\033[31mThis test cannot continue because there are too many failed projects (#{ failed_count }). " +
+         "Consider running `run/cleaner --failed` to clear these.\033[0m"
+    Cucumber.wants_to_quit = true
+  else
+    FileUtils.rm_rf(tmp_screenshots_dir) if Dir.exists?(tmp_screenshots_dir)
+    Dir.mkdir(tmp_screenshots_dir)
+    puts "Verifying requirements against #{ ConfigFile.web_client_url }"
+    puts "Your Unique.alpha value is #{ Unique.alpha }"
+  end
 end
 
 Before do |scenario|
@@ -39,7 +46,7 @@ Around do |scenario, block|
 end
 
 at_exit do
-  FileUtils.rm_rf(tmp_screenshots_dir)
+  FileUtils.rm_rf(tmp_screenshots_dir) if Dir.exists?(tmp_screenshots_dir)
   EnvironmentCleaner.delete_test_objects
   puts # blank line
   EnvironmentCleaner.delete_orphans

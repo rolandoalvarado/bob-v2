@@ -7,6 +7,7 @@ module Fog
 
   class Collection < Array
     def find_by_name(name)
+      reload rescue Excon::Errors::Unauthorized nil
       find{ |o| o.name == name.to_s }
     rescue Excon::Errors::SocketError
       nil

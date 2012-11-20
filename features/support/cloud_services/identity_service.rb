@@ -59,7 +59,7 @@ class IdentityService < BaseCloudService
   def delete_tenant(tenant)
     tenant_name = tenant.name
     sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_long).tries do
-      tenant = @tenants.reload.find_by_name(tenant_name)
+      tenant = find_tenant_by_name(tenant_name)
       begin
         tenant.destroy
       rescue
@@ -131,7 +131,7 @@ class IdentityService < BaseCloudService
     revoke_all_user_roles(user, tenant) # It's for (None)
 
     if ['System Admin', 'Admin', 'Project Manager', 'Member'].include?(role_name)
-      admin_tenant = tenants.find_by_name('admin')
+      admin_tenant = find_tenant_by_name('admin')
       member_role = roles.find_by_name('Member')
       user.update_tenant(tenant.id)
       tenant.grant_user_role(user.id, member_role.id)
@@ -169,7 +169,7 @@ class IdentityService < BaseCloudService
   end
 
   def ensure_tenant_does_not_exist(attributes)
-    if tenant = @tenants.find_by_name(attributes[:name])
+    if tenant = find_tenant_by_name(attributes[:name])
       ComputeService.session.delete_instances_in_project(tenant)
       VolumeService.session.delete_volumes_in_project(tenant)
       users = tenant.users.reload
@@ -184,7 +184,7 @@ class IdentityService < BaseCloudService
     attributes        = CloudObjectBuilder.attributes_for(:tenant, attributes)
     attributes[:name] = Unique.project_name(attributes[:name])
 
-    tenant = tenants.find_by_name(attributes[:name])
+    tenant = find_tenant_by_name(attributes[:name])
 
     if tenant
       tenant.update(attributes)
@@ -255,7 +255,7 @@ class IdentityService < BaseCloudService
       user.password = attributes[:password]
 
       if (is_admin.downcase == 'yes')
-        admin_tenant = tenants.find_by_name('admin')
+        admin_tenant = find_tenant_by_name('admin')
         revoke_all_user_roles(user, admin_tenant)
         ensure_tenant_role(user, admin_tenant, 'Admin')
       end
@@ -278,7 +278,7 @@ class IdentityService < BaseCloudService
 
 
       if admin_role
-        admin_tenant = tenants.find_by_name('admin')
+        admin_tenant = find_tenant_by_name('admin')
         admin_role = roles.find_by_name(RoleNameDictionary.db_name('Project Manager'))
         admin_tenant.grant_user_role(user.id, admin_role.id)
       end
@@ -292,11 +292,11 @@ class IdentityService < BaseCloudService
   end
 
   def find_user_by_name(name)
-    service.users.find_by_name(name)
+    @users.find_by_name(name)
   end
 
   def find_tenant_by_name(name)
-    service.tenants.find_by_name(name)
+    @tenants.find_by_name(name)
   end
 
   def revoke_all_user_roles(user, tenant)
@@ -343,6 +343,6 @@ class IdentityService < BaseCloudService
   end
 
   def find_test_tenant(name)
-    tenants.find_by_name(name)
+    @tenants.find_by_name(name)
   end
 end
