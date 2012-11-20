@@ -107,7 +107,7 @@ class EnvironmentCleaner
       end
     rescue Net::SSH::AuthenticationFailed => e
       puts "\033[0;33m  Could not connect to #{ username }@#{ host }. The error returned was: " +
-           e.inspect + "\033[m"
+           e.message + "\033[m"
     end
     puts "No orphaned resources found" if orphaned_count == 0
   end
@@ -136,7 +136,7 @@ class EnvironmentCleaner
         format_success(image.name, { id: image.id }, 'deleted', 2)
       rescue Exception => e
         puts "\033[0;33m  ERROR: #{ image.name } could not be deleted. The error returned was: " +
-             e.inspect + "\033[m"
+             e.message + "\033[m"
         unless retried
           retried = true
           sleep(ConfigFile.wait_short)
@@ -187,14 +187,14 @@ class EnvironmentCleaner
         end
 
         # Clean-up Images in Glance
-        if @image_service.get_glance_images.count > 0
-          format_header 'images [glance]'
-          deleted_images = @image_service.delete_images(project)
+        #if @image_service.get_glance_images.count > 0
+          #format_header 'images [glance]'
+          #deleted_images = @image_service.delete_images(project)
 
-          deleted_images.each do |deleted_image|
-            format_success deleted_image.delete(:name), deleted_image
-          end
-        end
+          #deleted_images.each do |deleted_image|
+            #format_success deleted_image.delete(:name), deleted_image
+          #end
+        #end
 
         # Clean-up Instance Snapshots in Nova
         if @compute_service.get_nova_images(project).count > 0
@@ -237,11 +237,11 @@ class EnvironmentCleaner
         success = true
       rescue Exception => e
         puts "\033[0;33m  ERROR: #{ project.name } could not be deleted. The error returned was: " +
-             e.inspect + "\033[m"
+             e.message + "\033[m"
         unless retried
           retried = true
           sleep(ConfigFile.wait_short)
-          puts "\033[0;33mTrying to delete again test project #{ project.name } and its resources...\033[m"
+          puts "\033[0;33mRetrying...\033[m"
           retry
         end
         error = e.message
@@ -259,7 +259,7 @@ class EnvironmentCleaner
     user_ids = registry[USER]
     return unless user_ids
 
-    puts "Deleting test users and their memberships"
+    puts "Deleting test users and their memberships..."
     @identity_service = IdentityService.session
 
     user_ids.uniq.each do |user_id|
@@ -272,6 +272,7 @@ class EnvironmentCleaner
         next
       end
       next if user.nil? || user.name == 'admin'
+      format_header user.name, '', 0
 
       retried = false
       begin
@@ -279,11 +280,11 @@ class EnvironmentCleaner
         format_success(user.name, { id: user.id }, 'deleted', 2)
       rescue Exception => e
         puts "\033[0;33m  ERROR: #{ user.name } could not be deleted. The error returned was: " +
-             e.inspect + "\033[m"
+             e.message + "\033[m"
         unless retried
           retried = true
           sleep(ConfigFile.wait_short)
-          puts "\033[0;33mTrying to delete again test user #{ user.name } and their memberships...\033[m"
+          puts "\033[0;33mRetrying...\033[m"
           retry
         end
       end
