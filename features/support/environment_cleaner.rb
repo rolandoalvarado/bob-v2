@@ -96,9 +96,9 @@ class EnvironmentCleaner
               orphaned_count += 1
               ssh.exec!("sudo nova #{ nova_options } delete #{ id }") do |ch, stream, data|
                 if stream == :stderr
-                  puts "       FAILED: #{ name } (id: #{ id })"
+                  format_failure(name, { id: id }, 'failed', 2)
                 else
-                  puts "      DELETED: #{ name } (id: #{ id })"
+                  format_success(name, { id: id }, 'deleted', 2)
                 end
               end
             end
@@ -107,7 +107,7 @@ class EnvironmentCleaner
       end
     rescue Net::SSH::AuthenticationFailed => e
       puts "\033[0;33m  Could not connect to #{ username }@#{ host }. The error returned was: " +
-           e.inspect + "\033[m"
+           e.message + "\033[m"
     end
     puts "No orphaned resources found" if orphaned_count == 0
   end
@@ -129,14 +129,14 @@ class EnvironmentCleaner
     image_ids.uniq.each do |image_id|
       image = @image_service.images.reload.find { |i| i.id == image_id }
       next if image.nil?
-      puts "  #{ image.name }..."
 
       retried = false
       begin
         @image_service.delete_image(image)
+        format_success(image.name, { id: image.id }, 'deleted', 2)
       rescue Exception => e
         puts "\033[0;33m  ERROR: #{ image.name } could not be deleted. The error returned was: " +
-             e.inspect + "\033[m"
+             e.message + "\033[m"
         unless retried
           retried = true
           sleep(ConfigFile.wait_short)
@@ -160,7 +160,7 @@ class EnvironmentCleaner
     project_ids.uniq.each do |project_id|
       project = @identity_service.tenants.reload.find { |t| t.id == project_id }
       next if project.nil? || project.name == 'admin'
-      puts "  #{ project.name }..."
+      format_header project.name, '', 0
 
       success = false
       retried = false
@@ -170,78 +170,78 @@ class EnvironmentCleaner
         @volume_service.set_tenant! project
 
         if @compute_service.addresses.count > 0
-          puts "    Releasing addresses..."
+          format_header 'addresses', 'releasing'
           released_addresses = @compute_service.release_addresses_from_project(project)
           released_addresses.each do |address|
-            puts "     RELEASED: #{ address[:ip] } (id: #{ address[:id] }, instance_id: #{ address[:instance_id] || '-' })"
+            format_success address[:ip], address.slice(:id, :instance_id), 'released'
           end
         end
 
         if @compute_service.service.servers.count > 0
-          puts "    Deleting instances..."
+          format_header 'instances'
           deleted_instances = @compute_service.delete_instances_in_project(project)
 
           deleted_instances.each do |instance|
-            puts "      DELETED: #{ instance[:name] } (id: #{ instance[:id] })"
+            format_success instance.delete(:name), instance
           end
         end
 
-#        # Clean-up Images in Glance
-#        if @image_service.get_glance_images.count > 0
-#          puts "    [Glance] Deleting Images..."
-#          deleted_images = @image_service.delete_images(project)
+        # Clean-up Images in Glance
+        #if @image_service.get_glance_images.count > 0
+          #format_header 'images [glance]'
+          #deleted_images = @image_service.delete_images(project)
 
-#          deleted_images.each do |deleted_image|
-#            puts "      DELETED: #{ deleted_image[:name] } (id: #{ deleted_image[:id] })"
-#          end
-#        end
+          #deleted_images.each do |deleted_image|
+            #format_success deleted_image.delete(:name), deleted_image
+          #end
+        #end
 
-        # Clean-up Instance Snapshots and Images in Nova
+        # Clean-up Instance Snapshots in Nova
         if @compute_service.get_nova_images(project).count > 0
-          puts "    [NOVA] Deleting instance snapshots and images..."
+          format_header 'instance snapshots [nova]'
           deleted_instance_snapshots = @compute_service.delete_instance_snapshots(project)
 
           deleted_instance_snapshots.each do |snapshot|
-            puts "      DELETED: #{ snapshot[:name] } (id: #{ snapshot[:id] })"
+            format_success snapshot.delete(:name), snapshot
           end
         end
 
         if @volume_service.snapshots.count > 0
-          puts "    Deleting volume snapshots..."
+          format_header 'volume snapshots'
           deleted_volume_snapshots = @volume_service.delete_volume_snapshots_in_project(project)
           deleted_volume_snapshots.each do |snapshot|
-            puts "      DELETED: #{ snapshot[:name] } (id: #{ snapshot[:id] })"
+            format_success snapshot.delete(:name), snapshot
           end
         end
 
         if @volume_service.volumes.count > 0
-          puts "    Deleting volumes..."
+          format_header 'volumes'
           deleted_volumes = @volume_service.delete_volumes_in_project(project)
           deleted_volumes.each do |volume|
-            puts "      DELETED: #{ volume[:name] } (id: #{ volume[:id] })"
+            format_success volume.delete(:name), volume
           end
         end
 
         users = project.users.reload
         if users.count > 0
-          puts "    Revoking memberships..."
+          format_header 'memberships', 'revoking'
           users.each do |user|
             next if user.name == "admin"
             @identity_service.revoke_all_user_roles(user, project)
-            puts "      REVOKED: #{ user.name } (id: #{ user.id })"
+            format_success user.name, id: user.id
           end
         end
 
-        puts "    Deleting #{ project.name } (id: #{ project.id })..."
         @identity_service.delete_project(project)
+        format_success(project.name, { id: project.id }, 'deleted', 2)
         success = true
       rescue Exception => e
         puts "\033[0;33m  ERROR: #{ project.name } could not be deleted. The error returned was: " +
-             e.inspect + "\033[m"
+             e.message + "\033[m"
         unless retried
           retried = true
           sleep(ConfigFile.wait_short)
-          puts "Trying to delete again test project #{ project.name } and its resources..."
+          puts "\033[0;33mRetrying...\033[m"
           retry
         end
         error = e.message
@@ -272,30 +272,47 @@ class EnvironmentCleaner
         next
       end
       next if user.nil? || user.name == 'admin'
-      puts "  #{ user.name }..."
+      format_header user.name, '', 0
 
       retried = false
       begin
         @identity_service.delete_user(user)
+        format_success(user.name, { id: user.id }, 'deleted', 2)
       rescue Exception => e
         puts "\033[0;33m  ERROR: #{ user.name } could not be deleted. The error returned was: " +
-             e.inspect + "\033[m"
+             e.message + "\033[m"
         unless retried
           retried = true
           sleep(ConfigFile.wait_short)
-          puts "Trying to delete again test user #{ user.name } and their memberships..."
+          puts "\033[0;33mRetrying...\033[m"
           retry
         end
       end
     end
   end
 
-  def say_with_time(message, &block)
-    start_time = Time.now
-    puts "    #{ message }... (started #{ start_time })"
-    yield
-    end_time = Time.now
-    puts "        (finished in #{ end_time - start_time } at #{ end_time })"
+  def format_header(items, action = 'deleting', indent = 2)
+    puts "\033[0;36m#{ ' ' * indent }#{ action.capitalize } \033[1;36m#{ items }\033[0;36m...\033[m"
+  end
+
+  def format_success(item, properties = {}, action='deleted', indent = 4)
+    print "\033[0;32m#{ ' ' * indent }#{ action.upcase }: \033[1;32m#{ item }\033[0;32m"
+    unless properties.empty?
+      print " ("
+      print properties.map { |k, v| "#{ k }: #{ v }" }.join(', ')
+      print ")"
+    end
+    print "\033[m\n"
+  end
+
+  def format_failure(item, properties = {}, action='failed', indent = 4)
+    print "\033[0;12m#{ ' ' * indent }#{ action.upcase }: \033[1;12m#{ item }\033[0;12m"
+    unless properties.empty?
+      print " ("
+      print properties.map { |k, v| "#{ k }: #{ v }" }.join(', ')
+      print ")"
+    end
+    print "\033[m\n"
   end
 
 end

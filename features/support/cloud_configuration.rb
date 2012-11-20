@@ -50,6 +50,8 @@ module CloudConfiguration
   CHROME               = :chrome
   INSTANCE_SNAPSHOT    = :instance_snapshot
   TEST_IMAGE           = :test_image
+  CLEANUP_OPTIONS      = :cleanup_options
+  CLEANUP_EXEMPTIONS   = :exemptions
 
   class ConfigFile
     include Singleton
@@ -73,6 +75,10 @@ module CloudConfiguration
 
     def self.web_client_url
       self.instance[WEB_CLIENT_HOST]
+    end
+
+    def self.cleanup_exemptions
+      self.instance[CLEANUP_OPTIONS][CLEANUP_EXEMPTIONS]
     end
 
     def self.minute
@@ -110,7 +116,7 @@ module CloudConfiguration
       end
       self.instance[WAIT][INSTANCE]
     end
-    
+
     def self.wait_instance_snapshot
       self.instance.ensure_repeat_and_wait_key
       unless self.instance[WAIT][INSTANCE_SNAPSHOT]
@@ -119,7 +125,7 @@ module CloudConfiguration
       end
       self.instance[WAIT][INSTANCE_SNAPSHOT]
     end
-    
+
     def self.wait_instance_resume
       self.instance.ensure_repeat_and_wait_key
       unless self.instance[WAIT][RESUME_INSTANCE]
@@ -281,7 +287,7 @@ module CloudConfiguration
       end
       self.instance[REPEAT][SHORT]
     end
-    
+
     def self.repeat_until_project_is_visible
       self.instance.ensure_repeat_and_wait_key
       unless self.instance[REPEAT][FIFTEEN]
@@ -344,7 +350,7 @@ module CloudConfiguration
       end
       self.instance[REPEAT][FORTY]
     end
-    
+
     def self.repeat_until_task_is_done
       self.instance.ensure_repeat_and_wait_key
       unless self.instance[REPEAT][FORTY]
