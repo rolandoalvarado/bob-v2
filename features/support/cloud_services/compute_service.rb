@@ -80,6 +80,7 @@ class ComputeService < BaseCloudService
 
     if snapshot
       begin
+        sleep(5)
         delete_snapshot_in_project(project, snapshot['id'])
       rescue => e
         raise "Couldn't delete snapshot #{ snapshot['name'] } in #{ project.name }. " +

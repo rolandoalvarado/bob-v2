@@ -292,11 +292,11 @@ class IdentityService < BaseCloudService
   end
 
   def find_user_by_name(name)
-    users.find_by_name(name)
+    service.users.find_by_name(name)
   end
 
   def find_tenant_by_name(name)
-    tenants.find_by_name(name)
+    service.tenants.find_by_name(name)
   end
 
   def revoke_all_user_roles(user, tenant)
