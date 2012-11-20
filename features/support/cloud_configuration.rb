@@ -52,6 +52,7 @@ module CloudConfiguration
   TEST_IMAGE           = :test_image
   CLEANUP_OPTIONS      = :cleanup_options
   CLEANUP_EXEMPTIONS   = :exemptions
+  FAILED_TENANT_LIMIT  = :failed_tenant_limit
 
   class ConfigFile
     include Singleton
@@ -407,6 +408,10 @@ module CloudConfiguration
 
     def self.test_image
       self.instance[TEST_IMAGE]
+    end
+
+    def self.failed_tenant_limit
+      self.instance[FAILED_TENANT_LIMIT]
     end
 
     def initialize
