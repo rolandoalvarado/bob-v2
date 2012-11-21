@@ -6,7 +6,7 @@ end
 
 AfterConfiguration do |config|
   failed_count = IdentityService.session.tenants.count { |t| t.name.start_with?('failed delete') }
-  if true #failed_count > ConfigFile.failed_tenant_limit
+  if failed_count > ConfigFile.failed_tenant_limit
     puts "\033[31mThis test cannot continue because there are too many failed projects (#{ failed_count }). " +
          "Consider running `run/cleaner --failed` to clear these.\033[0m"
     Cucumber.wants_to_quit = true
