@@ -20,7 +20,6 @@ class ComputeService < BaseCloudService
       @security_groups = service.security_groups
       @key_pairs = service.key_pairs
       @snapshots = ImageService.session.get_instance_snapshots
-      @private_keys = {}
     else
       @current_project ||= service.tenants.find_by_id(service.current_tenant['id'])
       @addresses ||= service.addresses
@@ -29,8 +28,8 @@ class ComputeService < BaseCloudService
       @security_groups ||= service.security_groups
       @key_pairs ||= service.key_pairs
       @snapshots ||= ImageService.session.get_instance_snapshots
-      @private_keys ||= {}
     end
+    @private_keys ||= {}
   end
 
   def ensure_instance_has_a_snapshot(project, instance, attributes)
@@ -285,7 +284,6 @@ class ComputeService < BaseCloudService
 
     begin
       instance.destroy
-      puts "Instance #{instance.name} is deleted."
     rescue => e
       raise "Couldn't delete instance #{ instance.name } in #{ project.name }. " +
             "The error returned was: #{ e.inspect }."
