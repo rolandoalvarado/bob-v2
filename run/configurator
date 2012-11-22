@@ -92,7 +92,7 @@ def configure(hash, key, prompt, force = @options[:force])
         print "[#{value}] "
       end
     end
-    hash[key] = STDIN.gets.chomp
+    hash[key] = STDIN.gets.to_s.chomp
     hash[key] = value if hash[key].empty?
   end
 end

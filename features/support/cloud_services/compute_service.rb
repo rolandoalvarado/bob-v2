@@ -68,13 +68,13 @@ class ComputeService < BaseCloudService
   end
 
   def ensure_instance_does_not_have_a_snapshot(project, instance, snapshot)
-    service.set_tenant project
+    set_tenant(project)
     snapshot_id = snapshot.id || snapshot['id']
     service.delete_image(snapshot_id)
   end
 
   def ensure_snapshot_does_not_exists(project, snapshot)
-    service.set_tenant project
+    set_tenant(project)
     snapshot = find_snapshot_by_name(project, snapshot)
 
     if snapshot
@@ -89,12 +89,12 @@ class ComputeService < BaseCloudService
   end
 
   def find_snapshot_by_name(project, name)
-    service.set_tenant project
+    set_tenant(project)
     return service.list_images.body['images'].find { |i| i['name'] == name }
   end
 
   def get_nova_images(project)
-    service.set_tenant project
+    set_tenant(project)
     # NOTE: Please revise this script if you will have additional default images
     return service.list_images.body['images'].select { |i| ((i['name'].to_s) != '64Bit Ubuntu 12.04') }
   end
@@ -111,7 +111,7 @@ class ComputeService < BaseCloudService
   end
 
   def ensure_public_snapshot(project, instance, snapshot, visibility)
-    service.set_tenant project
+    set_tenant(project)
     sleep(2)
 
     ensure_snapshot_does_not_exists(project, snapshot)
@@ -126,7 +126,7 @@ class ComputeService < BaseCloudService
   end
 
   def delete_snapshot_in_project(project, snapshot)
-    service.set_tenant project
+    set_tenant(project)
     service.delete_image(snapshot)
   end
 
@@ -234,7 +234,7 @@ class ComputeService < BaseCloudService
   end
 
   def create_instances_in_project(project, desired_count, attributes = {})
-    service.set_tenant project
+    set_tenant(project)
     service.servers.reload
 
     active_instances = []
@@ -400,12 +400,11 @@ class ComputeService < BaseCloudService
     keypairs = service.key_pairs
     if keypair = keypairs.find { |k| k.name == key_name }
       keypair.destroy
-      sleep(1)
     end
 
-    response = service.create_key_pair(key_name)
-    @private_keys[key_name] = response.body['keypair']['private_key']
-    return keypairs.reload.find { |kp| kp.name == key_name }
+    keypair = keypairs.create(name: key_name)
+    @private_keys[key_name] = keypair.private_key
+    return keypairs.reload.get(key_name)
   rescue => e
     raise "Couldn't create keypair '#{ key_name }'! The error returned " +
           "was: #{ e.inspect }"
@@ -468,7 +467,7 @@ class ComputeService < BaseCloudService
   end
 
   def ensure_project_instance_is_active(project, name)
-    service.set_tenant project
+    set_tenant(project)
     keep_trying do
       instances.reload
 
@@ -502,7 +501,7 @@ class ComputeService < BaseCloudService
   end
 
   def ensure_instance_is_rebooted_and_active(project, instance)
-    service.set_tenant project
+    set_tenant(project)
     instance.reboot("HARD")
 
     sleeping(ConfigFile.wait_long).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
@@ -521,7 +520,7 @@ class ComputeService < BaseCloudService
   end
 
   def ensure_security_group_rule(project, ip_protocol='tcp', from_port=22, to_port=22, cidr='0.0.0.0/0')
-    service.set_tenant project
+    set_tenant(project)
     security_group = @security_groups.reload.first
     parent_group_id = security_group.id
 
@@ -551,7 +550,7 @@ class ComputeService < BaseCloudService
   end
 
   def ensure_security_group_rule_exist(project, ip_protocol='tcp', from_port=22, to_port=22, cidr='0.0.0.0/0')
-    service.set_tenant project
+    set_tenant(project)
     security_group = @security_groups.reload.first
     parent_group_id = security_group.id
 
@@ -579,7 +578,7 @@ class ComputeService < BaseCloudService
   end
 
   def ensure_project_security_group_count(project, desired_count)
-    service.set_tenant project
+    set_tenant(project)
     security_groups_count = @security_groups.count
 
     if desired_count < security_groups_count
@@ -594,7 +593,7 @@ class ComputeService < BaseCloudService
   end
 
   def ensure_security_group_does_not_exist(project, attributes)
-    service.set_tenant project
+    set_tenant(project)
 
     if find_security_group = @security_groups.find_by_name(attributes[:name])
       delete_security_group(find_security_group)
@@ -602,13 +601,13 @@ class ComputeService < BaseCloudService
   end
 
   def find_security_group_by_name(project, name)
-    service.set_tenant project
+    set_tenant(project)
     @security_groups.find_by_name(name)
     security_groups
   end
 
   def create_security_group(project, attributes)
-    service.set_tenant project
+    set_tenant(project)
     security_group = @security_groups.find_by_name(attributes[:name])
     security_group.destroy if security_group
 
@@ -622,7 +621,7 @@ class ComputeService < BaseCloudService
   end
 
   def ensure_security_group_exists(project, attributes)
-    service.set_tenant project
+    set_tenant(project)
     find_security_group = @security_groups.find_by_name(attributes[:name]) rescue nil
 
     if find_security_group
@@ -634,7 +633,7 @@ class ComputeService < BaseCloudService
   end
 
   def ensure_project_security_group_count(project, desired_count)
-    service.set_tenant project
+    set_tenant(project)
     security_groups_count = @security_groups.count
 
     if desired_count < security_groups_count
@@ -649,7 +648,7 @@ class ComputeService < BaseCloudService
   end
 
   def ensure_security_group_does_not_exist(project, attributes)
-    service.set_tenant project
+    set_tenant(project)
 
     if security_group = @security_groups.find_by_name(attributes[:name])
       delete_security_group(security_group)
@@ -672,7 +671,7 @@ class ComputeService < BaseCloudService
   end
 
   def pause_an_instance(project, instance)
-    service.set_tenant project
+    set_tenant(project)
 
     sleep(ConfigFile.wait_long)
     service.pause_server(instance.id)
@@ -704,7 +703,7 @@ class ComputeService < BaseCloudService
   # number of instances in the project.
   def ensure_instance_count(project, status, desired_count, strict = true, attributes = {})
     status = status.to_s.upcase
-    service.set_tenant project
+    set_tenant(project)
 
     # This block will keep running until it stops raising an error, or until
     # the max number of tries is reached. In the last try, whatever error is
