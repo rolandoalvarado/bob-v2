@@ -10,6 +10,7 @@ def remote_client_connection(protocol, external_ip, internal_ip, username, optio
     private_key = ComputeService.session.private_keys[test_keypair_name]
     raise "Couldn't find private key for keypair '#{ test_keypair_name }'!" unless private_key
     options.merge!( port: 22, timeout: 60, key_data: [ private_key ], user_known_hosts_file: '/dev/null')
+    options.merge!( verbose: :debug )
 
     begin
       print "Connecting to external IP #{ external_ip }... "

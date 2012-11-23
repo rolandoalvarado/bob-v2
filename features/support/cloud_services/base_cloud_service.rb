@@ -49,8 +49,8 @@ class BaseCloudService
 
   def set_tenant(project, reload = true)
     if @current_project != project || reload
-      @current_project = project
       service.set_tenant(project)
+      @current_project = project
     end
     load_resources(reload)
   end

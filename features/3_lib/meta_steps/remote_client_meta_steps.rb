@@ -179,20 +179,7 @@ Step /^Connect to the instance named (.+) in project (.+) via (SSH|RDP)$/ do |in
 
   username    = ServerConfigFile.username(image_name)
 
-  retried = false
-  begin
-    remote_client_connection( remote_client, external_ip, internal_ip, username )
-  rescue => e
-    unless retried
-      # Reboot server then attempt reconnection once
-      retried = true
-      instance.reboot('HARD')
-      sleep(ConfigFile.wait_short) until instance.reload.state == 'ACTIVE'
-      retry
-    else
-      raise e
-    end
-  end
+  remote_client_connection( remote_client, external_ip, internal_ip, username )
 end
 
 
