@@ -122,7 +122,8 @@ class IdentityService < BaseCloudService
   # Project Manager = 'admin' in admin tenant, 'Member' in the tenant
   # Member          = 'Member' in the tenant
   def ensure_tenant_role(user, tenant, role_name)
-    valid_roles = ['System Admin', 'Admin', 'Project Manager', 'Member', '(None)']
+    valid_roles = RoleNameDictionary.roles.map { |role| role[:friendly_name] }
+    valid_roles << '(None)'
 
     unless valid_roles.include?(role_name)
       raise "Unknown role '#{ role_name }'. Valid roles are #{ valid_roles.join(',') }"
@@ -130,14 +131,14 @@ class IdentityService < BaseCloudService
 
     revoke_all_user_roles(user, tenant) # It's for (None)
 
-    if ['System Admin', 'Admin', 'Project Manager', 'Member'].include?(role_name)
+    if role_name != '(None)'
       admin_tenant = find_tenant_by_name('admin')
-      member_role = roles.find_by_name('Member')
+      member_role = roles.find_by_name(RoleNameDictionary.db_name(role_name))
       user.update_tenant(tenant.id)
       tenant.grant_user_role(user.id, member_role.id)
       revoke_all_user_roles(user, admin_tenant)
-      if ['System Admin', 'Admin','Project Manager'].include?(role_name)
-        admin_role   = roles.find_by_name('admin')
+      if ['System Admin', 'Admin'].include?(role_name)
+        admin_role = roles.find_by_name('admin')
         admin_tenant.grant_user_role(user.id, admin_role.id)
       end
     end
@@ -198,6 +199,44 @@ class IdentityService < BaseCloudService
     else
       tenant = create_tenant(attributes)
     end
+
+    # Make ConfigFile.admin_username an admin of the tenant. This is so that we
+    # can manipulate it as needed. Turns out the 'admin' role in Keystone is
+    # not really a global role
+    admin_user  = users.find_by_name(ConfigFile.admin_username)
+    raise "The user #{ ConfigFile.admin_username } could not be found!" unless admin_user
+
+    # Make sure user has no project manager role in project
+    response = service.list_roles_for_user_on_tenant(tenant.id, admin_user.id)
+    manager_role = response.body['roles'].find {|r| r['name'] == RoleNameDictionary.db_name('Project Manager') }
+    tenant.revoke_user_role(admin_user.id, manager_role['id']) if manager_role
+
+    # Every tenant should be handled by admin (MCF-199,MCF-198)
+    admin_role   = roles.find_by_name(RoleNameDictionary.db_name('System Admin'))
+    raise "The role #{ RoleNameDictionary.db_name('System Admin') } could not be found!" unless admin_role
+    tenant.grant_user_role(admin_user.id, admin_role.id)
+
+    tenant
+  end
+
+  def ensure_new_tenant_exists(attributes, clear = false)
+    attributes        = CloudObjectBuilder.attributes_for(:tenant, attributes)
+    attributes[:name] = Unique.project_name(attributes[:name])
+
+    tenant = find_tenant_by_name(attributes[:name])
+
+    if tenant
+      # Remove instances and volumes if exist.
+      if clear
+        ComputeService.session.delete_instances_in_project(tenant)
+        VolumeService.session.delete_volume_snapshots_in_project(tenant)
+        VolumeService.session.delete_volumes_in_project(tenant)
+      end
+
+      tenant.destroy
+    end
+
+    tenant = create_tenant(attributes)
 
     # Make ConfigFile.admin_username an admin of the tenant. This is so that we
     # can manipulate it as needed. Turns out the 'admin' role in Keystone is

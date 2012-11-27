@@ -255,6 +255,24 @@ Then /^The context menu for the image named (.+) should have the (.+) action$/i 
   end
 end
 
+
+Then /^The context menu for the project named (.+) should not have the (.+) action$/i do |project_name, project_action|
+  project_action = project_action.split.join('_').downcase
+
+  project = IdentityService.session.find_tenant_by_name(project_name)
+  raise "Couldn't find project #{ project_name }!" unless project
+  project_id = project.id
+
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+    @current_page.project_menu_button(id: project_id).click
+
+    if @current_page.send("has_#{ project_action }_project_button?", id: project_id)
+      raise "Found #{ project_action } action in the context menu for project " +
+            "#{ project_name }!"
+    end
+  end
+end
+
 Then /^Click the (.+) action in the context menu for the image named (.+)$/i do |image_action, image_name|
   image_action = image_action.split.join('_').downcase
 
@@ -567,10 +585,25 @@ end
 #  end
 #end
 
+Then /^Fill in and enter the (.+) field with (.+)$/ do |field_name, value|
+  value      = value.gsub(/^\([Nn]one\)$/, '')
+  field_name = field_name.split.join('_').downcase
+  @current_page.send("#{ field_name }_field").set(value)
+  @current_page.send("#{ field_name }_field").native.send_keys(:return)
+end
+
 Then /^Fill in the (.+) field with (.+)$/ do |field_name, value|
   value      = value.gsub(/^\([Nn]one\)$/, '')
   field_name = field_name.split.join('_').downcase
   @current_page.send("#{ field_name }_field").set value
+end
+
+Then /^Press (?:Enter|Return)$/i do
+  if @current_page
+    @current_page.session.execute_script %{
+      $('input:focus').trigger('keypress', [13])
+    }
+  end
 end
 
 Step /^Reload the page$/ do
@@ -1126,6 +1159,20 @@ Then /^The (.+) link should not be visible$/ do |link_name|
   end
 end
 
+Then /^(?:A|The) (.+) message should be visible$/ do |message_name|
+  message_name = message_name.split.join('_').downcase
+  unless @current_page.send("has_#{ message_name }_message?")
+    raise "The '#{ message_name.tr('_', ' ') }' message should be visible, but it is not."
+  end
+end
+
+Then /^(?:A|The) (.+) message should not be visible$/ do |message_name|
+  message_name = message_name.split.join('_').downcase
+  if @current_page.send("has_#{ message_name }_message?")
+    raise "The '#{ message_name.tr('_', ' ') }' message should not be visible, but it is."
+  end
+end
+
 Then /^The (.+) tab should not be visible$/ do |tab_name|
   tab_name = tab_name.split.join('_').downcase
   if @current_page.send("has_#{ tab_name }_tab?")
@@ -1279,6 +1326,24 @@ Then /^The (.+) table's last row should not include the text (.+)$/ do |table_na
     table_rows = @current_page.send("#{ table_name }_table").all('tbody tr')
     unless table_rows.last.has_no_content?(text)
       raise "Found the text '#{ text }' in the last row of the #{ table_name } table."
+    end
+  end
+end
+
+Then /^The collaborators table should have a row for the user named (.+)$/ do |username|
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+    unless @current_page.has_collaborator_row?( name: username )
+      raise "Expected to find a row for user #{ username } in the " +
+            "collaborators table."
+    end
+  end
+end
+
+Then /^The collaborators table should not have a row for the user named (.+)$/ do |username|
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+    if @current_page.has_collaborator_row?( name: username )
+      raise "Expected not to find a row for user #{ username } in the " +
+            "collaborators table."
     end
   end
 end

@@ -59,6 +59,9 @@ class ProjectPage < SecurePage
   span      'project name error',                 "span.error[for='project-name']"
   span      'project description error',          "span.error[for='project-description']"
 
+  message   'project name error',                 "span.error[for='project-name']"
+  message   'project description error',          "span.error[for='project-description']"
+
   #==========================
   # Security Group Elements
   #==========================
@@ -230,7 +233,8 @@ class ProjectPage < SecurePage
   button    'add collaborator',                   '#add-collaborator:not(.disabled)'
   option    'collaborator',                       xpath: '//*[@class="chzn-drop"]//*[li[text()="<name>"]]'
   button    'add new collaborator',               '#add-collaborator-submit'
-  table     'collaborators',                      xpath: "//*[tr[@class='user']]/td[normalize-space(text())='<name>']"
+  table     'collaborators',                      '#users-list'
+  row       'collaborator',                       xpath: "//tr[@class='user']/td[normalize-space(text())=\"<name>\"]"
 
   dropdown  'Users',                              "#user-id"
   field     'email',                              xpath: '//form[@id="add-collaborator-form"]//input[@class="default"]'

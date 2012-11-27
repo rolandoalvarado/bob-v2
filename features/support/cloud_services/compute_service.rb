@@ -712,7 +712,7 @@ class ComputeService < BaseCloudService
     # Since instance reboot will take a while.
     sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_long).tries do
 
-      status_instances = instances.reload.select { |i| i.state == status }
+      status_instances = service.servers.select { |i| i.state == status }
       delta_count      = (desired_count - status_instances.count).abs
 
       if desired_count > status_instances.count

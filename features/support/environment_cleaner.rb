@@ -158,7 +158,9 @@ class EnvironmentCleaner
     @image_service    = ImageService.session
 
     project_ids.uniq.each do |project_id|
-      project = @identity_service.tenants.reload.find { |t| t.id == project_id }
+      tenants = @identity_service.tenants.reload
+      # Find by id or name
+      project = tenants.find { |t| t.id == project_id || t.name == project_id }
       next if project.nil? || project.name == 'admin'
       format_header project.name, '', 0
 

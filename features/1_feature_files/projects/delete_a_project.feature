@@ -18,7 +18,7 @@ Feature: Delete a project
 
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Delete |
-        | System Admin    | Can Delete           |
+        | Admin           | Can Delete           |
         | Project Manager | Can Delete           |
 
       Scenarios: Unauthorized Roles

@@ -15,8 +15,9 @@ Feature: View a Project
 
       Scenarios: Authorized Roles
         | Role            | Can or Cannot View |
-        | Member          | Can View           |
+        | Admin           | Can View           |
         | Project Manager | Can View           |
+        | Member          | Can View           |
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot View |

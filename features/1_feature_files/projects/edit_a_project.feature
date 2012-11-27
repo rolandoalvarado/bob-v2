@@ -7,7 +7,8 @@ Feature: Edit a Project
   #MCF-84 from WC 1.0.1 , project manager role does not depend on project.
 
   Background:
-    * A project exists in the system
+    * A new project exists in the system
+    * A project does not have collaborators
 
   @permissions @jira-MCF-26-CUP
   Scenario Outline: Check User Permissions
@@ -16,9 +17,10 @@ Feature: Edit a Project
 
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Edit |
-        | System Admin    | Can Edit           |
+        | Admin           | Can Edit           |
         | Project Manager | Can Edit           |
 
+      @jira-MCF-26-UR
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Edit |
         | Member          | Cannot Edit        |

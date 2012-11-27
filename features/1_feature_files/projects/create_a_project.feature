@@ -16,18 +16,15 @@ Feature: Create a Project
 
   @permissions @jira-MCF-4-CUP
   Scenario Outline: Check User Permissions
-    Given I have a role of <Role> in the system
-     Then I <Can or Cannot Create> a project
+    * A user with a role of <Role> in the system <Can or Cannot Create> a project
 
-      
       @jira-MCF-4-AR
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Create |
-        | System Admin    | Can Create           |
         | Admin           | Can Create           |
         | Project Manager | Can Create           |
 
-      
+
       @jira-MCF-4-UR
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Create |
@@ -35,21 +32,19 @@ Feature: Create a Project
 
   @jira-MCF-4-CAP
   Scenario Outline: Create a Project
-    Given I am authorized to create projects
-     When I create a project with attributes <Name>, <Description>
-     Then the project will be <Created or Not>
+    * An authorized user <Can or Cannot Create> a project with attributes <Name>, <Description>
 
 
       @jira-MCF-4-VA
       Scenarios: Valid Values
-        | Name            | Description     | Created or Not |
-        | MCF-4-CAP       | Another project | Created        |
+        | Name            | Description     | Can or Cannot Create |
+        | MCF-4-CAP       | Another project | Can Create           |
 
 
       Scenarios: Invalid Values
-        | Name            | Description     | Created or Not | Reason           |
-        | (None)          | Wrong name      | Not Created    | Name is required |
-        | Wrong Desc      | (None)          | Not Created    | Description is required |
+        | Name            | Description     | Can or Cannot Create | Reason                  |
+        | (None)          | Wrong name      | Cannot Create        | Name is required        |
+        | Wrong Desc      | (None)          | Cannot Create        | Description is required |
 
   @jira-MCF-4-CPT
   Scenario: Create a Project That is Not Accessible to Another User

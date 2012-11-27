@@ -13,27 +13,18 @@ Feature: Grant Membership to a Project
   :project_id to his or her access key. If no project is specified in the
   API request, Compute attempts to use a project with the same id as the user.
 
-  Background:
-    * A project exists in the system
-    * A project does not have collaborator
-    * A user named Arya Stark exists in the system
-
-
-  @permissions
+  @permissions @jira-MCF-28-CUP
   Scenario Outline: Check User Permissions
-    Given I have a role of <Role> in the project
-     Then I <Can or Cannot Grant> project membership to Arya Stark
+    * A user with a role of <Role> in the project <Can or Cannot Grant> project membership
 
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Grant |
-        | System Admin    | Can Grant           |
+        | Admin           | Can Grant           |
         | Project Manager | Can Grant           |
 
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Grant |
         | Member          | Cannot Grant        |
 
-  Scenario: Add a Member to A Project
-    Given I am authorized to grant project memberships
-     When I grant project membership to her
-     Then She can view the project
+  Scenario: Add a Member to a Project
+    * A user granted project membership can view the project

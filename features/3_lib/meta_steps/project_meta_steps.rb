@@ -1,11 +1,3 @@
-Then /^A project does not have collaborator/i do
-  identity_service = IdentityService.session
-  @project.users.each do |user|
-    next if user.name == "admin"
-    identity_service.revoke_all_user_roles(user, @project)
-  end
-end
-
 Then /^A quota edit dialog show error/i do
   element_name =  "quota edit error element".split.join('_').downcase
   element_name2 = "quota edit error2 element".split.join('_').downcase
@@ -29,13 +21,9 @@ Step /^Ensure that a project named (.+) exists$/i do |project_name|
   @project = @named_project = project
 end
 
-Step /^Ensure that a project named (.+) does not exists$/i do |project_name|
+Step /^Ensure that a project named (.+) does not exist$/i do |project_name|
   identity_service = IdentityService.session
   project          = identity_service.ensure_tenant_does_not_exist(:name => project_name)
-
-  if project
-    EnvironmentCleaner.register(:project, project.id)
-  end
 end
 
 Step /^Ensure that no projects exist in the system$/ do
@@ -119,6 +107,17 @@ Then /^Ensure that a project is available for use$/i do
   end
 
   @project = project
+end
+
+Then /^Ensure that the project named (.+) has no collaborators$/i do |project_name|
+  identity_service = IdentityService.session
+  project          = identity_service.find_tenant_by_name(project_name)
+  raise "Project #{ project_name } couldn't be found!" unless project
+
+  project.users.each do |user|
+    next if user.name == "admin"
+    identity_service.revoke_all_user_roles(user, project)
+  end
 end
 
 Step /^Ensure that a user exists in the project$/ do
@@ -216,7 +215,11 @@ end
 
 Then /^Register the project named (.+) for deletion at exit$/i do |name|
   project = IdentityService.session.tenants.reload.find { |p| p.name == name }
-  EnvironmentCleaner.register(:project, project.id) if project
+  if project
+    EnvironmentCleaner.register(:project, project.id)
+  else
+    EnvironmentCleaner.register(:project, name)
+  end
 end
 
 Then /^Select Collaborator (.+)$/ do |username|
