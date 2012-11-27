@@ -183,26 +183,23 @@ class EnvironmentCleaner
 
           deleted_instances.each do |instance|
             format_success instance.delete(:name), instance
-          end
-        end
+            
+            # Clean-up Instance Snapshots
+            # ------------------------------------------------------------------
+            snapshots = @compute_service.service.images.reload
+            if snapshots.count > 0
+              snapshots.each do |snapshot|
+                if (snapshot.server && snapshot.server['id'] == instance[:id])
+                  format_header 'instance snapshots [nova]'
+                  deleted_instance_snapshots = @compute_service.delete_instance_snapshots(project, instance[:id]) if instance
 
-        # Clean-up Images in Glance
-        #if @image_service.get_glance_images.count > 0
-          #format_header 'images [glance]'
-          #deleted_images = @image_service.delete_images(project)
-
-          #deleted_images.each do |deleted_image|
-            #format_success deleted_image.delete(:name), deleted_image
-          #end
-        #end
-
-        # Clean-up Instance Snapshots in Nova
-        if @compute_service.get_nova_images(project).count > 0
-          format_header 'instance snapshots [nova]'
-          deleted_instance_snapshots = @compute_service.delete_instance_snapshots(project)
-
-          deleted_instance_snapshots.each do |snapshot|
-            format_success snapshot.delete(:name), snapshot
+                  deleted_instance_snapshots.each do |snapshot|
+                    format_success snapshot.delete(:name), snapshot
+                  end
+                end
+              end
+            end
+            #-------------------------------------------------------------------
           end
         end
 
