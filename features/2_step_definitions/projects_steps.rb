@@ -4,10 +4,10 @@
 Given /^[Aa] project exists in the system$/ do
   identity_service = IdentityService.session
   project          = identity_service.ensure_project_exists(:name => ('project'))
-  
+
   # Register project for clean-up.
   EnvironmentCleaner.register(:project, project.id)
-  
+
   if project.nil? or project.id.empty?
     raise "Project couldn't be initialized!"
   end
@@ -15,6 +15,30 @@ Given /^[Aa] project exists in the system$/ do
   # Make variable(s) available for use in succeeding steps
   @project = project
 end
+
+Given /^[Aa] new project exists in the system$/ do
+  identity_service = IdentityService.session
+  project          = identity_service.ensure_new_project_exists(:name => ('project'))
+
+  # Register project for clean-up.
+  EnvironmentCleaner.register(:project, project.id)
+
+  if project.nil? or project.id.empty?
+    raise "Project couldn't be initialized!"
+  end
+
+  # Make variable(s) available for use in succeeding steps
+  @project = project
+end
+
+Given /^A project does not have collaborators?$/i do
+  identity_service = IdentityService.session
+  @project.users.each do |user|
+    next if user.name == "admin"
+    identity_service.revoke_all_user_roles(user, @project)
+  end
+end
+
 
 Given /^At least (\d+) images? should be available for use in the project$/ do |number_of_images|
   number_of_images = number_of_images.to_i
@@ -65,7 +89,7 @@ Given /^I have a role of (.+) in the project$/ do |role_name|
     raise "No project was defined. You might need to add '* A project exists in the system' " +
           "in the feature file."
   end
-  
+
   user_attrs       = CloudObjectBuilder.attributes_for(
                        :user,
                        :name => bob_username
@@ -78,12 +102,10 @@ Given /^I have a role of (.+) in the project$/ do |role_name|
   identity_service.revoke_all_user_roles(user, @project)
 
   # Ensure user has the following role in the project
-  unless role_name.downcase == "(none)"
-    begin
-      identity_service.ensure_tenant_role(user, @project, role_name)
-    rescue Fog::Identity::OpenStack::NotFound => e
-      raise "Couldn't add #{ user.name } to #{ @project.name } as #{ role_name }"
-    end
+  begin
+    identity_service.ensure_tenant_role(user, @project, role_name)
+  rescue Fog::Identity::OpenStack::NotFound => e
+    raise "Couldn't add #{ user.name } to #{ @project.name } as #{ role_name }"
   end
 
   # Make variable(s) available for use in succeeding steps
@@ -170,17 +192,17 @@ When /^I (.*) edit the project's attributes to (.*), (.*)$/i do |can_or_cannot, 
     * Visit the projects page
 
     * Edit the #{@project} project
-  } 
+  }
 
   if name.downcase == "(none)"
     step "Clear the project name field"
-  else 
+  else
     step "Fill in the project name field with #{ name }"
   end
 
   if desc.downcase == "(none)"
     step "Clear the project description field"
-  else 
+  else
     step "Fill in the project description field with #{ desc }"
   end
 
@@ -191,8 +213,8 @@ When /^I (.*) edit the project's attributes to (.*), (.*)$/i do |can_or_cannot, 
     step "The #{name} project should be visible"
     @project.save
   else
-    if ( !@current_page.has_project_name_error_span? && 
-         !@current_page.has_project_description_error_span? )
+    if ( !@current_page.has_project_name_error_message? &&
+         !@current_page.has_project_description_error_message? )
          raise "The project should not have been created, but it seems that it was."
     end
   end
@@ -272,7 +294,7 @@ Then /^I Cannot Create a project$/ do
     * Visit the projects page
     * The create project button should not be visible
   }
-  
+
 end
 
 
@@ -311,9 +333,9 @@ Then /^I Can Create a project$/ do
 end
 
 Then /^I can grant project membership to (.+)$/i do |username|
-  
+
   user = @user
-  
+
   steps %{
 
     * Click the logout button if currently logged in
@@ -326,19 +348,11 @@ Then /^I can grant project membership to (.+)$/i do |username|
     * The #{ (@project || @project_attrs).name  } project should be visible
     * Click the #{ (@project || @project_attrs).name } project
 
-    * Wait 2 seconds
     * Click the collaborators tab
-
-    * Wait 2 seconds
-
     * Click the add collaborator button
-
-    * Wait 2 seconds
 
     * Fill in the email field with #{ user.email }
     * Click the add new collaborator button
-
-    * Wait 2 seconds
 
     * Current page should have the new collaborator
   }
@@ -465,10 +479,10 @@ Then /^(?:that|the) project cannot be deleted$/i do
 end
 
 Then /^I can edit (?:that|the) project$/i do
-  
+
   edited_project_name = (@project || @project_attrs).name.gsub('project', 'edited')
   edited_project_description = "Edited Project Description"
-  
+
   steps %{
     * Click the logout button if currently logged in
     * Visit the login page
@@ -483,11 +497,11 @@ Then /^I can edit (?:that|the) project$/i do
     * Fill in the project name field with #{ edited_project_name }
     * Fill in the project description field with #{ edited_project_description }
     * Click the modify project button
-    
+
     * Visit the projects page
     * The #{ edited_project_name } project should be visible
   }
-  
+
   # Register created project for post-test deletion
   edited_project = IdentityService.session.find_project_by_name(edited_project_name)
   EnvironmentCleaner.register(:project, edited_project.id) if edited_project
@@ -565,7 +579,7 @@ end
 Then /^the project will be Not Created$/ do
   # current_page should still have a new project form
   # new project form should have the error message "This field is required".
-  if ( !@current_page.has_new_project_name_error_span? && !@current_page.has_new_project_description_error_span? )
+  if ( !@current_page.has_new_project_name_error_message? && !@current_page.has_new_project_description_error_message? )
     raise "The project should not have been created, but it seems that it was."
   end
 end
@@ -578,8 +592,138 @@ end
 # Testcases
 #=================
 
+TestCase /^A user with a role of (.+) in the system can create a project$/i do |role_name|
+
+  Preconditions %{
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that a project named #{ test_project_name } does not exist
+    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the system
+  }
+
+  Cleanup %{
+    * Register the project named #{ test_project_name } for deletion at exit
+    * Register the user named #{ bob_username } for deletion at exit
+  }
+
+  Script %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ bob_username }
+    * Fill in the password field with #{ bob_password }
+    * Click the login button
+
+    * Visit the projects page
+
+    * Click the create project button
+    * Fill in the project name field with #{ test_project_name }
+    * Fill in the project description field with #{  test_project_desc }
+    * Click the save project button
+
+    * Visit the projects page
+    * The #{ test_project_name } project should be visible
+  }
+
+end
+
+TestCase /^A user with a role of (.+) in the system cannot create a project$/i do |role_name|
+
+  Preconditions %{
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that a project named #{ test_project_name } does not exist
+    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the system
+  }
+
+  Cleanup %{
+    * Register the project named #{ test_project_name } for deletion at exit
+    * Register the user named #{ bob_username } for deletion at exit
+  }
+
+  Script %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ bob_username }
+    * Fill in the password field with #{ bob_password }
+    * Click the login button
+
+    * Visit the projects page
+    * The create project button should not be visible
+  }
+
+end
+
+TestCase /^An authorized user can create a project with attributes (.+), (.+)$/i do |name, description|
+
+  Preconditions %{
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that a project named #{ name } does not exist
+    * Ensure that the user #{ bob_username } has a role of System Admin in the system
+  }
+
+  Cleanup %{
+    * Register the project named #{ name } for deletion at exit
+    * Register the user named #{ bob_username } for deletion at exit
+  }
+
+  Script %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ bob_username }
+    * Fill in the password field with #{ bob_password }
+    * Click the login button
+
+    * Visit the projects page
+
+    * Click the create project button
+    * Fill in the project name field with #{ name }
+    * Fill in the project description field with #{ description }
+    * Click the save project button
+
+    * Visit the projects page
+    * The #{ name } project should be visible
+  }
+
+end
+
+TestCase /^An authorized user cannot create a project with attributes (.+), (.+)$/i do |name, description|
+
+  Preconditions %{
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that a project named #{ name } does not exist
+    * Ensure that the user #{ bob_username } has a role of System Admin in the system
+  }
+
+  Cleanup %{
+    * Register the user named #{ bob_username } for deletion at exit
+  }
+
+  Script %{
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ bob_username }
+    * Fill in the password field with #{ bob_password }
+    * Click the login button
+
+    * Visit the projects page
+
+    * Click the create project button
+    * Fill in the project name field with #{ name }
+    * Fill in the project description field with #{ description }
+    * Click the save project button
+
+    * A new project error message should be visible
+
+    * Visit the projects page
+    * The #{ name } project should not be visible
+  }
+
+end
+
 TestCase /^A user with a role of (.+) in a project can edit the instance quota of the project$/i do |role_name|
-  
+
   floating_ips  = 10
   volumes       = 10
   cores         = 20
@@ -618,8 +762,8 @@ TestCase /^A user with a role of (.+) in a project can edit the instance quota o
 
 end
 
-TestCase /^A user with a role of (.+) in a project cannot edit the instance quota of the project$/i do |role_name| 
-  
+TestCase /^A user with a role of (.+) in a project cannot edit the instance quota of the project$/i do |role_name|
+
   floating_ips  = 10
   volumes       = 10
   cores         = 20
@@ -635,7 +779,7 @@ TestCase /^A user with a role of (.+) in a project cannot edit the instance quot
     * Register the project named #{ test_project_name } for deletion at exit
     * Register the user named #{ bob_username } for deletion at exit
   }
-  
+
   Script %{
 
     * Click the Logout button if currently logged in
@@ -657,7 +801,7 @@ TestCase /^Project can be updated the quota of the project with (.+) , (.+) and 
   Preconditions %{
     * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
     * Ensure that a project named #{ test_project_name } exists
-    * Ensure that the user #{ bob_username } has a role of Project Manager in the project #{ test_project_name } 
+    * Ensure that the user #{ bob_username } has a role of Project Manager in the project #{ test_project_name }
   }
 
   Cleanup %{
@@ -718,11 +862,135 @@ TestCase /^Project cannot be updated the quota of the project with (.+) , (.+) a
     * Fill in the floating ips quota edit field with #{ floating_ips }
     * Fill in the volumes quota edit field with #{ volumes }
     * Fill in the cores quota edit field with #{ cores }
-    
+
     * Click the save quota edit button
     * A quota edit dialog show error
   }
 
 end
 
+TestCase /^A user with a role of (.+) in the project can grant project membership$/i do |role_name|
 
+  Preconditions %{
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that another user with username #{ other_username }, password #{ other_password }, and email #{ other_email } exists
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that the project named #{ test_project_name } has no collaborators
+    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the project #{ test_project_name }
+  }
+
+  Cleanup %{
+    * Register the project named #{ test_project_name } for deletion at exit
+    * Register the user named #{ bob_username } for deletion at exit
+    * Register the user named #{ other_username } for deletion at exit
+  }
+
+  Script %{
+    * Click the logout button if currently logged in
+    * Visit the login page
+    * Fill in the username field with #{ bob_username }
+    * Fill in the password field with #{ bob_password }
+    * Click the login button
+
+    * Visit the projects page
+    * The #{ test_project_name } project should be visible
+    * Click the #{ test_project_name } project
+
+    * Click the collaborators tab
+    * Click the add collaborator button
+
+    * Fill in and enter the email field with #{ other_email }
+    * Click the add new collaborator button
+
+    * The collaborators table should have a row for the user named #{ other_username }
+  }
+
+end
+
+TestCase /^A user with a role of (.+) in the project cannot grant project membership$/i do |role_name|
+
+  Preconditions %{
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that the project named #{ test_project_name } has no collaborators
+    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the project #{ test_project_name }
+  }
+
+  Cleanup %{
+    * Register the project named #{ test_project_name } for deletion at exit
+    * Register the user named #{ bob_username } for deletion at exit
+  }
+
+  Script %{
+    * Click the logout button if currently logged in
+    * Visit the login page
+    * Fill in the username field with #{ bob_username }
+    * Fill in the password field with #{ bob_password }
+    * Click the login button
+
+    * Visit the projects page
+    * The #{ test_project_name  } project should be visible
+    * Click the #{ test_project_name } project
+
+    * The collaborators tab should not be visible
+  }
+
+end
+
+TestCase /^A user granted project membership can view the project$/i do
+
+  Preconditions %{
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that another user with username #{ other_username }, password #{ other_password }, and email #{ other_email } exists
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that the project named #{ test_project_name } has no collaborators
+    * Ensure that the user #{ bob_username } has a role of Project Manager in the project #{ test_project_name }
+  }
+
+  Cleanup %{
+    * Register the project named #{ test_project_name } for deletion at exit
+    * Register the user named #{ bob_username } for deletion at exit
+    * Register the user named #{ other_username } for deletion at exit
+  }
+
+  Script %{
+    * Click the logout button if currently logged in
+    * Visit the login page
+    * Fill in the username field with #{ other_username }
+    * Fill in the password field with #{ other_password }
+    * Click the login button
+
+    * Visit the projects page
+    * The #{ test_project_name } project should not be visible
+
+
+    * Click the logout button
+    * Visit the login page
+    * Fill in the username field with #{ bob_username }
+    * Fill in the password field with #{ bob_password }
+    * Click the login button
+
+    * Visit the projects page
+    * The #{ test_project_name } project should be visible
+    * Click the #{ test_project_name } project
+
+    * Click the collaborators tab
+    * Click the add collaborator button
+
+    * Fill in and enter the email field with #{ other_email }
+    * Click the add new collaborator button
+
+    * The collaborators table should have a row for the user named #{ other_username }
+
+
+    * Click the logout button
+    * Visit the login page
+    * Fill in the username field with #{ other_username }
+    * Fill in the password field with #{ other_password }
+    * Click the login button
+
+    * Visit the projects page
+    * The #{ test_project_name } project should be visible
+  }
+
+end

@@ -26,7 +26,27 @@ Step /^Ensure that (?:a|another) user with username (.+) and password (.+) exist
 
   #if user has project , reset roles for next steps
   identity_service.revoke_all_user_roles(user, @project) if @project != nil
-  
+
+  # Make variable(s) available for use in succeeding steps
+  @existing_user = @user = user
+end
+
+Step /^Ensure that (?:a|another) user with username (.+), password (.+), and email (.+) exists$/i do |username, password, email|
+  username         = Unique.username(username)
+  user_attrs       = CloudObjectBuilder.attributes_for(
+                       :user,
+                       :name => username,
+                       :password => password,
+                       :email => email
+                     )
+
+  identity_service = IdentityService.session
+  user = identity_service.ensure_user_exists(user_attrs)
+  EnvironmentCleaner.register(:user, user.id)
+
+  #if user has project , reset roles for next steps
+  identity_service.revoke_all_user_roles(user, @project) if @project != nil
+
   # Make variable(s) available for use in succeeding steps
   @existing_user = @user = user
 end
@@ -45,7 +65,7 @@ Step /^Ensure that (?:a|another) user with username (.+) and password (.+) has a
 
   #if user has project , reset roles for next steps
   identity_service.revoke_all_user_roles(user, @project) if @project != nil
-  
+
   # Ensure user has the following role in the project
   unless role_name.downcase == "(none)"
     begin
@@ -54,7 +74,7 @@ Step /^Ensure that (?:a|another) user with username (.+) and password (.+) has a
       raise "Couldn't add #{ user.name } to #{ @project.name } as #{ role_name }"
     end
   end
-  
+
   # Make variable(s) available for use in succeeding steps
   @existing_user = @user = user
 end

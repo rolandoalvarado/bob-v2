@@ -36,6 +36,10 @@ After do |scenario|
   end
 
   embed(File.join(tmp_screenshots_dir, "scenario.#{__id__}.png"), "image/png", "Screenshot")
+
+  if scenario.exception.is_a? Timeout::Error
+    Capybara.send(:session_pool).delete_if { |key, value| key =~ /#{ Capybara.current_driver.to_s.downcase }/i }
+  end
 end
 
 Around do |scenario, block|

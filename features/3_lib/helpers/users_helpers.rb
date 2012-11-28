@@ -6,6 +6,10 @@ def member_password
   '123qwe'
 end
 
+def other_password
+  '123qwe'
+end
+
 def bob_username
   Unique.username('bob')
 end
@@ -32,4 +36,12 @@ end
 
 def admin_role?(role)
   !!role.match(/project[ _]manager|system[ _]admin/i)
+end
+
+def bob_email
+  'bob@example.com'
+end
+
+def other_email
+  'other@example.com'
 end
