@@ -99,17 +99,23 @@ class ComputeService < BaseCloudService
     return service.list_images.body['images'].select { |i| ((i['name'].to_s) != '64Bit Ubuntu 12.04') }
   end
 
-  def delete_instance_snapshots(project) # Delete Instance Snapshots
+  def delete_instance_snapshots(project, instance_id) # Delete Instance Snapshots
+    set_tenant project
     deleted_snapshots = []
+    snapshots = service.images.reload
 
-    get_nova_images(project).each do |snapshot|
-      deleted_snapshots << { name: snapshot['name'], id: snapshot['id'] }
-      delete_snapshot_in_project(project, snapshot['id'])
+    if snapshots.count > 0
+      snapshots.each do |snapshot|
+        if (snapshot.server && snapshot.server['id'] == instance_id)
+          deleted_snapshots << { name: snapshot.name, id: snapshot.id }
+          delete_snapshot_in_project(project, snapshot.id)
+        end
+      end
     end
-
+  
     deleted_snapshots
   end
-
+  
   def ensure_public_snapshot(project, instance, snapshot, visibility)
     set_tenant(project)
     sleep(2)
