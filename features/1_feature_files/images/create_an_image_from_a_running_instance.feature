@@ -15,7 +15,7 @@ Feature: Create an Image from a Running Instance
       @jira-MCF-10-AR
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Create |
-        | System Admin    | Can Create           |
+        | Admin           | Can Create           |
         | Project Manager | Can Create           |
         | Member          | Can Create           |
 
