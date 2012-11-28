@@ -19,11 +19,6 @@ Feature: Create an Image from a Running Instance
         | Project Manager | Can Create           |
         | Member          | Can Create           |
 
-      @jira-MCF-10-UR
-      Scenarios: Unauthorized Roles
-        | Role            | Can or Cannot Create |
-        | (None)          | Cannot Create        |
-
 
   @jira-MCF-10-visibility
   Scenario Outline:
