@@ -87,7 +87,7 @@ TestCase /^A user with a role of (.+) in a project can create an image from an i
 
 end
 
-TestCase /^A user with a role of (.+) in a project cannot create an image from an instance$/i do |role_name|
+TestCase /^A user with a role of (\(None\)) in a project cannot create an image from an instance$/i do |role_name|
 
   Preconditions %{
     * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
