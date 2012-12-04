@@ -1,4 +1,4 @@
-@jira-MCF-44 @users 
+@jira-MCF-44 @users
 Feature: Edit a User
 
   @permissions @jira-MCF-44-roles
@@ -11,17 +11,17 @@ Feature: Edit a User
         | Role            | Can or Cannot Edit |
         | System Admin    | Can Edit           |
         | Admin           | Can Edit           |
-        
+
       Scenarios: Unauthorized Roles
         | Role         | Can or Cannot Edit |
         | Member       | Cannot Edit        |
-        
-    
+
+
   Scenario Outline: Edit a user with certain attributes
     Given I am authorized to edit users in the system
      Then I <Can or Cannot Update> a user with attributes <Username>, <Email>, <Password>, <Primary Project>, <Is PM or Not> and <Is Admin or Not>
 
-     @jira-MCF-44-vua       
+     @jira-MCF-44-vua
      Scenarios: Valid User Attributes
        | Username   | Email                 | Password | Primary Project | Is PM or Not| Is Admin or Not | Can or Cannot Update | Remarks                                           |
        | astarkAD   | astark@morphlabs.com  | fkd2350a | (Any)           | No          | Yes             | Can Update           |                                                 |

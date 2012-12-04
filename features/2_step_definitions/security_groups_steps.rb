@@ -73,7 +73,7 @@ end
 #=================
 
 When /^I create a security group with attributes (.+), (.+)$/ do |name, description|
-    
+
   security_group = CloudObjectBuilder.attributes_for(:security_group, :name => Unique.name(name))
 
   ComputeService.session.ensure_security_group_does_not_exist(@project, security_group)
@@ -134,7 +134,7 @@ When /^I edit a security group with the following rule: (.+), (.+), (.+), (\d+\.
 end
 
 When /^I add the following rule: (.+), (.+), (.+), (\d+\.\d+\.\d+\.\d+(?:|\/\d+)|\(None\)|\(Random\))$/ do |protocol, from_port, to_port, cidr|
-  
+
   steps %{
     * Click the logout button if currently logged in
 
@@ -370,92 +370,164 @@ Then /^The (.+) security group should not be visible$/ do |security_group|
   }
 end
 
-Then /^the security group with attributes (.+), (.+) will be [Cc]reated$/ do |name, description|
-  
-  security_group = CloudObjectBuilder.attributes_for(
-                    :security_group,
-                    :name     => Unique.name(name),
-                    :description    => description
-                  )
+TestCase /^The security group with attributes (.+), (.+) will be created$/i do |name, description|
 
-  @security_group = ComputeService.session.ensure_security_group_does_not_exist(@project, security_group)
-  
-  steps %{
+  Preconditions %{
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that the security group named #{ name } does not exist for project #{ test_project_name }
+    * Ensure that the user #{ bob_username } has a role of Project Manager in the project #{ test_project_name }
+  }
+
+  Cleanup %{
+    * Register the user named #{ bob_username } for deletion at exit
+    * Register the project named #{ test_project_name } for deletion at exit
+  }
+
+  Script %{
     * Click the logout button if currently logged in
-
     * Visit the login page
-    * Fill in the username field with #{ @current_user.name }
-    * Fill in the password field with #{ @current_user.password }
+    * Fill in the username field with #{ bob_username }
+    * Fill in the password field with #{ bob_password }
     * Click the login button
 
-    * Visit the projects page
-    * Click the #{ @project.name } project
-
-    * Wait 2 seconds
+    * Click the projects link
+    * Click the #{ test_project_name } project
 
     * Click the access security tab
     * Click the new security group button
     * Current page should have the new security form
-    * Fill in the security group name field with #{security_group.name}
-    * Fill in the security group description field with #{security_group.description}
+    * Fill in the security group name field with #{ name }
+    * Fill in the security group description field with #{ description }
     * Click the create security button
 
-    * Wait 1 second
-
-    * Current page should have the new #{security_group.name} security group
+    * Current page should have the new #{ name } security group
   }
+
 end
 
-Then /^the security group with attributes (.+), (.+) will be [Nn]ot [Cc]reated$/ do |name, description|
-  
-  @security_group = CloudObjectBuilder.attributes_for(
-                    :security_group,
-                    :name     => Unique.name(name),
-                    :description    => description
-                  )
-  
-  steps %{
-    * Click the logout button if currently logged in
+TestCase /^The security group with attributes (.+), (.+) will be not created$/i do |name, description|
 
+  Preconditions %{
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that the security group named #{ name } does not exist for project #{ test_project_name }
+    * Ensure that the user #{ bob_username } has a role of Project Manager in the project #{ test_project_name }
+  }
+
+  Cleanup %{
+    * Register the user named #{ bob_username } for deletion at exit
+    * Register the project named #{ test_project_name } for deletion at exit
+  }
+
+  Script %{
+    * Click the logout button if currently logged in
     * Visit the login page
-    * Fill in the username field with #{ @current_user.name }
-    * Fill in the password field with #{ @current_user.password }
+    * Fill in the username field with #{ bob_username }
+    * Fill in the password field with #{ bob_password }
     * Click the login button
 
-    * Visit the projects page
-    * Click the #{ @project.name } project
-
-    * Wait 2 seconds
+    * Click the projects link
+    * Click the #{ test_project_name } project
 
     * Click the access security tab
     * Click the new security group button
     * Current page should have the new security form
-    * Fill in the security group name field with #{name}
-    * Fill in the security group description field with #{description}
+    * Fill in the security group name field with #{ name }
+    * Fill in the security group description field with #{ description }
     * Click the create security button
-
-    * Wait 1 second
 
     * The new security form should be visible
     * The new security group form error message should be visible
   }
 end
 
-Then /^the rules will be Added$/ do
-  steps %{
-    * Current page should have the new rules
-  }
-end
+TestCase /^The security group with rule (.+), (.+), (.+), (.+) will be added$/i do |protocol, from_port, to_port, cidr|
 
-Then /^the rule will be [Aa]dded$/ do
-  steps %{
+  Preconditions %{
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that the security group named #{ test_security_group_name } exists for project #{ test_project_name }
+    * Ensure that the user #{ bob_username } has a role of Project Manager in the project #{ test_project_name }
+  }
+
+  Cleanup %{
+    * Register the user named #{ bob_username } for deletion at exit
+    * Register the project named #{ test_project_name } for deletion at exit
+  }
+
+  Script %{
+    * Click the logout button if currently logged in
+    * Visit the login page
+    * Fill in the username field with #{ bob_username }
+    * Fill in the password field with #{ bob_password }
+    * Click the login button
+
+    * Click the projects link
+    * Click the #{ test_project_name } project
+
+    * Click the access security tab
+    * Current page should have the security groups
+
+    * Click the edit security group button for the security group named #{ test_security_group_name }
+    * Current page should have the security group rules form
+
+    * Click the new security group rule button
+    * Current page should have the new security group rule form
+    * Choose the item with text Custom in the service dropdown
+    * Choose the item with text #{ protocol } in the ip protocol dropdown
+    * Set the from port field to #{ from_port }
+    * Set the to port field to #{ to_port }
+    * Choose the item with text Custom in the CIDR dropdown
+    * Fill in the CIDR field with #{ cidr }
+    * Click the add security group rule button
+
     * Current page should have the new security group rule
   }
+
 end
 
-Then /^the rule will be [Nn]ot [Aa]dded$/ do
-  steps %{
+TestCase /^The security group with rule (.+), (.+), (.+), (.+) will be not added$/i do |protocol, from_port, to_port, cidr|
+
+  Preconditions %{
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that the security group named #{ test_security_group_name } exists for project #{ test_project_name }
+    * Ensure that the user #{ bob_username } has a role of Project Manager in the project #{ test_project_name }
+  }
+
+  Cleanup %{
+    * Register the user named #{ bob_username } for deletion at exit
+    * Register the project named #{ test_project_name } for deletion at exit
+  }
+
+  Script %{
+    * Click the logout button if currently logged in
+    * Visit the login page
+    * Fill in the username field with #{ bob_username }
+    * Fill in the password field with #{ bob_password }
+    * Click the login button
+
+    * Click the projects link
+    * Click the #{ test_project_name } project
+
+    * Click the access security tab
+    * Current page should have the security groups
+
+    * Click the edit security group button for the security group named #{ test_security_group_name }
+    * Current page should have the security group rules form
+
+    * Click the new security group rule button
+    * Current page should have the new security group rule form
+    * Choose the item with text Custom in the service dropdown
+    * Choose the item with text #{ protocol } in the ip protocol dropdown
+    * Set the from port field to #{ from_port }
+    * Set the to port field to #{ to_port }
+    * Choose the item with text Custom in the CIDR dropdown
+    * Fill in the CIDR field with #{ cidr }
+
     * The add security group rule button should be disabled
     * Current page should still have the new security group rule form
   }
+
 end

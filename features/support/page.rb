@@ -345,7 +345,7 @@ class Page
     end
 
     send :define_method, "#{ name }_#{ type }_items" do
-      send("#{ name }_#{ type }").all(:xpath, "./option")
+      send("#{ name }_#{ type }").find('option')
     end
   end
 
