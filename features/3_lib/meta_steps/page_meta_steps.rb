@@ -91,7 +91,7 @@ Then /^Choose the item with text (.+) in the (.+) dropdown$/ do |item_text, drop
          when '(any)', '(Any)'
            dropdown_items[1]
          else
-           dropdown_items.find { |d| d.value.strip == item_text || d.text.strip == item_text }
+           dropdown_items.find { |d| d.value == item_text || d.text == item_text }
          end
 
   if item
@@ -703,7 +703,6 @@ Then /^Set the to port field to (.+)$/ do |port_number|
            else
              rand(65534) + 1
            end
-  field_name = field_name.downcase.split.join('_')
   value = case port_number
           when '(random)', '(Random)' then random.to_s
           when '(none)', '(None)'     then ''

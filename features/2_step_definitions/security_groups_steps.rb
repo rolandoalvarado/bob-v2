@@ -474,6 +474,7 @@ TestCase /^The security group with rule (.+), (.+), (.+), (.+) will be added$/i 
 
     * Click the new security group rule button
     * Current page should have the new security group rule form
+
     * Choose the item with text Custom in the service dropdown
     * Choose the item with text #{ protocol } in the ip protocol dropdown
     * Set the from port field to #{ from_port }
@@ -484,6 +485,7 @@ TestCase /^The security group with rule (.+), (.+), (.+), (.+) will be added$/i 
 
     * Current page should have the new security group rule
   }
+
 
 end
 
@@ -519,6 +521,7 @@ TestCase /^The security group with rule (.+), (.+), (.+), (.+) will be not added
 
     * Click the new security group rule button
     * Current page should have the new security group rule form
+
     * Choose the item with text Custom in the service dropdown
     * Choose the item with text #{ protocol } in the ip protocol dropdown
     * Set the from port field to #{ from_port }

@@ -57,10 +57,10 @@ Feature: Create a Security Group
         | TCP      | (Random)  | (Random) | 0.0.0.0/25  | Added        |
         | UDP      | (Random)  | (Random) | 0.0.0.0/25  | Added        |
         | ICMP     | (Random)  | (Random) | 0.0.0.0/25  | Added        |
+        | (Any)    | (Random)  | (Random) | (None)      | Added        |
 
       Scenarios: Invalid Rules
         | Protocol | From Port | To Port  | CIDR        | Added or Not | Reason                            |
         | (Any)    | (None)    | (Random) | 0.0.0.0/25  | Not Added    | 'From Port' must be specified     |
         | (Any)    | (Random)  | (None)   | 0.0.0.0/25  | Not Added    | 'To Port' must be specified       |
         | (Any)    | (Random)  | (None)   | 1.2.9.12    | Not Added    | CIDR must be in CIDR notation     |
-        | (Any)    | (Random)  | (Random) | (None)      | Not Added    | 'CIDR' can't be empty             |
