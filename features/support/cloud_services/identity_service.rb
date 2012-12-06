@@ -142,7 +142,7 @@ class IdentityService < BaseCloudService
         admin_role = find_role_by_friendly_name('Admin')
         (@tenants - [tenant]).each do |project|
           admin_in_tenant =
-            service.list_roles_for_user_on_tenant(tenant.id, user.id).
+            service.list_roles_for_user_on_tenant(project.id, user.id).
             body['roles'].compact.find {|r| r['name'] == 'admin'}
           unless admin_in_tenant
             service.add_user_to_tenant(project.id, user.id, admin_role.id)
