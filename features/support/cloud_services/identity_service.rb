@@ -350,7 +350,11 @@ class IdentityService < BaseCloudService
 
     admins.each do |admin|
       unless tenant.roles_for(admin).include?(admin_role)
-        service.add_user_to_tenant(tenant.id, admin.id, admin_role.id)
+        begin
+          service.add_user_to_tenant(tenant.id, admin.id, admin_role.id)
+        rescue
+          # ignore conflict exception (TODO: implement smart logic.)
+        end
       end
     end
   end
