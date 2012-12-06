@@ -77,7 +77,7 @@ class IdentityService < BaseCloudService
     user = users.new(attributes)
     user.save
     member_role = find_role_by_friendly_name('Member')
-    project.grant_user_role(user.id, member_role.id)
+    service.add_user_to_tenant(project.id, user.id, member_role.id)
     user
   end
 
@@ -132,15 +132,13 @@ class IdentityService < BaseCloudService
     if role_name != '(None)'
       member_role = find_role_by_friendly_name(role_name)
       user.update_tenant(tenant.id)
-
+      service.add_user_to_tenant(tenant.id, user.id, member_role.id)
       revoke_all_user_roles(user, @admin_tenant)
-      tenant.grant_user_role(user.id, member_role.id)
-
-      admin_role = roles.find_by_name('admin')
       if ['System Admin', 'Admin'].include?(role_name)
-        @admin_tenant.grant_user_role(user.id, admin_role.id) rescue nil
-      else
-        @admin_tenant.revoke_user_role(user.id, admin_role.id) rescue nil
+        admin_role = find_role_by_friendly_name('Admin')
+        (@tenants - [tenant]).each do |project|
+          service.add_user_to_tenant(project.id, user.id, admin_role.id)
+        end
       end
     end
 
@@ -157,12 +155,9 @@ class IdentityService < BaseCloudService
     if ['System Admin', 'Admin'].include?(role_name)
       revoke_all_user_roles(user, @admin_tenant)
 
-      admin_role   = roles.find_by_name('admin')
-      @admin_tenant.grant_user_role(user.id, admin_role.id)
-
-      pm_role = find_role_by_friendly_name('Project Manager')
-      tenants.each do |tenant|
-        tenant.grant_user_role(user.id, pm_role.id)
+      admin_role   = find_role_by_friendly_name('Admin')
+      @tenants.each do |tenant|
+        service.add_user_to_tenant(tenant.id, user.id, admin_role.id)
       end
     end
 
@@ -211,11 +206,7 @@ class IdentityService < BaseCloudService
     manager_role = response.body['roles'].find {|r| r['name'] == RoleNameDictionary.db_name('Project Manager') }
     tenant.revoke_user_role(admin_user.id, manager_role['id']) if manager_role
 
-    # Every tenant should be handled by admin (MCF-199,MCF-198)
-    admin_role = find_role_by_friendly_name('System Admin')
-    unless response.body['roles'].find {|r| r['name'] == RoleNameDictionary.db_name('System Admin') }
-      tenant.grant_user_role(admin_user.id, admin_role.id)
-    end
+    add_admins_to_tenant(tenant)
 
     tenant
   end
@@ -250,10 +241,7 @@ class IdentityService < BaseCloudService
     manager_role = response.body['roles'].find {|r| r['name'] == RoleNameDictionary.db_name('Project Manager') }
     tenant.revoke_user_role(admin_user.id, manager_role['id']) if manager_role
 
-    # Every tenant should be handled by admin (MCF-199,MCF-198)
-    admin_role   = find_role_by_friendly_name('System Admin')
-    raise "The role #{ RoleNameDictionary.db_name('System Admin') } could not be found!" unless admin_role
-    tenant.grant_user_role(admin_user.id, admin_role.id)
+    add_admins_to_tenant(tenant)
 
     tenant
   end
@@ -266,31 +254,16 @@ class IdentityService < BaseCloudService
 
   def ensure_user_exists(attributes)
     user = find_user_by_name(attributes[:name])
-
-    unless user
-      user = create_user(attributes)
-      user.password = attributes[:password]
-    else
-      if attributes[:password] != nil && user.password != attributes[:password]
-        user.password = attributes[:password]
-        user.update_password(attributes[:password])
-      end
-    end
-    user
-  end
-
-  def ensure_user_exists_is_admin_or_not(attributes, is_admin)
-    user = find_user_by_name(attributes[:name])
+    admin = !!attributes.delete(:admin)
 
     unless user
       user = create_user(attributes)
       user.password = attributes[:password]
 
-      if (is_admin.downcase == 'yes')
+      if admin
         revoke_all_user_roles(user, @admin_tenant)
         ensure_tenant_role(user, @admin_tenant, 'Admin')
       end
-
     else
       if attributes[:password] != nil && user.password != attributes[:password]
         user.password = attributes[:password]
@@ -301,25 +274,17 @@ class IdentityService < BaseCloudService
   end
 
   def ensure_user_exists_in_project(attributes, project, admin_role = false)
-    attributes[:project_id] = project.is_a?(Fixnum) ? project : project.id
-    user = find_user_by_name(attributes[:name])
+    attributes.merge!(project_id: (project.is_a?(Fixnum) ? project : project.id),
+                      admin: admin_role)
 
-    unless user
-      user = create_user(attributes)
+    user = ensure_user_exists(attributes)
 
-
-      if admin_role
-        admin_role = find_role_by_friendly_name('Project Manager')
-        @admin_tenant.grant_user_role(user.id, admin_role.id)
-      end
-    end
-
+    revoke_all_user_roles(user, project)
     member_role = find_role_by_friendly_name('Member')
     unless project.roles_for(user).include?(member_role)
-      project.grant_user_role(user.id, member_role.id)
+      service.add_user_to_tenant(project.id, user.id, member_role.id)
     end
 
-    user.password = attributes[:password]
     user
   end
 
@@ -343,6 +308,12 @@ class IdentityService < BaseCloudService
   def revoke_all_user_roles(user, tenant)
     service.list_roles_for_user_on_tenant(tenant.id, user.id).body['roles'].compact.each do |role|
       service.remove_user_from_tenant(tenant.id, user.id, role['id'])
+    end
+
+    user_name = user.name
+    sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_long).tries do
+      user = @users.reload.find_by_name(user_name)
+      raise "Roles for user #{ user.name } on tenant #{ tenant.name } took too long to revoke!" if user.roles(tenant.id).length > 0
     end
   end
 
@@ -369,6 +340,20 @@ class IdentityService < BaseCloudService
   #================================================
 
   private
+
+  def add_admins_to_tenant(tenant)
+    admin_role = find_role_by_friendly_name('Admin')
+    admins = @users.select do |user|
+               service.list_roles_for_user_on_tenant(@admin_tenant.id, user.id).
+                 body['roles'].compact.find {|r| r['name'] == 'admin'}
+             end
+
+    admins.each do |admin|
+      unless tenant.roles_for(admin).include?(admin_role)
+        service.add_user_to_tenant(tenant.id, admin.id, admin_role.id)
+      end
+    end
+  end
 
   def create_test_tenant(name)
     attributes = CloudObjectBuilder.attributes_for(:tenant, :name => name)

@@ -18,6 +18,7 @@ module CloudObjectBuilder
     attributes[:name]       ||= attributes.delete('name') || attributes.delete('Username') || Unique.username(Faker::Name.name.gsub(' ', '_')[0, 5].downcase)
     attributes[:tenant_id]  ||= attributes.delete('tenant_id')
     attributes[:password]   ||= attributes.delete('password') || attributes.delete('Password') || "123qwe"
+    attributes[:admin]      ||= attributes.delete('admin') || false
     BetterHash.new.merge(attributes)
   end
 
@@ -73,7 +74,7 @@ class BetterHash < Hash
     if has_key?(name)
       self[name]
     else
-        super name, *args, &block
+      super name, *args, &block
     end
   end
 end

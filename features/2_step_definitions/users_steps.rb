@@ -390,7 +390,11 @@ Then /^I cannot edit a user$/i do
 end
 
 Then /^I Cannot Update a user with attributes (.+), (.+), (.+), (.+), (.+) and (.+)$/i do |username, email, password, primary_project, is_pm_or_not, is_admin|
-  existing_user = CloudObjectBuilder.attributes_for(:user, :name => Unique.username('existing'))
+  existing_user = CloudObjectBuilder.attributes_for(
+                    :user,
+                    :name  => Unique.username('existing'),
+                    :admin => (is_admin.downcase == 'yes')
+                  )
   new_attrs     = CloudObjectBuilder.attributes_for(
                     :user,
                     :name     => ( username.downcase == "(none)" ? username : Unique.username(username) ),
@@ -406,7 +410,7 @@ Then /^I Cannot Update a user with attributes (.+), (.+), (.+), (.+), (.+) and (
 
   role = (is_pm_or_not == "Yes" ? "Project Manager" : "Member")
 
-  @existing_user = IdentityService.session.ensure_user_exists_is_admin_or_not(existing_user, is_admin)
+  @existing_user = IdentityService.session.ensure_user_exists(existing_user)
   me = @current_user
 
   steps %{
