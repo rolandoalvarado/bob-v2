@@ -2,7 +2,7 @@ require_relative 'base_cloud_service'
 
 class IdentityService < BaseCloudService
 
-  attr_reader :test_tenant, :users, :tenants, :roles, :admin_tenant
+  attr_reader :test_tenant, :users, :tenants, :roles, :admins, :admin_tenant
 
   def initialize
     initialize_service Identity
@@ -18,6 +18,10 @@ class IdentityService < BaseCloudService
       test_tenant_name = 'admin'
       @test_tenant = find_test_tenant(test_tenant_name) || create_test_tenant(test_tenant_name)
       @admin_tenant = find_tenant_by_name('admin')
+      @admins  = @users.select do |user|
+                   service.list_roles_for_user_on_tenant(@admin_tenant.id, user.id).
+                     body['roles'].compact.find {|r| r['name'] == 'admin'}
+                 end
     else
       @users   ||= service.users
       @tenants ||= service.tenants
@@ -26,6 +30,10 @@ class IdentityService < BaseCloudService
       test_tenant_name ||= 'admin'
       @test_tenant ||= find_test_tenant(test_tenant_name) || create_test_tenant(test_tenant_name)
       @admin_tenant ||= find_tenant_by_name('admin')
+      @admins  ||= @users.select do |user|
+                     service.list_roles_for_user_on_tenant(@admin_tenant.id, user.id).
+                       body['roles'].compact.find {|r| r['name'] == 'admin'}
+                   end
     end
   end
 
@@ -82,10 +90,6 @@ class IdentityService < BaseCloudService
   end
 
   def delete_user(user)
-    tenants.reload.each do |tenant|
-      revoke_all_user_roles(user, tenant)
-    end
-
     # Sometimes, OpenStack takes a while to complete the deletion
     # of all foreign key constraints. So we have to keep trying
     sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_long).tries do
@@ -137,7 +141,12 @@ class IdentityService < BaseCloudService
       if ['System Admin', 'Admin'].include?(role_name)
         admin_role = find_role_by_friendly_name('Admin')
         (@tenants - [tenant]).each do |project|
-          service.add_user_to_tenant(project.id, user.id, admin_role.id)
+          admin_in_tenant =
+            service.list_roles_for_user_on_tenant(tenant.id, user.id).
+            body['roles'].compact.find {|r| r['name'] == 'admin'}
+          unless admin_in_tenant
+            service.add_user_to_tenant(project.id, user.id, admin_role.id)
+          end
         end
       end
     end
@@ -309,12 +318,6 @@ class IdentityService < BaseCloudService
     service.list_roles_for_user_on_tenant(tenant.id, user.id).body['roles'].compact.each do |role|
       service.remove_user_from_tenant(tenant.id, user.id, role['id'])
     end
-
-    user_name = user.name
-    sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_long).tries do
-      user = @users.reload.find_by_name(user_name)
-      raise "Roles for user #{ user.name } on tenant #{ tenant.name } took too long to revoke!" if user.roles(tenant.id).length > 0
-    end
   end
 
   def get_generic_user(role)
@@ -343,13 +346,11 @@ class IdentityService < BaseCloudService
 
   def add_admins_to_tenant(tenant)
     admin_role = find_role_by_friendly_name('Admin')
-    admins = @users.select do |user|
-               service.list_roles_for_user_on_tenant(@admin_tenant.id, user.id).
-                 body['roles'].compact.find {|r| r['name'] == 'admin'}
-             end
-
-    admins.each do |admin|
-      unless tenant.roles_for(admin).include?(admin_role)
+    @admins.each do |admin|
+      admin_in_tenant =
+        service.list_roles_for_user_on_tenant(tenant.id, admin.id).
+        body['roles'].compact.find {|r| r['name'] == 'admin'}
+      unless admin_in_tenant
         service.add_user_to_tenant(tenant.id, admin.id, admin_role.id)
       end
     end

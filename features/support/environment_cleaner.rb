@@ -221,16 +221,6 @@ class EnvironmentCleaner
           end
         end
 
-        users = project.users.reload
-        if users.count > 0
-          format_header 'memberships', 'revoking'
-          users.each do |user|
-            next if user.name == "admin"
-            @identity_service.revoke_all_user_roles(user, project)
-            format_success user.name, id: user.id
-          end
-        end
-
         @identity_service.delete_project(project)
         format_success(project.name, { id: project.id }, 'deleted', 2)
         success = true
