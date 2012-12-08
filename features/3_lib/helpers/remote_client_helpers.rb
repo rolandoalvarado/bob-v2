@@ -16,7 +16,7 @@ def remote_client_connection(protocol, external_ip, internal_ip, username, optio
       print "Connecting to external IP #{ external_ip }... "
       Net::SSH.start(external_ip, username, options) do |ssh|
         print "Connected.\n"
-        output = ssh.exec!(' hostname ;ip addr show ; top -n 1 ; ')
+        output = ssh.exec!(' hostname ;ip addr show ; ping -c 3 www.google.com ; top -n 1 ; ')
         puts "Output: #{ output }"
       end
     rescue
@@ -25,7 +25,7 @@ def remote_client_connection(protocol, external_ip, internal_ip, username, optio
         print "Connecting to internal IP #{ internal_ip }... "
         Net::SSH.start(internal_ip, username, options) do |ssh|
           print "Connected.\n"
-          output = ssh.exec!(' hostname ;ip addr show ; top -n 1 ; ')
+          output = ssh.exec!(' hostname ;ip addr show ; ping -c 3 www.google.com ; top -n 1 ; ')
           puts "Output: #{ output }"
         end
       rescue Exception => e

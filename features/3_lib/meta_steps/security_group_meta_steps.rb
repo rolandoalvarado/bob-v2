@@ -87,6 +87,20 @@ Step /^Ensure that a security group rule exists for project (.+)$/ do |project_n
   ComputeService.session.ensure_security_group_rule project
 end
 
+Step /^Ensure that the security group named (.+) exists for project (.+)$/ do |security_group_name, project_name|
+  project = IdentityService.session.find_project_by_name(project_name)
+  raise "#{ project_name } couldn't be found!" unless project
+
+  ComputeService.session.ensure_security_group_exists project, name: security_group_name
+end
+
+Step /^Ensure that the security group named (.+) does not exist for project (.+)$/ do |security_group_name, project_name|
+  project = IdentityService.session.find_project_by_name(project_name)
+  raise "#{ project_name } couldn't be found!" unless project
+
+  ComputeService.session.ensure_security_group_does_not_exist project, name: security_group_name
+end
+
 Then /^Ensure that a security group named default exist$/i do
   compute_service = ComputeService.session
   security_group_attrs = CloudObjectBuilder.attributes_for(

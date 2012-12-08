@@ -12,7 +12,7 @@ Feature: Delete a Security Group
   Background:
     * A project exists in the system
     * Ensure that a security group exist
-      
+
   @permissions
   Scenario Outline: Check User Permissions
     Given I have a role of <Role> in the project

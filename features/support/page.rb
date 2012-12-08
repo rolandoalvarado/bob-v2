@@ -85,7 +85,7 @@ if ConfigFile.capybara_driver == :webkit
   Capybara.register_driver :webkit do |app|
     Capybara::Driver::Webkit.new(app, {:ignore_ssl_errors => true} )
   end
-  
+
   # Added to make capybara-webkit run faster. { defaul_value => true }
   Capybara.automatic_reload = false
 end
@@ -345,7 +345,7 @@ class Page
     end
 
     send :define_method, "#{ name }_#{ type }_items" do
-      send("#{ name }_#{ type }").all(:xpath, "./option")
+      send("#{ name }_#{ type }").all(:xpath, './/option')
     end
   end
 
@@ -403,7 +403,7 @@ class Page
   def actual_url
     "#{ session.current_host }#{ actual_path }"
   end
-  
+
   #=====================
   # METHOD MISSING
   #=====================

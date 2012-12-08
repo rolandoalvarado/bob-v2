@@ -84,14 +84,14 @@ end
 Then /^Choose the item with text (.+) in the (.+) dropdown$/ do |item_text, dropdown_name|
   dropdown_name  = dropdown_name.split.join('_').downcase
   dropdown_items = @current_page.send("#{ dropdown_name }_dropdown_items")
-  
-  item = case item_text.downcase
-         when '(none)'
+
+  item = case item_text
+         when '(none)', '(None)'
            dropdown_items.find { |d| d.value.blank? }
-         when '(any)'
+         when '(any)', '(Any)'
            dropdown_items[1]
          else
-           dropdown_items.find { |d| d.text == item_text }
+           dropdown_items.find { |d| d.value == item_text || d.text == item_text }
          end
 
   if item
@@ -320,6 +320,14 @@ end
 Then /^Click the (.+) button for security group (.+)$/ do |button_name, security_group_id|
   button_name = button_name.split.join('_').downcase
   @current_page.send("#{ button_name }_button", id: security_group_id).click
+end
+
+Then /^Click the (.+) button for the security group named (.+)$/ do |button_name, security_group_name|
+  security_groups = ComputeService.session.security_groups
+  security_group = security_groups.find { |sg| sg.name == security_group_name }
+
+  button_name = button_name.split.join('_').downcase
+  @current_page.send("#{ button_name }_button", id: security_group.id.to_s).click
 end
 
 Step /^Click the (delete|disable|edit) button for user (.+)$/ do |button_name, user_id|
@@ -673,14 +681,34 @@ Then /^Set instance name field with (.+)$/ do |instance_name|
 end
 
 
-Then /^Set the ((?:from|to) port) field to (.+)$/ do |field_name, port_number|
-  field_name = field_name.downcase.split.join('_')
-  value = case port_number.downcase
-          when '(random)' then (rand(65534) + 1).to_s
-          when '(none)'   then ''
+Then /^Set the from port field to (.+)$/ do |port_number|
+  to_port = @current_page.to_port_field.value
+  random = unless to_port.blank?
+             rand(0..to_port.to_i)
+           else
+             rand(65534)
+           end
+  value = case port_number
+          when '(random)', '(Random)' then random.to_s
+          when '(none)', '(None)'     then ''
           else port_number
           end
-  @current_page.send("#{ field_name }_field").set(value)
+  @current_page.from_port_field.set(value)
+end
+
+Then /^Set the to port field to (.+)$/ do |port_number|
+  from_port = @current_page.from_port_field.value
+  random = unless from_port.blank?
+             rand(from_port.to_i..65534) + 1
+           else
+             rand(65534) + 1
+           end
+  value = case port_number
+          when '(random)', '(Random)' then random.to_s
+          when '(none)', '(None)'     then ''
+          else port_number
+          end
+  @current_page.to_port_field.set(value)
 end
 
 Step /^Store the private key for keypair (.+)$/i do |key_name|
@@ -1199,22 +1227,6 @@ Step /^The Context Menu button for the project named (.+) should not be visible$
     raise "The context menu button for project #{ project_name } should not be visible, but it is."
   end
 end
-
-Then /^The (.+) message should be visible$/ do |message_name|
-  message_name = message_name.split.join('_').downcase
-  unless @current_page.send("has_#{ message_name }_message?")
-    raise "The '#{ message_name.gsub('_',' ') }' message should be visible, but it's not."
-  end
-end
-
-
-Then /^The (.+) message should not be visible$/ do |message_name|
-  message_name = message_name.split.join('_').downcase
-  if @current_page.send("has_#{ message_name }_message?")
-    raise "The '#{ message_name.gsub('_',' ') }' message should not be visible, but it is."
-  end
-end
-
 
 Then /^The (.+) span should be visible$/ do |span_name|
   span_name = span_name.split.join('_').downcase

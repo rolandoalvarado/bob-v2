@@ -614,6 +614,8 @@ class ComputeService < BaseCloudService
 
   def create_security_group(project, attributes)
     set_tenant(project)
+    attributes = CloudObjectBuilder.attributes_for(:security_group, attributes)
+
     security_group = @security_groups.find_by_name(attributes[:name])
     security_group.destroy if security_group
 

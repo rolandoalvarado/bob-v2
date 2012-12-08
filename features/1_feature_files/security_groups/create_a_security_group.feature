@@ -36,9 +36,8 @@ Feature: Create a Security Group
 
   @jira-MCF-32-csg
   Scenario Outline: Create a Security Group
-    Given I am authorized to create a security group in the project
-    Then the security group with attributes <Name>, <Description> will be <Created or Not Created>
-      
+    * The security group with attributes <Name>, <Description> will be <Created or Not Created>
+
       @jira-MCF-32-csg-vv
       Scenarios: Valid Values
         | Name             | Description              | Created or Not Created  |
@@ -51,20 +50,17 @@ Feature: Create a Security Group
 
   @jira-MCF-32-ardc
   Scenario Outline: Add a Rule
-    Given I am authorized to create a security group in the project
-      And the project has a security group named Web Servers
-    When I add the following rule: <Protocol>, <From Port>, <To Port>, <CIDR>
-    Then the rule will be <Added or Not>
+    * The security group with rule <Protocol>, <From Port>, <To Port>, <CIDR> will be <Added or Not>
 
       Scenarios: Valid Rules
         | Protocol | From Port | To Port  | CIDR        | Added or Not |
         | TCP      | (Random)  | (Random) | 0.0.0.0/25  | Added        |
         | UDP      | (Random)  | (Random) | 0.0.0.0/25  | Added        |
         | ICMP     | (Random)  | (Random) | 0.0.0.0/25  | Added        |
+        | (Any)    | (Random)  | (Random) | (None)      | Added        |
 
       Scenarios: Invalid Rules
         | Protocol | From Port | To Port  | CIDR        | Added or Not | Reason                            |
         | (Any)    | (None)    | (Random) | 0.0.0.0/25  | Not Added    | 'From Port' must be specified     |
         | (Any)    | (Random)  | (None)   | 0.0.0.0/25  | Not Added    | 'To Port' must be specified       |
         | (Any)    | (Random)  | (None)   | 1.2.9.12    | Not Added    | CIDR must be in CIDR notation     |
-        | (Any)    | (Random)  | (Random) | (None)      | Not Added    | 'CIDR' can't be empty             |
