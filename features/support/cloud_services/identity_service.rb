@@ -138,7 +138,7 @@ class IdentityService < BaseCloudService
       tenant.grant_user_role(user.id, member_role.id)
       revoke_all_user_roles(user, admin_tenant)
       if ['System Admin', 'Admin'].include?(role_name)
-        admin_role = roles.find_by_name('admin')
+        admin_role = roles.find_by_name(RoleNameDictionary.db_name('Admin'))
         admin_tenant.grant_user_role(user.id, admin_role.id)
       end
     end
@@ -157,7 +157,7 @@ class IdentityService < BaseCloudService
       admin_tenant = tenants.find{|t| t.name == 'admin'}
       revoke_all_user_roles(user, admin_tenant)
 
-      admin_role   = roles.find_by_name('admin')
+      admin_role   = roles.find_by_name(RoleNameDictionary.db_name('Admin'))
       admin_tenant.grant_user_role(user.id, admin_role.id)
 
       pm_role = roles.find_by_name(RoleNameDictionary.db_name('Project Manager'))
@@ -208,14 +208,29 @@ class IdentityService < BaseCloudService
 
     # Make sure user has no project manager role in project
     response = service.list_roles_for_user_on_tenant(tenant.id, admin_user.id)
-    manager_role = response.body['roles'].find {|r| r['name'] == RoleNameDictionary.db_name('Project Manager') }
-    tenant.revoke_user_role(admin_user.id, manager_role['id']) if manager_role
-
+    response_manager_role = response.body['roles'].find {|r| r['name'] == RoleNameDictionary.db_name('Project Manager') }
+    
+    if response_manager_role
+      tenant.revoke_user_role(admin_user.id, response_manager_role['id'])
+      sleep(ConfigFile.wait_long)
+    end
+    
+    manager_role   = roles.find_by_name(RoleNameDictionary.db_name('Project Manager'))
+    raise "The role #{ RoleNameDictionary.db_name('Project Manager') } could not be found!" unless manager_role
+    tenant.grant_user_role(admin_user.id, manager_role.id)
+    
     # Every tenant should be handled by admin (MCF-199,MCF-198)
-    admin_role   = roles.find_by_name(RoleNameDictionary.db_name('System Admin'))
-    raise "The role #{ RoleNameDictionary.db_name('System Admin') } could not be found!" unless admin_role
-    tenant.grant_user_role(admin_user.id, admin_role.id)
-
+    response_admin_role = response.body['roles'].find {|r| r['name'] == RoleNameDictionary.db_name('Admin') }
+    
+    if response_admin_role
+      tenant.revoke_user_role(admin_user.id, response_admin_role['id']) 
+      sleep(ConfigFile.wait_long)
+    else
+      admin_role   = roles.find_by_name(RoleNameDictionary.db_name('Admin'))
+      raise "The role #{ RoleNameDictionary.db_name('Admin') } could not be found!" unless admin_role
+      tenant.grant_user_role(admin_user.id, admin_role.id)
+    end
+    
     tenant
   end
 
