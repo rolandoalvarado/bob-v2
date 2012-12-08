@@ -32,5 +32,10 @@ Feature: Create an Image from a Running Instance
 
 
   @jira-MCF-10-format
-  Scenario: Image Format
-    * Image that will be created will be written in BARE format
+  Scenario Outline: 
+    * Image that will be created will be written in <Format> format
+      
+      Scenarios: Image Format
+        | Format  | 
+        | OVF     |
+

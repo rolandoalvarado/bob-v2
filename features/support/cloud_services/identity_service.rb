@@ -162,7 +162,15 @@ class IdentityService < BaseCloudService
     end
 
     if ['System Admin', 'Admin'].include?(role_name)
+<<<<<<< HEAD
       revoke_all_user_roles(user, @admin_tenant)
+=======
+      admin_tenant = tenants.find{|t| t.name == 'admin'}
+      revoke_all_user_roles(user, admin_tenant)
+
+      admin_role   = roles.find_by_name(RoleNameDictionary.db_name('Admin'))
+      admin_tenant.grant_user_role(user.id, admin_role.id)
+>>>>>>> 6e0fbafbaf5b31dd4bbe3609cdc1fd42da71b0d3
 
       admin_role   = find_role_by_friendly_name('Admin')
       @tenants.each do |tenant|
@@ -212,11 +220,37 @@ class IdentityService < BaseCloudService
 
     # Make sure user has no project manager role in project
     response = service.list_roles_for_user_on_tenant(tenant.id, admin_user.id)
+<<<<<<< HEAD
     manager_role = response.body['roles'].find {|r| r['name'] == RoleNameDictionary.db_name('Project Manager') }
     tenant.revoke_user_role(admin_user.id, manager_role['id']) if manager_role
 
     add_admins_to_tenant(tenant)
 
+=======
+    response_manager_role = response.body['roles'].find {|r| r['name'] == RoleNameDictionary.db_name('Project Manager') }
+    
+    if response_manager_role
+      tenant.revoke_user_role(admin_user.id, response_manager_role['id'])
+      sleep(ConfigFile.wait_long)
+    end
+    
+    manager_role   = roles.find_by_name(RoleNameDictionary.db_name('Project Manager'))
+    raise "The role #{ RoleNameDictionary.db_name('Project Manager') } could not be found!" unless manager_role
+    tenant.grant_user_role(admin_user.id, manager_role.id)
+    
+    # Every tenant should be handled by admin (MCF-199,MCF-198)
+    response_admin_role = response.body['roles'].find {|r| r['name'] == RoleNameDictionary.db_name('Admin') }
+    
+    if response_admin_role
+      tenant.revoke_user_role(admin_user.id, response_admin_role['id']) 
+      sleep(ConfigFile.wait_long)
+    else
+      admin_role   = roles.find_by_name(RoleNameDictionary.db_name('Admin'))
+      raise "The role #{ RoleNameDictionary.db_name('Admin') } could not be found!" unless admin_role
+      tenant.grant_user_role(admin_user.id, admin_role.id)
+    end
+    
+>>>>>>> 6e0fbafbaf5b31dd4bbe3609cdc1fd42da71b0d3
     tenant
   end
 
