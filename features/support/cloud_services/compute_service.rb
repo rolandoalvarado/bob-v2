@@ -172,7 +172,7 @@ class ComputeService < BaseCloudService
     set_tenant project
 
     @flavors ||= service.flavors
-    @images  ||= ImageService.session.get_bootable_images
+    @images  ||= ImageService.session.get_default_image
 
     if attributes[:flavor].to_i <= 0
       attributes[:flavor] = flavor_from_name(attributes[:flavor] || 'm1.small')
