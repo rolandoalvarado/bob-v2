@@ -64,6 +64,11 @@ class ImageService < BaseCloudService
     images.public
   end
 
+  def get_default_image
+    default_images = CloudConfiguration::ConfigFile.cleanup_exemptions[:images]
+    images.public.select { |i| default_images.include?(i.name) }
+  end
+
   def get_bootable_images
     #images.public.select {|i| i.disk_format !~ /^a[rk]i$/ && i.status == 'active' && i.properties.empty?}
     images.public.select {|i| i.disk_format !~ /^a[rk]i$/ && i.status == 'active' }
