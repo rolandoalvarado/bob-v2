@@ -123,11 +123,13 @@ When /^I edit a security group with the following rule: (.+), (.+), (.+), (\d+\.
 
     * Click the new security group rule button
     * Current page should have the new security group rule form
+    
     * Choose the item with text Custom in the service dropdown
     * Choose the item with text #{ protocol } in the ip protocol dropdown
     * Set the from port field to #{ from_port }
     * Set the to port field to #{ to_port }
-    * Fill in the CIDR field with #{ cidr }
+    * Choose the item with text Custom in the CIDR dropdown
+    * Fill in the CIDR field with 0.0.0.0/25
     * Click the add security group rule button
   }
 
@@ -190,16 +192,12 @@ Then /^I [Cc]an [Cc]reate a security group in the project$/ do
     * Visit the projects page
     * Click the #{ @project.name } project
 
-    * Wait 2 seconds
-
     * Click the access security tab
     * Click the new security group button
     * Current page should have the new security form
     * Fill in the security group name field with #{security_group.name}
     * Fill in the security group description field with #{security_group.description}
     * Click the create security button
-
-    * Wait 1 second
 
     * Current page should have the new #{security_group} security group
   }
@@ -227,10 +225,12 @@ Then /^I [Cc]an [Ee]dit a security group in the project$/ do
 
     * Click the new security group rule button
     * Current page should have the new security group rule form
+    
     * Choose the item with text Custom in the service dropdown
-    * Choose the item with text (Any) in the ip protocol dropdown
+    * Choose the item with text TCP in the ip protocol dropdown
     * Set the from port field to (Random)
     * Set the to port field to (Random)
+    * Choose the item with text Custom in the CIDR dropdown
     * Fill in the CIDR field with 0.0.0.0/25
     * Click the add security group rule button
 
@@ -307,8 +307,8 @@ Then /^I Cannot Delete the security group$/ do
     * Click the logout button if currently logged in
 
     * Visit the login page
-    * Fill in the username field with #{ @current_user.name }
-    * Fill in the password field with #{ @current_user.password }
+    * Fill in the username field with #{ bob_username }
+    * Fill in the password field with #{ bob_password }
     * Click the login button
 
     * Visit the projects page
@@ -343,6 +343,18 @@ Then /^the security group will be [Nn]ot [Cc]reated$/ do
 
     * Click the access security tab
     * Current page should not have the new security group
+  }
+end
+
+Then /^the rule will be [Aa]dded$/ do
+  steps %{
+    * Current page should have the new security group rule    
+  }
+end
+
+Then /^the rule will be [Nn]ot [Aa]dded$/ do
+  steps %{
+    * The add security group rule button should be disabled
   }
 end
 

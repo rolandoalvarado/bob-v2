@@ -13,16 +13,17 @@ Feature: Delete a Security Group
     * A project exists in the system
     * Ensure that a security group exist
 
-  @permissions
+  @jira-MCF-33-CUP @permissions
   Scenario Outline: Check User Permissions
     Given I have a role of <Role> in the project
      Then I <Can or Cannot Delete> a security group in the project
 
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Delete |
-        | Member          | Can Delete           |
+        | Admin           | Can Delete           |
         | Project Manager | Can Delete           |
-
+        | Member          | Can Delete           |
+        
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Delete |
         | (None)          | Cannot Delete        |

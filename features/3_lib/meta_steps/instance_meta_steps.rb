@@ -5,7 +5,8 @@ end
 
 Step /^Ensure that the instance is a member of the security group$/ do
   compute_service = ComputeService.session
-  compute_service.ensure_active_instance_count(@project, 1, true, {:security_group => test_security_group_name })
+  instance = compute_service.create_instance_in_project(@project, name: test_instance_name, security_group: test_security_group_name)
+  raise "Instance #{ test_instance_name } couldn't be found!" unless instance
 end
 
 Step /^Ensure that the project named (.+) has an instance named (.+)$/ do |project_name, instance_name|

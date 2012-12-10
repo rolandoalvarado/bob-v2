@@ -179,7 +179,7 @@ class ComputeService < BaseCloudService
     end
 
     attributes[:name]           ||= Faker::Name.name
-    attributes[:password]      ||= test_instance_password || '123qwe'
+    attributes[:password]       ||= test_instance_password || '123qwe'
     attributes[:key_name]       ||= @key_pairs[0] && @key_pairs[0].name
 
     if attributes[:security_group]
@@ -212,6 +212,7 @@ class ComputeService < BaseCloudService
             'user_id'         => service.current_user['id']
           }
         )
+        
         instance = service.servers.reload.get(response.body['server']['id'])
       rescue => e
         raise "Couldn't initialize instance in #{ project.name }. " +
@@ -630,6 +631,7 @@ class ComputeService < BaseCloudService
 
   def ensure_security_group_exists(project, attributes)
     set_tenant(project)
+    
     find_security_group = @security_groups.find_by_name(attributes[:name]) rescue nil
 
     if find_security_group
@@ -656,7 +658,7 @@ class ComputeService < BaseCloudService
   end
 
   def ensure_security_group_does_not_exist(project, attributes)
-    set_tenant(project)
+    set_tenant project
 
     if security_group = @security_groups.find_by_name(attributes[:name])
       delete_security_group(security_group)

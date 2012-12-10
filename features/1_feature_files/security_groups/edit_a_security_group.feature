@@ -27,9 +27,10 @@ Feature: Edit a Security Group
 
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Edit |
-        | Member          | Can Edit           |
+        | Admin           | Can Edit           |
         | Project Manager | Can Edit           |
-
+        | Member          | Can Edit           |
+        
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Edit |
         | (None)          | Cannot Edit        |
