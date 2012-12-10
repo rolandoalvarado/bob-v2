@@ -17,8 +17,6 @@ Feature: Create a Security Group
 
   Background:
     * A project exists in the system
-    * Ensure that the project has no security groups
-
 
   @permissions @jira-MCF-32-cup
   Scenario Outline: Check User Permissions
@@ -27,9 +25,10 @@ Feature: Create a Security Group
 
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Create |
-        | Member          | Can Create           |
+        | Admin           | Can Create           |
         | Project Manager | Can Create           |
-
+        | Member          | Can Create           |
+        
       Scenarios: Unauthorized Roles
         | Role            | Can or Cannot Create |
         | (None)          | Cannot Create        |
@@ -38,7 +37,6 @@ Feature: Create a Security Group
   Scenario Outline: Create a Security Group
     * The security group with attributes <Name>, <Description> will be <Created or Not Created>
 
-      @jira-MCF-32-csg-vv
       Scenarios: Valid Values
         | Name             | Description              | Created or Not Created  |
         | Web Servers      | Only port 443 is allowed | Created                 |

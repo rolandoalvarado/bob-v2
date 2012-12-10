@@ -64,7 +64,18 @@ Then /^Ensure that I have a role of (.+) in the named project$/i do |role_name|
   end
 
   identity_service = IdentityService.session
-  user             = @current_user
+  
+  if @current_user
+    user             = @current_user
+  else
+    user_attrs       = CloudObjectBuilder.attributes_for(
+                       :user,
+                       :name => bob_username
+                     )
+
+    user             = identity_service.ensure_user_exists(user_attrs)
+    EnvironmentCleaner.register(:user, user.id)
+  end
 
   identity_service.revoke_all_user_roles(user, project)
   admin_project = identity_service.tenants.find { |t| t.name == 'admin' }
@@ -146,7 +157,18 @@ Then /^Ensure that I have a role of (.+) in the project$/i do |role_name|
   end
 
   identity_service = IdentityService.session
-  user             = @current_user
+  
+  if @current_user
+    user             = @current_user
+  else
+    user_attrs       = CloudObjectBuilder.attributes_for(
+                       :user,
+                       :name => bob_username
+                     )
+
+    user             = identity_service.ensure_user_exists(user_attrs)
+    EnvironmentCleaner.register(:user, user.id)
+  end
 
   identity_service.revoke_all_user_roles(user, project)
   admin_project = identity_service.tenants.find { |t| t.name == 'admin' }
