@@ -131,26 +131,29 @@ class IdentityService < BaseCloudService
       raise "Unknown role '#{ role_name }'. Valid roles are #{ valid_roles.join(',') }"
     end
 
-    revoke_all_user_roles(user, tenant) # It's for (None)
+    revoke_all_user_roles(user, [tenant, @admin_tenant]) # It's for (None)
 
     if role_name != '(None)'
+      # Add user role to tenant
       member_role = find_role_by_friendly_name(role_name)
       user.update_tenant(tenant.id)
       service.add_user_to_tenant(tenant.id, user.id, member_role.id)
-      revoke_all_user_roles(user, @admin_tenant)
-      if ['System Admin', 'Admin'].include?(role_name)
-        admin_role = find_role_by_friendly_name('Admin')
-        (@tenants - [tenant]).each do |project|
-          admin_in_tenant =
-            service.list_roles_for_user_on_tenant(project.id, user.id).
-            body['roles'].compact.find {|r| r['name'] == 'admin'}
-          unless admin_in_tenant
-            service.add_user_to_tenant(project.id, user.id, admin_role.id)
-          end
+
+      # Add admin to all other tenants
+      admin_role = find_role_by_friendly_name('Admin')
+      (@tenants - [tenant]).each do |project|
+        admin_in_tenant =
+          service.list_roles_for_user_on_tenant(project.id, user.id).
+          body['roles'].compact.find {|r| r['name'] == 'admin'}
+        if ['System Admin', 'Admin'].include?(role_name)
+          service.add_user_to_tenant(project.id, user.id, admin_role.id) unless admin_in_tenant
+        else
+          service.remove_user_from_tenant(project.id, user.id, admin_role.id) if admin_in_tenant
         end
       end
     end
-
+  rescue Fog::Identity::OpenStack::NotFound => e
+    raise "Couldn't add #{ role_name } #{ user.name } to project #{ tenant.name }. #{ e.message }"
   end
 
   def ensure_user_role_is_admin(user, role_name)
@@ -294,10 +297,8 @@ class IdentityService < BaseCloudService
       user = create_user(attributes)
       user.password = attributes[:password]
 
-      if admin
-        revoke_all_user_roles(user, @admin_tenant)
-        ensure_tenant_role(user, @admin_tenant, 'Admin')
-      end
+      revoke_all_user_roles(user, @admin_tenant)
+      ensure_tenant_role(user, @admin_tenant, 'Admin') if admin
     else
       if attributes[:password] != nil && user.password != attributes[:password]
         user.password = attributes[:password]
@@ -339,9 +340,12 @@ class IdentityService < BaseCloudService
     @tenants.find_by_name(name)
   end
 
-  def revoke_all_user_roles(user, tenant)
-    service.list_roles_for_user_on_tenant(tenant.id, user.id).body['roles'].compact.each do |role|
-      service.remove_user_from_tenant(tenant.id, user.id, role['id'])
+  def revoke_all_user_roles(user, tenants = nil)
+    tenants = (tenants ? [tenants].flatten : @tenants)
+    tenants.each do |tenant|
+      service.list_roles_for_user_on_tenant(tenant.id, user.id).body['roles'].compact.each do |role|
+        service.remove_user_from_tenant(tenant.id, user.id, role['id'])
+      end
     end
   end
 

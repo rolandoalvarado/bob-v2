@@ -103,28 +103,16 @@ Then /^Ensure that I have a role of (.+) in the system$/i do |role_name|
   user = identity_service.ensure_user_exists(user_attrs)
   EnvironmentCleaner.register(:user, user.id)
 
-  admin_project = identity_service.tenants.find { |t| t.name == 'admin' }
-  if admin_project.nil? or admin_project.id.empty?
-    raise "Project couldn't be found!"
-  end
-
-  identity_service.revoke_all_user_roles(user, admin_project)
-
   # Ensure user has the following role in the system
   if role_name.downcase == "member"
     role_name = "Member"
     step "A project exists in the system"
+    project = @project
+  else
+    project = identity_service.admin_tenant
   end
 
-  begin
-    if role_name.downcase == "member"
-      identity_service.ensure_tenant_role(user,  @project, role_name)
-    else
-      identity_service.ensure_tenant_role(user, admin_project, role_name)
-    end
-  rescue Fog::Identity::OpenStack::NotFound => e
-    raise "Couldn't add #{ user.name } to #{ admin_project.name } as #{ role_name }"
-  end
+  identity_service.ensure_tenant_role(user, project, role_name)
 
   # Make variable(s) available for use in succeeding steps
   @current_user = user
@@ -152,16 +140,8 @@ Step /^Ensure that the user (.+) has a role of (.+) in the project (.+)$/ do |us
   project = identity_service.tenants.reload.find { |t| t.name == project_name }
   raise "The project named #{ project_name } couldn't be found!" if project.nil? or project.id.empty?
 
-  identity_service.revoke_all_user_roles(user, project)
-
   # Ensure user has the following role in the project
-  unless role_name.downcase == "(none)"
-    begin
-      identity_service.ensure_tenant_role(user, project, role_name)
-    rescue Fog::Identity::OpenStack::NotFound => e
-      raise "Couldn't add #{ user.name } to #{ @project.name } as #{ role_name }"
-    end
-  end  
+  identity_service.ensure_tenant_role(user, project, role_name)
 end
 
 Step /^Ensure that the user (.+) (?:does not have a role in|is not a member of) the project (.+)$/ do |username, project_name|
@@ -180,10 +160,7 @@ Step /^Ensure that the user (.+) does not have a role in the system$/ do |userna
   identity_service = IdentityService.session
   user             = identity_service.ensure_user_exists(user_attrs)
 
-  identity_service.tenants.each do |project|
-    raise "The project named #{ project_name } couldn't be found!" if project.nil? or project.id.empty?
-    identity_service.revoke_all_user_roles(user, project)
-  end
+  identity_service.revoke_all_user_roles(user)
 end
 
 Then /^Register the user named (.+) for deletion at exit$/i do |username|
