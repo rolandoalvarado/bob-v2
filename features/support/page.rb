@@ -113,6 +113,23 @@ Capybara.javascript_driver = ConfigFile.capybara_driver
 Capybara.run_server = false
 Capybara.app_host = ConfigFile.web_client_url
 
+#Saucelabs settings
+if ConfigFile.capybara_driver == :sauce
+  require 'sauce'
+  require 'sauce/cucumber'
+
+  Sauce.config do |config|
+    config['browser'] = 'firefox'
+    config['platform'] = 'Mac 10.6'
+    config['version'] = '7'
+    config['idle-timeout'] = 600 # 10 min
+    config['max-duration'] = 3200 # 2 hours
+  end
+
+  Capybara.default_driver = :sauce
+end
+
+
 # NOTE: Total waiting time will be NODE_QUERY_WAIT_TIME * MAX_NODE_QUERY_RETRIES
 # You want to avoid raising the total waiting time beyond 30 seconds or the
 # tests will slow down to a crawl. Play around with the time between retries

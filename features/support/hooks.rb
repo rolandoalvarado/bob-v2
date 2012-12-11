@@ -16,6 +16,13 @@ AfterConfiguration do |config|
     puts "Verifying requirements against #{ ConfigFile.web_client_url }"
     puts "Your Unique.alpha value is #{ Unique.alpha }"
   end
+
+  Sauce.config do |cfg|
+    cmd_args = ARGV.map {|a| a.match(/@.*$/) ? a.gsub('~', 'not ') : nil}.compact
+    cfg[:job_name] = "Dashboard (#{Capybara.app_host})"
+    cfg[:tags] = [Unique.alpha, Time.now.to_s, Capybara.app_host].push(*cmd_args)
+  end
+
 end
 
 Before do |scenario|
@@ -33,6 +40,9 @@ After do |scenario|
     page.driver.browser.save_screenshot(File.join(tmp_screenshots_dir, "scenario.#{__id__}.png"))
   when :webkit
     page.driver.render(File.join(tmp_screenshots_dir, "scenario.#{__id__}.png"))
+  when :sauce
+    # Do Nothing
+    skip_screenshot = true
   end
 
   embed(File.join(tmp_screenshots_dir, "scenario.#{__id__}.png"), "image/png", "Screenshot")
