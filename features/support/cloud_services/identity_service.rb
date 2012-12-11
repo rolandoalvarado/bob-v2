@@ -213,28 +213,35 @@ class IdentityService < BaseCloudService
     # Make sure user has no project manager role in project
     response = service.list_roles_for_user_on_tenant(tenant.id, admin_user.id)
     response_manager_role = response.body['roles'].find {|r| r['name'] == RoleNameDictionary.db_name('Project Manager') }
-    
+
     if response_manager_role
       tenant.revoke_user_role(admin_user.id, response_manager_role['id'])
       sleep(ConfigFile.wait_long)
     end
-    
+
     manager_role   = roles.find_by_name(RoleNameDictionary.db_name('Project Manager'))
     raise "The role #{ RoleNameDictionary.db_name('Project Manager') } could not be found!" unless manager_role
     tenant.grant_user_role(admin_user.id, manager_role.id)
-    
+
     # Every tenant should be handled by admin (MCF-199,MCF-198)
     response_admin_role = response.body['roles'].find {|r| r['name'] == RoleNameDictionary.db_name('Admin') }
-    
+
     if response_admin_role
-      tenant.revoke_user_role(admin_user.id, response_admin_role['id']) 
+      tenant.revoke_user_role(admin_user.id, response_admin_role['id'])
       sleep(ConfigFile.wait_long)
     else
       admin_role   = roles.find_by_name(RoleNameDictionary.db_name('Admin'))
       raise "The role #{ RoleNameDictionary.db_name('Admin') } could not be found!" unless admin_role
-      tenant.grant_user_role(admin_user.id, admin_role.id)
+      begin
+        tenant.grant_user_role(admin_user.id, admin_role.id)
+      rescue Excon::Errors::Conflict => error
+        # Ignore error if status is 409 Conflict
+        # - This means user had already been granted role for
+        #   the tenant.
+        raise error unless error.response.status == 409
+      end
     end
-    
+
     tenant
   end
 
