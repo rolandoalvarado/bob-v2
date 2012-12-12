@@ -101,6 +101,7 @@ Then /^Ensure that I have a role of (.+) in the system$/i do |role_name|
   identity_service = IdentityService.session
 
   user = identity_service.ensure_user_exists(user_attrs)
+  raise "User #{ bob_username } couldn't be initialized!" unless user
   EnvironmentCleaner.register(:user, user.id)
 
   # Ensure user has the following role in the system

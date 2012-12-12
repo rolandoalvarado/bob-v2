@@ -88,6 +88,13 @@ if ConfigFile.capybara_driver == :webkit
 
   # Added to make capybara-webkit run faster. { defaul_value => true }
   Capybara.automatic_reload = false
+else
+  # Prevents retry_block from throwing couldn't find class error
+  module Capybara::Driver
+    class Webkit
+      class NodeNotAttachedError < StandardError; end
+    end
+  end
 end
 
 if ConfigFile.capybara_driver == :poltergeist
