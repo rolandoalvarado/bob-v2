@@ -1,4 +1,5 @@
 require 'fileutils'
+require 'sauce'
 
 def tmp_screenshots_dir
   File.join(File.expand_path("../../../23452344317467_tmp_screenshots_dir", __FILE__))
@@ -22,7 +23,6 @@ AfterConfiguration do |config|
     cfg[:job_name] = "Dashboard (#{Capybara.app_host})"
     cfg[:tags] = [Unique.alpha, Time.now.to_s, Capybara.app_host].push(*cmd_args)
   end
-
 end
 
 Before do |scenario|
