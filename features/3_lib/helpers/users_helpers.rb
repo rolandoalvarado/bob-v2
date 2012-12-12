@@ -14,6 +14,10 @@ def bob_username
   Unique.username('bob')
 end
 
+def test_username
+  Unique.username('test')
+end
+
 def bob_logout_username
   Unique.username('bob-logout')
 end
@@ -28,6 +32,10 @@ end
 
 def other_username
   Unique.username('other')
+end
+
+def update_username
+  Unique.username('update')
 end
 
 def existing_username

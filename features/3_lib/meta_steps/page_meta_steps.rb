@@ -994,30 +994,42 @@ Step /^The snapshot named (.+) should be public$/ do |snapshot|
 end
 
 
-Step /^The newly created (.+) user should have (.+) permission$/ do |username, permission|
-  if (permission.downcase == 'admin')
+Step /^The newly (created|updated) (.+) user should have a (.+) role$/ do |action, username, role|
+  if action=='created'
+    button = 'Create'
+  else
+    button = 'Update'
+  end  
+  
+  if (role.downcase == 'admin')
     step "Check the admin checkbox"
-    step "Click the Create User button"
+    step "Click the #{ button } User button"
     step "The #{ username } user row should be visible"
   else
     step "Choose the item with text #{ @project.name } in the Primary Project dropdown"
-    step "Choose the item with text Project Manager in the Role dropdown"
-    step "Click the Create User button"
+    step "Choose the item with text #{ role } in the Role dropdown"
+    step "Click the #{ button } User button"
     step "The #{ username } user row should be visible"
   end
 end
 
 
-Step /^A user with a role of (.+) in a project (.+) will not be created$/ do |role, primary_project|
+Step /^A user with a role of (.+) in a project (.+) will not be (created|updated)$/ do |role, primary_project, action|
+  if action=='created'
+    button = 'Create'
+  else
+    button = 'Update'
+  end  
+
   if (role.downcase == 'admin')
     step "Check the admin checkbox"
-    step "Click the Create User button"
+    step "Click the #{ button } User button"
     step "The New User form should be visible"
     step "A New User Form Error Message element should be visible"
   else
     step "Choose the item with text #{ primary_project } in the Primary Project dropdown"
     step "Choose the item with text #{ role } in the Role dropdown"
-    step "Click the Create User button"
+    step "Click the #{ button } User button"
     step "The New User form should be visible"
     step "A New User Form Error Message element should be visible"
   end
