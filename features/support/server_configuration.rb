@@ -18,7 +18,7 @@ module ServerConfiguration
     end
 
     def self.username(name)
-      if shortname = operating_systems.find { |os_name| name.include?(os_name) }
+      if shortname = operating_systems.find { |os_name| name.downcase.include?(os_name.downcase) }
         self.instance[shortname][USERNAME]
       else
         raise "ERROR: Server configuration for #{name} was not found."
@@ -26,7 +26,7 @@ module ServerConfiguration
     end
 
     def self.password(name)
-      if shortname = operating_systems.find { |os_name| name.include?(os_name) }
+      if shortname = operating_systems.find { |os_name| name.downcase.include?(os_name.downcase) }
         password = self.instance[shortname][PASSWORD]
         password.kind_of?(Array) ? password.sample : password
       else
