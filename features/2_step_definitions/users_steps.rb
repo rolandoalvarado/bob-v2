@@ -278,6 +278,7 @@ Then /^I [Cc]annot [Dd]elete (?:that|the) user (.+)$/ do |user_name|
     * Fill in the username field with #{ bob_username }
     * Fill in the password field with #{ bob_password }
     * Click the login button
+    
     * The Users link should not be visible
   }
 end
@@ -305,7 +306,8 @@ Then /^I can edit a user$/i do
     * Click the Login button
 
     * Click the Users link
-    * Click the Edit button for the user named #{ @existing_user.name }
+    * Click the context menu button for user #{ @existing_user.name }
+    * Click the edit user link for user #{ @existing_user.name }
     * Fill in the Username field with #{ new_attrs.name }
     * Fill in the Email field with #{ new_attrs.email }
     * Fill in the Password field with #{ new_attrs.password }
@@ -485,21 +487,15 @@ end
 
 TestCase /^A user with a role of (.+) in the system cannot change user permissions$/i do |role_name|
 
-  username      = Unique.username('test')
-
   Preconditions %{
     * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
     * Ensure that the user #{ bob_username } has a role of #{ role_name } in the system
-
     * Ensure that a project named #{ test_project_name } exists
-    * Ensure that another user with username #{ username } and password #{ bob_password } exists
-    * Ensure that the user #{ username } has a role of Member in the project #{ test_project_name }
   }
 
   Cleanup %{
     * Register the project named #{ test_project_name } for deletion at exit
     * Register the user named #{ bob_username } for deletion at exit
-    * Register the user named #{ username } for deletion at exit
   }
 
   Script %{
@@ -522,7 +518,7 @@ TestCase /^A user with a role of (.+) in the system can create a user with (.+) 
   Preconditions %{
     * Ensure that a project named #{ test_project_name } exists
     * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
-    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the project #{ test_project_name }
+    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the project admin
     * Ensure that a user with username #{ user.name } does not exist
   }
 
@@ -545,7 +541,7 @@ TestCase /^A user with a role of (.+) in the system can create a user with (.+) 
     * Fill in the Email field with #{ user.email }
     * Fill in the Password field with #{ user.password }
     
-    * The newly created #{ user.name } user should have #{ permission } permission
+    * The newly created #{ user.name } user should have a #{ permission } role
   }
 
 end
@@ -554,8 +550,9 @@ end
 TestCase /^A user with a role of (.+) in the system Cannot Create a user with (.+) permission$/i do |role_name, permission|
 
   Preconditions %{
+    * Ensure that a project named #{ test_project_name } exists
     * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
-    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the system
+    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the project admin
   }
 
   Cleanup %{
@@ -586,7 +583,7 @@ TestCase /^An authorized user can create a user with attributes (.+), (.+), (.+)
   Preconditions %{
     * Ensure that a project named #{ test_project_name } exists
     * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
-    * Ensure that the user #{ bob_username } has a role of Project Manager in the project #{ test_project_name }
+    * Ensure that the user #{ bob_username } has a role of Admin in the project admin
     * Ensure that a user with username #{ user.name } does not exist
   }
 
@@ -609,7 +606,7 @@ TestCase /^An authorized user can create a user with attributes (.+), (.+), (.+)
     * Fill in the Email field with #{ user.email }
     * Fill in the Password field with #{ user.password }
     
-    * The newly created #{ user.name } user should have #{ role } permission
+    * The newly created #{ user.name } user should have a #{ role } role
   }
 end
 
@@ -625,7 +622,7 @@ TestCase /^An authorized user cannot create a user with attributes (.+), (.+), (
   Preconditions %{
     * Ensure that a project named #{ test_project_name } exists
     * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
-    * Ensure that the user #{ bob_username } has a role of Project Manager in the project #{ test_project_name }
+    * Ensure that the user #{ bob_username } has a role of Admin in the project admin
     * Ensure that a user with username #{ user.name } does not exist
   }
 
@@ -649,5 +646,241 @@ TestCase /^An authorized user cannot create a user with attributes (.+), (.+), (
     * Fill in the Password field with #{ user.password }
     
     * A user with a role of #{ role } in a project #{ primary_project } will not be created
+  }
+end
+
+
+TestCase /^A user with a role of (.+) in the system can delete a user$/i do |role_name|
+
+  user = CloudObjectBuilder.attributes_for(:user, :name => test_username)
+
+  Preconditions %{
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the project admin
+    * Ensure that a user named #{ user.name } exists
+  }
+
+  Cleanup %{
+    * Register the project named #{ test_project_name } for deletion at exit
+    * Register the user named #{ bob_username } for deletion at exit
+    * Register the user named #{ user.name } for deletion at exit
+  }
+
+  Script %{
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ bob_username }
+    * Fill in the Password field with #{ bob_password }
+    * Click the Login button
+
+    * Click the Users link
+    * Click the context menu button for user #{ user.name }
+    * Click the delete user link for user #{ user.name }
+    * Click the confirm user deletion button
+    
+    * The user #{ user.name } should not exist in the system
+  }
+
+end
+
+
+TestCase /^A user with a role of (.+) in the system Cannot (Edit|Delete) a user$/i do |role_name, action|
+  
+  Preconditions %{
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the project #{ test_project_name }
+  }
+
+  Cleanup %{
+    * Register the user named #{ bob_username } for deletion at exit
+  }
+
+  Script %{
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ bob_username }
+    * Fill in the Password field with #{ bob_password }
+    * Click the Login button
+
+    * The Users link should not be visible
+  }
+
+end
+
+
+TestCase /^An authorized user can delete the user named astark and that user will not be able to login$/ do
+  user = CloudObjectBuilder.attributes_for(
+           :user,
+           :name     => Unique.username('astark')
+         )
+
+  Preconditions %{
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that the user #{ bob_username } has a role of Admin in the project admin
+    * Ensure that a user named #{ user.name } exists
+  }
+
+  Cleanup %{
+    * Register the project named #{ test_project_name } for deletion at exit
+    * Register the user named #{ bob_username } for deletion at exit
+    * Register the user named #{ user.name } for deletion at exit
+  }
+
+  Script %{
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ bob_username }
+    * Fill in the Password field with #{ bob_password }
+    * Click the Login button
+
+    * Click the Users link
+    * Click the context menu button for user #{ user.name }
+    * Click the delete user link for user #{ user.name }
+    * Click the confirm user deletion button
+    
+    * The user #{ user.name } should not exist in the system
+    
+    * Click the logout button if currently logged in
+
+    * Visit the login page
+    * Fill in the username field with #{ user.name }
+    * Fill in the password field with #{ user.password }
+    * Click the login button
+
+    * Current page should be the login page
+  }
+end
+
+
+TestCase /^A user with a role of (.+) in the system can edit a user$/i do |role_name|
+
+  user           = CloudObjectBuilder.attributes_for(:user, :name => test_username)
+  update_user    = CloudObjectBuilder.attributes_for(:user)
+
+  Preconditions %{
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the project admin
+    * Ensure that a user named #{ user.name } exists
+    * Ensure that a user with username #{ update_user.name } does not exist
+  }
+
+  Cleanup %{
+    * Register the project named #{ test_project_name } for deletion at exit
+    * Register the user named #{ bob_username } for deletion at exit
+    * Register the user named #{ user.name } for deletion at exit
+    * Register the user named #{ update_user.name } for deletion at exit
+  }
+
+  Script %{
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ bob_username }
+    * Fill in the Password field with #{ bob_password }
+    * Click the Login button
+
+    * Click the Users link
+    * Click the context menu button for user #{ user.name }
+    * Click the Edit User link for user #{ user.name }
+    * Fill in the Username field with #{ update_user.name }
+    * Fill in the Email field with #{ update_user.email }
+    * Fill in the Password field with #{ update_user.password }
+    * Choose the item with text #{ test_project_name } in the Primary Project dropdown
+    * Click the Update User button
+
+    * The #{ update_user.name } user row should be visible    
+  }
+
+end
+
+
+TestCase /^An authorized user can edit a user with attributes (.+), (.+), (.+), (.+), and (.+)$/i do |username, email, password, primary_project, role|
+
+  user            = CloudObjectBuilder.attributes_for(:user, :name => test_username)
+  update_user     = CloudObjectBuilder.attributes_for(
+                     :user,
+                     :name     => Unique.username(username),
+                     :email    => Unique.email(email),
+                     :password => password
+                    )
+
+  Preconditions %{
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that the user #{ bob_username } has a role of Admin in the project admin
+    * Ensure that a user named #{ user.name } exists
+    * Ensure that a user with username #{ update_user.name } does not exist
+  }
+
+  Cleanup %{
+    * Register the project named #{ test_project_name } for deletion at exit
+    * Register the user named #{ bob_username } for deletion at exit
+    * Register the user named #{ user.name } for deletion at exit
+    * Register the user named #{ update_user.name } for deletion at exit
+  }
+
+  Script %{
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ bob_username }
+    * Fill in the Password field with #{ bob_password }
+    * Click the Login button
+
+    * Click the Users link
+    * Click the context menu button for user #{ user.name }
+    * Click the Edit User link for user #{ user.name }
+    
+    * Fill in the Username field with #{ update_user.name }
+    * Fill in the Email field with #{ update_user.email }
+    * Fill in the Password field with #{ update_user.password }
+    
+    * The newly updated #{ user.name } user should have a #{ role } role 
+  }
+end
+
+
+TestCase /^An authorized user cannot edit a user with attributes (.+), (.+), (.+), (.+), and (.+)$/i do |username, email, password, primary_project, role|
+  user            = CloudObjectBuilder.attributes_for(:user, :name => test_username)
+  update_user     = CloudObjectBuilder.attributes_for(
+                     :user,
+                     :name     => Unique.username(username),
+                     :email    => Unique.email(email),
+                     :password => password
+                    )
+
+  Preconditions %{
+    * Ensure that a project named #{ test_project_name } exists
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that the user #{ bob_username } has a role of Admin in the project #{ test_project_name }
+    * Ensure that a user named #{ user.name } exists
+    * Ensure that a user with username #{ update_user.name } does not exist
+  }
+
+  Cleanup %{
+    * Register the project named #{ test_project_name } for deletion at exit
+    * Register the user named #{ bob_username } for deletion at exit
+    * Register the user named #{ user.name } for deletion at exit
+    * Register the user named #{ update_user.name } for deletion at exit
+  }
+
+  Script %{
+    * Click the Logout button if currently logged in
+    * Visit the Login page
+    * Fill in the Username field with #{ bob_username }
+    * Fill in the Password field with #{ bob_password }
+    * Click the Login button
+
+    * Click the Users link
+    * Click the context menu button for user #{ user.name }
+    * Click the Edit User link for user #{ user.name }
+    
+    * Fill in the Username field with #{ update_user.name }
+    * Fill in the Email field with #{ update_user.email }
+    * Fill in the Password field with #{ update_user.password }
+    
+    * A user with a role of #{ role } in a project #{ primary_project } will not be updated
   }
 end

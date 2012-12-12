@@ -5,12 +5,11 @@ Feature: Change a user's permissions
   Scenario Outline:
     * A user with a role of <Role> in the system <Can or Cannot Change> user permissions
 
-      @jira-MCF-42-AR
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Change |
-        | System Admin    | Can Change           |
         | Admin           | Can Change           |
 
       Scenarios: Unauthorized Roles
-        | Role         | Can or Cannot Change |
-        | Member       | Cannot Change        |
+        | Role            | Can or Cannot Change |
+        | Project Manager | Cannot Change        |
+        | Member          | Cannot Change        |
