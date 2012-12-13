@@ -47,7 +47,7 @@
 #   page.has_no_username_element? #=> boolean
 #   page.username_element         #=> if '#username' exists in the html, returns a Node object
 # ```
-# Alternative keywords: button, field, link, checkbox, form, table, span, element
+# Alternative keywords: button, field, hyperlink, checkbox, form, table, span, element
 #
 # Supplying additional selector/locator information at runtime:
 # Sometimes, part of your css selector or xpath locator can't be determine until
@@ -119,6 +119,23 @@ Capybara.javascript_driver = ConfigFile.capybara_driver
 
 Capybara.run_server = false
 Capybara.app_host = ConfigFile.web_client_url
+
+#Saucelabs settings
+if ConfigFile.capybara_driver == :sauce
+  require 'sauce'
+  require 'sauce/cucumber'
+
+  Sauce.config do |config|
+    config['browser'] = 'firefox'
+    config['platform'] = 'Mac 10.6'
+    config['version'] = '7'
+    config['idle-timeout'] = 600 # 10 min
+    config['max-duration'] = 3200 # 2 hours
+  end
+
+  Capybara.default_driver = :sauce
+end
+
 
 # NOTE: Total waiting time will be NODE_QUERY_WAIT_TIME * MAX_NODE_QUERY_RETRIES
 # You want to avoid raising the total waiting time beyond 30 seconds or the
@@ -216,7 +233,7 @@ end
 class Page
   include NodeMethods
 
-  ELEMENT_TYPES    = 'button|field|link|checkbox|form|table|span|element|row|cell|option|message|tab|tile|graph'
+  ELEMENT_TYPES    = 'button|field|hyperlink|checkbox|form|table|span|element|row|cell|option|message|tab|tile|graph'
   RADIO_LIST_TYPES = 'radiolist'
   CHECK_LIST_TYPES = 'checklist'
   SELECTION_TYPES  = 'selection|dropdown'
@@ -465,7 +482,7 @@ end
 # Overried node.find method
 Capybara::Selenium::Node.module_eval do
   include Capybara::DSL
-  
+
   # Override node.click method.
   def click
     retry_block do
@@ -478,7 +495,7 @@ Capybara::Selenium::Node.module_eval do
       end
     end
   end
-  
+
   # Override node.find method.
   def find(locator)
     retry_block do
@@ -486,7 +503,7 @@ Capybara::Selenium::Node.module_eval do
       native.find_elements(:xpath, locator).map { |n| self.class.new(driver, n) }
     end
   end
-  
+
 end
 
 # Retry block for node.find method above.

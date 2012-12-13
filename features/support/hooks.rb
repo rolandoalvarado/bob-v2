@@ -27,15 +27,19 @@ end
 
 After do |scenario|
   page = Capybara.current_session
+  skip_screenshot = false
 
   case Capybara.current_driver
   when :selenium
     page.driver.browser.save_screenshot(File.join(tmp_screenshots_dir, "scenario.#{__id__}.png"))
   when :webkit
     page.driver.render(File.join(tmp_screenshots_dir, "scenario.#{__id__}.png"))
+  when :sauce
+    # Do Nothing
+    skip_screenshot = true
   end
 
-  embed(File.join(tmp_screenshots_dir, "scenario.#{__id__}.png"), "image/png", "Screenshot")
+  embed(File.join(tmp_screenshots_dir, "scenario.#{__id__}.png"), "image/png", "Screenshot") unless skip_screenshot
 
   if scenario.exception.is_a? Timeout::Error
     Capybara.send(:session_pool).delete_if { |key, value| key =~ /#{ Capybara.current_driver.to_s.downcase }/i }
