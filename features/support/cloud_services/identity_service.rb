@@ -132,6 +132,17 @@ class IdentityService < BaseCloudService
       end
   end
 
+  def revoke_user_role(tenant,userid,roleid)
+      begin
+        tenant.revoke_user_role(userid, roleid)
+      rescue Excon::Errors::NotFound => error
+        # Ignore error if status is 404 Not Found
+        # - This means user had already been revoked role for
+        #   the tenant.
+        raise error unless error.response.status == 404
+      end
+  end
+
   # System Admin    = 'admin' in admin tenant, 'Member' in all tenants
   # Admin           = 'admin' in admin tenant, 'Member' in all tenants
   # Project Manager = 'Project Manager' in a tenant
@@ -161,7 +172,7 @@ class IdentityService < BaseCloudService
             unless role_name == 'Member'
               grant_user_role(project,user.id, admin_role.id) unless admin_in_tenant
             else
-              project.revoke_user_role(user.id, admin_role.id) if admin_in_tenant
+              revoke_user_role(project,user.id, admin_role.id) if admin_in_tenant
             end
           end
       end
@@ -230,7 +241,7 @@ class IdentityService < BaseCloudService
     response_manager_role = response.body['roles'].find {|r| r['name'] == RoleNameDictionary.db_name('Project Manager') }
 
     if response_manager_role
-      tenant.revoke_user_role(admin_user.id, response_manager_role['id'])
+      revoke_user_role(tenant,admin_user.id, response_manager_role['id'])
       sleep(ConfigFile.wait_long)
     end
 
@@ -242,7 +253,7 @@ class IdentityService < BaseCloudService
     response_admin_role = response.body['roles'].find {|r| r['name'] == RoleNameDictionary.db_name('Admin') }
 
     if response_admin_role
-      tenant.revoke_user_role(admin_user.id, response_admin_role['id'])
+      revoke_user_role(tenant,admin_user.id, response_admin_role['id'])
       sleep(ConfigFile.wait_long)
     else
       admin_role   = roles.find_by_name(RoleNameDictionary.db_name('Admin'))
@@ -281,7 +292,7 @@ class IdentityService < BaseCloudService
     # Make sure user has no project manager role in project
     response = service.list_roles_for_user_on_tenant(tenant.id, admin_user.id)
     manager_role = response.body['roles'].find {|r| r['name'] == RoleNameDictionary.db_name('Project Manager') }
-    tenant.revoke_user_role(admin_user.id, manager_role['id']) if manager_role
+    revoke_user_role(tenant,admin_user.id, manager_role['id']) if manager_role
 
     add_admins_to_tenant(tenant)
 

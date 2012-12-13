@@ -13,15 +13,15 @@
 # * This must have a string key
 #
 # Possible values: Mac 10.6/Mac 10.8/Windows 2003/Windows 2008
-platform: 'Mac 10.8'
+platform: 'Windows 2008'
 
 # Browser to be used for the sauce test job.
 # * This must have a symbol key
 #
 # Possible values: firefox/iexplore/opera/safari/chrome
-:browser: 'firefox'
+:browser: 'iexplore'
 
 # Browser version to be used for the sauce test job.
 # * This must have a string key
 #
-version: 7.
+version: 9

@@ -35,7 +35,7 @@ class UsersPage < SecurePage
   hyperlink    'Disable User',                     xpath: "//tr[@class='user']/td[normalize-space(text())='<name>']/..//a[@class='disable']"
   hyperlink    'Delete User',                      xpath: "//tr[@class='user']/td[normalize-space(text())='<name>']/..//a[@class='destroy']"
 
-  link    'Edit User',                        xpath: "//tr[@class='user']/td[normalize-space(text())='<name>']/..//a[@class='edit']"
+  hyperlink    'Edit User',                        xpath: "//tr[@class='user']/td[normalize-space(text())='<name>']/..//a[@class='edit']"
 
   # The following buttons appear with the confirmation dialog that appears
   # when you click the delete hyperlink of a user.
