@@ -80,12 +80,12 @@ class IdentityService < BaseCloudService
 
   def create_user(attributes)
     tenants.reload
-    project = tenants.find_by_id(attributes[:project_id]) rescue test_tenant
-    attributes[:tenant_id] = project.id
+    tenant = tenants.find_by_id(attributes[:project_id]) rescue test_tenant
+    attributes[:tenant_id] = tenant.id
     user = users.new(attributes)
     user.save
     member_role = find_role_by_friendly_name('Member')
-    project.grant_user_role(user.id, member_role.id)
+    grant_user_role(tenant,user.id, member_role.id)
     user
   end
 
@@ -121,6 +121,17 @@ class IdentityService < BaseCloudService
     end
   end
 
+  def grant_user_role(tenant,userid,roleid)
+      begin
+        tenant.grant_user_role(userid, roleid)
+      rescue Excon::Errors::Conflict => error
+        # Ignore error if status is 409 Conflict
+        # - This means user had already been granted role for
+        #   the tenant.
+        raise error unless error.response.status == 409
+      end
+  end
+
   # System Admin    = 'admin' in admin tenant, 'Member' in all tenants
   # Admin           = 'admin' in admin tenant, 'Member' in all tenants
   # Project Manager = 'Project Manager' in a tenant
@@ -138,7 +149,7 @@ class IdentityService < BaseCloudService
       # Add user role to tenant
       member_role = find_role_by_friendly_name(role_name)
       user.update_tenant(tenant.id)
-      tenant.grant_user_role(user.id, member_role.id)
+      grant_user_role(tenant,user.id,member_role.id)
 
       # Add admin to all other tenants
       admin_role = find_role_by_friendly_name('Admin')
@@ -146,18 +157,15 @@ class IdentityService < BaseCloudService
         admin_in_tenant =
           service.list_roles_for_user_on_tenant(project.id, user.id).
           body['roles'].compact.find {|r| r['name'] == 'admin'}
-          
           sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
             unless role_name == 'Member'
-              project.grant_user_role(user.id, admin_role.id) unless admin_in_tenant
+              grant_user_role(project,user.id, admin_role.id) unless admin_in_tenant
             else
               project.revoke_user_role(user.id, admin_role.id) if admin_in_tenant
             end
           end
       end
     end
-  rescue Fog::Identity::OpenStack::NotFound => e
-    raise "Couldn't add #{ role_name } #{ user.name } to project #{ tenant.name }. #{ e.message }"
   end
 
   def ensure_user_role_is_admin(user, role_name)
@@ -228,9 +236,9 @@ class IdentityService < BaseCloudService
 
     manager_role   = roles.find_by_name(RoleNameDictionary.db_name('Project Manager'))
     raise "The role #{ RoleNameDictionary.db_name('Project Manager') } could not be found!" unless manager_role
-    tenant.grant_user_role(admin_user.id, manager_role.id)
-
-    # Every tenant should be handled by admin (MCF-199,MCF-198)
+    grant_user_role(tenant,admin_user.id, manager_role.id)
+ 
+   # Every tenant should be handled by admin (MCF-199,MCF-198)
     response_admin_role = response.body['roles'].find {|r| r['name'] == RoleNameDictionary.db_name('Admin') }
 
     if response_admin_role
@@ -239,14 +247,7 @@ class IdentityService < BaseCloudService
     else
       admin_role   = roles.find_by_name(RoleNameDictionary.db_name('Admin'))
       raise "The role #{ RoleNameDictionary.db_name('Admin') } could not be found!" unless admin_role
-      begin
-        tenant.grant_user_role(admin_user.id, admin_role.id)
-      rescue Excon::Errors::Conflict => error
-        # Ignore error if status is 409 Conflict
-        # - This means user had already been granted role for
-        #   the tenant.
-        raise error unless error.response.status == 409
-      end
+      grant_user_role(tenant,admin_user.id, admin_role.id)
     end
 
     tenant
@@ -386,7 +387,7 @@ class IdentityService < BaseCloudService
 
     admins.each do |admin|
       unless tenant.roles_for(admin).include?(admin_role)
-        tenant.grant_user_role(admin.id, admin_role.id)
+        grant_user_role(tenant,admin.id, admin_role.id)
       end
     end
   end
