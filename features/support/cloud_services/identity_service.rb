@@ -85,7 +85,7 @@ class IdentityService < BaseCloudService
     user = users.new(attributes)
     user.save
     member_role = find_role_by_friendly_name('Member')
-    service.add_user_to_tenant(project.id, user.id, member_role.id)
+    project.grant_user_role(user.id, member_role.id)
     user
   end
 
@@ -138,25 +138,20 @@ class IdentityService < BaseCloudService
       # Add user role to tenant
       member_role = find_role_by_friendly_name(role_name)
       user.update_tenant(tenant.id)
-      service.add_user_to_tenant(tenant.id, user.id, member_role.id)
+      tenant.grant_user_role(user.id, member_role.id)
 
       # Add admin to all other tenants
       admin_role = find_role_by_friendly_name('Admin')
       (@tenants - [tenant]).each do |project|
         admin_in_tenant =
-          service.list_roles_for_user_on_tenant(project.id, user.id).body['roles'].compact.find {|r| r['name'] == 'admin'}
-        sleep(ConfigFile.wait_short)
-        
-        if ['System Admin', 'Admin'].include?(role_name)
-          begin
-            service.add_user_to_tenant(project.id, user.id, admin_role.id) unless admin_in_tenant
-          rescue Excon::Errors::Conflict => error
-            raise error unless error.response.status == 409
-          end
+          service.list_roles_for_user_on_tenant(project.id, user.id).
+          body['roles'].compact.find {|r| r['name'] == 'admin'}
+        unless role_name == 'Member'
+          project.grant_user_role(user.id, admin_role.id) unless admin_in_tenant
         else
-          service.remove_user_from_tenant(project.id, user.id, admin_role.id) if admin_in_tenant
-        end 
-      end #/do
+          project.revoke_user_role(user.id, admin_role.id) if admin_in_tenant
+        end
+      end
     end
   rescue Fog::Identity::OpenStack::NotFound => e
     raise "Couldn't add #{ role_name } #{ user.name } to project #{ tenant.name }. #{ e.message }"
@@ -388,11 +383,7 @@ class IdentityService < BaseCloudService
 
     admins.each do |admin|
       unless tenant.roles_for(admin).include?(admin_role)
-        begin
-          service.add_user_to_tenant(tenant.id, admin.id, admin_role.id)
-        rescue
-          # ignore conflict exception (TODO: implement smart logic.)
-        end
+        tenant.grant_user_role(admin.id, admin_role.id)
       end
     end
   end
