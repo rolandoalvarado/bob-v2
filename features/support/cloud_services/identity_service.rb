@@ -157,15 +157,15 @@ class IdentityService < BaseCloudService
         admin_in_tenant =
           service.list_roles_for_user_on_tenant(project.id, user.id).
           body['roles'].compact.find {|r| r['name'] == 'admin'}
-        unless role_name == 'Member'
-          grant_user_role(project,user.id, admin_role.id) unless admin_in_tenant
-        else
-          project.revoke_user_role(user.id, admin_role.id) if admin_in_tenant
-        end
+          sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
+            unless role_name == 'Member'
+              grant_user_role(project,user.id, admin_role.id) unless admin_in_tenant
+            else
+              project.revoke_user_role(user.id, admin_role.id) if admin_in_tenant
+            end
+          end
       end
     end
-  rescue Fog::Identity::OpenStack::NotFound => e
-    raise "Couldn't add #{ role_name } #{ user.name } to project #{ tenant.name }. #{ e.message }"
   end
 
   def ensure_user_role_is_admin(user, role_name)

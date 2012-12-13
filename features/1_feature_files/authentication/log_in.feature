@@ -12,17 +12,17 @@ Feature: Log In
     Scenarios: Valid credentials
       | Username  | Password   | Can or Cannot Log In |
       | rstark    | w1nt3rf3ll | Can Log In           |
+      | RSTARK    | w1nt3rf3ll | Can Log In           |
 
+    @jira-DPBLOG-IV      
     Scenarios: Invalid credentials
       | Username  | Password   | Can or Cannot Log In | Reason                                                       |
-      | RSTARK    | w1nt3rf3ll | Cannot Log In        | Username is case sensitive (This is an OpenStack constraint) |
       | (None)    | w1nt3rf3ll | Cannot Log In        | Username can't be empty                                      |
       | rstark    | w0nt3rf3ll | Cannot Log In        | Invalid password                                             |
 
-
   Scenario Outline:
     * I will be redirected to the Log In page when I anonymously access <Secure Page>
-
+    @jira-DPBLOG-SP
     Scenarios:
       | Secure Page |
       | Projects    |
@@ -32,7 +32,7 @@ Feature: Log In
   
   Scenario Outline:
     * Logging in after anonymously accessing <Secure Page> redirects me back to it
-
+    @jira-DPBLOG-BP
     Scenarios:
       | Secure Page |
       | Projects    |
