@@ -7,7 +7,7 @@ Feature: Log In
 
   Scenario Outline:
     * If my username is rstark and my password is w1nt3rf3ll, I <Can or Cannot Log In> with the following credentials <Username>, <Password>
-    
+
     @jira-DPBLOG-VC
     Scenarios: Valid credentials
       | Username  | Password   | Can or Cannot Log In |
@@ -29,7 +29,7 @@ Feature: Log In
       | Users       |
       | Usage       |
 
-  
+
   Scenario Outline:
     * Logging in after anonymously accessing <Secure Page> redirects me back to it
 

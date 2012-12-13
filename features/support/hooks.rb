@@ -1,5 +1,4 @@
 require 'fileutils'
-require 'sauce'
 
 def tmp_screenshots_dir
   File.join(File.expand_path("../../../23452344317467_tmp_screenshots_dir", __FILE__))
@@ -17,12 +16,6 @@ AfterConfiguration do |config|
     puts "Verifying requirements against #{ ConfigFile.web_client_url }"
     puts "Your Unique.alpha value is #{ Unique.alpha }"
   end
-
-  Sauce.config do |cfg|
-    cmd_args = ARGV.map {|a| a.match(/@.*$/) ? a.gsub('~', 'not ') : nil}.compact
-    cfg[:job_name] = "Dashboard (#{Capybara.app_host})"
-    cfg[:tags] = [Unique.alpha, Time.now.to_s, Capybara.app_host].push(*cmd_args)
-  end
 end
 
 Before do |scenario|
@@ -34,6 +27,7 @@ end
 
 After do |scenario|
   page = Capybara.current_session
+  skip_screenshot = false
 
   case Capybara.current_driver
   when :selenium
@@ -45,7 +39,7 @@ After do |scenario|
     skip_screenshot = true
   end
 
-  embed(File.join(tmp_screenshots_dir, "scenario.#{__id__}.png"), "image/png", "Screenshot")
+  embed(File.join(tmp_screenshots_dir, "scenario.#{__id__}.png"), "image/png", "Screenshot") unless skip_screenshot
 
   if scenario.exception.is_a? Timeout::Error
     Capybara.send(:session_pool).delete_if { |key, value| key =~ /#{ Capybara.current_driver.to_s.downcase }/i }
