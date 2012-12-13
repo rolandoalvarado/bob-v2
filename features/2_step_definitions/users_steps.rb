@@ -690,7 +690,7 @@ TestCase /^A user with a role of (.+) in the system Cannot (Edit|Delete) a user$
   Preconditions %{
     * Ensure that a project named #{ test_project_name } exists
     * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
-    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the project #{ test_project_name }
+    * Ensure that the user #{ bob_username } has a role of #{ role_name } in the project admin
   }
 
   Cleanup %{

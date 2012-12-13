@@ -16,7 +16,7 @@ Feature: Edit a User
         | Member          | Cannot Edit        |
         | Project Manager | Cannot Edit        |
 
-
+  @jira-MCF-44-eawca
   Scenario Outline: Edit a user with certain attributes
      * An authorized user <Can or Cannot Edit> a user with attributes <Username>, <Email>, <Password>, <Primary Project>, and <Role>
       
