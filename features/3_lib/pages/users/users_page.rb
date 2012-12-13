@@ -1,6 +1,6 @@
 require_relative '../secure_page'
 
-# The page that is displayed when clicking the users link
+# The page that is displayed when clicking the users hyperlink
 class UsersPage < SecurePage
   path '/users'
 
@@ -21,9 +21,9 @@ class UsersPage < SecurePage
   element  'Edit User Form Error Message',    "#user-form .error"
   element  'users',                           "#user-list"
 
-  row      'User',                            xpath: "//*[@id='user-list']//td[normalize-space(text())='<name>']/.."
-  link     'User',                            xpath: "//*[@id='user-list']//td[normalize-space(text())='<name>']"
-  checkbox 'admin',                           "#admin"
+  row       'User',                            xpath: "//*[@id='user-list']//td[normalize-space(text())='<name>']/.."
+  hyperlink 'User',                            xpath: "//*[@id='user-list']//td[normalize-space(text())='<name>']"
+  checkbox  'admin',                           "#admin"
 
   # The 'username' cell in the Users table
   element 'Username',                         xpath: "//tr[@class='user']/td[normalize-space(text())='<name>']"
@@ -31,12 +31,12 @@ class UsersPage < SecurePage
   # Toggles the menu of actions for a specific user in the table
   button  'Context Menu',                     xpath: "//tr[@class='user']/td[normalize-space(text())='<name>']/..//a[@class='dropdown-toggle']"
 
-  # The following links appear in the context menu
-  link    'Disable User',                     xpath: "//tr[@class='user']/td[normalize-space(text())='<name>']/..//a[@class='disable']"
-  link    'Delete User',                      xpath: "//tr[@class='user']/td[normalize-space(text())='<name>']/..//a[@class='destroy']"
+  # The following hyperlinks appear in the context menu
+  hyperlink    'Disable User',                     xpath: "//tr[@class='user']/td[normalize-space(text())='<name>']/..//a[@class='disable']"
+  hyperlink    'Delete User',                      xpath: "//tr[@class='user']/td[normalize-space(text())='<name>']/..//a[@class='destroy']"
 
   # The following buttons appear with the confirmation dialog that appears
-  # when you click the delete link of a user.
+  # when you click the delete hyperlink of a user.
   button  'Confirm User Deletion',            "a.okay"
   button  'Cancel User Deletion',             "a.cancel"
 end

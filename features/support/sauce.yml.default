@@ -1,0 +1,27 @@
+# To customize the sauce configurations, copy this file to the same directory as `sauce.yml`
+# (features/suppport/sauce.yml).
+#
+
+# Name of the sauce test job.
+# * This must have a symbol key
+:job_name: Dashboard Test
+
+# For information on Browser, OS Platform and Browser Version combinations:
+# https://saucelabs.com/docs/browsers
+
+# Platform where the sauce test job will be run on.
+# * This must have a string key
+#
+# Possible values: Mac 10.6/Mac 10.8/Windows 2003/Windows 2008
+platform: 'Mac 10.8'
+
+# Browser to be used for the sauce test job.
+# * This must have a symbol key
+#
+# Possible values: firefox/iexplore/opera/safari/chrome
+:browser: 'firefox'
+
+# Browser version to be used for the sauce test job.
+# * This must have a string key
+#
+version: 7.

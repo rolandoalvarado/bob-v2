@@ -4,7 +4,7 @@ class ProjectPage < SecurePage
   path '/projects'
 
   # For Project
-  link      'project',                            xpath:  "//*[@id='projects-list']//td[normalize-space(text())='<name>']/.."
+  hyperlink 'project',                            xpath:  "//*[@id='projects-list']//td[normalize-space(text())='<name>']/.."
   message   'update project',                     '#alert-template .alert-success'
   row       'project',                            xpath:  "//td[@title='<name>']"
 
@@ -42,7 +42,7 @@ class ProjectPage < SecurePage
   #==========================
 # Type      Name                                  Selector
   button    'quota modify',                       xpath: '//*[@id="edit-quota"]'
-  link      'disabled quota modify',              xpath: '//*[@id="edit-quota"]'
+  hyperlink 'disabled quota modify',              xpath: '//*[@id="edit-quota"]'
   form      'modify quota',                       '#quota-form'
   message   'Modify Quota',                       xpath: '//h3[text()="Modify Quota"]'
   message   'update quota',                       '#alert-template .alert-success' #xpath: '//*[div[@class="alert alert-success"]]'
@@ -72,9 +72,9 @@ class ProjectPage < SecurePage
   form      'new security',                       "#new-security-group-modal"
   form      'security group rules',               "#security-group-rules-modal"
   form      'new security group rule',            '#new-security-group-rule-form'
-  link      'delete security group',              "#security-item-<id> .delete-security-group"
-  link      'edit security group',                "#security-item-<id> .edit-security-rules"
-  link      'security group',                     "#security-item-<id> .edit-security-rules"
+  hyperlink 'delete security group',              "#security-item-<id> .delete-security-group"
+  hyperlink 'edit security group',                "#security-item-<id> .edit-security-rules"
+  hyperlink 'security group',                     "#security-item-<id> .edit-security-rules"
   element   'security groups',                    "#security-groups-list"
   tab       'access security',                    ".nav-tabs .access-and-security a"
 
@@ -161,7 +161,7 @@ class ProjectPage < SecurePage
   #==========================
   element   "project details",                    xpath: "//*[@id='details_body']//*[div[@name='<name>']]"
   tile      "project tile",                       xpath: '//*[div[@name="<name>"]]'
-  
+
   #==========================
   # Instance-related elements
   #==========================
@@ -183,11 +183,11 @@ class ProjectPage < SecurePage
   cell      'snapshot status',                    xpath: "//*[@id='instance-snapshot-list']//*[contains(text(), \"<name>\")]//..//*[@class='status']"
   cell      'snapshot public',                    xpath: "//*[@id='instance-snapshot-list']//..//*[td[normalize-space(text())='Yes']]"
   cell      'snapshot not public',                xpath: "//*[@id='instance-snapshot-list']//..//*[td[normalize-space(text())='No']]"
-  
+
   cell      'snapshot format',                    xpath:  "//table[@id='instance-snapshot-list']" +
                                                           "//td[@class='name' and contains(text(), \"<name>\")]//.." +
                                                           "//td[normalize-space(text())='<format>']"
-                                                          
+
   form      'resize instance',                    '#resize-instance-modal'
 
   element   'console output',                     '#logsModal'
@@ -213,7 +213,7 @@ class ProjectPage < SecurePage
   button    'confirm instance deletion',          '#alert-template .okay'
   button    'confirm instance reboot',            "#alert-template .okay"
   button    'resize instance confirmation',       "#resize-instance"
-    
+
   element   'image',                                xpath: "//*[@id='instances-list']//label[text()='<name>']"
   tab       'images and snapshots',               '.nav-tabs .snapshots a'
   field     'snapshot name',                       '#name'
@@ -228,7 +228,7 @@ class ProjectPage < SecurePage
   #==========================
   # Collaborators
   #==========================
-  link      'collaborators email',                '.chzn-choices'
+  hyperlink      'collaborators email',                '.chzn-choices'
   tab       'collaborators',                      '.nav-tabs .collaborators:not(.disabled) a'
   tab       'disabled collaborators',             '.nav-tabs .collaborators.disabled'
   button    'add collaborator',                   '#add-collaborator:not(.disabled)'
@@ -240,7 +240,7 @@ class ProjectPage < SecurePage
   dropdown  'Users',                              "#user-id"
   field     'email',                              xpath: '//form[@id="add-collaborator-form"]//input[@class="default"]'
   option    'email',                              xpath: '//select[@id="user-id"]/option[@value="<name>"]'
-  link      'user',                               xpath: '//*[@class="chzn-drop"]//*[li[text()="<name>"]]'
+  hyperlink 'user',                               xpath: '//*[@class="chzn-drop"]//*[li[text()="<name>"]]'
   row       'User',                               xpath: "//*[@id='users-list']//td[normalize-space(text())=\"<name>\"]/.."
   element   'collaborator',                       "#users-list"
 

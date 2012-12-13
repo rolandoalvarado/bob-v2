@@ -1,6 +1,6 @@
 require_relative '../secure_page'
 
-# The page that is displayed when clicking the images link
+# The page that is displayed when clicking the images hyperlink
 class ImagesPage < SecurePage
 
   path '/images'
