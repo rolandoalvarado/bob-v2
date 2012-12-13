@@ -622,7 +622,7 @@ TestCase /^An authorized user cannot create a user with attributes (.+), (.+), (
   Preconditions %{
     * Ensure that a project named #{ test_project_name } exists
     * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
-    * Ensure that the user #{ bob_username } has a role of #{ role } in the project #{ test_project_name }
+    * Ensure that the user #{ bob_username } has a role of Admin in the project admin
     * Ensure that a user with username #{ user.name } does not exist
   }
 
