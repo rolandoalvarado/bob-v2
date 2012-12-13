@@ -32,6 +32,7 @@ end
 
 include CloudConfiguration
 
+require_relative File.expand_path('../../features/support/sauce', __FILE__) if ConfigFile.capybara_driver == 'sauce'
 host = URI.parse(ConfigFile.web_client_url).host
 username = ConfigFile.server_username || `whoami`.chomp
 tunnel = create_tunnel(host, username) if ConfigFile.tunnel

@@ -18,6 +18,7 @@ gem 'poltergeist'
 gem 'rb-fsevent', :require => false
 gem 'guard-cucumber', :require => false
 gem 'pry'
+gem 'sauce-cucumber'
 
 
 begin
