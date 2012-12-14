@@ -311,6 +311,9 @@ class Page
     else
       raise "Invalid element selector #{ selector.inspect }"
     end
+
+    # Quick fix for link/hyperlink type elements
+    register_element(name, 'link', options) if type == 'hyperlink'
   end
 
   def self.register_radiolist(name, type, options)
