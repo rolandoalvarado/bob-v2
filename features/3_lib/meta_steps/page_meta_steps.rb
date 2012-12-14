@@ -143,7 +143,7 @@ end
 
 Then /^Click the (.+) link$/ do |link_name|
   link_name = link_name.split.join('_').downcase
-  @current_page.send("#{ link_name }_link").click
+  @current_page.send("#{ link_name }_hyperlink").click
 
   page_name = link_name
   page_class_name = "#{ page_name.downcase.capitalize }Page"
