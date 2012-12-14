@@ -233,7 +233,7 @@ end
 class Page
   include NodeMethods
 
-  ELEMENT_TYPES    = 'button|field|hyperlink|checkbox|form|table|span|element|row|cell|option|message|tab|tile|graph'
+  ELEMENT_TYPES    = 'button|field|link|hyperlink|checkbox|form|table|span|element|row|cell|option|message|tab|tile|graph'
   RADIO_LIST_TYPES = 'radiolist'
   CHECK_LIST_TYPES = 'checklist'
   SELECTION_TYPES  = 'selection|dropdown'
