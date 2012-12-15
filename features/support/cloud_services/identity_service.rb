@@ -9,6 +9,17 @@ class IdentityService < BaseCloudService
     load_resources
   end
 
+  def list_roles_for_user_on_tenant(projectid,userid)
+    begin
+      roles_in_tenant = service.list_roles_for_user_on_tenant(projectid, userid)
+    rescue Excon::Errors::NotFound => error
+      # Ignore error if status is 404 Not Found
+      # - This means return value is nil
+      raise error unless error.response.status == 404
+    end
+    roles_in_tenant
+  end
+
   def load_resources(reload = false)
     if reload
       @users   = service.users
@@ -19,7 +30,7 @@ class IdentityService < BaseCloudService
       @test_tenant = find_test_tenant(test_tenant_name) || create_test_tenant(test_tenant_name)
       @admin_tenant = find_tenant_by_name('admin')
       @admins  = @users.select do |user|
-                   service.list_roles_for_user_on_tenant(@admin_tenant.id, user.id).
+                   list_roles_for_user_on_tenant(@admin_tenant.id, user.id).
                      body['roles'].compact.find {|r| r['name'] == 'admin'}
                  end
     else
@@ -31,7 +42,7 @@ class IdentityService < BaseCloudService
       @test_tenant ||= find_test_tenant(test_tenant_name) || create_test_tenant(test_tenant_name)
       @admin_tenant ||= find_tenant_by_name('admin')
       @admins  ||= @users.select do |user|
-                     service.list_roles_for_user_on_tenant(@admin_tenant.id, user.id).
+                     list_roles_for_user_on_tenant(@admin_tenant.id, user.id).
                        body['roles'].compact.find {|r| r['name'] == 'admin'}
                    end
     end
@@ -165,9 +176,7 @@ class IdentityService < BaseCloudService
       # Add admin to all other tenants
       admin_role = find_role_by_friendly_name('Admin')
       (@tenants - [tenant]).each do |project|
-        admin_in_tenant =
-          service.list_roles_for_user_on_tenant(project.id, user.id).
-          body['roles'].compact.find {|r| r['name'] == 'admin'}
+          admin_in_tenant = list_roles_for_user_on_tenant(project.id, user.id).body['roles'].compact.find {|r| r['name'] == 'admin'}
           sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
             unless role_name == 'Member'
               grant_user_role(project,user.id, admin_role.id) unless admin_in_tenant
@@ -237,7 +246,7 @@ class IdentityService < BaseCloudService
     raise "The user #{ ConfigFile.admin_username } could not be found!" unless admin_user
 
     # Make sure user has no project manager role in project
-    response = service.list_roles_for_user_on_tenant(tenant.id, admin_user.id)
+    response = list_roles_for_user_on_tenant(tenant.id, admin_user.id)
     response_manager_role = response.body['roles'].find {|r| r['name'] == RoleNameDictionary.db_name('Project Manager') }
 
     if response_manager_role
@@ -290,7 +299,7 @@ class IdentityService < BaseCloudService
     raise "The user #{ ConfigFile.admin_username } could not be found!" unless admin_user
 
     # Make sure user has no project manager role in project
-    response = service.list_roles_for_user_on_tenant(tenant.id, admin_user.id)
+    response = list_roles_for_user_on_tenant(tenant.id, admin_user.id)
     manager_role = response.body['roles'].find {|r| r['name'] == RoleNameDictionary.db_name('Project Manager') }
     revoke_user_role(tenant,admin_user.id, manager_role['id']) if manager_role
 
@@ -359,7 +368,7 @@ class IdentityService < BaseCloudService
   def revoke_all_user_roles(user, tenants = nil)
     tenants = (tenants ? [tenants].flatten : @tenants)
     tenants.each do |tenant|
-      service.list_roles_for_user_on_tenant(tenant.id, user.id).body['roles'].compact.each do |role|
+      list_roles_for_user_on_tenant(tenant.id, user.id).body['roles'].compact.each do |role|
         service.remove_user_from_tenant(tenant.id, user.id, role['id'])
       end
     end
@@ -392,7 +401,7 @@ class IdentityService < BaseCloudService
   def add_admins_to_tenant(tenant)
     admin_role = find_role_by_friendly_name('Admin')
     admins = @users.select do |user|
-               service.list_roles_for_user_on_tenant(@admin_tenant.id, user.id).
+               list_roles_for_user_on_tenant(@admin_tenant.id, user.id).
                  body['roles'].compact.find {|r| r['name'] == 'admin'}
              end
 
