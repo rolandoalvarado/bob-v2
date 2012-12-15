@@ -71,7 +71,8 @@ Step /^Ensure that (?:a|another) user with username (.+) and password (.+) has a
     begin
       identity_service.ensure_tenant_role(user, @project, role_name)
     rescue Fog::Identity::OpenStack::NotFound => e
-      raise "Couldn't add #{ user.name } to #{ @project.name } as #{ role_name }"
+      e.message << "Couldn't add #{ user.name } to #{ @project.name } as #{ role_name }"
+      raise e
     end
   end
 
