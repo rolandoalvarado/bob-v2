@@ -14,7 +14,7 @@ class ProjectsPage < SecurePage
   message 'new project name error',        "span.error[for='new-project-name']"
   message 'new project description error', "span.error[for='new-project-description']"
 
-  # To click on a project hyperlink, use ProjectsPage#project_link( name: NAME_OF_PROJECT ).click
+  # To click on a project hyperlink, use ProjectsPage#project_hyperlink( name: NAME_OF_PROJECT ).click
   row       'project',                        xpath:  "//td[@title='<name>']"
   hyperlink 'project',                        xpath:  "//td[@title='<name>']/..//a[@class='view-project']"
   hyperlink 'edit project',                   xpath:  "//td[@title='<name>']/..//a[@class='edit-project']"

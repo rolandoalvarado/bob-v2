@@ -105,7 +105,8 @@ Given /^I have a role of (.+) in the project$/ do |role_name|
   begin
     identity_service.ensure_tenant_role(user, @project, role_name)
   rescue Fog::Identity::OpenStack::NotFound => e
-    raise "Couldn't add #{ user.name } to #{ @project.name } as #{ role_name }"
+    e.message << "Couldn't add #{ user.name } to #{ @project.name } as #{ role_name }"
+    raise e
   end
 
   # Make variable(s) available for use in succeeding steps
@@ -440,7 +441,7 @@ Then /^I failed to delete (?:that|the) project$/i do
   }
 
   @current_page.project_menu_button( name: project_name ).click
-  @current_page.delete_project_link( name: project_name ).click
+  @current_page.delete_project_hyperlink( name: project_name ).click
   if (!@current_page.has_unable_to_delete_field?) then
     raise "The project deletng should be failed, but it seems to succeeed."
   end

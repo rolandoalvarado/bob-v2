@@ -245,7 +245,7 @@ Then /^Register the project named (.+) for deletion at exit$/i do |name|
 end
 
 Then /^Select Collaborator (.+)$/ do |username|
-  @current_page.collaborators_email_link.click
+  @current_page.collaborators_email_hyperlink.click
   sleep(1)
   @current_page.collaborator_option( name: @user.email ).click
 end
@@ -261,14 +261,14 @@ end
 Then /^Edit the (.+) project$/i do |project_name|
   project_name.strip!
   @current_page.project_menu_button( name: project_name ).click
-  @current_page.edit_project_link( name: project_name ).click
+  @current_page.edit_project_hyperlink( name: project_name ).click
   @current_page = ProjectPage.new
 end
 
 Then /^Delete the (.+) project$/i do |project_name|
   project_name.strip!
   @current_page.project_menu_button( name: project_name ).click
-  @current_page.delete_project_link( name: project_name ).click
+  @current_page.delete_project_hyperlink( name: project_name ).click
 end
 
 Then /^Confirm the deletion of (.+) project$/i do |project_name|
