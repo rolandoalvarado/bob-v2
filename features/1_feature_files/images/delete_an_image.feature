@@ -1,4 +1,4 @@
-@images
+@images @jira-MCF-11
 Feature: Delete an Image
   As a user, I want to delete an image in my project so that I can keep my list
   of images manageable
@@ -9,7 +9,7 @@ Feature: Delete an Image
   including operating system information and file system information.
 
 
-  @permissions
+  @permissions  @jira-MCF-11-CUP
   Scenario Outline: Check User Permissions
     * A user with a role of <Role> in a project <Can or Cannot Delete> an image
 
@@ -23,6 +23,6 @@ Feature: Delete an Image
         | Member          | Cannot Delete        |
         | (None)          | Cannot Delete        |
 
-
+  @jira-MCF-11-DAI
   Scenario: Delete an Image
     * An image deleted in the project can no longer be used by that project

@@ -172,7 +172,7 @@ class ComputeService < BaseCloudService
     set_tenant project
 
     @flavors ||= service.flavors
-    @images  ||= ImageService.session.get_default_image
+    @images  ||= ImageService.session.get_public_images
 
     if attributes[:flavor].to_i <= 0
       attributes[:flavor] = flavor_from_name(attributes[:flavor] || 'm1.small')
@@ -198,7 +198,6 @@ class ComputeService < BaseCloudService
     end
 
     unless instance
-      begin
         test_image = @images.find{|image| image.name == ConfigFile.test_image} if ConfigFile.test_image
         response = service.create_server(
           attributes[:name],
@@ -214,10 +213,6 @@ class ComputeService < BaseCloudService
         )
         
         instance = service.servers.reload.get(response.body['server']['id'])
-      rescue => e
-        raise "Couldn't initialize instance in #{ project.name }. " +
-              "The error returned was: #{ e.inspect }"
-      end
     end
 
     wait_period = ConfigFile.wait_instance_launch + Time.now().to_i

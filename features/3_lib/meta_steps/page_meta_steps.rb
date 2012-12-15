@@ -116,7 +116,7 @@ Then /^Click the (.+) link for user (.+)$/ do |link_name, username|
   username  = Unique.username(username)
   link_name = link_name.split.join('_').downcase
 
-  @current_page.send("#{ link_name }_link", name: username).click
+  @current_page.send("#{ link_name }_hyperlink", name: username).click
 end
 
 
@@ -143,7 +143,7 @@ end
 
 Then /^Click the (.+) link$/ do |link_name|
   link_name = link_name.split.join('_').downcase
-  @current_page.send("#{ link_name }_link").click
+  @current_page.send("#{ link_name }_hyperlink").click
 
   page_name = link_name
   page_class_name = "#{ page_name.downcase.capitalize }Page"
@@ -314,7 +314,7 @@ end
 
 Then /^Click the (.+) link for security group (.+)$/ do |link_name, security_group_id|
   link_name = link_name.split.join('_').downcase
-  @current_page.send("#{ link_name }_link", id: security_group_id).click
+  @current_page.send("#{ link_name }_hyperlink", id: security_group_id).click
 end
 
 Then /^Click the (.+) button for security group (.+)$/ do |button_name, security_group_id|
@@ -342,7 +342,7 @@ end
 
 Then /^Click the (.+) project$/ do |project_name|
   project_name.strip!
-  @current_page.project_link( name: project_name ).click
+  @current_page.project_hyperlink( name: project_name ).click
   @current_page = ProjectPage.new
 end
 
@@ -389,12 +389,12 @@ end
 
 Then /^Click the row for user with id (.+)$/i do |user_id|
   user_id.strip!
-  @current_page.user_link(id: user_id).click
+  @current_page.user_hyperlink(id: user_id).click
 end
 
 Then /^Click the row for security group with id (.+)$/i do |security_group_id|
   security_group_id.strip!
-  @current_page.security_group_link(id: security_group_id).click
+  @current_page.security_group_hyperlink(id: security_group_id).click
 end
 
 Step /^Click the context menu button of the volume named (.+)$/i do |volume_name|
@@ -430,7 +430,7 @@ end
 Then /^Click the link for user with username (.+)$/i do |username|
   user = IdentityService.session.find_user_by_name(username.strip)
   raise "ERROR: I couldn't find a user with username '#{ username }'." unless user
-  @current_page.user_link(user_id: user.id).click
+  @current_page.user_hyperlink(user_id: user.id).click
 end
 
 
@@ -545,6 +545,7 @@ Then /^Current page should have the (.+) security group$/ do |security_group|
 end
 
 Then /^Current page should not have the (.+)$/ do |element|
+  element.gsub!(/ link/," hyperlink")
   if @current_page.send("has_#{ element.downcase.tr(' ', '_') }?")
     raise "Expected current page to not have the #{ element }, " +
           "but it is."
@@ -790,7 +791,7 @@ end
 
 Then /^The (.+) link should be disabled$/ do |link_name|
   link_name = link_name.split.join('_').downcase
-  unless @current_page.send("has_disabled_#{ link_name }_link?")
+  unless @current_page.send("has_disabled_#{ link_name }_hyperlink?")
     raise "Couldn't find disabled #{ link_name } link."
   end
 end
@@ -798,7 +799,7 @@ end
 Then /^The (.+) link should be disabled with (.+)$/i do |link_name,name|
   link_name = link_name.split.join('_').downcase
 
-  unless @current_page.send("has_disabled_#{ link_name.gsub(' ','_') }_link?", name: name)
+  unless @current_page.send("has_disabled_#{ link_name.gsub(' ','_') }_hyperlink?", name: name)
     raise "Couldn't find disabled #{ link_name } link."
   end
 end
@@ -1186,7 +1187,7 @@ end
 
 Then /^The (.+) link should be visible$/ do |link_name|
   link_name = link_name.split.join('_').downcase
-  unless @current_page.send("has_#{ link_name }_link?")
+  unless @current_page.send("has_#{ link_name }_hyperlink?")
     raise "The '#{ link_name.gsub('_',' ') }' link should be visible, but it's not."
   end
 end
@@ -1194,7 +1195,7 @@ end
 
 Then /^The (.+) link should not be visible$/ do |link_name|
   link_name = link_name.split.join('_').downcase
-  if @current_page.send("has_#{ link_name }_link?")
+  if @current_page.send("has_#{ link_name }_hyperlink?")
     raise "The '#{ link_name.gsub('_',' ') }' link should not be visible, but it is."
   end
 end
@@ -1264,7 +1265,7 @@ end
 
 Then /^The (.+) project should be visible$/ do |project_name|
   sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_until_project_is_visible).tries do
-    unless @current_page.has_project_link?( name: project_name )
+    unless @current_page.has_project_hyperlink?( name: project_name )
       raise "The project '#{ project_name }' should be visible, but it's not."
     end
   end
