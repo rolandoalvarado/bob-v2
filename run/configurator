@@ -62,6 +62,10 @@ OptionParser.new do |opts|
     @options[SERVER_USERNAME] = v
   end
 
+  opts.on("--unique_key ALPHA", "Unique alphanumeric key") do |v|
+    @options[ALPHA] = v
+  end
+
 end.parse!
 
 # Remove old configuration file location
@@ -123,6 +127,11 @@ configure openstack_options, OPENSTACK_API_KEY , "password for #{openstack_optio
 openstack_options[OPENSTACK_TENANT] = @options[OPENSTACK_TENANT] || openstack_options[OPENSTACK_TENANT]
 configure openstack_options, OPENSTACK_TENANT  , "tenant name for #{openstack_options[OPENSTACK_USERNAME]}? "
 
+@config[UNIQUE_HELPER_VALUES] ||= {}
+@config[UNIQUE_HELPER_VALUES][ALPHA] = @options[ALPHA] || @config[UNIQUE_HELPER_VALUES][ALPHA]
+configure @config[UNIQUE_HELPER_VALUES], ALPHA, "unique alphanumeric key? "
+@config[UNIQUE_HELPER_VALUES][ALPHA] ||= (0...50).map{65.+(rand(25)).chr}.join
+
 @config[CAPYBARA_DRIVER] = @options[CAPYBARA_DRIVER] || @config[CAPYBARA_DRIVER] || 'selenium'
 configure @config, CAPYBARA_DRIVER  , "capybara driver? (#{ available_capybara_drivers })"
 
@@ -130,11 +139,11 @@ configure @config, CAPYBARA_DRIVER  , "capybara driver? (#{ available_capybara_d
 configure @config, FAILED_TENANT_LIMIT, "max limit for failed projects? "
 
 @config[TUNNEL] = case @config[TUNNEL] || @options[TUNNEL]
-                  when true  then 'y'
-                  when false then 'n'
+                  when true, 'y'  then 'y'
+                  else 'n'
                   end
 configure @config, TUNNEL, "connect via tunnel? (Yn) "
-@config[TUNNEL] = (@config[TUNNEL].downcase == 'y')
+@config[TUNNEL] = (@config[TUNNEL].to_s.downcase == 'y')
 
 @config[SERVER_USERNAME] = @options[SERVER_USERNAME] || @config[SERVER_USERNAME]
 if @config[TUNNEL]
