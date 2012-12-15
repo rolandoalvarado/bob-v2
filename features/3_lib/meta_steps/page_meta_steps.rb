@@ -545,6 +545,7 @@ Then /^Current page should have the (.+) security group$/ do |security_group|
 end
 
 Then /^Current page should not have the (.+)$/ do |element|
+  element.gsub!(/ link/," hyperlink")
   if @current_page.send("has_#{ element.downcase.tr(' ', '_') }?")
     raise "Expected current page to not have the #{ element }, " +
           "but it is."
