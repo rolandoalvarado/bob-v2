@@ -30,8 +30,9 @@ def remote_client_connection(protocol, external_ip, internal_ip, username, optio
         end
       rescue Exception => e
         print "Failed.\n"
-        raise "The instance is not publicly accessible on both #{ external_ip } and #{ internal_ip } via SSH. " +
+        e.message <<  "The instance is not publicly accessible on both #{ external_ip } and #{ internal_ip } via SSH. " +
               "The error returned was: #{ e.inspect }"
+        raise e
       end
     end
   end

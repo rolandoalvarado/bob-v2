@@ -26,8 +26,9 @@ class ImageService < BaseCloudService
         sleep(ConfigFile.wait_long)
         image = @images.reload.find { |i| i.name == attrs.name }
       rescue => e
-        raise "Couldn't initialize image #{ attrs.name }. " +
+        e.message <<  "Couldn't initialize image #{ attrs.name }. " +
               "The error returned was: #{ e.inspect }"
+        raise e
       end
     end
     return image
@@ -70,7 +71,6 @@ class ImageService < BaseCloudService
   end
 
   def get_bootable_images
-    #images.public.select {|i| i.disk_format !~ /^a[rk]i$/ && i.status == 'active' && i.properties.empty?}
     images.public.select {|i| i.disk_format !~ /^a[rk]i$/ && i.status == 'active' }
   end
 

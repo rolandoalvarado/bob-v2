@@ -44,8 +44,9 @@ class ComputeService < BaseCloudService
         image_name = response.body['image']['name']
         sleep(5)
       rescue Exception => e
-        raise "There was an error creating snapshot #{ attributes[:name] }. " +
+        e.message << "There was an error creating snapshot #{ attributes[:name] }. " +
               "The error was: #{ e.inspect }"
+        raise e
       end
 
       visibility = (attributes[:visibility] == 'public')
@@ -82,8 +83,9 @@ class ComputeService < BaseCloudService
         sleep(5)
         delete_snapshot_in_project(project, snapshot['id'])
       rescue => e
-        raise "Couldn't delete snapshot #{ snapshot['name'] } in #{ project.name }. " +
+        e.message <<  "Couldn't delete snapshot #{ snapshot['name'] } in #{ project.name }. " +
               "The error returned was: #{ e.inspect }."
+        raise e
       end
     end
   end
@@ -127,8 +129,9 @@ class ComputeService < BaseCloudService
     elsif instance.state == 'ERROR'
        raise "Instance in ERROR state. Please check."
     end
-  rescue
-    raise "An error occured in your instance #{instance.state}!"
+  rescue => e
+    e.message <<  "An error occured in your instance #{instance.state}!"
+    raise e
   end
 
   def delete_snapshot_in_project(project, snapshot)
@@ -155,8 +158,9 @@ class ComputeService < BaseCloudService
     begin
       service.attach_volume(volume.id, instance.id, device_name)
     rescue => e
-      raise "Couldn't attach volume #{ volume.name } to instance #{ instance.name }! " +
+      e.message <<  "Couldn't attach volume #{ volume.name } to instance #{ instance.name }! " +
             "The error returned was: #{ e.inspect }"
+      raise e
     end
 
     sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
@@ -172,7 +176,7 @@ class ComputeService < BaseCloudService
     set_tenant project
 
     @flavors ||= service.flavors
-    @images  ||= ImageService.session.get_public_images
+    @images  ||= ImageService.session.get_default_image
 
     if attributes[:flavor].to_i <= 0
       attributes[:flavor] = flavor_from_name(attributes[:flavor] || 'm1.small')
@@ -287,8 +291,9 @@ class ComputeService < BaseCloudService
     begin
       instance.destroy
     rescue => e
-      raise "Couldn't delete instance #{ instance.name } in #{ project.name }. " +
+      e.message << "Couldn't delete instance #{ instance.name } in #{ project.name }. " +
             "The error returned was: #{ e.inspect }."
+      raise e
     end
   end
 
@@ -325,8 +330,9 @@ class ComputeService < BaseCloudService
       begin
         service.detach_volume(instance.id, volume.id)
       rescue => e
-        raise "Couldn't detach volume #{ volume.name } from instance #{ instance.name }! " +
+        e.message <<  "Couldn't detach volume #{ volume.name } from instance #{ instance.name }! " +
               "The error returned was: #{ e.inspect }"
+        raise e
       end
     end
 
@@ -408,8 +414,9 @@ class ComputeService < BaseCloudService
     @private_keys[key_name] = keypair.private_key
     return keypairs.reload.get(key_name)
   rescue => e
-    raise "Couldn't create keypair '#{ key_name }'! The error returned " +
+    e.message << "Couldn't create keypair '#{ key_name }'! The error returned " +
           "was: #{ e.inspect }"
+    raise e
   end
 
   def ensure_project_floating_ip_count(project, desired_count, instance=nil)
@@ -548,7 +555,8 @@ class ComputeService < BaseCloudService
     icmp_cidr = '0.0.0.0/0'
     service.create_security_group_rule(parent_group_id, icmp_protocol, icmp_from_port, icmp_to_port, icmp_cidr)
   rescue => e
-    raise "Couldn't ensure security group rule exists! The error returned was #{ e.inspect }"
+    e.message << "Couldn't ensure security group rule exists! The error returned was #{ e.inspect }"
+    raise e
   end
 
   def ensure_security_group_rule_exist(project, ip_protocol='tcp', from_port=22, to_port=22, cidr='0.0.0.0/0')
@@ -572,7 +580,8 @@ class ComputeService < BaseCloudService
     service.create_security_group_rule(parent_group_id, ip_protocol, from_port, to_port, cidr)
 
   rescue => e
-    raise "Couldn't ensure security group rule exists! The error returned was #{ e.inspect }"
+    e.message << "Couldn't ensure security group rule exists! The error returned was #{ e.inspect }"
+    raise e
   end
 
   def delete_security_group(security_group)

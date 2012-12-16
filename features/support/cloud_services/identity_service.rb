@@ -13,9 +13,9 @@ class IdentityService < BaseCloudService
     begin
       roles_in_tenant = service.list_roles_for_user_on_tenant(projectid, userid)
     rescue Excon::Errors::NotFound => error
-      # Ignore error if status is 404 Not Found
+      # Ignore error if status is 204 Not Found
       # - This means return value is nil
-      raise error unless error.response.status == 404
+      raise error unless error.response.status == 204
     end
     roles_in_tenant
   end
@@ -83,8 +83,9 @@ class IdentityService < BaseCloudService
       tenant = find_tenant_by_name(tenant_name)
       begin
         tenant.destroy
-      rescue
-        raise "Tenant #{ tenant_name } took too long to delete!"
+      rescue => error
+        error.message << "Tenant #{ tenant_name } took too long to delete!" 
+        raise error
       end
     end
   end
@@ -147,10 +148,10 @@ class IdentityService < BaseCloudService
       begin
         tenant.revoke_user_role(userid, roleid)
       rescue Excon::Errors::NotFound => error
-        # Ignore error if status is 404 Not Found
+        # Ignore error if status is 204 Not Found
         # - This means user had already been revoked role for
         #   the tenant.
-        raise error unless error.response.status == 404
+        raise error unless error.response.status == 204
       end
   end
 
