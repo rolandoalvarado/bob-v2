@@ -2,7 +2,7 @@ require_relative 'base_cloud_service'
 
 class ImageService < BaseCloudService
 
-  attr_reader :images
+  attr_reader :images, :test_image
 
   def initialize
     initialize_service Image
@@ -12,8 +12,10 @@ class ImageService < BaseCloudService
   def load_resources(reload = false)
     if reload
       @images = service.images
+      @test_image = @images.find { |i| i.name == CloudConfiguration::ConfigFile.test_image }
     else
       @images ||= service.images
+      @test_image ||= @images.find { |i| i.name == CloudConfiguration::ConfigFile.test_image }
     end
   end
 
@@ -24,7 +26,8 @@ class ImageService < BaseCloudService
       begin
         service.create_image(attributes)
         sleep(ConfigFile.wait_long)
-        image = @images.reload.find { |i| i.name == attrs.name }
+        load_resources(true)
+        image = @images.find { |i| i.name == attrs.name }
       rescue => e
         e.message <<  "Couldn't initialize image #{ attrs.name }. " +
               "The error returned was: #{ e.inspect }"
@@ -35,8 +38,9 @@ class ImageService < BaseCloudService
   end
 
   def delete_image(image)
+    load_resources(true)
     sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_long).tries do
-      image = service.images.reload.find { |i| i.id == image.id }
+      image = @images.find { |i| i.id == image.id }
       if image.status == 'saving'
         raise "Image #{ image.name } took too long to be ready for deletion. " +
               "It is currently #{ image.status }."
@@ -62,25 +66,21 @@ class ImageService < BaseCloudService
   end
 
   def get_public_images
-    images.public
-  end
-
-  def get_default_image
-    default_images = CloudConfiguration::ConfigFile.cleanup_exemptions[:images]
-    images.public.select { |i| default_images.include?(i.name) }
+    @images.public
   end
 
   def get_bootable_images
-    images.public.select {|i| i.disk_format !~ /^a[rk]i$/ && i.status == 'active' }
+    @images.public.select {|i| i.disk_format !~ /^a[rk]i$/ && i.status == 'active' }
   end
 
   def get_instance_snapshots # Get Images with snapshot image_type.
-    service.images.all.select { |i| i.disk_format !~ /^a[rk]i$/ && i.properties['image_type'] == 'snapshot' }
+    load_resources(true)
+    @images.select { |i| i.disk_format !~ /^a[rk]i$/ && i.properties['image_type'] == 'snapshot' }
   end
 
   def get_glance_images
-    default_images = CloudConfiguration::ConfigFile.cleanup_exemptions[:images]
-    service.images.all.select { |i| !default_images.include?(i.name) }
+    load_resources(true)
+    @test_image
   end
 
   def delete_images(project)

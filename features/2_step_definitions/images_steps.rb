@@ -72,20 +72,20 @@ TestCase /^A user with a role of (.+) in a project can create an image from an i
     * Click the create instance snapshot button
 
     * Click the logout button if currently logged in
-    
+
     * Visit the login page
     * Fill in the username field with #{ bob_username }
     * Fill in the password field with #{ bob_password }
     * Click the login button
 
     * Click the projects link
-    * Click the #{ test_project_name } project    
-    
+    * Click the #{ test_project_name } project
+
     * Click the images and snapshots tab
-    * The snapshot named #{ test_instance_snapshot_name } should be in active status    
-    
+    * The snapshot named #{ test_instance_snapshot_name } should be in active status
+
     * Click the logout button if currently logged in
-    
+
     * Visit the login page
     * Fill in the username field with #{ bob_username }
     * Fill in the password field with #{ bob_password }
@@ -396,6 +396,7 @@ TestCase /^An authorized user can import an image with a format of AKI$/ do
   Cleanup %{
     * Register the project named #{ test_project_name } for deletion at exit
     * Register the user named #{ bob_username } for deletion at exit
+    * Register the image named #{ test_image_name } for deletion at exit
   }
 
   Script %{
@@ -418,9 +419,9 @@ TestCase /^An authorized user can import an image with a format of AKI$/ do
     * Fill in the AMI url field with #{ test_image_url('ami') }
     * Choose the item with text #{ test_project_name } in the project dropdown
     * Click the confirm upload button
-    
+
     * Click the logout button if currently logged in
-    
+
     * Visit the login page
     * Fill in the username field with #{ bob_username }
     * Fill in the password field with #{ bob_password }
@@ -452,6 +453,7 @@ TestCase /^An authorized user can import an image with a format of AMI$/ do
   Cleanup %{
     * Register the project named #{ test_project_name } for deletion at exit
     * Register the user named #{ bob_username } for deletion at exit
+    * Register the image named #{ test_image_name } for deletion at exit
   }
 
   Script %{
@@ -478,7 +480,7 @@ TestCase /^An authorized user can import an image with a format of AMI$/ do
     * The images table should have a row for the image named #{ test_image_name }
     * The images table should have a row for the image named #{ test_image_name } Kernel Image
     * The images table should have a row for the image named #{ test_image_name } Ramdisk Image
-    
+
     * The image named #{ test_image_name } Kernel Image should be in active status
     * The image named #{ test_image_name } Ramdisk Image should be in active status
     * The image named #{ test_image_name } should be in active status
@@ -499,6 +501,7 @@ TestCase /^An authorized user can import an image with a format of ARI$/ do
   Cleanup %{
     * Register the project named #{ test_project_name } for deletion at exit
     * Register the user named #{ bob_username } for deletion at exit
+    * Register the image named #{ test_image_name } for deletion at exit
   }
 
   Script %{

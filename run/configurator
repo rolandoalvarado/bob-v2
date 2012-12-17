@@ -156,8 +156,10 @@ end
 
 cleanup_options   = @config[CLEANUP_OPTIONS] ||= {}
 cleanup_options.merge!(CLEANUP_EXEMPTIONS => { projects: ['admin', 'demo'],
-                                               users:    ['admin', 'demo', 'nova', 'glance'],
-                                               images:   ['64Bit_Ubuntu_12.04'] })
+                                               users:    ['admin', 'demo', 'nova', 'glance'] })
+
+configure @config, TEST_IMAGE, "test image name? "
+@config[TEST_IMAGE] ||= "'64Bit_Ubuntu_12.04'"
 
 puts "Writing #{config_path} with contents:"
 puts @config.to_yaml

@@ -176,7 +176,6 @@ class ComputeService < BaseCloudService
     set_tenant project
 
     @flavors ||= service.flavors
-    @images  ||= ImageService.session.get_default_image
 
     if attributes[:flavor].to_i <= 0
       attributes[:flavor] = flavor_from_name(attributes[:flavor] || 'm1.small')
@@ -202,10 +201,17 @@ class ComputeService < BaseCloudService
     end
 
     unless instance
-        test_image = @images.find{|image| image.name == ConfigFile.test_image} if ConfigFile.test_image
+      test_image = ImageService.session.test_image
+      unless test_image
+        @images ||= ImageService.session.get_bootable_images
+        test_image = @images.sample
+      end
+      raise "No test image available to create an instance!" unless test_image
+
+      begin
         response = service.create_server(
           attributes[:name],
-          attributes[:image] || (test_image.id if test_image) || @images.sample.id,
+          attributes[:image] || test_image.id,
           attributes[:flavor],
           {
             'adminPass'       => attributes[:password],
@@ -215,8 +221,12 @@ class ComputeService < BaseCloudService
             'user_id'         => service.current_user['id']
           }
         )
-        
+
         instance = service.servers.reload.get(response.body['server']['id'])
+      rescue => e
+        raise "Couldn't initialize instance in #{ project.name }. " +
+              "The error returned was: #{ e.message }"
+      end
     end
 
     wait_period = ConfigFile.wait_instance_launch + Time.now().to_i

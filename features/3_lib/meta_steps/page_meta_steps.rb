@@ -1236,7 +1236,7 @@ end
 
 Step /^The Context Menu button for the project named (.+) should not be visible$/i do |project_name|
   project_name.strip!
-  if @current_page.send("has_context_menu_button?", name: project_name)
+  if @current_page.send("has_project_menu_button?", name: project_name)
     raise "The context menu button for project #{ project_name } should not be visible, but it is."
   end
 end
