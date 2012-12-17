@@ -261,7 +261,6 @@ class Page
     element_name = args[0].split.join('_').downcase
 
     if element
-      element['type'] = "hyperlink" if element['type'] == "link"
       register_element   element_name, element['type'], args[1]
     elsif radiolist
       register_radiolist element_name, radiolist['type'], args[1]
@@ -441,6 +440,7 @@ class Page
     element_query  = /^has_(?<name>.+)_(?<type>#{ ELEMENT_TYPES })\??$/.match(name)
     element_find   = /^(?<name>.+)_(?<type>#{ ELEMENT_TYPES })$/.match(name)
     element_action = /^(?<action>click|fill_in|select|check)_(?<name>.+)_(?<type>#{ ELEMENT_TYPES })/.match(name)
+
     if element_action
       raise "Undefined method '#{ element_action[0] }'. Maybe you mean " +
             "#{ self.class }##{ element_action['name'] }_#{ element_action['type'] }.#{ element_action['action'] }?"

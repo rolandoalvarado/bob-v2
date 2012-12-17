@@ -64,6 +64,7 @@ class EnvironmentCleaner
       VolumeService.session.reset_credentials
       delete_test_projects
       delete_test_users
+      delete_test_images
     else
       puts "No test objects to delete."
     end
@@ -185,7 +186,7 @@ class EnvironmentCleaner
 
           deleted_instances.each do |instance|
             format_success instance.delete(:name), instance
-            
+
             # Clean-up Instance Snapshots
             # ------------------------------------------------------------------
             snapshots = @compute_service.service.images.reload
