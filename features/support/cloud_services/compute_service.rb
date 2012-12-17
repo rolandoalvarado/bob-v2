@@ -39,11 +39,10 @@ class ComputeService < BaseCloudService
 
     if instance.state == 'ACTIVE'
       begin
-        sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
-          response = service.create_image(instance.id, attributes[:name])
-          image_id = response.body['image']['id']
-          image_name = response.body['image']['name']
-        end
+        response = service.create_image(instance.id, attributes[:name])
+        sleep(ConfigFile.wait_long)
+        image_id = response.body['image']['id']
+        image_name = response.body['image']['name']
       rescue Exception => e
         e.message << "There was an error creating snapshot #{ attributes[:name] }. " +
               "The error was: #{ e.inspect }"
