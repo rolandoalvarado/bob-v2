@@ -40,7 +40,7 @@ class ComputeService < BaseCloudService
     if instance.state == 'ACTIVE'
       begin
         response = service.create_image(instance.id, attributes[:name])
-        sleep(30)
+        sleep(ConfigFile.wait_while_instance_is_performing_task)
         image_id = response.body['image']['id']
         image_name = response.body['image']['name']
       rescue Exception => e
