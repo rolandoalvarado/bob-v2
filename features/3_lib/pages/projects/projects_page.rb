@@ -20,6 +20,7 @@ class ProjectsPage < SecurePage
   hyperlink 'edit project',                   xpath:  "//td[@title='<name>']/..//a[@class='edit-project']"
   hyperlink 'disabled edit project',          xpath:  "//td[@title='<name>']/..//a[@class='edit-project disabled'][@disabled='disabled']"
   hyperlink 'delete project',                 xpath:  "//td[@title='<name>']/..//a[@class='destroy-project']"
+  button    'delete project',                 xpath:  "//td[@title='<name>']/..//a[@class='destroy-project']"
   hyperlink 'disabled delete project',        xpath:  "//td[@title='<name>']/..//a[@class='destroy-project disabled'][@disabled='disabled']"
   button    'context menu',                   xpath:  "//td[@title='<name>']/..//a[@class='dropdown-toggle']"
   button    'project menu',                   xpath:  "//td[@title='<name>']/..//a[@class='dropdown-toggle']"
