@@ -90,6 +90,15 @@ module CloudConfiguration
       end
       self.instance[REPEAT][MINUTE]
     end
+    
+    def self.wait_while_instance_is_performing_task
+      self.instance.ensure_repeat_and_wait_key
+      unless self.instance[REPEAT][MINUTE]
+        self.instance[REPEAT][MINUTE] = 60
+        self.instance.save
+      end
+      self.instance[REPEAT][MINUTE]
+    end
 
     def self.timing
       self.instance.ensure_repeat_and_wait_key
