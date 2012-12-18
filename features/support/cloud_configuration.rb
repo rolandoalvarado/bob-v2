@@ -166,7 +166,7 @@ module CloudConfiguration
     def self.wait_volume_detach
       self.instance.ensure_repeat_and_wait_key
       unless self.instance[WAIT][VOLUME_DETACH]
-        self.instance[WAIT][VOLUME_DETACH] = 40
+        self.instance[WAIT][VOLUME_DETACH] = 30
         self.instance.save
       end
       self.instance[WAIT][VOLUME_DETACH]
@@ -274,7 +274,7 @@ module CloudConfiguration
     def self.repeat_volume_detach
       self.instance.ensure_repeat_and_wait_key
       unless self.instance[REPEAT][VOLUME_DETACH]
-        self.instance[REPEAT][VOLUME_DETACH] = 3
+        self.instance[REPEAT][VOLUME_DETACH] = 6
         self.instance.save
       end
       self.instance[REPEAT][VOLUME_DETACH]
