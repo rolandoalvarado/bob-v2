@@ -524,12 +524,12 @@ end
 TestCase /^Volumes that are attached to an instance cannot be deleted$/i do
 
   Preconditions %{
-    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
     * Ensure that a project named #{ test_project_name } exists
     * Ensure that the project named #{ test_project_name } has an instance named #{ test_instance_name }
     * Ensure that the project named #{ test_project_name } has an available volume named #{ test_volume_name }
-    * Ensure that the user #{ bob_username } has a role of Project Manager in the project #{ test_project_name }
     * Ensure that the instance named #{ test_instance_name } has an attached volume named #{ test_volume_name } in the project #{ test_project_name }
+    * Ensure that a user with username #{ bob_username } and password #{ bob_password } exists
+    * Ensure that the user #{ bob_username } has a role of Project Manager in the project #{ test_project_name }
 
   }
 

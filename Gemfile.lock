@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/MorphGlobal/fog.git
-  revision: 9a67515552b0034321fc6192f9005cc814de31d3
+  revision: d7a44438c5a812e6e84bb1f95cc060fe232f2a11
   branch: development
   specs:
     mcloud-fog (1.3.9)

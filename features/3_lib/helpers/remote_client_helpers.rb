@@ -39,6 +39,12 @@ def remote_client_connection(protocol, external_ip, internal_ip, username, optio
 end
 
 def remote_client_check_volume(ip_address, username, delta_time, options={})
+
+  private_key = ComputeService.session.private_keys[test_keypair_name]
+  raise "Couldn't find private key for keypair '#{ test_keypair_name }'!" unless private_key
+  options.merge!( port: 22, timeout: 60, key_data: [ private_key ], user_known_hosts_file: '/dev/null')
+  options.merge!( verbose: :debug )
+
   device_file_list = Array.new
   Net::SSH.start(ip_address, username, options) do |ssh|
     # Get a list of all device /dev/vd* files modified/created from x minutes ago
