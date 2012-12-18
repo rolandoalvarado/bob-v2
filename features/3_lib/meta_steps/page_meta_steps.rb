@@ -264,13 +264,13 @@ Then /^The context menu for the project named (.+) should not have the (.+) acti
   raise "Couldn't find project #{ project_name }!" unless project
   project_id = project.id
 
-  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
-    @current_page.project_menu_button(id: project_id).click
+  sleep(ConfigFile.wait_short)
+  @current_page.project_menu_button(id: project_id).click rescue nil
 
-    if @current_page.send("has_#{ project_action }_project_button?", id: project_id)
-      raise "Found #{ project_action } action in the context menu for project " +
-            "#{ project_name }!"
-    end
+  sleep(ConfigFile.wait_short)
+  if @current_page.send("has_#{ project_action }_project_button?", id: project_id)
+    raise "Found #{ project_action } action in the context menu for project " +
+          "#{ project_name }!"
   end
 end
 
