@@ -187,6 +187,8 @@ class IdentityService < BaseCloudService
           end
       end
     end
+  #rescue Fog::Identity::OpenStack::NotFound => e
+  #  raise "Couldn't add #{ role_name } #{ user.name } to project #{ tenant.name }. #{ e.message }"
   end
 
   def ensure_user_role_is_admin(user, role_name)

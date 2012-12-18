@@ -959,7 +959,7 @@ Step /^Click the (.+) button for snapshot named (.+)$/ do |button_name, snapshot
 end
 
 Step /^The snapshot named (.+) should be in (.+) format$/ do |snapshot_name, expected_format|
-  #sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(15).tries do
+  sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
     format_cell = @current_page.snapshot_format_cell(name: snapshot_name, format: expected_format)
     actual_format = format_cell.text.to_s.upcase.strip
     
@@ -967,7 +967,7 @@ Step /^The snapshot named (.+) should be in (.+) format$/ do |snapshot_name, exp
       raise "Expected snapshot #{ snapshot_name } to be in #{ expected_format }. " +
             "Current format is #{ actual_format }."
     end
-  #end
+  end
 end
 
 Step /^The snapshot named (.+) should not be public$/ do |snapshot|
