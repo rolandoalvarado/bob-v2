@@ -19,8 +19,7 @@ class IdentityService < BaseCloudService
       @test_tenant = find_test_tenant(test_tenant_name) || create_test_tenant(test_tenant_name)
       @admin_tenant = find_tenant_by_name('admin')
       @admins  = @users.select do |user|
-                   list_roles_for_user_on_tenant(@admin_tenant.id, user.id).
-                     body['roles'].compact.find {|r| r['name'] == 'admin'}
+                   list_roles_for_user_on_tenant(@admin_tenant.id, user.id).find {|r| r['name'] == 'admin'}
                  end
     else
       @users   ||= service.users
@@ -31,8 +30,7 @@ class IdentityService < BaseCloudService
       @test_tenant ||= find_test_tenant(test_tenant_name) || create_test_tenant(test_tenant_name)
       @admin_tenant ||= find_tenant_by_name('admin')
       @admins  ||= @users.select do |user|
-                     list_roles_for_user_on_tenant(@admin_tenant.id, user.id).
-                       body['roles'].compact.find {|r| r['name'] == 'admin'}
+                     list_roles_for_user_on_tenant(@admin_tenant.id, user.id).find {|r| r['name'] == 'admin'}
                    end
     end
   end
@@ -144,7 +142,7 @@ class IdentityService < BaseCloudService
       # Add admin to all other tenants
       admin_role = find_role_by_friendly_name('Admin')
       (@tenants - [tenant]).each do |project|
-        admin_in_tenant = list_roles_for_user_on_tenant(project.id, user.id).body['roles'].compact.find {|r| r['name'] == 'admin'}
+        admin_in_tenant = list_roles_for_user_on_tenant(project.id, user.id).find {|r| r['name'] == 'admin'}
         sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(ConfigFile.repeat_short).tries do
           unless role_name == 'Member'
             project.grant_user_role(user.id, admin_role.id) unless admin_in_tenant
@@ -221,7 +219,7 @@ class IdentityService < BaseCloudService
 
     # Make sure user has no project manager role in project
     response = list_roles_for_user_on_tenant(tenant.id, admin_user.id)
-    response_manager_role = response.body['roles'].find {|r| r['name'] == RoleNameDictionary.db_name('Project Manager') }
+    response_manager_role = response.find {|r| r['name'] == RoleNameDictionary.db_name('Project Manager') }
 
     if response_manager_role
       tenant.revoke_user_role(admin_user.id, response_manager_role['id'])
@@ -233,7 +231,7 @@ class IdentityService < BaseCloudService
     tenant.grant_user_role(admin_user.id, manager_role.id)
 
    # Every tenant should be handled by admin (MCF-199,MCF-198)
-    response_admin_role = response.body['roles'].find {|r| r['name'] == RoleNameDictionary.db_name('Admin') }
+    response_admin_role = response.find {|r| r['name'] == RoleNameDictionary.db_name('Admin') }
 
     if response_admin_role
       tenant.revoke_user_role(admin_user.id, response_admin_role['id'])
@@ -311,7 +309,7 @@ class IdentityService < BaseCloudService
   def revoke_all_user_roles(user, tenants = nil)
     tenants = (tenants ? [tenants].flatten : @tenants)
     tenants.each do |tenant|
-      list_roles_for_user_on_tenant(tenant.id, user.id).body['roles'].compact.each do |role|
+      list_roles_for_user_on_tenant(tenant.id, user.id).each do |role|
         tenant.revoke_user_role(user.id, role['id'])
       end
     end
@@ -368,7 +366,7 @@ class IdentityService < BaseCloudService
 
   def list_roles_for_user_on_tenant(projectid,userid)
     begin
-      roles_in_tenant = service.list_roles_for_user_on_tenant(projectid, userid)
+      roles_in_tenant = service.list_roles_for_user_on_tenant(projectid, userid).body['roles'].compact
     rescue Excon::Errors::NotFound => error
       # Ignore error if status is 204 Not Found
       # - This means return value is nil
@@ -376,6 +374,7 @@ class IdentityService < BaseCloudService
     rescue Fog::Identity::OpenStack::NotFound
       nil
     end
-    roles_in_tenant
+
+    roles_in_tenant || []
   end
 end
