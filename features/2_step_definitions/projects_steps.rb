@@ -99,15 +99,8 @@ Given /^I have a role of (.+) in the project$/ do |role_name|
   user             = identity_service.ensure_user_exists(user_attrs)
   EnvironmentCleaner.register(:user, user.id)
 
-  identity_service.revoke_all_user_roles(user, @project)
-
   # Ensure user has the following role in the project
-  begin
-    identity_service.ensure_tenant_role(user, @project, role_name)
-  rescue Fog::Identity::OpenStack::NotFound => e
-    e.message << "Couldn't add #{ user.name } to #{ @project.name } as #{ role_name }"
-    raise e
-  end
+  identity_service.ensure_tenant_role(user, @project, role_name)
 
   # Make variable(s) available for use in succeeding steps
   @current_user = user
@@ -459,7 +452,7 @@ Then /^I cannot delete (?:that|the) project$/i do
 
     * Visit the projects page
     * The #{ @project } project should be visible
-    * The Context Menu button for the project named #{ @project } should not be visible
+    * The context menu for the project named #{ @project } should not have the delete action
   }
 end
 
