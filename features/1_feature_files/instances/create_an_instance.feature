@@ -36,11 +36,6 @@ Feature: Create an Instance
      When I create an instance with attributes <Image>, <Name>, <Flavor>, <Keypair> and <Security Group>
      Then the instance will be <Created or Not>
 
-      @jira-MCF-14-CISI
-      Scenarios: Specific Images
-        | Image                                | Name        | Flavor | Keypair | Security Group | Created or Not |
-        | 64Bit Ubuntu 12.04                   | My Server   | (Any)  | (Any)   | (Any)          | Created        |
-
       @jira-MCF-14-CISF
       Scenarios: Specific Flavors
         | Image  | Name        | Flavor    | Keypair | Security Group | Created or Not |
@@ -48,7 +43,7 @@ Feature: Create an Instance
         | (Any)  | My Server   | m1.large  | (Any)   | (Any)          | Created        |
         | (Any)  | My Server   | m1.xlarge | (Any)   | (Any)          | Created        |
 
-      @jira-MCF-14-CIIV        
+      @jira-MCF-14-CIIV
       Scenarios: Invalid Values
         | Image  | Name        | Flavor | Keypair | Security Group | Created or Not | Reason                                           |
         | (Any)  | (None)      | (Any)  | (Any)   | (Any)          | Not Created    | Must specify a name                              |
