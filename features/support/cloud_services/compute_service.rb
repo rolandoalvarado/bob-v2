@@ -152,7 +152,9 @@ class ComputeService < BaseCloudService
     set_tenant project, false
 
     @volumes.reload
-    volume      = @volumes.find { |v| v.id == volume['id'].to_i }
+
+    # Change from volume hash to volume object
+    volume      = @volumes.find { |v| v.id == volume['id'] }
     device_name = "/dev/vd#{ ('a'..'z').to_a.sample(2).join }"
 
     begin
@@ -173,8 +175,8 @@ class ComputeService < BaseCloudService
   end
 
   def create_instance_in_project(project, attributes={})
-    set_tenant project
 
+    set_tenant project
     @flavors ||= service.flavors
 
     if attributes[:flavor].to_i <= 0
@@ -224,8 +226,9 @@ class ComputeService < BaseCloudService
 
         instance = service.servers.reload.get(response.body['server']['id'])
       rescue => e
-        raise "Couldn't initialize instance in #{ project.name }. " +
+        e.message<< "Couldn't initialize instance in #{ project.name }. " +
               "The error returned was: #{ e.message }"
+        raise e
       end
     end
 
@@ -334,8 +337,9 @@ class ComputeService < BaseCloudService
   def detach_volume_from_instance_in_project(project, instance, volume)
     set_tenant project
     @volumes.reload
-    volume = @volumes.find { |v| v.id == volume['id'].to_i }
-    return if volume == nil
+
+    # Change from volume hash to volume object
+    volume = @volumes.find { |v| v.id == volume['id'] }
 
     # Check if volume is attached to the instance
     if volume.attachments.any? { |a| a['server_id'] == instance.id }

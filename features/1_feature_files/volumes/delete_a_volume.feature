@@ -20,10 +20,12 @@ Feature: Delete a volume
     Given I have a role of <Role> in the project
     Then I <Can or Cannot Delete> a volume
 
+      @jira-MCF-40-AR
       Scenarios: Authorized Roles
         | Role            | Can or Cannot Delete |
         | System Admin    | Can Delete           |
         | Project Manager | Can Delete           |
 
+ @jira-MCF-40-CDV
   Scenario:
     * Volumes that are attached to an instance cannot be deleted

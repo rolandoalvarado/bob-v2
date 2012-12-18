@@ -49,7 +49,14 @@ class BaseCloudService
 
   def set_tenant(project, reload = true)
     if @current_project != project || reload
-      service.set_tenant(project)
+      begin
+        service.set_tenant(project)
+      rescue  Excon::Errors::Unauthorized => error
+        #When authentication error happened, 
+        #it reset credential and try set tenant again.
+        set_credentials
+        service.set_tenant(project)
+      end
       @current_project = project
     end
     load_resources(reload)
