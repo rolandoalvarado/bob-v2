@@ -24,7 +24,8 @@ Then /^A new window should show the instance's VNC console$/ do
   # Wait for VNC Console to Connect
   sleep ConfigFile.wait_short
 
-  unless @current_page.has_css_selector?("#VNC_screen")
+  unless @current_page.has_css_selector?("#noVNC_screen") || # Folsom
+         @current_page.has_css_selector?("#VNC_screen")      # Essex
     raise "The VNC console was not shown!"
   end
 
@@ -962,7 +963,7 @@ Step /^The snapshot named (.+) should be in (.+) format$/ do |snapshot_name, exp
   #sleeping(ConfigFile.wait_short).seconds.between_tries.failing_after(15).tries do
     format_cell = @current_page.snapshot_format_cell(name: snapshot_name, format: expected_format)
     actual_format = format_cell.text.to_s.upcase.strip
-    
+
     unless actual_format.include?(expected_format.upcase.tr(' ', '_'))
       raise "Expected snapshot #{ snapshot_name } to be in #{ expected_format }. " +
             "Current format is #{ actual_format }."
@@ -1000,8 +1001,8 @@ Step /^The newly (created|updated) (.+) user should have a (.+) role$/ do |actio
     button = 'Create'
   else
     button = 'Update'
-  end  
-  
+  end
+
   if (role.downcase == 'admin')
     step "Check the admin checkbox"
     step "Click the #{ button } User button"
@@ -1020,7 +1021,7 @@ Step /^A user with a role of (.+) in a project (.+) will not be (created|updated
     button = 'Create'
   else
     button = 'Update'
-  end  
+  end
 
   if (role.downcase == 'admin')
     step "Check the admin checkbox"
