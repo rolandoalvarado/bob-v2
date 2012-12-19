@@ -299,10 +299,12 @@ class IdentityService < BaseCloudService
   end
 
   def find_user_by_name(name)
+    @users.reload
     @users.find_by_name(name)
   end
 
   def find_tenant_by_name(name)
+    @tenants.reload
     @tenants.find_by_name(name)
   end
 
@@ -361,7 +363,7 @@ class IdentityService < BaseCloudService
   end
 
   def find_test_tenant(name)
-    @tenants.find_by_name(name)
+    find_tenant_by_name(name)
   end
 
   def list_roles_for_user_on_tenant(projectid,userid)
