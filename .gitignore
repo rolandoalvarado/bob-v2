@@ -15,6 +15,7 @@
 /capybara*.*
 /*_tmp_screenshot_dir
 /features/support/config.yml
+features/support/ondemand.yml
 /*localgems*
 /*screenshots_dir
 *.log
