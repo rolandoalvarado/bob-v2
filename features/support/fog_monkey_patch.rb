@@ -32,10 +32,10 @@ module Fog
 
         def revoke_user_role(user_id, role_id)
           connection.remove_user_from_tenant(self.id, user_id, role_id)
-        rescue Excon::Errors::Conflict => error
+        rescue Excon::Errors::NotFound => error
           raise error unless error.response.status == 409
         end
-      end
+      end # class Tenant
 
     end # class OpenStack
   end # module Identity

@@ -36,6 +36,7 @@ class VolumeService < BaseCloudService
   end
 
   def create_volume_snapshot(volume, attributes = {})
+    reload_volumes
     volume = @volumes.find { |v| v['id'] == volume['id'] }
     raise "Volume couldn't be found!" unless volume
 
@@ -48,26 +49,36 @@ class VolumeService < BaseCloudService
   def create_volume_in_project(project, attributes)
     attrs = CloudObjectBuilder.attributes_for(:volume, attributes)
     set_tenant project
-    volume = @volumes.find { |v| v['display_name'] == attrs.name }
-
-    unless volume
-      # Create volume if it does not exist yet
-      service.create_volume(attrs.name, attrs.description, attrs.size)
-    else
-      # Detach volumes from all instances
-      attachments = volume['attachments'].select { |a| !a.empty? }
-      attachments.each do |attachment|
-        # Volume service does not have its own detach volume function
-        compute_service = ComputeService.session.service
-        compute_service.detach_volume(attachment['server_id'], attachment['id'])
-        sleep(ConfigFile.wait_short)
-      end
 
       sleeping(ConfigFile.wait_volume_detach).seconds.between_tries.failing_after(ConfigFile.repeat_volume_detach).tries do
+
+      reload_volumes
+      volume = @volumes.find { |v| v['display_name'] == attrs.name }
+
+      unless volume
+        # Create volume if it does not exist yet
+        service.create_volume(attrs.name, attrs.description, attrs.size)
+      else
+        # Detach volumes from all instances
+        attachments = volume['attachments'].select { |a| !a.empty? }
+        attachments.each do |attachment|
+          # Volume service does not have its own detach volume function
+          compute_service = ComputeService.session.service
+          begin
+            compute_service.detach_volume(attachment['server_id'], attachment['id'])
+          rescue Excon::Errors::BadRequest => e
+            #Repeating call detach_volume might cause 400. 
+            #But it's not error because detacing volume taking time.
+            raise e unless e.response.code == 400
+          end
+        end
+
         reload_volumes
         volume = @volumes.find { |v| v['display_name'] == attrs.name }
         attachment_count = volume['attachments'].count { |a| !a.empty? }
-        raise "Couldn't detach volume #{ volume['display_name'] }!" unless attachment_count == 0
+        unless attachment_count == 0
+          raise "Couldn't detach volume #{ volume['display_name']}. Attachment_count is #{attachment_count}!" 
+        end
       end
 
       # If volume is in error state, recreate volume
