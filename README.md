@@ -1,23 +1,21 @@
-Bob the mCloud Bot
-==================
-![Bob](http://dl.dropbox.com/u/1355795/bob.jpg "Bob")
+Bob-V2 is Cucumber and Ruby
+===========================
 
-Bob is the central repository for mCloud business requirements. It is used by:
+Bob-V2 is an app that will interpret business requirements in a form of Gherkin syntax. It is used to gather:
 
-* PPC to record product requirements
-* Engineering to understand what to implement
-* QA to auto-verify an mCloud environment, and
-* Documentation to keep track of what features are supported by mCloud.
+* To record product requirements
+* Developers to understand what to implement
+* For verification
+* Documentation of features.
 
-Bob is built with Cucumber and Ruby. His eye is made out of a knob, and it goes to eleven.
+Bob-V2 is built with Cucumber and Ruby.
 
 Prerequisites for Mac OS X 
 -------------------------------------
 1. Xcode 4.4.1+(10.7 later) or the [Command Line Tools](https://developer.apple.com/downloads/index.action)
-2. If you have Xcode 4.2 or above, you'll need to work around LLVM GCC. Here's [a suggestion](http://www.relaxdiego.com/2012/02/using-gcc-when-xcode-43-is-installed.html).
-3. Install [Homebrew](http://mxcl.github.com/homebrew/)
- `ruby <(curl -fsSkL raw.github.com/mxcl/homebrew/go)`
-4. Install git
+2. Install [Homebrew](http://mxcl.github.com/homebrew/)
+   `ruby <(curl -fsSkL raw.github.com/mxcl/homebrew/go)`
+3. Install git
  `brew install git`
  
 Prerequisites for Ubuntu
@@ -40,7 +38,7 @@ Common Requirements
 Installation
 ------------
 1. Make sure you have accomplished the steps indicated in the *Prerequisites* and *Common Requirements* section.
-2. `git clone git@github.com:[your forked repository]/bob.git`
+2. `git clone git@github.com:[your forked repository]/bob-v2.git`
 3. `cd bob`
 4. `run/setup`
 
@@ -69,7 +67,7 @@ Usage
 
 To test Bob:
 
-    run/tag @jira-MCF-4
+    run/tag @keyword
 
 If you want to execute full test (it takes 3 hours):
 
@@ -111,7 +109,6 @@ To see a full list of available commands you can give Bob:
 
 Need More Help?
 ---------------
-If you're stuck, email me at ttakekawa@morphlabs.com or ping me through my Skype. Optionally, you can suggest ways to further improve Bob by creating tickets [here](https://issues.morphlabs.com/browse/MCF).
 
 Contributing
 ------------
@@ -120,7 +117,7 @@ and then, you may skip this section and write .feature files directly.
 Afterwards, email it to me and I will commit your file for you. If you plan on
 contributing on an ongoing basis, I highly recommend you follow this process.
 
-1. Fork `https://github.com/MorphGlobal/bob`
+1. Fork `https://github.com/rolandoalvarado/bob-v2`
 2. Create a branch for whatever it is you plan to do. ALWAYS create a branch so that when there are changes in wdamarillo/master, you only need to rebase your local branch and keep your commits in order. Also, this allows you to squash multiple commits into one before submitting a pull request.
 3. Change stuff
 4. Add your ssh pub key to github https://github.com/settings/ssh 
@@ -146,7 +143,7 @@ How to write Features
               |    $100 |              $50 | Dispensed        |
               |    $100 |             $150 | Not Dispensed    |
 
-*   For more sample feature files, see [the actual feature files](https://github.com/MorphGlobal/bob/src/master/features/1_feature_files/).
+*   For more sample feature files, see [the actual feature files](https://github.com/rolandoalvarado/bob-v2/src/master/features/1_feature_files/).
 
 Helpful references for development
 ----------------------------------
