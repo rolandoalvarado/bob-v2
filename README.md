@@ -1,5 +1,5 @@
-Bob-V2 is Cucumber and Ruby
-===========================
+Bob-V2 is an automated test app.
+================================================================================
 
 Bob-V2 is an app that will interpret business requirements in a form of Gherkin syntax. It is used to gather:
 
